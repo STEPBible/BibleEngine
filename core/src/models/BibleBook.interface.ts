@@ -10,6 +10,8 @@ export interface IBibleBook {
     title: string;
 
     type: 'ot' | 'nt' | 'ap';
+
+    chaptersCount?: number[];
 }
 
 export interface IBibleBookWithContent extends IBibleBook {

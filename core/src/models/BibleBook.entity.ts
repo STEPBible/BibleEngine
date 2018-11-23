@@ -35,9 +35,7 @@ export class BibleBook implements IBibleBook {
     @BeforeInsert()
     @BeforeUpdate()
     async stringifyMetaJson() {
-        this.chaptersMetaJson = this.chaptersCount
-            ? JSON.stringify(this.chaptersCount)
-            : JSON.stringify([]);
+        this.chaptersMetaJson = JSON.stringify(this.chaptersCount);
     }
 
     getChapterVerseCount(chapterNumber: number) {

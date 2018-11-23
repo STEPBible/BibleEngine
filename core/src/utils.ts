@@ -106,6 +106,49 @@ export function generateRandomChar(): string {
 }
 
 /**
+ * generates SQL for a range-query on the section table
+ *
+ * @param {IBibleReferenceRangeNormalized} range
+ * @param {string} [col='id']
+ * @returns {string} SQL
+ */
+export const generateSectionSql = (
+    range: IBibleReferenceRangeNormalized,
+    colSectionStart: string,
+    colSectionEnd: string
+) => {
+    const refEnd: IBiblePhraseRef = {
+        isNormalized: true,
+        bookOsisId: range.bookOsisId,
+        normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
+        normalizedVerseNum:
+            range.normalizedVerseEndNum ||
+            (range.normalizedVerseNum && !range.normalizedChapterEndNum)
+                ? range.normalizedVerseNum
+                : 999,
+        versionId: range.versionId || 999,
+        phraseNum: 99
+    };
+    const rangePhraseIdStart = generatePhraseId(range);
+    const rangePhraseIdEnd = generatePhraseId(refEnd);
+    // TODO: we have an OR query that only queries colSectionEnd - how does our index work here?
+    let sql = `
+        ( ${colSectionStart} < ${rangePhraseIdStart} AND ${colSectionEnd} > ${rangePhraseIdEnd} ) OR
+        ( ${colSectionStart} >= ${rangePhraseIdStart} AND 
+          ${colSectionStart} <= ${rangePhraseIdEnd} ) OR
+        ( ${colSectionEnd} >= ${rangePhraseIdStart} AND ${colSectionEnd} <= ${rangePhraseIdEnd} )`;
+
+    // if we query for a specific version we need to filter out the
+    // version with a little math (due to the nature of our encoded reference integers)
+    if (range.versionId)
+        sql += `AND cast(${colSectionStart} % 100000000000 / 100000000 as int) = ${
+            range.versionId
+        }`;
+
+    return sql;
+};
+
+/**
  * returns a zero-padded string of a number
  * @param {number} n the number to be padded
  * @param {number} width the length or the resulting string

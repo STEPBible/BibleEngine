@@ -15,12 +15,18 @@ import {
     BibleInput,
     BibleBookPlaintext,
     IBibleReferenceRangeNormalized,
-    IBibleReferenceNormalized
+    IBibleReferenceNormalized,
+    DictionaryEntry
 } from './models';
-import { parsePhraseId, generatePhraseIdSql, generateReferenceIdSql } from './utils';
-import { IBibleOutputFormatted } from './models/BibleOutput.interface';
+import {
+    parsePhraseId,
+    generatePhraseIdSql,
+    generateReferenceIdSql,
+    generateSectionSql
+} from './utils';
+import { IBibleOutputFormatted, IBibleFormattingGroup } from './models/BibleOutput.interface';
 
-export class SqlBible {
+export class BibleEngine {
     currentVersion?: BibleVersion;
     currentVersionMetadata?: BibleBook[];
     pEntityManager: Promise<EntityManager>;
@@ -35,10 +41,18 @@ export class SqlBible {
     }
 
     async addBookWithContent(book: IBibleBookWithContent) {
-        const bookEntity = await this.addBook(book);
         const textData = this.getBookPlaintextFromBibleContent(book.content);
+        book.chaptersCount = [];
+        for (const verses of textData.values()) {
+            book.chaptersCount.push(verses.size);
+        }
+        await this.addBook(book);
         await this.addBibleContent(book.content, textData);
-        this.generateBookMetadata(bookEntity);
+    }
+
+    async addDictionaryEntry(dictionaryEntry: DictionaryEntry) {
+        const entityManager = await this.pEntityManager;
+        entityManager.save(dictionaryEntry);
     }
 
     async addVersion(version: BibleVersion) {
@@ -54,12 +68,34 @@ export class SqlBible {
         this.normalizeCrossReferencesForVersion(versionId);
     }
 
+    async generateBookMetadata(book: BibleBook) {
+        const entityManager = await this.pEntityManager;
+        const metaData = await entityManager
+            .createQueryBuilder(BiblePhrase, 'phrase')
+            .addSelect('COUNT(DISTINCT phrase.versionVerseNum)', 'numVerses')
+            .where({
+                id: Raw(col =>
+                    generatePhraseIdSql({ isNormalized: true, bookOsisId: book.osisId }, col)
+                )
+            })
+            .orderBy('phrase.versionChapterNum')
+            .groupBy('phrase.versionChapterNum')
+            .getRawMany();
+        book.chaptersCount = metaData.map(chapterMetaDb => chapterMetaDb.numVerses);
+        return entityManager.save(book);
+    }
+
     async getBooksForVersion(versionId: number) {
         const entityManager = await this.pEntityManager;
         return entityManager.find(BibleBook, {
             where: { versionId },
             order: { number: 'ASC' }
         });
+    }
+
+    async getDictionaryEntries(strong: string, dictionary?: string) {
+        const entityManager = await this.pEntityManager;
+        return entityManager.find(DictionaryEntry, { where: { strong, dictionary } });
     }
 
     async getFormattedTextForRange(range: IBibleReferenceRange): Promise<IBibleOutputFormatted> {
@@ -69,15 +105,34 @@ export class SqlBible {
         const book = await this.getBookForVersionReference(range);
         if (!book) throw new Error(`can't get formatted text: invalid book`);
         const rangeNormalized = range.isNormalized
-            ? range
+            ? <IBibleReferenceRangeNormalized>range
             : await this.getNormalizedReferenceRange(range);
         const phrases = await this.getPhrases(rangeNormalized);
+        const sections = await entityManager
+            .createQueryBuilder(BibleSection, 'section')
+            .where(
+                generateSectionSql(rangeNormalized, 'section.phraseStartId', 'section.phraseEndId')
+            )
+            .orderBy('id')
+            .getMany();
+        const paragraphs: IBibleFormattingGroup[] = [];
+        for (const section of sections) {
+            // TODO: we skip non-paragraph sections for now
+            if (section.level !== 0) continue;
+            // TODO: this works only if all phrases are within a paragraph
+            const paragraph: IBibleFormattingGroup = {
+                type: 'paragraph',
+                content: phrases.filter(
+                    phrase => phrase.id >= section.phraseStartId && phrase.id <= section.phraseEndId
+                )
+            };
+            paragraphs.push(paragraph);
+        }
         return {
             version,
             versionBook: book,
             range: rangeNormalized,
-            // TODO:
-            paragraphs: [{ content: phrases, type: 'none' }]
+            paragraphs
         };
     }
 
@@ -188,23 +243,6 @@ export class SqlBible {
         }
 
         return entityManager.save(phrases);
-    }
-
-    private async generateBookMetadata(book: BibleBook) {
-        const entityManager = await this.pEntityManager;
-        const metaData = await entityManager
-            .createQueryBuilder(BiblePhrase, 'phrase')
-            .addSelect('COUNT(DISTINCT phrase.versionVerseNum)', 'numVerses')
-            .where({
-                id: Raw(col =>
-                    generatePhraseIdSql({ isNormalized: true, bookOsisId: book.osisId }, col)
-                )
-            })
-            .orderBy('phrase.versionChapterNum')
-            .groupBy('phrase.versionChapterNum')
-            .getRawMany();
-        book.chaptersCount = metaData.map(chapterMetaDb => chapterMetaDb.numVerses);
-        return entityManager.save(book);
     }
 
     private async getBookForVersionReference({ versionId, bookOsisId }: IBibleReference) {

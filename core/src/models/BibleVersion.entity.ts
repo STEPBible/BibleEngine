@@ -1,8 +1,8 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class BibleVersion {
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
@@ -16,13 +16,13 @@ export class BibleVersion {
     })
     language: string;
 
-    @Column()
+    @Column({ nullable: true })
     copyright: string;
 
-    @Column()
+    @Column({ nullable: true })
     hasStrongs: boolean;
 
-    @Column()
+    @Column({ nullable: true })
     hasMorphology: boolean;
 
     constructor(initializer: Partial<BibleVersion>) {

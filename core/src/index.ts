@@ -1,1 +1,1 @@
-export * from './SqlBible';
+export * from './BibleEngine';

@@ -5,7 +5,7 @@ import { BiblePhrase } from './BiblePhrase.entity';
 import { BiblePhraseOriginalWord } from './BiblePhraseOriginalWord.entity';
 import { BibleCrossReference } from './BibleCrossReference.entity';
 import { BibleNote } from './BibleNote.entity';
-import { Strong } from './Strong';
+import { DictionaryEntry } from './DictionaryEntry.entity';
 
 import { IBibleVerse } from './BibleOutput.interface';
 import {
@@ -30,7 +30,7 @@ export {
     BiblePhraseOriginalWord,
     BibleCrossReference,
     BibleNote,
-    Strong,
+    DictionaryEntry,
     IBibleVerse,
     IBibleNotePhrase,
     IBibleReference,
@@ -54,5 +54,5 @@ export const ENTITIES = [
     BiblePhraseOriginalWord,
     BibleCrossReference,
     BibleNote,
-    Strong
+    DictionaryEntry
 ];

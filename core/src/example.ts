@@ -1,15 +1,22 @@
 const wordGen = require('random-words');
 
-import { SqlBible } from './SqlBible';
-import { BiblePhrase, BibleNote, IBibleSectionWithContent } from './models';
+import { BibleEngine } from './BibleEngine';
+import { BiblePhrase, BibleNote, IBibleSectionWithContent, BibleVersion } from './models';
 import { getOsisIdFromBookGenericId } from './data/bibleMeta';
 
-const sqlBible = new SqlBible({
+const sqlBible = new BibleEngine({
     type: 'sqlite',
     database: 'bible.db'
 });
 
 export const genDb = async () => {
+    const esvVersion = await sqlBible.addVersion(
+        new BibleVersion({
+            version: 'ESV',
+            description: 'English Standard Bible',
+            language: 'en-US'
+        })
+    );
     for (let bookNum = 1; bookNum <= 2; bookNum++) {
         const paragraphs: IBibleSectionWithContent[] = [];
         for (let chapter = 1; chapter <= 15; chapter++) {
@@ -30,7 +37,7 @@ export const genDb = async () => {
                             bookOsisId: getOsisIdFromBookGenericId(bookNum),
                             versionChapterNum: chapter,
                             versionVerseNum: verse,
-                            versionId: 1,
+                            versionId: esvVersion.id,
                             text: wordGen({ min: 1, max: 2, join: ' ' }),
                             notes:
                                 verse % 7 === 0 && phraseIdx === 1
@@ -53,7 +60,7 @@ export const genDb = async () => {
                                 verse % 5 === 0 && phraseIdx === 1
                                     ? [
                                           await sqlBible.createCrossReference({
-                                              versionId: 1,
+                                              versionId: esvVersion.id,
                                               bookOsisId: 'Gen',
                                               versionChapterNum: 1
                                           })
@@ -67,7 +74,7 @@ export const genDb = async () => {
             }
         }
         await sqlBible.addBookWithContent({
-            versionId: 1,
+            versionId: esvVersion.id,
             number: bookNum,
             osisId: getOsisIdFromBookGenericId(bookNum),
             title: wordGen({ min: 1, max: 3, join: ' ' }),
@@ -80,11 +87,10 @@ export const genDb = async () => {
 };
 
 export const getData = async () => {
-    const section = await sqlBible.getPhrases({
+    const section = await sqlBible.getFormattedTextForRange({
         versionId: 1,
         bookOsisId: 'Gen',
-        versionChapterNum: 1,
-        versionVerseNum: 3
+        versionChapterNum: 1
     });
     console.log(section);
 };
