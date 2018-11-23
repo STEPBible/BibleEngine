@@ -25,4 +25,3 @@ Additional features:
 
 -   [@bible-engine/core](https://github.com/tyndale/BibleEngine/tree/master/core): the brain of _BibleEngine_
 -   [@bible-engine/server](https://github.com/tyndale/BibleEngine/tree/master/server): gql-server to serve data if not present on the client
--   [@bible-engine/app](https://github.com/tyndale/BibleEngine/tree/master/app): react-native app
