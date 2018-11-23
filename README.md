@@ -18,11 +18,11 @@ Additional features:
 -   offline-first design with remote fallback
 -   compatible with (almost) all relational databases (via [TypeORM](http://typeorm.io))
 -   performant and space-efficient database design, focussed on bible study use cases
--   [plugin system](./tree/master/core/plugins) to import any kind of bible format
+-   [plugin system](https://github.com/tyndale/BibleEngine/tree/master/core/plugins) to import any kind of bible format
 -   TypeScript - Intellisense for the win!
 
 ## Packages
 
--   [@bible-engine/core](./tree/master/core): the brain of _BibleEngine_
--   [@bible-engine/server](./tree/master/server): gql-server to serve data if not present on the client
--   [@bible-engine/app](./tree/master/app): react-native app
+-   [@bible-engine/core](https://github.com/tyndale/BibleEngine/tree/master/core): the brain of _BibleEngine_
+-   [@bible-engine/server](https://github.com/tyndale/BibleEngine/tree/master/server): gql-server to serve data if not present on the client
+-   [@bible-engine/app](https://github.com/tyndale/BibleEngine/tree/master/app): react-native app
