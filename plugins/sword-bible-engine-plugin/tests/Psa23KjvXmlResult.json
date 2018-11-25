@@ -1,0 +1,29 @@
+{
+  "intro": "<chapter chapterTitle=\"PSALM 23.\" osisID=\"Ps.23\" sID=\"gen520\"/> <title type=\"chapter\">PSALM 23.</title> ",
+  "verses": [
+    {
+      "text": "<div type=\"x-milestone\" subType=\"x-preverse\" sID=\"pv20\"/><title canonical=\"true\" type=\"psalm\"><w lemma=\"strong:H04210\">A Psalm</w> <w lemma=\"strong:H01732\">of David</w>.</title><div type=\"x-milestone\" subType=\"x-preverse\" eID=\"pv20\"/><w lemma=\"strong:H03068\">The <divineName>Lord</divineName></w> <transChange type=\"added\">is</transChange> <w lemma=\"strong:H07462\" morph=\"strongMorph:TH8802\">my shepherd</w>; <w lemma=\"strong:H02637\" morph=\"strongMorph:TH8799\">I shall not want</w>.",
+      "verse": 1
+    },
+    {
+      "text": "<w lemma=\"strong:H07257\" morph=\"strongMorph:TH8686\">He maketh me to lie down</w> <w lemma=\"strong:H01877\">in green</w> <w lemma=\"strong:H04999\">pastures</w>: <w lemma=\"strong:H05095\" morph=\"strongMorph:TH8762\">he leadeth</w> <w lemma=\"strong:H04496\">me beside the still</w> <w lemma=\"strong:H04325\">waters</w>.<note type=\"study\"><catchWord>green…</catchWord>: Heb. <rdg type=\"x-literal\">pastures of tender grass</rdg></note><note type=\"study\"><catchWord>still…</catchWord>: Heb. <rdg type=\"x-literal\">waters of quietness</rdg></note>",
+      "verse": 2
+    },
+    {
+      "text": "<w lemma=\"strong:H07725\" morph=\"strongMorph:TH8787\">He restoreth</w> <w lemma=\"strong:H05315\">my soul</w>: <w lemma=\"strong:H05148\" morph=\"strongMorph:TH8686\">he leadeth</w> <w lemma=\"strong:H04570\">me in the paths</w> <w lemma=\"strong:H06664\">of righteousness</w> <w lemma=\"strong:H08034\">for his name’s</w> sake.",
+      "verse": 3
+    },
+    {
+      "text": "<w lemma=\"strong:H03212\" morph=\"strongMorph:TH8799\">Yea, though I walk</w> <w lemma=\"strong:H01516\">through the valley</w> <w lemma=\"strong:H06757\">of the shadow of death</w>, <w lemma=\"strong:H03372\" morph=\"strongMorph:TH8799\">I will fear</w> <w lemma=\"strong:H07451\">no evil</w>: for thou <transChange type=\"added\">art</transChange> <w lemma=\"strong:H07626\">with me; thy rod</w> <w lemma=\"strong:H04938\">and thy staff</w> <w lemma=\"strong:H05162\" morph=\"strongMorph:TH8762\">they comfort</w> me.",
+      "verse": 4
+    },
+    {
+      "text": "<w lemma=\"strong:H06186\" morph=\"strongMorph:TH8799\">Thou preparest</w> <w lemma=\"strong:H07979\">a table</w> <w lemma=\"strong:H06440\">before</w> <w lemma=\"strong:H06887\" morph=\"strongMorph:TH8802\">me in the presence of mine enemies</w>: <w lemma=\"strong:H01878\" morph=\"strongMorph:TH8765\">thou anointest</w> <w lemma=\"strong:H07218\">my head</w> <w lemma=\"strong:H08081\">with oil</w>; <w lemma=\"strong:H03563\">my cup</w> <w lemma=\"strong:H07310\">runneth over</w>.<note type=\"study\"><catchWord>anointest</catchWord>: Heb. <rdg type=\"x-literal\">makest fat</rdg></note>",
+      "verse": 5
+    },
+    {
+      "text": "<w lemma=\"strong:H02896\">Surely goodness</w> <w lemma=\"strong:H02617\">and mercy</w> <w lemma=\"strong:H07291\" morph=\"strongMorph:TH8799\">shall follow</w> <w lemma=\"strong:H03117\">me all the days</w> <w lemma=\"strong:H02416\">of my life</w>: <w lemma=\"strong:H03427\" morph=\"strongMorph:TH8804\">and I will dwell</w> <w lemma=\"strong:H01004\">in the house</w> <w lemma=\"strong:H03068\">of the <divineName>Lord</divineName></w> <w lemma=\"strong:H03117 strong:H0753\">for ever</w>.<note type=\"study\"><catchWord>for ever</catchWord>: Heb. <rdg type=\"x-literal\">to length of days</rdg></note> <chapter chapterTitle=\"PSALM 23.\" eID=\"gen520\" osisID=\"Ps.23\"/>",
+      "verse": 6
+    }
+  ]
+}

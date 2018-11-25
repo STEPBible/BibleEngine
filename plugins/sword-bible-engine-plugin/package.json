@@ -1,0 +1,18 @@
+{
+  "name": "swords-bible-engine-plugin",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^10.12.10",
+    "@types/jest": "^23.3.9",
+    "jest": "^23.6.0",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.1.6"
+  },
+  "dependencies": {
+    "bible-passage-reference-parser": "^2.0.1",
+    "jszip": "~2.4.0",
+    "pako": "^1.0.6"
+  }
+}

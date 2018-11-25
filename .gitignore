@@ -8,3 +8,7 @@ core/output
 notes
 NeÜ bibel.heute.ont
 core/src/importers/NEUE/html
+lib/
+*ESV20*
+*/dist/*
+*/bible.db

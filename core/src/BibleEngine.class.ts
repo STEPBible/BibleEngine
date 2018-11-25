@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import { createConnection, ConnectionOptions, Raw, EntityManager } from '../typeorm';
-// import { deflate } from 'pako';
 
 import {
     ENTITIES,

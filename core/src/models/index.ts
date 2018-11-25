@@ -46,6 +46,7 @@ import {
     IBibleContentForInput,
     BookWithContentForInput,
     IBibleContentGroupForInput,
+    IBibleContentSectionForInput,
     IBibleContentPhraseForInput
 } from './BibleInput';
 import { IV11nRule } from './V11nRule';
@@ -71,6 +72,7 @@ export {
     IBibleContentGroupForInput,
     IBibleContentPhrase,
     IBibleContentPhraseForInput,
+    IBibleContentSectionForInput,
     IBibleContentSection,
     IBibleCrossReference,
     IBibleNote,
