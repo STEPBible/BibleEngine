@@ -7,7 +7,13 @@ import { BibleCrossReference } from './BibleCrossReference.entity';
 import { BibleNote } from './BibleNote.entity';
 import { DictionaryEntry } from './DictionaryEntry.entity';
 
-import { IBibleVerse } from './BibleOutput.interface';
+import {
+    IBibleVerse,
+    IBibleOutputFormatted,
+    BibleOutputGroup,
+    IBibleOutputGroupPhrases,
+    IBibleOutputGroupRoot
+} from './BibleOutput.interface';
 import {
     IBibleReference,
     IBibleReferenceRange,
@@ -32,6 +38,10 @@ export {
     BibleNote,
     DictionaryEntry,
     IBibleVerse,
+    IBibleOutputFormatted,
+    BibleOutputGroup,
+    IBibleOutputGroupPhrases,
+    IBibleOutputGroupRoot,
     IBibleNotePhrase,
     IBibleReference,
     IBibleReferenceRange,

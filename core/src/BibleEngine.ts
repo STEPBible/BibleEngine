@@ -16,15 +16,16 @@ import {
     BibleBookPlaintext,
     IBibleReferenceRangeNormalized,
     IBibleReferenceNormalized,
-    DictionaryEntry
+    DictionaryEntry,
+    IBibleOutputFormatted
 } from './models';
 import {
     parsePhraseId,
     generatePhraseIdSql,
     generateReferenceIdSql,
-    generateSectionSql
+    generateSectionSql,
+    getOutputFormattingGroupsForPhrasesAndSections
 } from './utils';
-import { IBibleOutputFormatted, IBibleFormattingGroup } from './models/BibleOutput.interface';
 
 export class BibleEngine {
     currentVersion?: BibleVersion;
@@ -115,24 +116,15 @@ export class BibleEngine {
             )
             .orderBy('id')
             .getMany();
-        const paragraphs: IBibleFormattingGroup[] = [];
-        for (const section of sections) {
-            // TODO: we skip non-paragraph sections for now
-            if (section.level !== 0) continue;
-            // TODO: this works only if all phrases are within a paragraph
-            const paragraph: IBibleFormattingGroup = {
-                type: 'paragraph',
-                content: phrases.filter(
-                    phrase => phrase.id >= section.phraseStartId && phrase.id <= section.phraseEndId
-                )
-            };
-            paragraphs.push(paragraph);
-        }
+        // TODO: find those
+        const wrappingSections: { [index: number]: BibleSection } = {};
+
         return {
             version,
             versionBook: book,
             range: rangeNormalized,
-            paragraphs
+            wrappingSections,
+            content: getOutputFormattingGroupsForPhrasesAndSections(phrases, sections)
         };
     }
 
@@ -253,6 +245,36 @@ export class BibleEngine {
                 osisId: bookOsisId
             }
         });
+    }
+
+    private getBookPlaintextFromBibleContent(
+        content: BibleInput,
+        _accChapters: BibleBookPlaintext = new Map()
+    ) {
+        if (content.type === 'phrases') {
+            this.getBookPlaintextFromPhrases(content.phrases, _accChapters);
+        } else {
+            for (const section of content.sections) {
+                this.getBookPlaintextFromBibleContent(section.content, _accChapters);
+            }
+        }
+        return _accChapters;
+    }
+
+    private getBookPlaintextFromPhrases(
+        phrases: BiblePhrase[],
+        _accChapters: BibleBookPlaintext = new Map()
+    ) {
+        for (const phrase of phrases) {
+            if (!_accChapters.has(phrase.versionChapterNum))
+                _accChapters.set(phrase.versionChapterNum, new Map());
+            const chapter = _accChapters.get(phrase.versionChapterNum)!; // we know it's set
+            const verse = chapter.has(phrase.versionVerseNum)
+                ? chapter.get(phrase.versionVerseNum) + ' ' + phrase.text
+                : phrase.text;
+            chapter.set(phrase.versionVerseNum, verse);
+        }
+        return _accChapters;
     }
 
     private getContextRangeForVersionRange({
@@ -416,36 +438,6 @@ export class BibleEngine {
         }
 
         return normRange;
-    }
-
-    private getBookPlaintextFromBibleContent(
-        content: BibleInput,
-        _accChapters: BibleBookPlaintext = new Map()
-    ) {
-        if (content.type === 'phrases') {
-            this.getBookPlaintextFromPhrases(content.phrases, _accChapters);
-        } else {
-            for (const section of content.sections) {
-                this.getBookPlaintextFromBibleContent(section.content, _accChapters);
-            }
-        }
-        return _accChapters;
-    }
-
-    private getBookPlaintextFromPhrases(
-        phrases: BiblePhrase[],
-        _accChapters: BibleBookPlaintext = new Map()
-    ) {
-        for (const phrase of phrases) {
-            if (!_accChapters.has(phrase.versionChapterNum))
-                _accChapters.set(phrase.versionChapterNum, new Map());
-            const chapter = _accChapters.get(phrase.versionChapterNum)!; // we know it's set
-            const verse = chapter.has(phrase.versionVerseNum)
-                ? chapter.get(phrase.versionVerseNum) + ' ' + phrase.text
-                : phrase.text;
-            chapter.set(phrase.versionVerseNum, verse);
-        }
-        return _accChapters;
     }
 
     private async getNormalisationRulesForReference(_: IBibleReferenceRange) {

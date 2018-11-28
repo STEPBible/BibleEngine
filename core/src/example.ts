@@ -87,12 +87,12 @@ export const genDb = async () => {
 };
 
 export const getData = async () => {
-    const section = await sqlBible.getFormattedTextForRange({
+    const output = await sqlBible.getFormattedTextForRange({
         versionId: 1,
         bookOsisId: 'Gen',
         versionChapterNum: 1
     });
-    console.log(section);
+    console.dir(output, { depth: null });
 };
 
 const run = async () => {

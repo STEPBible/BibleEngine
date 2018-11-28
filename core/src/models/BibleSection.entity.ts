@@ -5,6 +5,7 @@ import { IBibleSection } from './BibleSection.interface';
 
 @Entity()
 @Index(['phraseStartId', 'phraseEndId'])
+@Index(['phraseEndId'])
 export class BibleSection implements IBibleSection {
     @PrimaryGeneratedColumn()
     id: number;
