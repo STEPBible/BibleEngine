@@ -10,17 +10,18 @@ import {
     IBibleOutputGroupParagraph,
     IBibleOutputGroupPhrases,
     IBibleOutputGroupLevelFormatting,
-    IBibleOutputGroupBooleanFormatting
+    IBibleOutputGroupBooleanFormatting,
+    IBibleOutputRich
 } from 'models/BibleOutput.interface';
 
 export const getOutputFormattingGroupsForPhrasesAndSections = (
     phrases: BiblePhrase[],
-    sections: BibleSection[]
+    paragraphs: BibleSection[],
+    context: IBibleOutputRich['context']
 ) => {
     const rootGroup: IBibleOutputGroupRoot = {
         type: 'root',
         parent: undefined,
-        numbering: {},
         contents: []
     };
 
@@ -41,6 +42,13 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
         italic: false,
         divineName: false,
         jesusWords: false
+    };
+
+    const currentNumbering = {
+        normalizedChapter: 0,
+        normalizedVerse: -1, // we have zero-verses (psalms in some versions)
+        versionChapter: 0,
+        versionVerse: -1 // we have zero-verses (psalms in some versions)
     };
 
     for (const phrase of phrases) {
@@ -108,54 +116,72 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
             _group = _group.parent;
         }
 
-        // now go through all sections and the phrases modifiers and create new groups if needed
+        /*
+         * now go through all sections and the phrases modifiers and create new groups if needed
+         */
 
-        // sort sections by level(desc) and phraseStartId(asc)
-        sections.sort((a, b) => {
-            // higher levels come first
-            if (a.level > b.level) return -1;
-            else if (b.level > a.level) return 1;
-            // lower phraseStartIds come first
-            else return a.phraseStartId < b.phraseStartId ? -1 : 1;
-        });
+        // look for the paragraph where the phrase is in (if any) and open it if necessary
+        const paragraph = paragraphs.find(
+            _paragraph =>
+                phrase.id >= _paragraph.phraseStartId && phrase.id <= _paragraph.phraseEndId
+        );
+        // is the paragraph already active?
+        if (
+            paragraph &&
+            !activeModifiers.sections.find(activeSection => activeSection.id === paragraph.id)
+        ) {
+            // paragraph can only be children of root or other sections. Else the strucuture got
+            // corrupted somewhere. throw an error so we know about it
+            if (activeGroup.type !== 'root' && activeGroup.type !== 'section')
+                throw new Error(`can't create output object: corrupted structure (paragraphs)`);
 
-        // filter out all sections where the phrase is included
-        for (const section of sections.filter(
-            // TODO: filter out wrapping sections
-            // TODO: make sure that a partial paragraph at beginning or end is still added
-            _section => phrase.id >= _section.phraseStartId && phrase.id <= _section.phraseEndId
-        )) {
+            const newSectionGroup: IBibleOutputGroupParagraph = {
+                ...paragraph,
+                type: 'paragraph',
+                contents: [],
+                parent: activeGroup
+            };
+            activeGroup.contents.push(newSectionGroup);
+            activeGroup = newSectionGroup;
+            activeModifiers.sections.push(newSectionGroup);
+        }
+
+        // go through all levels of context, starting by the highest
+        for (const level of Object.keys(context)
+            .sort()
+            .reverse()
+            .map(key => +key)) {
+            // look for the section where the phrase is in (if any) and open it if necessary
+            const section = context[level].includedSections.find(
+                _section => phrase.id >= _section.phraseStartId && phrase.id <= _section.phraseEndId
+            );
             // is the section already active?
-            if (!activeModifiers.sections.find(activeSection => activeSection.id === section.id)) {
-                // section can only be children of root or other sections. Else the strucuture got
-                // corrupted somewhere. throw an error so we know about it
-                if (activeGroup.type !== 'root' && activeGroup.type !== 'section')
-                    throw new Error(`can't create formatted output: corrupted structure`);
+            if (
+                section &&
+                !activeModifiers.sections.find(activeSection => activeSection.id === section.id)
+            ) {
+                if (
+                    // section can only be children of root or other sections. Else the strucuture
+                    // got corrupted somewhere. throw an error so we know about it
+                    (activeGroup.type !== 'root' && activeGroup.type !== 'section') ||
+                    // throw error if creating a section in the wrong level order
+                    activeModifiers.sections.find(activeSection => activeSection.level <= level)
+                )
+                    throw new Error(`can't create output object: corrupted structure (section)`);
 
-                let newSectionGroup: IBibleOutputGroupParagraph | IBibleOutputGroupSection;
-                if (section.level === 0) {
-                    newSectionGroup = {
-                        ...section,
-                        type: 'paragraph',
-                        contents: [],
-                        numbering: {},
-                        parent: activeGroup
-                    };
-                } else {
-                    newSectionGroup = {
-                        ...section,
-                        type: 'section',
-                        contents: [],
-                        numbering: {},
-                        parent: activeGroup
-                    };
-                }
+                const newSectionGroup: IBibleOutputGroupSection = {
+                    ...section,
+                    type: 'section',
+                    contents: [],
+                    parent: activeGroup
+                };
                 activeGroup.contents.push(newSectionGroup);
                 activeGroup = newSectionGroup;
                 activeModifiers.sections.push(newSectionGroup);
             }
         }
-        // TODO: loops through modifiers and check if active check if they need to be started
+
+        // loop through modifiers and check if active check if they need to be started
         type LevelModifiers = 'indentLevel' | 'quoteLevel';
         const levelModifiers: LevelModifiers[] = ['indentLevel', 'quoteLevel'];
         for (const levelModifier of levelModifiers) {
@@ -166,7 +192,6 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
                     type: levelModifier,
                     parent: activeGroup,
                     level: phrase[levelModifier]!,
-                    numbering: {},
                     contents: []
                 };
 
@@ -186,7 +211,6 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
                 const newBooleanGroup: IBibleOutputGroupBooleanFormatting = {
                     type: booleanModifier,
                     parent: activeGroup,
-                    numbering: {},
                     contents: []
                 };
                 // RADAR: TypeScript shows an error if we use 'push()' here. Feels like a bug in TS.
@@ -203,7 +227,6 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
             const newPhrasesGroup: IBibleOutputGroupPhrases = {
                 type: 'phrases',
                 contents: [],
-                numbering: {},
                 parent: activeGroup
             };
             // RADAR: TypeScript shows an error if we use 'push()' here. Feels like a bug in TS.
@@ -211,13 +234,85 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
             activeGroup = newPhrasesGroup;
         }
 
+        // set numbering
+        // get the most outer group for wich this is the first phrase
+        let numberingGroup: BibleOutputGroup | null = null;
+        _group = activeGroup;
+        do {
+            // if we are at the top level (phrases can't have groups as content)
+            if (_group.type === 'phrases') {
+                // if there is already content in the phrase group => we can't use that one
+                if (_group.contents.length) break;
+                else numberingGroup = _group;
+            }
+            // as soon as we hit a group with more than one content we can break, otherwise it is a
+            // valid numbering group(=> if a parent has only one member it is the one from where we
+            // navigated via the parent attribute)
+            // tslint:disable-next-line:one-line
+            else if (_group.contents.length > 1) break;
+            else if (_group.contents.length === 1) numberingGroup = _group;
+            // there should be no group that is not a phrase group and has no child
+            else if (_group.contents.length === 0)
+                throw new Error(
+                    `can't create output object: corrupted structure (empty ancestor group)`
+                );
+
+            if (_group.parent) _group = _group.parent;
+        } while (!!_group.parent);
+
+        // we have no suitable numberingGroup => a new outputGroupPhrases needs to be created
+        if (numberingGroup === null) {
+            const newPhrasesGroup: IBibleOutputGroupPhrases = {
+                type: 'phrases',
+                contents: [],
+                parent: activeGroup.parent
+            };
+            // RADAR: TypeScript shows an error if we use 'push()' here. Feels like a bug in TS.
+            activeGroup.parent.contents[activeGroup.parent.contents.length] = newPhrasesGroup;
+            activeGroup = newPhrasesGroup;
+            numberingGroup = activeGroup;
+        }
+
+        // if the numberingGroup we figured out already has numbering values set we screwed up
+        // somewhere
+        if (numberingGroup.numbering)
+            throw new Error(
+                `can't create output object: corrupted structure (unexpected numbering group)`
+            );
+
+        numberingGroup.numbering = {};
+
+        // if this phrase switches any numbers (verse/chapter, normalized/version), the related
+        // value is set on the numbering object of the topmost group where this phrase is the
+        // (current) only member
+        if (currentNumbering.normalizedChapter !== phrase.normalizedChapterNum) {
+            // psalms can have verse number zero
+            if (phrase.normalizedVerseNum <= 1)
+                numberingGroup.numbering.normalizedChapterIsStarting = phrase.normalizedChapterNum;
+            numberingGroup.numbering.normalizedChapterIsStartingInRange =
+                phrase.normalizedChapterNum;
+            currentNumbering.normalizedChapter = phrase.normalizedChapterNum;
+        }
+        if (currentNumbering.normalizedVerse !== phrase.normalizedVerseNum) {
+            numberingGroup.numbering.normalizedVerseIsStarting = phrase.normalizedVerseNum;
+            currentNumbering.normalizedVerse = phrase.normalizedVerseNum;
+        }
+        if (currentNumbering.versionChapter !== phrase.versionChapterNum) {
+            // psalms can have verse number zero
+            if (phrase.versionVerseNum <= 1)
+                numberingGroup.numbering.versionChapterIsStarting = phrase.versionChapterNum;
+            numberingGroup.numbering.versionChapterIsStartingInRange = phrase.versionChapterNum;
+            currentNumbering.versionChapter = phrase.versionChapterNum;
+        }
+        if (currentNumbering.versionVerse !== phrase.versionVerseNum) {
+            numberingGroup.numbering.normalizedVerseIsStarting = phrase.versionVerseNum;
+            currentNumbering.versionVerse = phrase.versionVerseNum;
+        }
+
         // finally we can add our phrase to the data structure
         activeGroup.contents.push(phrase);
-
-        // TODO: set numbering
-        //    - if already set, a new outputGroupPhrases needs to be created
-        //    - numbering needs to be set on the most outer group for wich this is the first phrase
     }
+
     return rootGroup;
 };
 
@@ -328,11 +423,7 @@ export function generateRandomChar(): string {
  * @param {string} [col='id']
  * @returns {string} SQL
  */
-export const generateSectionSql = (
-    range: IBibleReferenceRangeNormalized,
-    colSectionStart: string,
-    colSectionEnd: string
-) => {
+export const generateSectionSql = (range: IBibleReferenceRangeNormalized, tableAlias: string) => {
     const refEnd: IBiblePhraseRef = {
         isNormalized: true,
         bookOsisId: range.bookOsisId,
@@ -347,19 +438,77 @@ export const generateSectionSql = (
     };
     const rangePhraseIdStart = generatePhraseId(range);
     const rangePhraseIdEnd = generatePhraseId(refEnd);
-    // TODO: we have an OR query that only queries colSectionEnd - how does our index work here?
-    let sql = `
-        ( ${colSectionStart} < ${rangePhraseIdStart} AND ${colSectionEnd} > ${rangePhraseIdEnd} ) OR
-        ( ${colSectionStart} >= ${rangePhraseIdStart} AND
-          ${colSectionStart} <= ${rangePhraseIdEnd} ) OR
-        ( ${colSectionEnd} >= ${rangePhraseIdStart} AND ${colSectionEnd} <= ${rangePhraseIdEnd} )`;
+    const bookPhraseIdStart = generatePhraseId({
+        bookOsisId: range.bookOsisId,
+        isNormalized: true
+    });
+    const bookPhraseIdEnd = generatePhraseId({
+        bookOsisId: range.bookOsisId,
+        normalizedChapterNum: 999,
+        isNormalized: true
+    });
 
-    // if we query for a specific version we need to filter out the
-    // version with a little math (due to the nature of our encoded reference integers)
-    if (range.versionId)
-        sql += `AND cast(${colSectionStart} % 100000000000 / 100000000 as int) = ${
-            range.versionId
-        }`;
+    const colVersion = `${tableAlias}.versionId`;
+    const colLevel = `${tableAlias}.level`;
+    const colSectionStart = `${tableAlias}.phraseStartId`;
+    const colSectionEnd = `${tableAlias}.phraseEndId`;
+    let sql: string;
+
+    if (range.versionId) {
+        // since this is an OR query the query optimizer may/will use different indexes for each
+        // https://www.sqlite.org/optoverview.html#or_optimizations
+        // thats also why we repeat the versionId condition.
+        //
+        // the three conditions select:
+        // - paragraphs that wrap around the range
+        // - paragraphs that start within the range
+        // - all sections (level > 0) of this book (context)
+        // - paragraphs that end within the range (seperate index)
+        //
+        // (paragraphs that are fully contained in the range or selected by both the 2nd and 3rd
+        //  condition)
+        //
+        // RADAR: if the context selection is a performance problem, refactor the context-query
+        //        into a seperate method
+
+        sql = `
+            ( ${colVersion} = ${range.versionId} AND (
+                ( ${colLevel} = 0 AND (
+                    ( ${colSectionStart} < ${rangePhraseIdStart} AND
+                        ${colSectionEnd} > ${rangePhraseIdEnd} ) OR
+                    ( ${colSectionStart} >= ${rangePhraseIdStart} AND
+                        ${colSectionStart} <= ${rangePhraseIdEnd} )
+                ) ) OR (
+                    ${colVersion} = ${range.versionId} AND ${colLevel} > 0 AND
+                    ${colSectionStart} >= ${bookPhraseIdStart} AND
+                    ${colSectionEnd} <= ${bookPhraseIdEnd}
+                )
+            ) ) OR (
+                ${colVersion} = ${range.versionId} AND ${colLevel} = 0 AND
+                ${colSectionEnd} >= ${rangePhraseIdStart} AND
+                ${colSectionEnd} <= ${rangePhraseIdEnd}
+            )`;
+    } else {
+        // if we have no version we don't query for paragraphs (doesn't make sense)
+        //
+        // since we are interested in the context as well, we keep it simple and select the whole
+        // book-structure (as we do in the version query).
+        // RADAR: if this is a performance problem, refactor the context-query into a seperate
+        //        method
+
+        sql = `${colLevel} > 0 AND
+            ${colSectionStart} >= ${bookPhraseIdStart} AND ${colSectionEnd} <= ${bookPhraseIdEnd}`;
+    }
+
+    // [REFERENCE] we added the versionId column to the sections table, so we don't need to query
+    //             the version via the phraseIds. Since this is not stable, we leave the code for
+    //             reference.
+    // // if we query for a specific version we need to filter out the
+    // // version with a little math (due to the nature of our encoded reference integers)
+    // if (range.versionId)
+    //     sql += `AND cast(${colSectionStart} % 100000000000 / 100000000 as int) = ${
+    //         range.versionId
+    //     }`;
 
     return sql;
 };

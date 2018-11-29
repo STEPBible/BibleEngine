@@ -9,7 +9,7 @@ import { DictionaryEntry } from './DictionaryEntry.entity';
 
 import {
     IBibleVerse,
-    IBibleOutputFormatted,
+    IBibleOutputRich,
     BibleOutputGroup,
     IBibleOutputGroupPhrases,
     IBibleOutputGroupRoot
@@ -38,7 +38,7 @@ export {
     BibleNote,
     DictionaryEntry,
     IBibleVerse,
-    IBibleOutputFormatted,
+    IBibleOutputRich,
     BibleOutputGroup,
     IBibleOutputGroupPhrases,
     IBibleOutputGroupRoot,

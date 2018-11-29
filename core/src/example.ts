@@ -1,7 +1,13 @@
 const wordGen = require('random-words');
 
 import { BibleEngine } from './BibleEngine';
-import { BiblePhrase, BibleNote, IBibleSectionWithContent, BibleVersion } from './models';
+import {
+    BiblePhrase,
+    BibleNote,
+    IBibleSectionWithContent,
+    BibleVersion,
+    BibleCrossReference
+} from './models';
 import { getOsisIdFromBookGenericId } from './data/bibleMeta';
 
 const sqlBible = new BibleEngine({
@@ -59,7 +65,7 @@ export const genDb = async () => {
                             crossReferences:
                                 verse % 5 === 0 && phraseIdx === 1
                                     ? [
-                                          await sqlBible.createCrossReference({
+                                          new BibleCrossReference({
                                               versionId: esvVersion.id,
                                               bookOsisId: 'Gen',
                                               versionChapterNum: 1
@@ -83,14 +89,15 @@ export const genDb = async () => {
         });
     }
 
-    sqlBible.finalizeVersion(1);
+    sqlBible.finalizeVersion(esvVersion.id);
 };
 
 export const getData = async () => {
     const output = await sqlBible.getFormattedTextForRange({
         versionId: 1,
         bookOsisId: 'Gen',
-        versionChapterNum: 1
+        versionChapterNum: 1,
+        versionVerseNum: 5
     });
     console.dir(output, { depth: null });
 };

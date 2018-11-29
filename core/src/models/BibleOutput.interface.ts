@@ -11,34 +11,55 @@ export interface IBibleOutputBase {
     version: BibleVersion;
     versionBook: BibleBook;
     range: IBibleReferenceRange;
-    /**
-     * the section(s) that wrap the current range (without being contained in it),
-     * indexed by their level (1,2,3,..)
-     * @type {{ [index: number]: BibleSection[] }}
-     * @memberof IBibleOutputBase
-     */
-    wrappingSections?: { [index: number]: BibleSection };
-    previousSection?: BibleSection;
-    nextSection?: BibleSection;
-    completeStartingParagraphRange?: IBibleReferenceRange;
-    completeEndingParagraphRange?: IBibleReferenceRange;
-    previousParagraphRange?: IBibleReferenceRange;
-    nextParagraphRange?: IBibleReferenceRange;
-    completeStartingSectionRange?: IBibleReferenceRange;
-    completeEndingSectionRange?: IBibleReferenceRange;
-    previousSectionRange?: IBibleReferenceRange;
-    nextSectionRange?: IBibleReferenceRange;
-    completeChapterRange?: IBibleReferenceRange;
-    previousChapterRange?: IBibleReferenceRange;
-    nextChapterRange?: IBibleReferenceRange;
 }
 
 export interface IBibleOutputPlaintext extends IBibleOutputBase {
     verses: IBibleVerse[];
 }
 
-export interface IBibleOutputFormatted extends IBibleOutputBase {
+export interface IBibleOutputRich extends IBibleOutputBase {
     content: IBibleOutputGroupRoot;
+
+    /**
+     * the sections that are in and around the current range, indexed by their level (1,2,3,..)
+     */
+    context: {
+        [index: number]: {
+            /**
+             * the sections that start or end within the current range
+             */
+            includedSections: BibleSection[];
+            /**
+             * the section that wraps the current range (without being contained in it)
+             */
+            wrappingSection?: BibleSection;
+            /**
+             * the sections of this level before the current range that have no intersection
+             * with the current range
+             */
+            previousSections: BibleSection[];
+            /**
+             * this sections of this level after the current range that have no intersection
+             * with the current range
+             */
+            nextSections: BibleSection[];
+        };
+    };
+
+    /**
+     * pre-generated ranges to use in context queries for paragraph, section (level 1) and chapter
+     */
+    contextRanges: {
+        [key in 'paragraph' | 'section' | 'chapter']: {
+            // RADAR: we might enable this again
+            // completeStartingRange?: IBibleReferenceRange;
+            completeRange?: IBibleReferenceRange;
+            // RADAR: we might enable this again
+            // completeEndingRange?: IBibleReferenceRange;
+            previousRange?: IBibleReferenceRange;
+            nextRange?: IBibleReferenceRange;
+        }
+    };
 }
 
 export interface IBibleVerse {
@@ -66,14 +87,14 @@ export type BibleOutputGroup =
 export interface IBibleOutputGroupRoot {
     readonly type: 'root';
     parent: undefined;
-    numbering: IBibleOutputNumbering;
+    numbering?: IBibleOutputNumbering;
     contents: BibleOutputGroup[];
 }
 
 export interface IBibleOutputGroupSection extends BibleSection {
     readonly type: 'section';
     parent: BibleOutputGroup;
-    numbering: IBibleOutputNumbering;
+    numbering?: IBibleOutputNumbering;
     contents: BibleOutputGroup[]; // a section can contain everything
 }
 
@@ -83,7 +104,7 @@ export interface IBibleOutputGroupSection extends BibleSection {
 export interface IBibleOutputGroupParagraph extends BibleSection {
     readonly type: 'paragraph';
     parent: BibleOutputGroup;
-    numbering: IBibleOutputNumbering;
+    numbering?: IBibleOutputNumbering;
     contents: (
         | IBibleOutputGroupLevelFormatting
         | IBibleOutputGroupBooleanFormatting
@@ -93,7 +114,7 @@ export interface IBibleOutputGroupParagraph extends BibleSection {
 export interface IBibleOutputGroupBooleanFormatting {
     readonly type: 'bold' | 'italic' | 'divineName' | 'jesusWords';
     parent: BibleOutputGroup; // pointer back to it's parent, needed for generating the groups
-    numbering: IBibleOutputNumbering;
+    numbering?: IBibleOutputNumbering;
     contents: (
         | IBibleOutputGroupLevelFormatting
         | IBibleOutputGroupBooleanFormatting
@@ -103,7 +124,7 @@ export interface IBibleOutputGroupBooleanFormatting {
 export interface IBibleOutputGroupLevelFormatting {
     readonly type: 'indentLevel' | 'quoteLevel';
     parent: BibleOutputGroup; // pointer back to it's parent, needed for generating the groups
-    numbering: IBibleOutputNumbering;
+    numbering?: IBibleOutputNumbering;
     level: number;
     contents: (
         | IBibleOutputGroupLevelFormatting
@@ -114,6 +135,6 @@ export interface IBibleOutputGroupLevelFormatting {
 export interface IBibleOutputGroupPhrases {
     readonly type: 'phrases';
     parent: BibleOutputGroup;
-    numbering: IBibleOutputNumbering;
+    numbering?: IBibleOutputNumbering;
     contents: BiblePhrase[];
 }

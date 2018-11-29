@@ -17,7 +17,7 @@ import {
     IBibleReferenceRangeNormalized,
     IBibleReferenceNormalized,
     DictionaryEntry,
-    IBibleOutputFormatted
+    IBibleOutputRich
 } from './models';
 import {
     parsePhraseId,
@@ -99,32 +99,111 @@ export class BibleEngine {
         return entityManager.find(DictionaryEntry, { where: { strong, dictionary } });
     }
 
-    async getFormattedTextForRange(range: IBibleReferenceRange): Promise<IBibleOutputFormatted> {
+    async getFormattedTextForRange(range: IBibleReferenceRange): Promise<IBibleOutputRich> {
         const entityManager = await this.pEntityManager;
+
         const version = await entityManager.findOne(BibleVersion, range.versionId);
         if (!version) throw new Error(`can't get formatted text: invalid version`);
+
         const book = await this.getBookForVersionReference(range);
         if (!book) throw new Error(`can't get formatted text: invalid book`);
+
         const rangeNormalized = range.isNormalized
             ? <IBibleReferenceRangeNormalized>range
             : await this.getNormalizedReferenceRange(range);
+
         const phrases = await this.getPhrases(rangeNormalized);
         const sections = await entityManager
             .createQueryBuilder(BibleSection, 'section')
-            .where(
-                generateSectionSql(rangeNormalized, 'section.phraseStartId', 'section.phraseEndId')
-            )
+            .where(generateSectionSql(rangeNormalized, 'section'))
+            // sections are inserted in order, so its safe to sort by generated id
             .orderBy('id')
             .getMany();
-        // TODO: find those
-        const wrappingSections: { [index: number]: BibleSection } = {};
+
+        const paragraphs: BibleSection[] = [];
+        const context: IBibleOutputRich['context'] = {};
+        const contextRanges: IBibleOutputRich['contextRanges'] = {
+            paragraph: {},
+            section: {},
+            chapter: {}
+        };
+
+        if (phrases.length) {
+            const firstPhraseId = phrases[0].id;
+            const lastPhraseId = phrases[phrases.length - 1].id;
+            for (const section of sections) {
+                if (section.level === 0) {
+                    paragraphs.push(section);
+                } else {
+                    if (!context[section.level])
+                        context[section.level] = {
+                            includedSections: [],
+                            previousSections: [],
+                            nextSections: []
+                        };
+
+                    // check if this section wraps the entire range
+                    if (section.phraseStartId < firstPhraseId && section.phraseEndId > lastPhraseId)
+                        context[section.level].wrappingSection = section;
+                    // check if this section starts or ends within the range
+                    else if (
+                        section.phraseStartId >= firstPhraseId ||
+                        section.phraseEndId <= lastPhraseId
+                    )
+                        context[section.level].includedSections.push(section);
+                    // check if this section is before the range
+                    else if (section.phraseEndId < firstPhraseId)
+                        context[section.level].previousSections.push(section);
+                    // check if this section is after the range
+                    else if (section.phraseStartId > lastPhraseId)
+                        context[section.level].nextSections.push(section);
+                }
+            }
+
+            // generate contextRanges
+            if (
+                paragraphs.length === 1 &&
+                (paragraphs[0].phraseStartId < firstPhraseId ||
+                    paragraphs[0].phraseEndId > lastPhraseId)
+            ) {
+                contextRanges.paragraph.completeRange = paragraphs[0].getReferenceRange();
+            }
+            // TODO: generate next/previous contextRanges for paragraphs
+            //       (possibly add a new query method for requesting next/previous sections by
+            //        current section id)
+
+            if (context[1] && context[1].wrappingSection) {
+                // tslint:disable-next-line:max-line-length
+                contextRanges.section.completeRange = context[1].wrappingSection.getReferenceRange();
+            }
+            if (
+                context[1] &&
+                context[1].includedSections.length === 1 &&
+                (context[1].includedSections[0].phraseStartId < firstPhraseId ||
+                    context[1].includedSections[0].phraseEndId > lastPhraseId)
+            ) {
+                // tslint:disable-next-line:max-line-length
+                contextRanges.section.completeRange = context[1].includedSections[0].getReferenceRange();
+            }
+
+            if (context[1] && context[1].previousSections.length)
+                contextRanges.section.previousRange = context[1].previousSections[
+                    context[1].previousSections.length - 1
+                ].getReferenceRange();
+            if (context[1] && context[1].nextSections.length)
+                // tslint:disable-next-line:max-line-length
+                contextRanges.section.previousRange = context[1].nextSections[0].getReferenceRange();
+
+            // TODO: generate context ranges for chapter (how to deal with normalization here?)
+        }
 
         return {
             version,
             versionBook: book,
             range: rangeNormalized,
-            wrappingSections,
-            content: getOutputFormattingGroupsForPhrasesAndSections(phrases, sections)
+            content: getOutputFormattingGroupsForPhrasesAndSections(phrases, paragraphs, context),
+            context,
+            contextRanges
         };
     }
 
@@ -190,16 +269,19 @@ export class BibleEngine {
                 } else {
                     newSectionPhrases = await this.addBibleContent(section.content, context);
                 }
-                const newSection = new BibleSection({
-                    phraseStartId: newSectionPhrases[0].id!,
-                    phraseEndId: newSectionPhrases[newSectionPhrases.length - 1].id!,
-                    level: section.level,
-                    title: section.title,
-                    crossReferences: section.crossReferences,
-                    notes: section.notes
-                });
-                entityManager.save(newSection);
-                newPhrases.push(...newSectionPhrases);
+                if (newSectionPhrases.length) {
+                    const newSection = new BibleSection({
+                        versionId: newSectionPhrases[0].versionId,
+                        phraseStartId: newSectionPhrases[0].id!,
+                        phraseEndId: newSectionPhrases[newSectionPhrases.length - 1].id!,
+                        level: section.level,
+                        title: section.title,
+                        crossReferences: section.crossReferences,
+                        notes: section.notes
+                    });
+                    entityManager.save(newSection);
+                    newPhrases.push(...newSectionPhrases);
+                }
             }
             return newPhrases;
         }
