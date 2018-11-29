@@ -99,7 +99,7 @@ export class BibleEngine {
         return entityManager.find(DictionaryEntry, { where: { strong, dictionary } });
     }
 
-    async getFormattedTextForRange(range: IBibleReferenceRange): Promise<IBibleOutputRich> {
+    async getFullDataForReferenceRange(range: IBibleReferenceRange): Promise<IBibleOutputRich> {
         const entityManager = await this.pEntityManager;
 
         const version = await entityManager.findOne(BibleVersion, range.versionId);

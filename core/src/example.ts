@@ -93,7 +93,7 @@ export const genDb = async () => {
 };
 
 export const getData = async () => {
-    const output = await sqlBible.getFormattedTextForRange({
+    const output = await sqlBible.getFullDataForReferenceRange({
         versionId: 1,
         bookOsisId: 'Gen',
         versionChapterNum: 1,
