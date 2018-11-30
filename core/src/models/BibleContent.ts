@@ -1,10 +1,10 @@
-import { IBibleSection } from './BibleSection';
+import { IBibleSectionInput } from './BibleSection';
 import { IBiblePhrase } from './BiblePhrase';
 import { IContentGroup } from './ContentGroup';
 
 export type IBibleContent = IBibleContentSection | IBibleContentGroup | IBibleContentPhrase;
 
-export interface IBibleContentSection extends IBibleSection {
+export interface IBibleContentSection extends IBibleSectionInput {
     readonly type: 'section';
     contents: IBibleContent[];
 }
@@ -25,6 +25,7 @@ export interface IBibleContentPhrase extends IBiblePhrase {
     contents: [
         {
             type: 'section',
+            title: 'New Title',
             contents: [
                 {
                     type: 'group',

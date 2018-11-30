@@ -333,11 +333,13 @@ export class BibleEngine {
                 this.addBibleContent(content.contents, state);
                 const newPhrases = await entityManager.save(state.phraseStack);
                 if (newPhrases.length) {
+                    // TODO: determine level
+                    const level = 1;
                     const newSection = new BibleSection({
                         versionId: newPhrases[0].reference.versionId,
                         phraseStartId: newPhrases[0].id!,
                         phraseEndId: newPhrases[newPhrases.length - 1].id!,
-                        level: content.level,
+                        level,
                         title: content.title,
                         crossReferences: content.crossReferences,
                         description: content.description
