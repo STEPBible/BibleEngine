@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, Index } from 'typeorm';
-import { BiblePhrase } from './BiblePhrase.entity';
+import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 
 @Entity()
 export class BiblePhraseOriginalWord {
@@ -33,12 +32,6 @@ export class BiblePhraseOriginalWord {
     action?: string;
     @Column({ nullable: true })
     aspect?: string;
-
-    @Column({ nullable: true })
-    @Index()
-    phraseId?: number;
-    @ManyToOne(() => BiblePhrase, phrase => phrase.originalWords)
-    phrase?: BiblePhrase;
 
     constructor(initializer: BiblePhraseOriginalWord) {
         if (initializer) Object.assign(this, initializer);

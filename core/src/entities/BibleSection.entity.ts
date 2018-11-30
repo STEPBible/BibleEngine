@@ -1,17 +1,27 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, Index } from 'typeorm';
-import { BibleNote } from './BibleNote.entity';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    OneToMany,
+    JoinColumn,
+    Index,
+    AfterLoad,
+    BeforeInsert,
+    BeforeUpdate
+} from 'typeorm';
 import { BibleCrossReference } from './BibleCrossReference.entity';
-import { IBibleSection } from './BibleSection.interface';
-import { IBibleReferenceRangeNormalized } from '../models';
+import { IBibleSection } from '../models/BibleSection';
+import { IBibleReferenceRangeNormalized, Document } from '../models';
 import { parsePhraseId } from '../utils';
 
 @Entity()
-@Index(['versionId', 'level', 'phraseStartId', 'phraseEndId'])
+@Index(['versionId', 'phraseStartId', 'phraseEndId'])
 // this second index is needed since we also query 'phraseEndId' on its own when selecting
 // sections for a range
-@Index(['versionId', 'level', 'phraseEndId'])
-// if we want to query section cross versions
-@Index(['level', 'phraseStartId', 'phraseEndId'])
+@Index(['versionId', 'phraseEndId'])
+// if we want to query sections across versions
+// @Index(['phraseStartId', 'phraseEndId'])
+// @Index(['phraseEndId'])
 export class BibleSection implements IBibleSection {
     @PrimaryGeneratedColumn()
     id: number;
@@ -31,20 +41,34 @@ export class BibleSection implements IBibleSection {
     @Column({ nullable: true })
     title?: string;
 
-    @OneToMany(() => BibleNote, note => note.section, {
-        cascade: true
-    })
-    @JoinColumn()
-    notes?: BibleNote[];
+    @Column({ nullable: true })
+    descriptionJson?: string;
+
+    description: Document;
 
     @OneToMany(() => BibleCrossReference, crossReference => crossReference.section, {
         cascade: true
     })
     @JoinColumn()
-    crossReferences?: BibleCrossReference[];
+    crossReferences: BibleCrossReference[];
 
-    constructor(initializer: Partial<BibleSection>) {
-        if (initializer) Object.assign(this, initializer);
+    constructor(section: IBibleSection) {
+        Object.assign(this, section);
+        if (section.crossReferences)
+            this.crossReferences = section.crossReferences.map(
+                crossReference => new BibleCrossReference(crossReference, true)
+            );
+    }
+
+    @AfterLoad()
+    parse() {
+        if (this.descriptionJson) this.description = JSON.parse(this.descriptionJson);
+    }
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    async prepare() {
+        if (this.description) this.descriptionJson = JSON.stringify(this.description);
     }
 
     getReferenceRange = (): IBibleReferenceRangeNormalized => {

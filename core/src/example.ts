@@ -1,13 +1,13 @@
 const wordGen = require('random-words');
 
-import { BibleEngine } from './BibleEngine';
+import { BibleEngine } from './classes/BibleEngine.class';
 import {
     BiblePhrase,
     BibleNote,
     IBibleSectionWithContent,
     BibleVersion,
     BibleCrossReference
-} from './models';
+} from './entities';
 import { getOsisIdFromBookGenericId } from './data/bibleMeta';
 
 const sqlBible = new BibleEngine({

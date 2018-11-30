@@ -7,25 +7,31 @@ import {
     BiblePhrase,
     BibleBook,
     BibleSection,
-    IBibleReferenceRange,
-    IBibleReference,
     BibleCrossReference,
-    IBibleBookWithContent,
-    IBibleBook,
-    BibleInput,
-    BibleBookPlaintext,
-    IBibleReferenceRangeNormalized,
-    IBibleReferenceNormalized,
     DictionaryEntry,
-    IBibleOutputRich
-} from './models';
+    BibleParagraph
+} from '../entities';
 import {
     parsePhraseId,
     generatePhraseIdSql,
     generateReferenceIdSql,
     generateSectionSql,
     getOutputFormattingGroupsForPhrasesAndSections
-} from './utils';
+} from '../utils';
+import {
+    IBibleContent,
+    BibleBookPlaintext,
+    IDictionaryEntry,
+    IBibleVersion,
+    IBibleReferenceRange,
+    IBibleOutputRich,
+    IBibleReferenceRangeNormalized,
+    IBibleBook,
+    BookWithContent,
+    PhraseModifiers,
+    IBibleReference,
+    IBibleReferenceNormalized
+} from '../models';
 
 export class BibleEngine {
     currentVersion?: BibleVersion;
@@ -41,28 +47,29 @@ export class BibleEngine {
         }).then(conn => conn.manager);
     }
 
-    async addBookWithContent(book: IBibleBookWithContent) {
-        const textData = this.getBookPlaintextFromBibleContent(book.content);
-        book.chaptersCount = [];
+    async addBookWithContent(bookInput: BookWithContent) {
+        const textData = this.getBookPlaintextFromBibleContent(bookInput.contents);
+        bookInput.book.chaptersCount = [];
         for (const verses of textData.values()) {
-            book.chaptersCount.push(verses.size);
+            bookInput.book.chaptersCount.push(verses.size);
         }
-        await this.addBook(book);
-        await this.addBibleContent(book.content, textData);
+        await this.addBook(bookInput.book);
+        await this.addBibleContent(bookInput.contents, {
+            book: bookInput.book,
+            context: textData,
+            modifierState: {},
+            phraseStack: []
+        });
     }
 
-    async addDictionaryEntry(dictionaryEntry: DictionaryEntry) {
+    async addDictionaryEntry(dictionaryEntry: IDictionaryEntry) {
         const entityManager = await this.pEntityManager;
-        entityManager.save(dictionaryEntry);
+        entityManager.save(new DictionaryEntry(dictionaryEntry));
     }
 
-    async addVersion(version: BibleVersion) {
+    async addVersion(version: IBibleVersion) {
         const entityManager = await this.pEntityManager;
-        return entityManager.save(version);
-    }
-
-    async createCrossReference(refRange: IBibleReferenceRange) {
-        return new BibleCrossReference(await this.getNormalizedReferenceRange(refRange));
+        return entityManager.save(new BibleVersion(version));
     }
 
     async finalizeVersion(versionId: number) {
@@ -256,67 +263,94 @@ export class BibleEngine {
         this.currentVersion = versionDb;
     }
 
-    private async addBibleContent(content: BibleInput, context: BibleBookPlaintext) {
+    private async addBibleContent(
+        contents: IBibleContent[],
+        state: {
+            book: IBibleBook;
+            context: BibleBookPlaintext;
+            modifierState: PhraseModifiers;
+            phraseStack: BiblePhrase[];
+        }
+    ) {
         const entityManager = await this.pEntityManager;
-        if (content.type === 'phrases') {
-            return this.addPhrases(content.phrases, context);
-        } else {
-            const newPhrases: BiblePhrase[] = [];
-            for (const section of content.sections) {
-                let newSectionPhrases: BiblePhrase[];
-                if (section.content.type === 'phrases') {
-                    newSectionPhrases = await this.addPhrases(section.content.phrases, context);
+        let currentNormalizedChapter;
+        let currentNormalizedVerse;
+        let currentPhraseNum = 0;
+        for (const content of contents) {
+            if (content.type === 'phrase') {
+                const nRef = await this.getNormalizedReferenceFromV11nRules(
+                    {
+                        versionId: state.book.versionId,
+                        bookOsisId: state.book.osisId,
+                        versionChapterNum: content.versionChapterNum,
+                        versionVerseNum: content.versionVerseNum
+                    },
+                    state.context
+                );
+                if (!nRef.normalizedChapterNum || !nRef.normalizedVerseNum)
+                    throw new Error(`can't add phrases: normalisation failed`);
+
+                if (
+                    nRef.normalizedChapterNum === currentNormalizedChapter &&
+                    nRef.normalizedVerseNum === currentNormalizedVerse
+                ) {
+                    currentPhraseNum++;
                 } else {
-                    newSectionPhrases = await this.addBibleContent(section.content, context);
+                    currentPhraseNum = await this.getNextPhraseNumForNormalizedVerseNum(nRef);
                 }
-                if (newSectionPhrases.length) {
+
+                state.phraseStack.push(
+                    new BiblePhrase(
+                        content,
+                        {
+                            isNormalized: true,
+                            bookOsisId: state.book.osisId,
+                            normalizedChapterNum: nRef.normalizedChapterNum,
+                            normalizedVerseNum: nRef.normalizedVerseNum,
+                            versionId: state.book.versionId,
+                            phraseNum: currentPhraseNum
+                        },
+                        state.modifierState
+                    )
+                );
+            } else if (content.type === 'group' && content.groupType !== 'paragraph') {
+                // TODO: set modifiers
+                this.addBibleContent(content.contents, state);
+            } else if (content.type === 'group' && content.groupType === 'paragraph') {
+                this.addBibleContent(content.contents, state);
+                const newPhrases = await entityManager.save(state.phraseStack);
+                if (newPhrases.length) {
+                    entityManager.save(
+                        new BibleParagraph(
+                            state.book.versionId,
+                            newPhrases[0].id!,
+                            newPhrases[newPhrases.length - 1].id!
+                        )
+                    );
+                }
+            } else if (content.type === 'section') {
+                // TODO: only save this if not saved before
+                this.addBibleContent(content.contents, state);
+                const newPhrases = await entityManager.save(state.phraseStack);
+                if (newPhrases.length) {
                     const newSection = new BibleSection({
-                        versionId: newSectionPhrases[0].versionId,
-                        phraseStartId: newSectionPhrases[0].id!,
-                        phraseEndId: newSectionPhrases[newSectionPhrases.length - 1].id!,
-                        level: section.level,
-                        title: section.title,
-                        crossReferences: section.crossReferences,
-                        notes: section.notes
+                        versionId: newPhrases[0].reference.versionId,
+                        phraseStartId: newPhrases[0].id!,
+                        phraseEndId: newPhrases[newPhrases.length - 1].id!,
+                        level: content.level,
+                        title: content.title,
+                        crossReferences: content.crossReferences,
+                        description: content.description
                     });
                     entityManager.save(newSection);
-                    newPhrases.push(...newSectionPhrases);
                 }
             }
-            return newPhrases;
         }
     }
 
     private async addBook(book: IBibleBook) {
         const entityManager = await this.pEntityManager;
         return await entityManager.save(new BibleBook(book));
-    }
-
-    private async addPhrases(phrases: BiblePhrase[], context: BibleBookPlaintext) {
-        const entityManager = await this.pEntityManager;
-        let verse,
-            phraseNum = 0;
-        for (const phrase of phrases) {
-            if (!phrase.normalizedChapterNum) {
-                const {
-                    normalizedChapterNum,
-                    normalizedVerseNum
-                } = await this.getNormalizedReferenceFromV11nRules(phrase, context);
-                if (!normalizedChapterNum || !normalizedVerseNum)
-                    throw new Error(`can't add phrases: normalisation failed`);
-                phrase.normalizedChapterNum = normalizedChapterNum;
-                phrase.normalizedVerseNum = normalizedVerseNum;
-            }
-            if (!verse || verse !== phrase.normalizedVerseNum) {
-                verse = phrase.normalizedVerseNum;
-                phraseNum = await this.getNextPhraseIdForNormalizedVerseNum(phrase);
-            } else {
-                phraseNum++;
-            }
-            phrase.phraseNum = phraseNum;
-        }
-
-        return entityManager.save(phrases);
     }
 
     private async getBookForVersionReference({ versionId, bookOsisId }: IBibleReference) {
@@ -330,32 +364,23 @@ export class BibleEngine {
     }
 
     private getBookPlaintextFromBibleContent(
-        content: BibleInput,
+        contents: IBibleContent[],
         _accChapters: BibleBookPlaintext = new Map()
     ) {
-        if (content.type === 'phrases') {
-            this.getBookPlaintextFromPhrases(content.phrases, _accChapters);
-        } else {
-            for (const section of content.sections) {
-                this.getBookPlaintextFromBibleContent(section.content, _accChapters);
+        for (const content of contents) {
+            if (content.type !== 'phrase')
+                this.getBookPlaintextFromBibleContent(content.contents, _accChapters);
+            else {
+                if (!_accChapters.has(content.versionChapterNum))
+                    _accChapters.set(content.versionChapterNum, new Map());
+                const chapter = _accChapters.get(content.versionChapterNum)!; // we know it's set
+                const verse = chapter.has(content.versionVerseNum)
+                    ? chapter.get(content.versionVerseNum) + ' ' + content.content
+                    : content.content;
+                chapter.set(content.versionVerseNum, verse);
             }
         }
-        return _accChapters;
-    }
 
-    private getBookPlaintextFromPhrases(
-        phrases: BiblePhrase[],
-        _accChapters: BibleBookPlaintext = new Map()
-    ) {
-        for (const phrase of phrases) {
-            if (!_accChapters.has(phrase.versionChapterNum))
-                _accChapters.set(phrase.versionChapterNum, new Map());
-            const chapter = _accChapters.get(phrase.versionChapterNum)!; // we know it's set
-            const verse = chapter.has(phrase.versionVerseNum)
-                ? chapter.get(phrase.versionVerseNum) + ' ' + phrase.text
-                : phrase.text;
-            chapter.set(phrase.versionVerseNum, verse);
-        }
         return _accChapters;
     }
 
@@ -382,7 +407,7 @@ export class BibleEngine {
         return contextRange;
     }
 
-    private async getNextPhraseIdForNormalizedVerseNum(
+    private async getNextPhraseNumForNormalizedVerseNum(
         reference: IBibleReferenceNormalized
     ): Promise<number> {
         const entityManager = await this.pEntityManager;
@@ -447,8 +472,8 @@ export class BibleEngine {
         return {
             ...reference,
             isNormalized: true,
-            normalizedChapterNum: refPhrase.normalizedChapterNum,
-            normalizedVerseNum: refPhrase.normalizedVerseNum
+            normalizedChapterNum: refPhrase.reference.normalizedChapterNum,
+            normalizedVerseNum: refPhrase.reference.normalizedVerseNum
         };
     }
 
@@ -540,15 +565,15 @@ export class BibleEngine {
                 }
             })) {
                 // get normalized reference range
-                const normalizedRange = await this.getNormalizedReferenceRange(cRef);
+                const normalizedRange = await this.getNormalizedReferenceRange(cRef.range);
                 if (cRef.versionChapterNum)
-                    cRef.normalizedChapterNum = normalizedRange.normalizedChapterNum;
+                    cRef.range.normalizedChapterNum = normalizedRange.normalizedChapterNum;
                 if (cRef.versionVerseNum)
-                    cRef.normalizedVerseNum = normalizedRange.normalizedVerseNum;
+                    cRef.range.normalizedVerseNum = normalizedRange.normalizedVerseNum;
                 if (cRef.versionChapterEndNum)
-                    cRef.versionChapterEndNum = normalizedRange.normalizedChapterEndNum;
+                    cRef.range.normalizedChapterEndNum = normalizedRange.normalizedChapterEndNum;
                 if (cRef.versionVerseEndNum)
-                    cRef.versionVerseEndNum = normalizedRange.normalizedVerseEndNum;
+                    cRef.range.normalizedVerseEndNum = normalizedRange.normalizedVerseEndNum;
                 // and save cross reference back to db
                 entityManager.save(cRef);
             }

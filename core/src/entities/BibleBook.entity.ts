@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
-import { IBibleBook } from './BibleBook.interface';
+import { IBibleBook } from '../models/BibleBook';
+import { Document } from 'models/Document';
 
 @Entity()
 export class BibleBook implements IBibleBook {
@@ -15,6 +16,11 @@ export class BibleBook implements IBibleBook {
     @Column()
     title: string;
 
+    @Column({ nullable: true })
+    introductionJson: string;
+
+    introduction: Document;
+
     @Column()
     type: 'ot' | 'nt' | 'ap';
 
@@ -23,19 +29,21 @@ export class BibleBook implements IBibleBook {
 
     chaptersCount: number[];
 
-    constructor(initializer: Partial<BibleBook>) {
-        if (initializer) Object.assign(this, initializer);
+    constructor(initializer: IBibleBook) {
+        Object.assign(this, initializer);
     }
 
     @AfterLoad()
-    parseMetaJson() {
+    parse() {
         this.chaptersCount = JSON.parse(this.chaptersMetaJson);
+        if (this.introductionJson) this.introduction = JSON.parse(this.introductionJson);
     }
 
     @BeforeInsert()
     @BeforeUpdate()
-    async stringifyMetaJson() {
+    async prepare() {
         this.chaptersMetaJson = JSON.stringify(this.chaptersCount);
+        if (this.introduction) this.introductionJson = JSON.stringify(this.introduction);
     }
 
     getChapterVerseCount(chapterNumber: number) {

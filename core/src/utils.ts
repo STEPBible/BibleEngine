@@ -3,29 +3,22 @@ import {
     IBiblePhraseRef,
     IBibleReferenceNormalized,
     IBibleReferenceRangeNormalized
-} from './models/BibleReference.interface';
-import { BiblePhrase, BibleSection, IBibleOutputGroupRoot, BibleOutputGroup } from 'models';
-import {
-    IBibleOutputGroupSection,
-    IBibleOutputGroupParagraph,
-    IBibleOutputGroupPhrases,
-    IBibleOutputGroupLevelFormatting,
-    IBibleOutputGroupBooleanFormatting,
-    IBibleOutputRich
-} from 'models/BibleOutput.interface';
+} from './models/BibleReference';
+import { BiblePhrase, BibleSection } from './entities';
+import { IBibleOutputRich, IBibleOutputRoot, IBibleOutputGroup } from './models';
 
 export const getOutputFormattingGroupsForPhrasesAndSections = (
     phrases: BiblePhrase[],
     paragraphs: BibleSection[],
     context: IBibleOutputRich['context']
 ) => {
-    const rootGroup: IBibleOutputGroupRoot = {
+    const rootGroup: IBibleOutputRoot = {
         type: 'root',
         parent: undefined,
         contents: []
     };
 
-    let activeGroup: BibleOutputGroup = rootGroup;
+    let activeGroup: IBibleOutputGroup = rootGroup;
     const activeModifiers: {
         sections: BibleSection[];
         indentLevel: number;
