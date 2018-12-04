@@ -6,6 +6,6 @@ export interface IBibleBook {
     osisId: string;
     number: number;
     title: string;
-    chaptersCount: number[];
+    chaptersCount?: number[];
     introduction?: Document;
 }

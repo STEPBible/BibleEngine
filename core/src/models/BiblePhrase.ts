@@ -13,15 +13,16 @@ export interface IBiblePhrase extends IContentPhrase {
 }
 
 export type PhraseModifiers = {
-    indentLevel?: number;
-    quoteLevel?: number;
-    orderedListItem?: number;
-    unorderedListItem?: number;
+    indentLevel: number;
+    quoteLevel: number;
     // we have a mix of semantic and style modifiers here - we provide both to be compatible with
     // every bible version while keeping the flexibility for those that use semantic modifiers:
     bold?: boolean;
     italic?: boolean;
     emphasis?: boolean;
     divineName?: boolean;
+    listItem?: string;
     translationChange?: string;
+    person?: string;
+    quoteWho?: string;
 };

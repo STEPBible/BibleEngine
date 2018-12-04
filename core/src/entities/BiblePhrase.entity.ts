@@ -29,6 +29,9 @@ export class BiblePhrase implements IBiblePhrase {
     content: string;
 
     @Column({ nullable: true })
+    linebreak: boolean;
+
+    @Column({ nullable: true })
     modifiersJson: string;
     modifiers: PhraseModifiers;
 
@@ -59,13 +62,18 @@ export class BiblePhrase implements IBiblePhrase {
         reference: Required<IBiblePhraseRef>,
         modifiers?: PhraseModifiers
     ) {
+        // typeorm is seemingly creating objects on startup (without passing parameters), so we
+        // need to add a guard here
+        if (!phrase) return;
+
         Object.assign(this, phrase);
         this.reference = reference;
         if (modifiers) this.modifiers = modifiers;
-        if (phrase.crossReferences)
+        if (phrase.crossReferences) {
             this.crossReferences = phrase.crossReferences.map(
                 crossReference => new BibleCrossReference(crossReference, true)
             );
+        }
         if (phrase.notes) this.notes = phrase.notes.map(note => new BibleNote(note));
     }
 

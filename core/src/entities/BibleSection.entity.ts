@@ -16,9 +16,9 @@ import { parsePhraseId } from '../utils';
 
 @Entity()
 @Index(['versionId', 'phraseStartId', 'phraseEndId'])
-// this second index is needed since we also query 'phraseEndId' on its own when selecting
+// this second index is needed when we also query 'phraseEndId' on its own when selecting
 // sections for a range
-@Index(['versionId', 'phraseEndId'])
+// @Index(['versionId', 'phraseEndId'])
 // if we want to query sections across versions
 // @Index(['phraseStartId', 'phraseEndId'])
 // @Index(['phraseEndId'])
@@ -42,6 +42,9 @@ export class BibleSection implements IBibleSection {
     title?: string;
 
     @Column({ nullable: true })
+    subTitle?: string;
+
+    @Column({ nullable: true })
     descriptionJson?: string;
 
     description: Document;
@@ -53,6 +56,10 @@ export class BibleSection implements IBibleSection {
     crossReferences: BibleCrossReference[];
 
     constructor(section: IBibleSection) {
+        // typeorm is seemingly creating objects on startup (without passing parameters), so we
+        // need to add a guard here
+        if (!section) return;
+
         Object.assign(this, section);
         if (section.crossReferences)
             this.crossReferences = section.crossReferences.map(

@@ -1,14 +1,9 @@
 const wordGen = require('random-words');
 
 import { BibleEngine } from './classes/BibleEngine.class';
-import {
-    BiblePhrase,
-    BibleNote,
-    IBibleSectionWithContent,
-    BibleVersion,
-    BibleCrossReference
-} from './entities';
+import { BibleVersion } from './entities';
 import { getOsisIdFromBookGenericId } from './data/bibleMeta';
+import { IBibleInputGroup, IBibleInputPhrase } from 'models/BibleInput';
 
 const sqlBible = new BibleEngine({
     type: 'sqlite',
@@ -19,12 +14,12 @@ export const genDb = async () => {
     const esvVersion = await sqlBible.addVersion(
         new BibleVersion({
             version: 'ESV',
-            description: 'English Standard Bible',
+            title: 'English Standard Bible',
             language: 'en-US'
         })
     );
     for (let bookNum = 1; bookNum <= 2; bookNum++) {
-        const paragraphs: IBibleSectionWithContent[] = [];
+        const paragraphs: IBibleInputGroup[] = [];
         for (let chapter = 1; chapter <= 15; chapter++) {
             for (let paragraph = 0; paragraph < 5; paragraph++) {
                 console.log(
@@ -39,53 +34,60 @@ export const genDb = async () => {
                 let phrases = [];
                 for (let verse = paragraph * 5 + 1; verse <= (paragraph + 1) * 5; verse++) {
                     for (let phraseIdx = 1; phraseIdx <= 22; phraseIdx++) {
-                        const phrase = new BiblePhrase({
-                            bookOsisId: getOsisIdFromBookGenericId(bookNum),
+                        const phrase: IBibleInputPhrase = {
+                            type: 'phrase',
                             versionChapterNum: chapter,
                             versionVerseNum: verse,
-                            versionId: esvVersion.id,
-                            text: wordGen({ min: 1, max: 2, join: ' ' }),
+                            content: wordGen({ min: 1, max: 2, join: ' ' }),
                             notes:
                                 verse % 7 === 0 && phraseIdx === 1
                                     ? [
-                                          new BibleNote({
-                                              phrases: [
+                                          {
+                                              type: 'study',
+                                              key: '1',
+                                              content: [
                                                   {
-                                                      text: wordGen({ min: 1, max: 30, join: ' ' })
+                                                      type: 'phrase',
+                                                      content: wordGen({
+                                                          min: 1,
+                                                          max: 30,
+                                                          join: ' '
+                                                      })
                                                   }
                                               ]
-                                          })
+                                          }
                                       ]
                                     : undefined,
-                            bold: true,
-                            italic: false,
-                            indentLevel: 0,
-                            quoteLevel: 0,
-                            strong: 'G' + phraseIdx * verse,
+                            strongs: ['G' + phraseIdx * verse],
                             crossReferences:
                                 verse % 5 === 0 && phraseIdx === 1
                                     ? [
-                                          new BibleCrossReference({
-                                              versionId: esvVersion.id,
-                                              bookOsisId: 'Gen',
-                                              versionChapterNum: 1
-                                          })
+                                          {
+                                              key: 'a',
+                                              range: {
+                                                  versionId: esvVersion.id,
+                                                  bookOsisId: 'Gen',
+                                                  versionChapterNum: 1
+                                              }
+                                          }
                                       ]
                                     : undefined
-                        });
+                        };
                         phrases.push(phrase);
                     }
                 }
-                paragraphs.push({ level: 0, content: { phrases, type: 'phrases' } });
+                paragraphs.push({ type: 'group', groupType: 'paragraph', contents: phrases });
             }
         }
         await sqlBible.addBookWithContent({
-            versionId: esvVersion.id,
-            number: bookNum,
-            osisId: getOsisIdFromBookGenericId(bookNum),
-            title: wordGen({ min: 1, max: 3, join: ' ' }),
-            type: bookNum < 40 ? 'ot' : 'nt',
-            content: { type: 'sections', sections: paragraphs }
+            book: {
+                versionId: esvVersion.id,
+                number: bookNum,
+                osisId: getOsisIdFromBookGenericId(bookNum),
+                title: wordGen({ min: 1, max: 3, join: ' ' }),
+                type: bookNum < 40 ? 'ot' : 'nt'
+            },
+            contents: paragraphs
         });
     }
 
@@ -96,8 +98,8 @@ export const getData = async () => {
     const output = await sqlBible.getFullDataForReferenceRange({
         versionId: 1,
         bookOsisId: 'Gen',
-        versionChapterNum: 1,
-        versionVerseNum: 5
+        versionChapterNum: 1
+        // versionVerseNum: 5
     });
     console.dir(output, { depth: null });
 };

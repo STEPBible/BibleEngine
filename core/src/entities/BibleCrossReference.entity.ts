@@ -58,32 +58,33 @@ export class BibleCrossReference implements IBibleCrossReference {
     @ManyToOne(() => BibleSection, section => section.crossReferences)
     section?: BibleSection;
 
-    constructor(
-        initializer: IBibleCrossReference,
-        allowCreationWithoutNormalizedReference = false
-    ) {
-        this.key = initializer.key;
+    constructor(crossRef: IBibleCrossReference, allowCreationWithoutNormalizedReference = false) {
+        // typeorm is seemingly creating objects on startup (without passing parameters), so we
+        // need to add a guard here
+        if (!crossRef) return;
 
-        if (!initializer.range.versionId)
+        this.key = crossRef.key;
+
+        if (!crossRef.range.versionId)
             throw new Error(`can't generate cross reference: versionId is missing`);
 
-        this.versionId = initializer.range.versionId;
-        this.versionChapterNum = initializer.range.versionChapterNum;
-        this.versionVerseNum = initializer.range.versionVerseNum;
-        this.versionChapterEndNum = initializer.range.versionChapterEndNum;
-        this.versionVerseEndNum = initializer.range.versionVerseEndNum;
+        this.versionId = crossRef.range.versionId;
+        this.versionChapterNum = crossRef.range.versionChapterNum;
+        this.versionVerseNum = crossRef.range.versionVerseNum;
+        this.versionChapterEndNum = crossRef.range.versionChapterEndNum;
+        this.versionVerseEndNum = crossRef.range.versionVerseEndNum;
 
-        if (!initializer.range.isNormalized) {
+        if (!crossRef.range.isNormalized) {
             if (allowCreationWithoutNormalizedReference)
                 // we need this during the creation of the version, since we can't normalize
                 // references there. normalization is done at the end in a seperate step via
                 // 'finalizeVersion'
                 this.range = {
-                    ...initializer.range,
-                    normalizedChapterNum: initializer.range.versionChapterNum,
-                    normalizedVerseNum: initializer.range.versionVerseNum,
-                    normalizedChapterEndNum: initializer.range.versionChapterEndNum,
-                    normalizedVerseEndNum: initializer.range.normalizedVerseEndNum,
+                    ...crossRef.range,
+                    normalizedChapterNum: crossRef.range.versionChapterNum,
+                    normalizedVerseNum: crossRef.range.versionVerseNum,
+                    normalizedChapterEndNum: crossRef.range.versionChapterEndNum,
+                    normalizedVerseEndNum: crossRef.range.normalizedVerseEndNum,
                     isNormalized: true
                 };
             else {
@@ -96,7 +97,7 @@ export class BibleCrossReference implements IBibleCrossReference {
             // the else clause (and casting to normalized) remains technically correct and is left
             // for reference for now (e.g. for a future use case where we will generate cross-refs,
             // after the version has been created - maybe user generated, etc.)
-            this.range = <IBibleReferenceRangeNormalized>initializer.range;
+            this.range = <IBibleReferenceRangeNormalized>crossRef.range;
         }
     }
 

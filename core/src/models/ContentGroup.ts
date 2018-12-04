@@ -9,8 +9,7 @@ export interface IContentGroup {
         | 'person'
         | 'divineName'
         | 'translationChange'
-        | 'orderedListItem'
-        | 'unorderedListItem';
+        | 'listItem';
 
     /**
      * 'quote' | 'person' => who?

@@ -2,7 +2,7 @@ import {
     IBibleVerse,
     IBibleOutputRich,
     BibleOutput,
-    IBibleOutputPhrase,
+    IBibleOutputPhrases,
     IBibleOutputRoot,
     IBibleOutputGroup
 } from './BibleOutput';
@@ -16,7 +16,7 @@ import {
 import { IBibleBook } from './BibleBook';
 import { IBibleSection } from './BibleSection';
 import { IBiblePhrase, PhraseModifiers } from './BiblePhrase';
-import { IBibleContent } from './BibleContent';
+import { IBibleInput } from './BibleInput';
 import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext';
 import { Document } from './Document';
 import { IBibleVersion } from './BibleVersion';
@@ -31,9 +31,9 @@ export {
     BookWithContent,
     Document,
     IBibleBook,
-    IBibleContent,
+    IBibleInput,
     IBibleOutputGroup,
-    IBibleOutputPhrase,
+    IBibleOutputPhrases,
     IBibleOutputRoot,
     IBibleOutputRich,
     IBiblePhrase,
