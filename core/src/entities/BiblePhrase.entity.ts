@@ -18,7 +18,7 @@ export class BiblePhrase implements IBiblePhrase {
     id: number;
 
     // the id encodes the following attribute:
-    reference: Required<IBiblePhraseRef>;
+    normalizedReference: Required<IBiblePhraseRef>;
 
     @Column()
     versionChapterNum: number;
@@ -67,8 +67,15 @@ export class BiblePhrase implements IBiblePhrase {
         if (!phrase) return;
 
         Object.assign(this, phrase);
-        this.reference = reference;
-        if (modifiers) this.modifiers = modifiers;
+        this.normalizedReference = reference;
+        if (modifiers) {
+            // we don't want to save an modifier object without an active modifier to save space
+            let hasActiveModifiers = !!Object.values(modifiers).find(
+                modifierValue => modifierValue !== false && modifierValue !== 0
+            );
+
+            if (hasActiveModifiers) this.modifiers = modifiers;
+        }
         if (phrase.crossReferences) {
             this.crossReferences = phrase.crossReferences.map(
                 crossReference => new BibleCrossReference(crossReference, true)
@@ -81,7 +88,7 @@ export class BiblePhrase implements IBiblePhrase {
     parse() {
         // since we got this from the DB we know we have an id and we know it has all the data
         const phraseRef = parsePhraseId(this.id!);
-        this.reference = {
+        this.normalizedReference = {
             isNormalized: true,
             bookOsisId: phraseRef.bookOsisId,
             normalizedChapterNum: phraseRef.normalizedChapterNum!,
@@ -91,13 +98,13 @@ export class BiblePhrase implements IBiblePhrase {
         };
 
         if (this.strongsJoined) this.strongs = this.strongsJoined.split(',');
-        if (this.modifiersJson) this.modifiers = JSON.parse(this.modifiersJson);
+        this.modifiers = this.modifiersJson ? JSON.parse(this.modifiersJson) : {};
     }
 
     @BeforeInsert()
     @BeforeUpdate()
     async prepare() {
-        this.id = generatePhraseId(this.reference);
+        this.id = generatePhraseId(this.normalizedReference);
         if (this.strongs) this.strongsJoined = this.strongs.join(',');
         if (this.modifiers) this.modifiersJson = JSON.stringify(this.modifiers);
     }

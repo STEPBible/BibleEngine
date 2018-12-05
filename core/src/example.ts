@@ -18,19 +18,17 @@ export const genDb = async () => {
             language: 'en-US'
         })
     );
-    for (let bookNum = 1; bookNum <= 2; bookNum++) {
+    for (let bookNum = 1; bookNum <= 66; bookNum++) {
+        console.log(
+            'adding book ' + bookNum
+            // ' and chapter ' +
+            // chapter +
+            // ' and paragraph ' +
+            // (paragraph + 1)
+        );
         const paragraphs: IBibleInputGroup[] = [];
         for (let chapter = 1; chapter <= 15; chapter++) {
             for (let paragraph = 0; paragraph < 5; paragraph++) {
-                console.log(
-                    'adding book ' +
-                        bookNum +
-                        ' and chapter ' +
-                        chapter +
-                        ' and paragraph ' +
-                        (paragraph + 1)
-                );
-
                 let phrases = [];
                 for (let verse = paragraph * 5 + 1; verse <= (paragraph + 1) * 5; verse++) {
                     for (let phraseIdx = 1; phraseIdx <= 22; phraseIdx++) {
@@ -97,11 +95,23 @@ export const genDb = async () => {
 export const getData = async () => {
     const output = await sqlBible.getFullDataForReferenceRange({
         versionId: 1,
-        bookOsisId: 'Gen',
-        versionChapterNum: 1
-        // versionVerseNum: 5
+        bookOsisId: 'Gen'
+        // versionChapterNum: 1,
+        // versionVerseNum: 4,
+        // versionVerseEndNum: 6
     });
-    console.dir(output, { depth: null });
+    console.dir(output, { depth: 4 });
+
+    // const versionData = await sqlBible.getRawVersionData(1);
+    // console.dir(versionData.bookData[0].content, { depth: 7 });
+
+    // fs.writeFile(
+    //     `${versionData.version.version}.beifz`,
+    //     deflate(JSON.stringify(versionData), { to: 'string' }),
+    //     (err: any) => console.log(err)
+    // );
+
+    // fs.writeFile(`${versionData.version.version}.beif`, JSON.stringify(versionData));
 };
 
 const run = async () => {

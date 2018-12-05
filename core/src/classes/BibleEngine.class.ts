@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { createConnection, ConnectionOptions, Raw, EntityManager } from 'typeorm';
+// import { deflate } from 'pako';
 
 import {
     ENTITIES,
@@ -18,7 +19,10 @@ import {
     generateBookSectionsSql,
     getOutputFormattingGroupsForPhrasesAndSections,
     generatePhraseId,
-    generateParagraphSql
+    generateParagraphSql,
+    getMinimizedDbObject,
+    getMinimizedDbObjects,
+    getBibleInputFromOutputData
 } from '../utils';
 import {
     BibleBookPlaintext,
@@ -62,6 +66,8 @@ export class BibleEngine {
             context: textData,
             modifierState: { quoteLevel: 0, indentLevel: 0 },
             phraseStack: [],
+            paragraphStack: [],
+            sectionStack: [],
             currentPhraseNum: 0,
             currentNormalizedChapter: 0,
             currentNormalizedVerse: -1,
@@ -255,6 +261,49 @@ export class BibleEngine {
         });
     }
 
+    async getRawVersionData(versionId: number) {
+        const entityManager = await this.pEntityManager;
+        const version: IBibleVersion = await entityManager
+            .findOne(BibleVersion, versionId)
+            .then(getMinimizedDbObject);
+        const books: IBibleBook[] = await entityManager
+            .find(BibleBook, { where: { versionId }, order: { number: 'ASC' } })
+            .then(getMinimizedDbObjects);
+        const bookData: { book: IBibleBook; content: IBibleInput[] }[] = [];
+        for (const book of books) {
+            bookData.push({
+                book,
+                content: await this.getFullDataForReferenceRange({
+                    versionId,
+                    bookOsisId: book.osisId
+                }).then(fullData => getBibleInputFromOutputData(fullData.content.contents))
+            });
+        }
+        // const phrases = await entityManager
+        //     .find(BiblePhrase, {
+        //         where: { id: Raw(col => generatePhraseIdVersionSql(versionId, col)) },
+        //         order: { id: 'ASC' }
+        //     })
+        //     .then(getMinimizedDbObjects)
+        //     .then(_phrases =>
+        //         _phrases.map(phrase => {
+        //             // data is encoded in phrase.id
+        //             delete phrase.reference;
+        //             // strongsJoined takes less space
+        //             delete phrase.strongs;
+        //             return phrase;
+        //         })
+        //     );
+        return { version, bookData };
+        // deflate(
+        //     JSON.stringify({
+        //         version,
+        //         books
+        //     }),
+        //     { to: 'string' }
+        // );
+    }
+
     async getReferenceRangeWithAllVersionProperties(
         range: IBibleReferenceRange
     ): Promise<IBibleReferenceRange> {
@@ -298,6 +347,8 @@ export class BibleEngine {
             context: BibleBookPlaintext;
             modifierState: PhraseModifiers;
             phraseStack: BiblePhrase[];
+            paragraphStack: BibleParagraph[];
+            sectionStack: BibleSection[];
             currentNormalizedChapter: number;
             currentNormalizedVerse: number;
             currentPhraseNum: number;
@@ -328,15 +379,15 @@ export class BibleEngine {
                     state.currentPhraseNum++;
                 } else {
                     // chapter switch?
-                    if (
-                        nRef.normalizedChapterNum !== state.currentNormalizedChapter &&
-                        state.phraseStack.length
-                    ) {
-                        // we save the stack for each chapter (otherwise it might become too big)
-                        // RADAR: test if we have to save more often (low-mem devices?)
-                        entityManager.save(state.phraseStack);
-                        state.phraseStack = [];
-                    }
+                    // if (
+                    //     nRef.normalizedChapterNum !== state.currentNormalizedChapter &&
+                    //     state.phraseStack.length
+                    // ) {
+                    //     // we save the stack for each chapter (otherwise it might become too big)
+                    //     // RADAR: test if we have to save more often (low-mem devices?)
+                    //     entityManager.save(state.phraseStack);
+                    //     state.phraseStack = [];
+                    // }
 
                     state.currentPhraseNum = 1;
                     state.currentNormalizedChapter = nRef.normalizedChapterNum;
@@ -385,11 +436,12 @@ export class BibleEngine {
                     state.modifierState.person = content.modifier;
                 else if (content.groupType === 'listItem')
                     state.modifierState.listItem = content.modifier;
-
+                state.recursionLevel++;
                 const {
                     firstPhraseId: groupFirstPhraseId,
                     lastPhraseId: groupLastPhraseId
                 } = await this.addBibleContent(content.contents, state);
+                state.recursionLevel--;
                 if (groupFirstPhraseId && !firstPhraseId) firstPhraseId = groupFirstPhraseId;
                 if (groupLastPhraseId) lastPhraseId = groupLastPhraseId;
 
@@ -400,14 +452,16 @@ export class BibleEngine {
             ) {
                 if (content.type === 'section') state.sectionLevel++;
 
+                state.recursionLevel++;
                 let {
                     firstPhraseId: sectionFirstPhraseId,
                     lastPhraseId: sectionLastPhraseId
                 } = await this.addBibleContent(content.contents, state);
+                state.recursionLevel--;
 
                 if (sectionFirstPhraseId && sectionLastPhraseId) {
                     if (content.type === 'group' && content.groupType === 'paragraph') {
-                        await entityManager.save(
+                        state.paragraphStack.push(
                             new BibleParagraph(
                                 state.book.versionId,
                                 sectionFirstPhraseId,
@@ -415,7 +469,7 @@ export class BibleEngine {
                             )
                         );
                     } else if (content.type === 'section') {
-                        await entityManager.save(
+                        state.sectionStack.push(
                             new BibleSection({
                                 versionId: state.book.versionId,
                                 phraseStartId: sectionFirstPhraseId,
@@ -436,10 +490,11 @@ export class BibleEngine {
             }
         }
 
-        if (state.recursionLevel === 0 && state.phraseStack.length) {
-            // we are at the end of the root method and there is still unsaved phrases left
-            // (happens for the last chapter)
-            await entityManager.save(state.phraseStack);
+        if (state.recursionLevel === 0) {
+            // we are at the end of the root method => persist everything
+            await entityManager.save(state.phraseStack, { chunk: state.phraseStack.length / 500 });
+            await entityManager.save(state.paragraphStack);
+            await entityManager.save(state.sectionStack);
         }
 
         return { firstPhraseId, lastPhraseId };
@@ -556,8 +611,8 @@ export class BibleEngine {
         return {
             ...reference,
             isNormalized: true,
-            normalizedChapterNum: refPhrase.reference.normalizedChapterNum,
-            normalizedVerseNum: refPhrase.reference.normalizedVerseNum
+            normalizedChapterNum: refPhrase.normalizedReference.normalizedChapterNum,
+            normalizedVerseNum: refPhrase.normalizedReference.normalizedVerseNum
         };
     }
 

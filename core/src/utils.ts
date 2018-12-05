@@ -10,13 +10,17 @@ import {
     IBibleOutputRoot,
     BibleOutput,
     IBibleOutputGroup,
-    PhraseModifiers
+    PhraseModifiers,
+    IBibleInput,
+    IBiblePhrase
 } from './models';
 import {
     IBibleOutputSection,
     IBibleOutputPhrases,
     IBibleOutputNumbering
 } from 'models/BibleOutput';
+import { isObject } from 'util';
+import { IBibleInputGroup, IBibleInputPhrase } from 'models/BibleInput';
 
 export const getOutputFormattingGroupsForPhrasesAndSections = (
     phrases: BiblePhrase[],
@@ -185,7 +189,7 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
                     // got corrupted somewhere. throw an error so we know about it
                     (activeGroup.type !== 'root' && activeGroup.type !== 'section') ||
                     // throw error if creating a section in the wrong level order
-                    activeSections.find(activeSection => activeSection.level <= level)
+                    activeSections.find(activeSection => activeSection.level >= level)
                 )
                     throw new Error(`can't create output object: corrupted structure (section)`);
 
@@ -294,16 +298,20 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
         // if this phrase switches any numbers (verse/chapter, normalized/version), the related
         // value is set on the numbering object of the topmost group where this phrase is the
         // (current) only member
-        if (currentNumbering.normalizedChapter !== phrase.reference.normalizedChapterNum) {
+        if (
+            currentNumbering.normalizedChapter !== phrase.normalizedReference.normalizedChapterNum
+        ) {
             // psalms can have verse number zero
-            if (phrase.reference.normalizedVerseNum <= 1)
-                numbering.normalizedChapterIsStarting = phrase.reference.normalizedChapterNum;
-            numbering.normalizedChapterIsStartingInRange = phrase.reference.normalizedChapterNum;
-            currentNumbering.normalizedChapter = phrase.reference.normalizedChapterNum;
+            if (phrase.normalizedReference.normalizedVerseNum <= 1)
+                numbering.normalizedChapterIsStarting =
+                    phrase.normalizedReference.normalizedChapterNum;
+            numbering.normalizedChapterIsStartingInRange =
+                phrase.normalizedReference.normalizedChapterNum;
+            currentNumbering.normalizedChapter = phrase.normalizedReference.normalizedChapterNum;
         }
-        if (currentNumbering.normalizedVerse !== phrase.reference.normalizedVerseNum) {
-            numbering.normalizedVerseIsStarting = phrase.reference.normalizedVerseNum;
-            currentNumbering.normalizedVerse = phrase.reference.normalizedVerseNum;
+        if (currentNumbering.normalizedVerse !== phrase.normalizedReference.normalizedVerseNum) {
+            numbering.normalizedVerseIsStarting = phrase.normalizedReference.normalizedVerseNum;
+            currentNumbering.normalizedVerse = phrase.normalizedReference.normalizedVerseNum;
         }
         if (currentNumbering.versionChapter !== phrase.versionChapterNum) {
             // psalms can have verse number zero
@@ -313,7 +321,7 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
             currentNumbering.versionChapter = phrase.versionChapterNum;
         }
         if (currentNumbering.versionVerse !== phrase.versionVerseNum) {
-            numbering.normalizedVerseIsStarting = phrase.versionVerseNum;
+            numbering.versionVerseIsStarting = phrase.versionVerseNum;
             currentNumbering.versionVerse = phrase.versionVerseNum;
         }
 
@@ -384,18 +392,7 @@ export const generatePhraseId = (reference: IBiblePhraseRef): number => {
  * @returns {string} SQL
  */
 export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, col = 'id') => {
-    const refEnd: IBiblePhraseRef = {
-        isNormalized: true,
-        bookOsisId: range.bookOsisId,
-        normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
-        normalizedVerseNum:
-            range.normalizedVerseEndNum ||
-            (range.normalizedVerseNum && !range.normalizedChapterEndNum)
-                ? range.normalizedVerseNum
-                : 999,
-        versionId: range.versionId || 999,
-        phraseNum: 99
-    };
+    const refEnd = getEndReferenceForRangeQuery(range);
     let sql = `${col} BETWEEN '${generatePhraseId(range)}' AND '${generatePhraseId(refEnd)}'`;
 
     // if we query for more than just one verse in a specific version we need to filter out the
@@ -411,10 +408,13 @@ export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, col =
                 (!range.normalizedChapterEndNum && !range.normalizedVerseEndNum))
         )
     )
-        sql += `AND cast(${col} % 100000000000 / 100000000 as int) = ${range.versionId}`;
+        sql += 'AND ' + generatePhraseIdVersionSql(range.versionId, col);
 
     return sql;
 };
+
+export const generatePhraseIdVersionSql = (versionId: number, col = 'id') =>
+    `cast(${col} % 100000 / 100 as int) = ${versionId}`;
 
 /**
  * generates SQL for a range-query for reference ids
@@ -527,6 +527,82 @@ export const generateBookSectionsSql = (
     return sql;
 };
 
+export function getBibleInputFromOutputData(data: BibleOutput[]): IBibleInput[] {
+    const inputData: IBibleInput[] = [];
+    for (const obj of data) {
+        if (obj.type === 'phrases') {
+            for (const phrase of obj.contents) {
+                if (!phrase.versionChapterNum) {
+                    throw new Error(`can't generate input data: corrupted structure`);
+                }
+                const inputPhrase: IBiblePhrase = {
+                    content: phrase.content,
+                    versionChapterNum: phrase.versionChapterNum,
+                    versionVerseNum: phrase.versionVerseNum,
+                    normalizedReference: {
+                        normalizedChapterNum: phrase.normalizedReference!.normalizedChapterNum,
+                        normalizedVerseNum: phrase.normalizedReference!.normalizedVerseNum
+                    }
+                };
+                if (phrase.linebreak) inputPhrase.linebreak = true;
+                if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
+                if (phrase.person) inputPhrase.person = phrase.person;
+                if (phrase.strongs && phrase.strongs.length) inputPhrase.strongs = phrase.strongs;
+                if (phrase.notes && phrase.notes.length)
+                    inputPhrase.notes = phrase.notes.map(({ key, type, content }) => ({
+                        key,
+                        type,
+                        content
+                    }));
+                if (phrase.crossReferences && phrase.crossReferences.length)
+                    inputPhrase.crossReferences = phrase.crossReferences.map(({ key, range }) => ({
+                        key,
+                        range
+                    }));
+
+                inputData.push({ type: 'phrase', ...inputPhrase });
+            }
+        } else if (obj.type === 'group') {
+            inputData.push({
+                type: 'group',
+                groupType: obj.groupType,
+                modifier: obj.modifier,
+                contents: <(IBibleInputGroup | IBibleInputPhrase)[]>(
+                    getBibleInputFromOutputData(obj.contents)
+                )
+            });
+        } else if (obj.type === 'section') {
+            inputData.push({
+                type: 'section',
+                title: obj.title,
+                subTitle: obj.subTitle,
+                description: obj.description,
+                crossReferences: obj.crossReferences,
+                contents: getBibleInputFromOutputData(obj.contents)
+            });
+        }
+    }
+    return inputData;
+}
+
+export function getMinimizedDbObjects(dbObjects: any[]) {
+    return dbObjects.map(getMinimizedDbObject);
+}
+
+export function getMinimizedDbObject(dbObject: any) {
+    const strippedObject: any = {};
+    for (const property of Object.keys(dbObject)) {
+        if (
+            property.indexOf('Json') !== -1 ||
+            dbObject[property] === null ||
+            (isObject(dbObject[property]) && !Object.keys(dbObject[property]).length)
+        )
+            continue;
+        strippedObject[property] = dbObject[property];
+    }
+    return strippedObject;
+}
+
 export function getEndReferenceForRangeQuery(
     range: IBibleReferenceRangeNormalized
 ): IBiblePhraseRef {
@@ -534,11 +610,11 @@ export function getEndReferenceForRangeQuery(
         isNormalized: true,
         bookOsisId: range.bookOsisId,
         normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
-        normalizedVerseNum:
-            range.normalizedVerseEndNum ||
-            (range.normalizedVerseNum && !range.normalizedChapterEndNum)
-                ? range.normalizedVerseNum
-                : 999,
+        normalizedVerseNum: range.normalizedVerseEndNum
+            ? range.normalizedVerseEndNum
+            : range.normalizedVerseNum && !range.normalizedChapterEndNum
+            ? range.normalizedVerseNum
+            : 999,
         versionId: range.versionId || 999,
         phraseNum: 99
     };
@@ -571,13 +647,14 @@ export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
     _id -= normalizedChapterNum;
     _id /= 1000;
     const normalizedBookNum = _id;
-
-    return {
+    const ref: IBibleReferenceNormalized = {
         isNormalized: true,
-        bookOsisId: getOsisIdFromBookGenericId(normalizedBookNum),
-        normalizedChapterNum,
-        normalizedVerseNum
+        bookOsisId: getOsisIdFromBookGenericId(normalizedBookNum)
     };
+    if (normalizedChapterNum) ref.normalizedChapterNum = normalizedChapterNum;
+    if (normalizedVerseNum) ref.normalizedVerseNum = normalizedVerseNum;
+
+    return ref;
 };
 
 /**

@@ -107,15 +107,24 @@ export class BibleCrossReference implements IBibleCrossReference {
         const normalizedRef = parseReferenceId(this.normalizedRefId!);
         this.range = {
             isNormalized: true,
-            bookOsisId: normalizedRef.bookOsisId,
-            normalizedChapterNum: normalizedRef.normalizedChapterNum!,
-            normalizedVerseNum: normalizedRef.normalizedVerseNum!
+            bookOsisId: normalizedRef.bookOsisId
         };
+        if (normalizedRef.normalizedChapterNum)
+            this.range.normalizedChapterNum = normalizedRef.normalizedChapterNum;
+        if (normalizedRef.normalizedVerseNum)
+            this.range.normalizedVerseNum = normalizedRef.normalizedVerseNum;
+        if (this.versionChapterNum) this.range.versionChapterNum = this.versionChapterNum;
+        if (this.versionVerseNum) this.range.versionVerseNum = this.versionVerseNum;
 
         if (this.normalizedRefIdEnd) {
             const normalizedRefEnd = parseReferenceId(this.normalizedRefIdEnd);
-            this.range.normalizedChapterEndNum = normalizedRefEnd.normalizedChapterNum;
-            this.range.normalizedVerseEndNum = normalizedRefEnd.normalizedVerseNum;
+            if (normalizedRefEnd.normalizedChapterNum)
+                this.range.normalizedChapterEndNum = normalizedRefEnd.normalizedChapterNum;
+            if (normalizedRefEnd.normalizedVerseNum)
+                this.range.normalizedVerseEndNum = normalizedRefEnd.normalizedVerseNum;
+            if (this.versionChapterEndNum)
+                this.range.versionChapterEndNum = this.versionChapterEndNum;
+            if (this.versionVerseEndNum) this.range.versionVerseEndNum = this.versionVerseEndNum;
         }
     }
 
