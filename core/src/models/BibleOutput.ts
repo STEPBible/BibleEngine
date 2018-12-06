@@ -1,11 +1,11 @@
+import { BiblePhrase, BibleSection, BibleBook, BibleVersion } from '../entities';
 import {
-    BiblePhrase,
-    BibleSection,
     IBibleReferenceRange,
-    BibleBook,
-    BibleVersion,
-    IBibleReference
-} from '.';
+    IBibleReference,
+    IBibleSection,
+    IBiblePhrase,
+    IContentGroup
+} from '../models';
 
 export interface IBibleOutputBase {
     version: BibleVersion;
@@ -18,7 +18,7 @@ export interface IBibleOutputPlaintext extends IBibleOutputBase {
 }
 
 export interface IBibleOutputRich extends IBibleOutputBase {
-    content: IBibleOutputGroupRoot;
+    content: IBibleOutputRoot;
 
     /**
      * the sections that are in and around the current range, indexed by their level (1,2,3,..)
@@ -76,65 +76,44 @@ export interface IBibleOutputNumbering {
     versionVerseIsStarting?: number;
 }
 
-export type BibleOutputGroup =
-    | IBibleOutputGroupRoot
-    | IBibleOutputGroupSection
-    | IBibleOutputGroupParagraph
-    | IBibleOutputGroupLevelFormatting
-    | IBibleOutputGroupBooleanFormatting
-    | IBibleOutputGroupPhrases;
+export type BibleOutput =
+    | IBibleOutputSection
+    | IBibleOutputGroup<IContentGroup['groupType']>
+    | IBibleOutputPhrases;
 
-export interface IBibleOutputGroupRoot {
+export interface IBibleOutputRoot {
     readonly type: 'root';
     parent: undefined;
     numbering?: IBibleOutputNumbering;
-    contents: BibleOutputGroup[];
+    contents: BibleOutput[];
 }
 
-export interface IBibleOutputGroupSection extends BibleSection {
+export interface IBibleOutputSection extends IBibleSection {
     readonly type: 'section';
-    parent: BibleOutputGroup;
+    parent: BibleOutput | IBibleOutputRoot;
+    meta: { sectionId: number; level: number };
     numbering?: IBibleOutputNumbering;
-    contents: BibleOutputGroup[]; // a section can contain everything
+    contents: BibleOutput[]; // a section can contain everything
 }
 
-// we have a seperate type for paragraphs (and not within the formatting groups or section groups)
-// to make explicit that a paragraph can't contain another section, nor can a formatting group
-// contain a paragraph
-export interface IBibleOutputGroupParagraph extends BibleSection {
-    readonly type: 'paragraph';
-    parent: BibleOutputGroup;
+export interface IBibleOutputGroup<T extends IContentGroup['groupType']> extends IContentGroup {
+    readonly type: 'group';
+    readonly groupType: T;
+    parent: BibleOutput | IBibleOutputRoot;
     numbering?: IBibleOutputNumbering;
-    contents: (
-        | IBibleOutputGroupLevelFormatting
-        | IBibleOutputGroupBooleanFormatting
-        | IBibleOutputGroupPhrases)[];
+    meta: T extends 'paragraph'
+        ? { paragraphId: number; phraseStartId: number; phraseEndId: number }
+        : T extends 'quote'
+        ? { level: number }
+        : T extends 'indent'
+        ? { level: number }
+        : undefined;
+    contents: (IBibleOutputGroup<T> | IBibleOutputPhrases)[];
 }
 
-export interface IBibleOutputGroupBooleanFormatting {
-    readonly type: 'bold' | 'italic' | 'divineName' | 'jesusWords';
-    parent: BibleOutputGroup; // pointer back to it's parent, needed for generating the groups
-    numbering?: IBibleOutputNumbering;
-    contents: (
-        | IBibleOutputGroupLevelFormatting
-        | IBibleOutputGroupBooleanFormatting
-        | IBibleOutputGroupPhrases)[];
-}
-
-export interface IBibleOutputGroupLevelFormatting {
-    readonly type: 'indentLevel' | 'quoteLevel';
-    parent: BibleOutputGroup; // pointer back to it's parent, needed for generating the groups
-    numbering?: IBibleOutputNumbering;
-    level: number;
-    contents: (
-        | IBibleOutputGroupLevelFormatting
-        | IBibleOutputGroupBooleanFormatting
-        | IBibleOutputGroupPhrases)[];
-}
-
-export interface IBibleOutputGroupPhrases {
+export interface IBibleOutputPhrases {
     readonly type: 'phrases';
-    parent: BibleOutputGroup;
+    parent: BibleOutput | IBibleOutputRoot;
     numbering?: IBibleOutputNumbering;
-    contents: BiblePhrase[];
+    contents: IBiblePhrase[];
 }

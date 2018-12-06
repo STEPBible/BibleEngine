@@ -1,68 +1,62 @@
-import { BibleVersion } from './BibleVersion.entity';
-import { BibleBook } from './BibleBook.entity';
-import { BibleSection } from './BibleSection.entity';
-import { BiblePhrase } from './BiblePhrase.entity';
-import { BiblePhraseOriginalWord } from './BiblePhraseOriginalWord.entity';
-import { BibleCrossReference } from './BibleCrossReference.entity';
-import { BibleNote } from './BibleNote.entity';
-import { DictionaryEntry } from './DictionaryEntry.entity';
-
 import {
-    IBibleVerse,
+    BibleOutput,
+    IBibleOutputGroup,
+    IBibleOutputNumbering,
+    IBibleOutputPhrases,
     IBibleOutputRich,
-    BibleOutputGroup,
-    IBibleOutputGroupPhrases,
-    IBibleOutputGroupRoot
-} from './BibleOutput.interface';
+    IBibleOutputRoot,
+    IBibleOutputSection,
+    IBibleVerse
+} from './BibleOutput';
 import {
     IBibleReference,
     IBibleReferenceRange,
     IBibleReferenceNormalized,
     IBibleReferenceRangeNormalized,
     IBiblePhraseRef
-} from './BibleReference.interface';
-import { IBibleBook, IBibleBookWithContent } from './BibleBook.interface';
-import { IBibleSection, IBibleSectionWithContent } from './BibleSection.interface';
-import { IBibleNotePhrase } from './BibleNotePhrase.interface';
-
-import { BibleInput } from './BibleInput.type';
-import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext.type';
+} from './BibleReference';
+import { IBibleBook } from './BibleBook';
+import { IBibleSection } from './BibleSection';
+import { IBiblePhrase, PhraseModifiers } from './BiblePhrase';
+import { IBibleInput, IBibleInputGroup, IBibleInputPhrase, IBibleInputSection } from './BibleInput';
+import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext';
+import { Document } from './Document';
+import { IBibleVersion } from './BibleVersion';
+import { IDictionaryEntry } from './DictionaryEntry';
+import { IContentGroup } from './ContentGroup';
+import { BookWithContent } from './BibleInput';
+import { IBibleCrossReference } from './BibleCrossReference';
+import { IBibleNote } from './BibleNote';
 
 export {
-    BibleVersion,
-    BibleBook,
-    BibleSection,
-    BiblePhrase,
-    BiblePhraseOriginalWord,
-    BibleCrossReference,
-    BibleNote,
-    DictionaryEntry,
-    IBibleVerse,
-    IBibleOutputRich,
-    BibleOutputGroup,
-    IBibleOutputGroupPhrases,
-    IBibleOutputGroupRoot,
-    IBibleNotePhrase,
-    IBibleReference,
-    IBibleReferenceRange,
-    IBibleReferenceNormalized,
-    IBibleReferenceRangeNormalized,
-    IBiblePhraseRef,
-    IBibleBook,
-    IBibleBookWithContent,
-    IBibleSection,
-    IBibleSectionWithContent,
-    BibleInput,
+    BibleBookPlaintext,
     BibleChapterPlaintext,
-    BibleBookPlaintext
+    BibleOutput,
+    BookWithContent,
+    Document,
+    IBibleBook,
+    IBibleCrossReference,
+    IBibleInput,
+    IBibleInputGroup,
+    IBibleInputPhrase,
+    IBibleInputSection,
+    IBibleNote,
+    IBibleOutputGroup,
+    IBibleOutputNumbering,
+    IBibleOutputPhrases,
+    IBibleOutputRich,
+    IBibleOutputRoot,
+    IBibleOutputSection,
+    IBiblePhrase,
+    IBiblePhraseRef,
+    IBibleReference,
+    IBibleReferenceNormalized,
+    IBibleReferenceRange,
+    IBibleReferenceRangeNormalized,
+    IBibleSection,
+    IBibleVerse,
+    IBibleVersion,
+    IContentGroup,
+    IDictionaryEntry,
+    PhraseModifiers
 };
-export const ENTITIES = [
-    BibleVersion,
-    BibleBook,
-    BibleSection,
-    BiblePhrase,
-    BiblePhraseOriginalWord,
-    BibleCrossReference,
-    BibleNote,
-    DictionaryEntry
-];

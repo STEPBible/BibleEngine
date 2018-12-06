@@ -1,7 +1,10 @@
-export interface IBibleReferenceBase {
-    bookOsisId: string;
+export interface IBibleReferenceNormalizedNumbers {
     normalizedChapterNum?: number;
     normalizedVerseNum?: number;
+}
+
+export interface IBibleReferenceBase extends IBibleReferenceNormalizedNumbers {
+    bookOsisId: string;
     versionId?: number;
 }
 
