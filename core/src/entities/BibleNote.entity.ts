@@ -9,8 +9,7 @@ import {
     BeforeUpdate
 } from 'typeorm';
 import { BiblePhrase } from './BiblePhrase.entity';
-import { Document } from 'models/Document';
-import { IBibleNote } from 'models/BibleNote';
+import { Document, IBibleNote } from '../models';
 
 @Entity()
 export class BibleNote implements IBibleNote {

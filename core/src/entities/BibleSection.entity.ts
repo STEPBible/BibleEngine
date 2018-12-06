@@ -9,10 +9,9 @@ import {
     BeforeInsert,
     BeforeUpdate
 } from 'typeorm';
-import { BibleCrossReference } from './BibleCrossReference.entity';
-import { IBibleSection } from '../models/BibleSection';
-import { IBibleReferenceRangeNormalized, Document } from '../models';
-import { parsePhraseId } from '../utils';
+import { BibleCrossReference } from '.';
+import { IBibleSection, IBibleReferenceRangeNormalized, Document } from '../models';
+import { parsePhraseId } from '../functions/reference.functions';
 
 @Entity()
 @Index(['versionId', 'phraseStartId', 'phraseEndId'])

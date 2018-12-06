@@ -1,9 +1,9 @@
 const wordGen = require('random-words');
 
-import { BibleEngine } from './classes/BibleEngine.class';
+import { BibleEngine } from './BibleEngine.class';
 import { BibleVersion } from './entities';
 import { getOsisIdFromBookGenericId } from './data/bibleMeta';
-import { IBibleInputGroup, IBibleInputPhrase } from 'models/BibleInput';
+import { IBibleInputGroup, IBibleInputPhrase } from './models';
 
 const sqlBible = new BibleEngine({
     type: 'sqlite',

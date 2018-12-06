@@ -1,6 +1,5 @@
 import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
-import { IBibleBook } from '../models/BibleBook';
-import { Document } from 'models/Document';
+import { IBibleBook, Document } from '../models';
 
 @Entity()
 export class BibleBook implements IBibleBook {

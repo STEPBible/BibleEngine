@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
-import { parsePhraseId } from '../utils';
+import { parsePhraseId } from '../functions/reference.functions';
 import { IBibleReferenceRangeNormalized } from '../models';
 
 @Entity()

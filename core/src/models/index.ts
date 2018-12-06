@@ -1,10 +1,12 @@
 import {
-    IBibleVerse,
-    IBibleOutputRich,
     BibleOutput,
+    IBibleOutputGroup,
+    IBibleOutputNumbering,
     IBibleOutputPhrases,
+    IBibleOutputRich,
     IBibleOutputRoot,
-    IBibleOutputGroup
+    IBibleOutputSection,
+    IBibleVerse
 } from './BibleOutput';
 import {
     IBibleReference,
@@ -16,13 +18,15 @@ import {
 import { IBibleBook } from './BibleBook';
 import { IBibleSection } from './BibleSection';
 import { IBiblePhrase, PhraseModifiers } from './BiblePhrase';
-import { IBibleInput } from './BibleInput';
+import { IBibleInput, IBibleInputGroup, IBibleInputPhrase, IBibleInputSection } from './BibleInput';
 import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext';
 import { Document } from './Document';
 import { IBibleVersion } from './BibleVersion';
 import { IDictionaryEntry } from './DictionaryEntry';
 import { IContentGroup } from './ContentGroup';
 import { BookWithContent } from './BibleInput';
+import { IBibleCrossReference } from './BibleCrossReference';
+import { IBibleNote } from './BibleNote';
 
 export {
     BibleBookPlaintext,
@@ -31,11 +35,18 @@ export {
     BookWithContent,
     Document,
     IBibleBook,
+    IBibleCrossReference,
     IBibleInput,
+    IBibleInputGroup,
+    IBibleInputPhrase,
+    IBibleInputSection,
+    IBibleNote,
     IBibleOutputGroup,
+    IBibleOutputNumbering,
     IBibleOutputPhrases,
-    IBibleOutputRoot,
     IBibleOutputRich,
+    IBibleOutputRoot,
+    IBibleOutputSection,
     IBiblePhrase,
     IBiblePhraseRef,
     IBibleReference,

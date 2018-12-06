@@ -1,1 +1,1 @@
-export * from './classes/BibleEngine.class';
+export * from './BibleEngine.class';

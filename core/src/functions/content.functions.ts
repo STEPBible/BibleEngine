@@ -1,28 +1,124 @@
-import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from './data/bibleMeta';
 import {
-    IBiblePhraseRef,
-    IBibleReferenceNormalized,
-    IBibleReferenceRangeNormalized
-} from './models/BibleReference';
-import { BiblePhrase, BibleParagraph } from './entities';
-import {
+    IBibleInput,
+    BibleBookPlaintext,
     IBibleOutputRich,
     IBibleOutputRoot,
     BibleOutput,
     IBibleOutputGroup,
     PhraseModifiers,
-    IBibleInput,
-    IBiblePhrase
-} from './models';
-import {
+    IBiblePhrase,
     IBibleOutputSection,
     IBibleOutputPhrases,
-    IBibleOutputNumbering
-} from 'models/BibleOutput';
-import { isObject } from 'util';
-import { IBibleInputGroup, IBibleInputPhrase, IBibleInputSection } from 'models/BibleInput';
+    IBibleOutputNumbering,
+    IBibleInputGroup,
+    IBibleInputPhrase,
+    IBibleInputSection
+} from '../models';
+import { BiblePhrase, BibleParagraph } from '../entities';
 
-export const getOutputFormattingGroupsForPhrasesAndSections = (
+/**
+ * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
+ * @param {IBibleInput[]} contents
+ * @param {BibleBookPlaintext} _accChapters
+ * @returns {IBibleBookPlaintext}
+ */
+export const convertBibleInputToBookPlaintext = (
+    contents: IBibleInput[],
+    _accChapters: BibleBookPlaintext = new Map()
+) => {
+    for (const content of contents) {
+        if (content.type !== 'phrase')
+            convertBibleInputToBookPlaintext(content.contents, _accChapters);
+        else {
+            if (!_accChapters.has(content.versionChapterNum))
+                _accChapters.set(content.versionChapterNum, new Map());
+            const chapter = _accChapters.get(content.versionChapterNum)!; // we know it's set
+            const verse = chapter.has(content.versionVerseNum)
+                ? chapter.get(content.versionVerseNum) + ' ' + content.content
+                : content.content;
+            chapter.set(content.versionVerseNum, verse);
+        }
+    }
+
+    return _accChapters;
+};
+
+/**
+ * converts output of BibleEngine into format that can be used as input into the BibleEngine schema
+ * @param {BibleOutput[]} data
+ * @returns {IBibleInput[]}
+ */
+export const convertBibleOutputToBibleInput = (data: BibleOutput[]): IBibleInput[] => {
+    const inputData: IBibleInput[] = [];
+    for (const obj of data) {
+        if (obj.type === 'phrases') {
+            for (const phrase of obj.contents) {
+                if (!phrase.versionChapterNum) {
+                    throw new Error(`can't generate input data: corrupted structure`);
+                }
+                const inputPhrase: IBiblePhrase = {
+                    content: phrase.content,
+                    versionChapterNum: phrase.versionChapterNum,
+                    versionVerseNum: phrase.versionVerseNum,
+                    normalizedReference: {
+                        normalizedChapterNum: phrase.normalizedReference!.normalizedChapterNum,
+                        normalizedVerseNum: phrase.normalizedReference!.normalizedVerseNum
+                    }
+                };
+                if (phrase.linebreak) inputPhrase.linebreak = true;
+                if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
+                if (phrase.person) inputPhrase.person = phrase.person;
+                if (phrase.strongs && phrase.strongs.length) inputPhrase.strongs = phrase.strongs;
+                if (phrase.notes && phrase.notes.length)
+                    inputPhrase.notes = phrase.notes.map(({ key, type, content }) => ({
+                        key,
+                        type,
+                        content
+                    }));
+                if (phrase.crossReferences && phrase.crossReferences.length)
+                    inputPhrase.crossReferences = phrase.crossReferences.map(({ key, range }) => ({
+                        key,
+                        range
+                    }));
+
+                inputData.push({ type: 'phrase', ...inputPhrase });
+            }
+        } else if (obj.type === 'group') {
+            inputData.push({
+                type: 'group',
+                groupType: obj.groupType,
+                modifier: obj.modifier,
+                contents: <(IBibleInputGroup | IBibleInputPhrase)[]>(
+                    convertBibleOutputToBibleInput(obj.contents)
+                )
+            });
+        } else if (obj.type === 'section') {
+            const inputSection: IBibleInputSection = {
+                type: 'section',
+                contents: convertBibleOutputToBibleInput(obj.contents)
+            };
+            if (obj.title) inputSection.title = obj.title;
+            if (obj.subTitle) inputSection.subTitle = obj.subTitle;
+            if (obj.description) inputSection.description = obj.description;
+            if (obj.crossReferences && obj.crossReferences.length)
+                inputSection.crossReferences = obj.crossReferences.map(({ key, range }) => ({
+                    key,
+                    range
+                }));
+            inputData.push(inputSection);
+        }
+    }
+    return inputData;
+};
+
+/**
+ * turns list of phrases, paragraphs and sections into a structured bible document
+ * @param {BiblePhrase[]} phrases
+ * @param {BibleParagraph[]} paragraphs
+ * @param {IBibleOutputRich['context']} context
+ * @returns {IBibleOutputRoot}
+ */
+export const generateBibleDocument = (
     phrases: BiblePhrase[],
     paragraphs: BibleParagraph[],
     context: IBibleOutputRich['context']
@@ -354,332 +450,4 @@ export const getOutputFormattingGroupsForPhrasesAndSections = (
     }
 
     return rootGroup;
-};
-
-/**
- * encodes a normalized reference object into an integer to use in database operations
- * @param {IBibleReferenceNormalized} reference
- * @returns {number}
- */
-export const generateReferenceId = (reference: IBibleReferenceNormalized): number => {
-    let refId = pad(getBookGenericIdFromOsisId(reference.bookOsisId), 2);
-    if (reference.normalizedChapterNum) refId += '' + pad(reference.normalizedChapterNum, 3);
-    else refId += '000';
-    if (reference.normalizedVerseNum) refId += '' + pad(reference.normalizedVerseNum, 3);
-    else refId += '000';
-    return +refId;
-};
-
-/**
- * encodes a bible phrase reference object into an integer to use in database operations
- * @param {IBiblePhraseRef} reference
- * @returns {number}
- */
-export const generatePhraseId = (reference: IBiblePhraseRef): number => {
-    let refId = '' + generateReferenceId(reference);
-    if (reference.versionId) refId += '' + pad(reference.versionId, 3);
-    else refId += '000';
-    if (reference.phraseNum) refId += '' + pad(reference.phraseNum, 2);
-    else refId += '00';
-    return +refId;
-};
-
-/**
- * generates SQL for a range-query on the id of the phrases table
- *
- * @param {IBibleReferenceRangeNormalized} range
- * @param {string} [col='id']
- * @returns {string} SQL
- */
-export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, col = 'id') => {
-    const refEnd = getEndReferenceForRangeQuery(range);
-    let sql = `${col} BETWEEN '${generatePhraseId(range)}' AND '${generatePhraseId(refEnd)}'`;
-
-    // if we query for more than just one verse in a specific version we need to filter out the
-    // version with a little math (due to the nature of our encoded reference integers)
-    if (
-        range.versionId &&
-        !// condition for a query for a single verse
-        (
-            !!range.normalizedChapterNum &&
-            !!range.normalizedVerseNum &&
-            ((range.normalizedChapterNum === range.normalizedChapterEndNum &&
-                range.normalizedVerseNum === range.normalizedVerseEndNum) ||
-                (!range.normalizedChapterEndNum && !range.normalizedVerseEndNum))
-        )
-    )
-        sql += 'AND ' + generatePhraseIdVersionSql(range.versionId, col);
-
-    return sql;
-};
-
-export const generatePhraseIdVersionSql = (versionId: number, col = 'id') =>
-    `cast(${col} % 100000 / 100 as int) = ${versionId}`;
-
-/**
- * generates SQL for a range-query for reference ids
- *
- * @param {IBibleReferenceRangeNormalized} range
- * @param {string} [col='id']
- * @returns {string} SQL
- */
-export const generateReferenceIdSql = (range: IBibleReferenceRangeNormalized, col = 'id') => {
-    const refEnd: IBibleReferenceRangeNormalized = {
-        isNormalized: true,
-        bookOsisId: range.bookOsisId,
-        normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
-        normalizedVerseNum:
-            range.normalizedVerseEndNum ||
-            (range.normalizedVerseNum && !range.normalizedChapterEndNum)
-                ? range.normalizedVerseNum
-                : 999
-    };
-    let sql = `${col} BETWEEN '${generateReferenceId(range)}' AND '${generateReferenceId(refEnd)}'`;
-
-    return sql;
-};
-
-/**
- * generates a random uppercase char
- * @returns {string}
- */
-export function generateRandomChar(): string {
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; // abcdefghijklmnopqrstuvwxyz0123456789
-    return possible.charAt(Math.floor(Math.random() * possible.length));
-}
-
-export const generateParagraphSql = (
-    range: IBibleReferenceRangeNormalized & { versionId: number },
-    tableAlias: string
-) => {
-    const refEnd: IBiblePhraseRef = getEndReferenceForRangeQuery(range);
-    const rangePhraseIdStart = generatePhraseId(range);
-    const rangePhraseIdEnd = generatePhraseId(refEnd);
-    const colVersion = `${tableAlias}.versionId`;
-    const colSectionStart = `${tableAlias}.phraseStartId`;
-    const colSectionEnd = `${tableAlias}.phraseEndId`;
-
-    // since this is an OR query the query optimizer may/will use different indexes for each
-    // https://www.sqlite.org/optoverview.html#or_optimizations
-    // thats also why we repeat the versionId condition.
-    //
-    // the three conditions select:
-    // - paragraphs that wrap around the range
-    // - paragraphs that start within the range
-    // - paragraphs that end within the range (seperate index)
-    //
-    // (paragraphs that are fully contained in the range or selected by both the 2nd and 3rd
-    //  condition)
-    return `
-        ( ${colVersion} = ${range.versionId} AND (
-                ( ${colSectionStart} < ${rangePhraseIdStart} AND
-                    ${colSectionEnd} > ${rangePhraseIdEnd} ) OR
-                ( ${colSectionStart} >= ${rangePhraseIdStart} AND
-                    ${colSectionStart} <= ${rangePhraseIdEnd} )
-            )
-        ) OR (
-            ${colVersion} = ${range.versionId} AND
-            ${colSectionEnd} >= ${rangePhraseIdStart} AND
-            ${colSectionEnd} <= ${rangePhraseIdEnd}
-        )`;
-};
-
-/**
- * generates SQL for a range-query on the section table
- *
- * @param {IBibleReferenceRangeNormalized} range
- * @param {string} [col='id']
- * @returns {string} SQL
- */
-export const generateBookSectionsSql = (
-    range: IBibleReferenceRangeNormalized,
-    tableAlias: string
-) => {
-    const bookPhraseIdStart = generatePhraseId({
-        bookOsisId: range.bookOsisId,
-        isNormalized: true
-    });
-    const bookPhraseIdEnd = generatePhraseId({
-        bookOsisId: range.bookOsisId,
-        normalizedChapterNum: 999,
-        isNormalized: true
-    });
-
-    const colVersion = `${tableAlias}.versionId`;
-    const colSectionStart = `${tableAlias}.phraseStartId`;
-    const colSectionEnd = `${tableAlias}.phraseEndId`;
-    let sql = '';
-
-    if (range.versionId) sql += `${colVersion} = ${range.versionId} AND `;
-
-    sql += `${colSectionStart} >= ${bookPhraseIdStart} AND ${colSectionEnd} <= ${bookPhraseIdEnd}`;
-
-    // [REFERENCE] we added the versionId column to the sections table, so we don't need to query
-    //             the version via the phraseIds. Since this is not stable, we leave the code for
-    //             reference.
-    // // if we query for a specific version we need to filter out the
-    // // version with a little math (due to the nature of our encoded reference integers)
-    // if (range.versionId)
-    //     sql += `AND cast(${colSectionStart} % 100000000000 / 100000000 as int) = ${
-    //         range.versionId
-    //     }`;
-
-    return sql;
-};
-
-export function getBibleInputFromOutputData(data: BibleOutput[]): IBibleInput[] {
-    const inputData: IBibleInput[] = [];
-    for (const obj of data) {
-        if (obj.type === 'phrases') {
-            for (const phrase of obj.contents) {
-                if (!phrase.versionChapterNum) {
-                    throw new Error(`can't generate input data: corrupted structure`);
-                }
-                const inputPhrase: IBiblePhrase = {
-                    content: phrase.content,
-                    versionChapterNum: phrase.versionChapterNum,
-                    versionVerseNum: phrase.versionVerseNum,
-                    normalizedReference: {
-                        normalizedChapterNum: phrase.normalizedReference!.normalizedChapterNum,
-                        normalizedVerseNum: phrase.normalizedReference!.normalizedVerseNum
-                    }
-                };
-                if (phrase.linebreak) inputPhrase.linebreak = true;
-                if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
-                if (phrase.person) inputPhrase.person = phrase.person;
-                if (phrase.strongs && phrase.strongs.length) inputPhrase.strongs = phrase.strongs;
-                if (phrase.notes && phrase.notes.length)
-                    inputPhrase.notes = phrase.notes.map(({ key, type, content }) => ({
-                        key,
-                        type,
-                        content
-                    }));
-                if (phrase.crossReferences && phrase.crossReferences.length)
-                    inputPhrase.crossReferences = phrase.crossReferences.map(({ key, range }) => ({
-                        key,
-                        range
-                    }));
-
-                inputData.push({ type: 'phrase', ...inputPhrase });
-            }
-        } else if (obj.type === 'group') {
-            inputData.push({
-                type: 'group',
-                groupType: obj.groupType,
-                modifier: obj.modifier,
-                contents: <(IBibleInputGroup | IBibleInputPhrase)[]>(
-                    getBibleInputFromOutputData(obj.contents)
-                )
-            });
-        } else if (obj.type === 'section') {
-            const inputSection: IBibleInputSection = {
-                type: 'section',
-                contents: getBibleInputFromOutputData(obj.contents)
-            };
-            if (obj.title) inputSection.title = obj.title;
-            if (obj.subTitle) inputSection.subTitle = obj.subTitle;
-            if (obj.description) inputSection.description = obj.description;
-            if (obj.crossReferences && obj.crossReferences.length)
-                inputSection.crossReferences = obj.crossReferences.map(({ key, range }) => ({
-                    key,
-                    range
-                }));
-            inputData.push(inputSection);
-        }
-    }
-    return inputData;
-}
-
-export function getMinimizedDbObjects(dbObjects: any[]) {
-    return dbObjects.map(getMinimizedDbObject);
-}
-
-export function getMinimizedDbObject(dbObject: any) {
-    const strippedObject: any = {};
-    for (const property of Object.keys(dbObject)) {
-        if (
-            property.indexOf('Json') !== -1 ||
-            dbObject[property] === null ||
-            (isObject(dbObject[property]) && !Object.keys(dbObject[property]).length)
-        )
-            continue;
-        strippedObject[property] = dbObject[property];
-    }
-    return strippedObject;
-}
-
-export function getEndReferenceForRangeQuery(
-    range: IBibleReferenceRangeNormalized
-): IBiblePhraseRef {
-    return {
-        isNormalized: true,
-        bookOsisId: range.bookOsisId,
-        normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
-        normalizedVerseNum: range.normalizedVerseEndNum
-            ? range.normalizedVerseEndNum
-            : range.normalizedVerseNum && !range.normalizedChapterEndNum
-            ? range.normalizedVerseNum
-            : 999,
-        versionId: range.versionId || 999,
-        phraseNum: 99
-    };
-}
-
-/**
- * returns a zero-padded string of a number
- * @param {number} n the number to be padded
- * @param {number} width the length or the resulting string
- * @param {string} [z='0'] padding character
- * @returns {string}
- */
-export function pad(n: number, width: number, z?: string): string {
-    z = z || '0';
-    let nStr = n + '';
-    return nStr.length >= width ? nStr : new Array(width - nStr.length + 1).join(z) + n;
-}
-
-/**
- * parses a database reference id into a normalized bible reference object
- * @param {number} id
- * @returns {IBibleReferenceNormalized}
- */
-export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
-    let _id = id;
-    const normalizedVerseNum = _id % 1000;
-    _id -= normalizedVerseNum;
-    _id /= 1000;
-    const normalizedChapterNum = _id % 1000;
-    _id -= normalizedChapterNum;
-    _id /= 1000;
-    const normalizedBookNum = _id;
-    const ref: IBibleReferenceNormalized = {
-        isNormalized: true,
-        bookOsisId: getOsisIdFromBookGenericId(normalizedBookNum)
-    };
-    if (normalizedChapterNum) ref.normalizedChapterNum = normalizedChapterNum;
-    if (normalizedVerseNum) ref.normalizedVerseNum = normalizedVerseNum;
-
-    return ref;
-};
-
-/**
- * parses a database phrase id into a bible phrase reference object
- * @param {number} id database phrase id
- * @returns {IBiblePhraseRef}
- */
-export const parsePhraseId = (id: number): IBiblePhraseRef => {
-    let _id = id;
-
-    const phraseNum = _id % 100;
-    _id -= phraseNum;
-    _id /= 100;
-    const versionId = _id % 1000;
-    _id -= versionId;
-    _id /= 1000;
-
-    return {
-        ...parseReferenceId(_id),
-        versionId,
-        phraseNum
-    };
 };

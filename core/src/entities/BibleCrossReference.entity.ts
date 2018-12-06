@@ -8,9 +8,8 @@ import {
     BeforeInsert,
     BeforeUpdate
 } from 'typeorm';
-import { generateReferenceId, parseReferenceId } from '../utils';
-import { IBibleCrossReference } from '../models/BibleCrossReference';
-import { IBibleReferenceRangeNormalized } from '../models';
+import { generateReferenceId, parseReferenceId } from '../functions/reference.functions';
+import { IBibleReferenceRangeNormalized, IBibleCrossReference } from '../models';
 import { BiblePhrase, BibleSection } from '../entities';
 
 @Entity()

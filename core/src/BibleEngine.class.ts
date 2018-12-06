@@ -11,19 +11,25 @@ import {
     BibleCrossReference,
     DictionaryEntry,
     BibleParagraph
-} from '../entities';
+} from './entities';
 import {
     parsePhraseId,
+    generatePhraseId,
+    generateContextRangeFromVersionRange,
+    generateNormalizedReferenceFromVersionReference
+} from './functions/reference.functions';
+import {
     generatePhraseIdSql,
     generateReferenceIdSql,
     generateBookSectionsSql,
-    getOutputFormattingGroupsForPhrasesAndSections,
-    generatePhraseId,
-    generateParagraphSql,
-    getMinimizedDbObject,
-    getMinimizedDbObjects,
-    getBibleInputFromOutputData
-} from '../utils';
+    generateParagraphSql
+} from './functions/sql.functions';
+import {
+    convertBibleOutputToBibleInput,
+    generateBibleDocument,
+    convertBibleInputToBookPlaintext
+} from './functions/content.functions';
+import { generateMinimizedDbObject, generateMinimizedDbObjects } from './functions/utils.functions';
 import {
     BibleBookPlaintext,
     IDictionaryEntry,
@@ -38,7 +44,7 @@ import {
     IBibleReferenceNormalized,
     IBiblePhraseRef,
     IBibleInput
-} from '../models';
+} from './models';
 
 export class BibleEngine {
     currentVersion?: BibleVersion;
@@ -55,7 +61,7 @@ export class BibleEngine {
     }
 
     async addBookWithContent(bookInput: BookWithContent) {
-        const textData = this.getBookPlaintextFromBibleContent(bookInput.contents);
+        const textData = convertBibleInputToBookPlaintext(bookInput.contents);
         bookInput.book.chaptersCount = [];
         for (const verses of textData.values()) {
             bookInput.book.chaptersCount.push(verses.size);
@@ -229,7 +235,7 @@ export class BibleEngine {
             version,
             versionBook: book,
             range: rangeNormalized,
-            content: getOutputFormattingGroupsForPhrasesAndSections(phrases, paragraphs, context),
+            content: generateBibleDocument(phrases, paragraphs, context),
             context,
             contextRanges
         };
@@ -265,10 +271,10 @@ export class BibleEngine {
         const entityManager = await this.pEntityManager;
         const version: IBibleVersion = await entityManager
             .findOne(BibleVersion, versionId)
-            .then(getMinimizedDbObject);
+            .then(generateMinimizedDbObject);
         const books: IBibleBook[] = await entityManager
             .find(BibleBook, { where: { versionId }, order: { number: 'ASC' } })
-            .then(getMinimizedDbObjects);
+            .then(generateMinimizedDbObjects);
         const bookData: { book: IBibleBook; content: IBibleInput[] }[] = [];
         for (const book of books) {
             bookData.push({
@@ -276,7 +282,7 @@ export class BibleEngine {
                 content: await this.getFullDataForReferenceRange({
                     versionId,
                     bookOsisId: book.osisId
-                }).then(fullData => getBibleInputFromOutputData(fullData.content.contents))
+                }).then(fullData => convertBibleOutputToBibleInput(fullData.content.contents))
             });
         }
         // const phrases = await entityManager
@@ -305,12 +311,15 @@ export class BibleEngine {
     }
 
     async getReferenceRangeWithAllVersionProperties(
-        range: IBibleReferenceRange
+        range: IBibleReferenceRange,
+        versionBook?: BibleBook
     ): Promise<IBibleReferenceRange> {
-        const entityManager = await this.pEntityManager;
-        const versionBook = await entityManager.findOne(BibleBook, {
-            where: { versionId: range.versionId, osisId: range.bookOsisId }
-        });
+        if (!versionBook) {
+            const entityManager = await this.pEntityManager;
+            versionBook = await entityManager.findOne(BibleBook, {
+                where: { versionId: range.versionId, osisId: range.bookOsisId }
+            });
+        }
         if (!versionBook) {
             throw new Error(
                 `can't get normalized reference: invalid or missing version or book data`
@@ -322,14 +331,20 @@ export class BibleEngine {
             range.versionChapterEndNum ||
             range.versionChapterNum ||
             versionBook.chaptersCount.length;
+        const versionVerseEndNum = range.versionVerseEndNum
+            ? range.versionVerseEndNum
+            : range.versionVerseNum &&
+              (!range.versionChapterEndNum ||
+                  range.versionChapterEndNum === range.versionChapterNum)
+            ? range.versionVerseNum
+            : versionBook.getChapterVerseCount(versionChapterEndNum);
         return {
             versionId: range.versionId,
             bookOsisId: range.bookOsisId,
             versionChapterNum: range.versionChapterNum || 1,
             versionChapterEndNum,
             versionVerseNum: range.versionVerseNum || 1,
-            versionVerseEndNum:
-                range.versionVerseEndNum || versionBook.getChapterVerseCount(versionChapterEndNum)
+            versionVerseEndNum
         };
     }
 
@@ -515,50 +530,6 @@ export class BibleEngine {
         });
     }
 
-    private getBookPlaintextFromBibleContent(
-        contents: IBibleInput[],
-        _accChapters: BibleBookPlaintext = new Map()
-    ) {
-        for (const content of contents) {
-            if (content.type !== 'phrase')
-                this.getBookPlaintextFromBibleContent(content.contents, _accChapters);
-            else {
-                if (!_accChapters.has(content.versionChapterNum))
-                    _accChapters.set(content.versionChapterNum, new Map());
-                const chapter = _accChapters.get(content.versionChapterNum)!; // we know it's set
-                const verse = chapter.has(content.versionVerseNum)
-                    ? chapter.get(content.versionVerseNum) + ' ' + content.content
-                    : content.content;
-                chapter.set(content.versionVerseNum, verse);
-            }
-        }
-
-        return _accChapters;
-    }
-
-    private getContextRangeForVersionRange({
-        versionId,
-        bookOsisId,
-        versionChapterNum,
-        versionChapterEndNum
-    }: IBibleReferenceRange): IBibleReferenceRange {
-        const contextRange: IBibleReferenceRange = {
-            versionId,
-            bookOsisId
-        };
-        if (versionChapterNum) {
-            // our queries are graceful with out of bounds references, so we don't bother looking
-            // at the version metadata here for number of chapters and verses
-            contextRange.versionChapterNum = versionChapterNum > 1 ? versionChapterNum - 1 : 1;
-            contextRange.versionChapterEndNum = versionChapterEndNum
-                ? versionChapterEndNum + 1
-                : versionChapterNum + 1;
-            contextRange.versionVerseNum = 1;
-            contextRange.versionVerseEndNum = 999;
-        }
-        return contextRange;
-    }
-
     // we excpect this to be an async method in the future
     // - to not break code then we make it async already
     private async getNormalizedReference(
@@ -572,7 +543,7 @@ export class BibleEngine {
             !reference.versionChapterNum ||
             !reference.versionVerseNum // RADAR: is it safe to return here if no versionVerse?
         )
-            return this.getNormalizedReferenceFromVersionNumbers(reference);
+            return generateNormalizedReferenceFromVersionReference(reference);
 
         // RADAR: test if it is really faster to check for the existence of v11n rules for this
         // reference before looking into the phrases table
@@ -580,10 +551,10 @@ export class BibleEngine {
 
         // there are no rules for this reference(-range) than can cause normalisation changes
         if (!normalisationRules.length)
-            return this.getNormalizedReferenceFromVersionNumbers(reference);
+            return generateNormalizedReferenceFromVersionReference(reference);
 
         // see if we already have the reference in the database
-        const referenceContextRange = this.getContextRangeForVersionRange(reference);
+        const referenceContextRange = generateContextRangeFromVersionRange(reference);
         const entityManager = await this.pEntityManager;
         const refPhrase = await entityManager.findOne(BiblePhrase, {
             where: {
@@ -629,31 +600,20 @@ export class BibleEngine {
             !reference.versionChapterNum ||
             !reference.versionVerseNum // RADAR: is it safe to return here if no versionVerse?
         )
-            return this.getNormalizedReferenceFromVersionNumbers(reference);
+            return generateNormalizedReferenceFromVersionReference(reference);
 
         const normalisationRules = await this.getNormalisationRulesForReference(reference);
 
         // there are no rules for this reference(-range) than can cause normalisation changes
         if (!normalisationRules.length)
-            return this.getNormalizedReferenceFromVersionNumbers(reference);
+            return generateNormalizedReferenceFromVersionReference(reference);
 
         for (const rule of normalisationRules) {
             this.runV11nRuleOnReference(reference, rule, context);
         }
 
         // TODO: normalize this using the v11n-normalisation data from STEPData
-        return this.getNormalizedReferenceFromVersionNumbers(reference);
-    }
-
-    private getNormalizedReferenceFromVersionNumbers(
-        reference: IBibleReference
-    ): IBibleReferenceNormalized {
-        return {
-            ...reference,
-            isNormalized: true,
-            normalizedChapterNum: reference.normalizedChapterNum || reference.versionChapterNum,
-            normalizedVerseNum: reference.normalizedVerseNum || reference.versionVerseNum
-        };
+        return generateNormalizedReferenceFromVersionReference(reference);
     }
 
     private async getNormalizedReferenceRange(
@@ -686,7 +646,9 @@ export class BibleEngine {
         return normRange;
     }
 
+    // this is probably async when implemented
     private async getNormalisationRulesForReference(_: IBibleReferenceRange) {
+        // TODO: implement
         return [];
     }
 

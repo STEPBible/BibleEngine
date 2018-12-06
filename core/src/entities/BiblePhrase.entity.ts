@@ -9,7 +9,7 @@ import {
     BeforeUpdate
 } from 'typeorm';
 import { BibleCrossReference, BibleNote } from '.';
-import { generatePhraseId, parsePhraseId } from '../utils';
+import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
 import { PhraseModifiers, IBiblePhrase, IBiblePhraseRef } from '../models';
 
 @Entity()
