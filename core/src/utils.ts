@@ -20,7 +20,7 @@ import {
     IBibleOutputNumbering
 } from 'models/BibleOutput';
 import { isObject } from 'util';
-import { IBibleInputGroup, IBibleInputPhrase } from 'models/BibleInput';
+import { IBibleInputGroup, IBibleInputPhrase, IBibleInputSection } from 'models/BibleInput';
 
 export const getOutputFormattingGroupsForPhrasesAndSections = (
     phrases: BiblePhrase[],
@@ -572,14 +572,19 @@ export function getBibleInputFromOutputData(data: BibleOutput[]): IBibleInput[] 
                 )
             });
         } else if (obj.type === 'section') {
-            inputData.push({
+            const inputSection: IBibleInputSection = {
                 type: 'section',
-                title: obj.title,
-                subTitle: obj.subTitle,
-                description: obj.description,
-                crossReferences: obj.crossReferences,
                 contents: getBibleInputFromOutputData(obj.contents)
-            });
+            };
+            if (obj.title) inputSection.title = obj.title;
+            if (obj.subTitle) inputSection.subTitle = obj.subTitle;
+            if (obj.description) inputSection.description = obj.description;
+            if (obj.crossReferences && obj.crossReferences.length)
+                inputSection.crossReferences = obj.crossReferences.map(({ key, range }) => ({
+                    key,
+                    range
+                }));
+            inputData.push(inputSection);
         }
     }
     return inputData;
