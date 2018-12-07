@@ -1,15 +1,16 @@
 export interface IContentGroup {
     readonly groupType:
         | 'paragraph'
+        | 'person'
+        | 'quote'
+        | 'orderedListItem'
+        | 'unorderedListItem'
         | 'indent'
         | 'bold'
         | 'italic'
         | 'emphasis'
-        | 'quote'
-        | 'person'
         | 'divineName'
-        | 'translationChange'
-        | 'listItem';
+        | 'translationChange';
 
     /**
      * 'quote' | 'person' => who?

@@ -108,4 +108,21 @@ export class BiblePhrase implements IBiblePhrase {
         if (this.strongs) this.strongsJoined = this.strongs.join(',');
         if (this.modifiers) this.modifiersJson = JSON.stringify(this.modifiers);
     }
+
+    getModifierValue<T extends keyof PhraseModifiers>(modifier: T): PhraseModifiers[T] {
+        if (this.modifiers && this.modifiers[modifier]) return this.modifiers[modifier];
+        else {
+            // default values
+            if (modifier === 'indentLevel' || modifier === 'quoteLevel') return 0;
+            else if (
+                modifier === 'person' ||
+                modifier === 'quote' ||
+                modifier === 'translationChange' ||
+                modifier === 'orderedListItem' ||
+                modifier === 'unorderedListItem'
+            )
+                return undefined;
+            else return false;
+        }
+    }
 }

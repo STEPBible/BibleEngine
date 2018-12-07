@@ -2,11 +2,12 @@ import {
     BibleOutput,
     IBibleOutputGroup,
     IBibleOutputNumbering,
-    IBibleOutputPhrases,
+    IBibleOutputPhrase,
     IBibleOutputRich,
     IBibleOutputRoot,
     IBibleOutputSection,
-    IBibleVerse
+    IBibleVerse,
+    BibleOutputContainer
 } from './BibleOutput';
 import {
     IBibleReference,
@@ -32,6 +33,7 @@ export {
     BibleBookPlaintext,
     BibleChapterPlaintext,
     BibleOutput,
+    BibleOutputContainer,
     BookWithContent,
     Document,
     IBibleBook,
@@ -43,7 +45,7 @@ export {
     IBibleNote,
     IBibleOutputGroup,
     IBibleOutputNumbering,
-    IBibleOutputPhrases,
+    IBibleOutputPhrase,
     IBibleOutputRich,
     IBibleOutputRoot,
     IBibleOutputSection,

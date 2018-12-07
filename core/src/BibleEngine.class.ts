@@ -71,6 +71,7 @@ export class BibleEngine {
             book: bookInput.book,
             context: textData,
             modifierState: { quoteLevel: 0, indentLevel: 0 },
+            columnModifierState: {},
             phraseStack: [],
             paragraphStack: [],
             sectionStack: [],
@@ -361,6 +362,7 @@ export class BibleEngine {
             book: IBibleBook;
             context: BibleBookPlaintext;
             modifierState: PhraseModifiers;
+            columnModifierState: { quoteWho?: string; person?: string };
             phraseStack: BiblePhrase[];
             paragraphStack: BibleParagraph[];
             sectionStack: BibleSection[];
@@ -433,24 +435,35 @@ export class BibleEngine {
                 if (!firstPhraseId) firstPhraseId = phraseId;
                 lastPhraseId = phraseId;
 
+                if (state.columnModifierState.quoteWho)
+                    content.quoteWho = state.columnModifierState.quoteWho;
+                if (state.columnModifierState.person)
+                    content.person = state.columnModifierState.person;
+
                 state.phraseStack.push(new BiblePhrase(content, phraseRef, state.modifierState));
             } else if (content.type === 'group' && content.groupType !== 'paragraph') {
                 const backupModifierState = { ...state.modifierState };
+                const backupColumnModifierState = { ...state.columnModifierState };
 
                 if (content.groupType === 'quote') {
+                    if (!state.modifierState.quoteLevel) state.modifierState.quoteLevel = 0;
                     state.modifierState.quoteLevel++;
-                    state.modifierState.quoteWho = content.modifier;
-                } else if (content.groupType === 'indent') state.modifierState.indentLevel++;
-                else if (content.groupType === 'bold') state.modifierState.bold = true;
+                    state.columnModifierState.quoteWho = content.modifier;
+                } else if (content.groupType === 'indent') {
+                    if (!state.modifierState.indentLevel) state.modifierState.indentLevel = 0;
+                    state.modifierState.indentLevel++;
+                } else if (content.groupType === 'bold') state.modifierState.bold = true;
                 else if (content.groupType === 'divineName') state.modifierState.divineName = true;
                 else if (content.groupType === 'emphasis') state.modifierState.emphasis = true;
                 else if (content.groupType === 'italic') state.modifierState.italic = true;
                 else if (content.groupType === 'translationChange')
                     state.modifierState.translationChange = content.modifier;
                 else if (content.groupType === 'person')
-                    state.modifierState.person = content.modifier;
-                else if (content.groupType === 'listItem')
-                    state.modifierState.listItem = content.modifier;
+                    state.columnModifierState.person = content.modifier;
+                else if (content.groupType === 'orderedListItem')
+                    state.modifierState.orderedListItem = content.modifier;
+                else if (content.groupType === 'unorderedListItem')
+                    state.modifierState.orderedListItem = content.modifier;
                 state.recursionLevel++;
                 const {
                     firstPhraseId: groupFirstPhraseId,
@@ -461,6 +474,7 @@ export class BibleEngine {
                 if (groupLastPhraseId) lastPhraseId = groupLastPhraseId;
 
                 state.modifierState = backupModifierState;
+                state.columnModifierState = backupColumnModifierState;
             } else if (
                 (content.type === 'group' && content.groupType === 'paragraph') ||
                 content.type === 'section'

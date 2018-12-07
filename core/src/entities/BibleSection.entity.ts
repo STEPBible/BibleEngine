@@ -46,13 +46,13 @@ export class BibleSection implements IBibleSection {
     @Column({ nullable: true })
     descriptionJson?: string;
 
-    description: Document;
+    description?: Document;
 
     @OneToMany(() => BibleCrossReference, crossReference => crossReference.section, {
         cascade: true
     })
     @JoinColumn()
-    crossReferences: BibleCrossReference[];
+    crossReferences?: BibleCrossReference[];
 
     constructor(section: IBibleSection) {
         // typeorm is seemingly creating objects on startup (without passing parameters), so we

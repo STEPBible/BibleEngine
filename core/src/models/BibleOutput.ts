@@ -79,7 +79,12 @@ export interface IBibleOutputNumbering {
 export type BibleOutput =
     | IBibleOutputSection
     | IBibleOutputGroup<IContentGroup['groupType']>
-    | IBibleOutputPhrases;
+    | IBibleOutputPhrase;
+
+export type BibleOutputContainer =
+    | IBibleOutputRoot
+    | IBibleOutputSection
+    | IBibleOutputGroup<IContentGroup['groupType']>;
 
 export interface IBibleOutputRoot {
     readonly type: 'root';
@@ -90,16 +95,16 @@ export interface IBibleOutputRoot {
 
 export interface IBibleOutputSection extends IBibleSection {
     readonly type: 'section';
-    parent: BibleOutput | IBibleOutputRoot;
+    parent: BibleOutputContainer;
     meta: { sectionId: number; level: number };
-    numbering?: IBibleOutputNumbering;
+    numbering?: IBibleOutputRoot | IBibleOutputSection;
     contents: BibleOutput[]; // a section can contain everything
 }
 
 export interface IBibleOutputGroup<T extends IContentGroup['groupType']> extends IContentGroup {
     readonly type: 'group';
     readonly groupType: T;
-    parent: BibleOutput | IBibleOutputRoot;
+    parent: BibleOutputContainer;
     numbering?: IBibleOutputNumbering;
     meta: T extends 'paragraph'
         ? { paragraphId: number; phraseStartId: number; phraseEndId: number }
@@ -108,12 +113,11 @@ export interface IBibleOutputGroup<T extends IContentGroup['groupType']> extends
         : T extends 'indent'
         ? { level: number }
         : undefined;
-    contents: (IBibleOutputGroup<T> | IBibleOutputPhrases)[];
+    contents: (IBibleOutputGroup<T> | IBibleOutputPhrase)[];
 }
 
-export interface IBibleOutputPhrases {
-    readonly type: 'phrases';
-    parent: BibleOutput | IBibleOutputRoot;
+export interface IBibleOutputPhrase extends IBiblePhrase {
+    readonly type: 'phrase';
+    parent: BibleOutputContainer;
     numbering?: IBibleOutputNumbering;
-    contents: IBiblePhrase[];
 }

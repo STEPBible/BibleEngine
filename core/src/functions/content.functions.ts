@@ -8,13 +8,15 @@ import {
     PhraseModifiers,
     IBiblePhrase,
     IBibleOutputSection,
-    IBibleOutputPhrases,
+    IBibleOutputPhrase,
     IBibleOutputNumbering,
     IBibleInputGroup,
     IBibleInputPhrase,
-    IBibleInputSection
+    IBibleInputSection,
+    BibleOutputContainer
 } from '../models';
 import { BiblePhrase, BibleParagraph } from '../entities';
+import { BooleanModifiers, ValueModifiers } from '../models/BiblePhrase';
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
@@ -51,38 +53,37 @@ export const convertBibleInputToBookPlaintext = (
 export const convertBibleOutputToBibleInput = (data: BibleOutput[]): IBibleInput[] => {
     const inputData: IBibleInput[] = [];
     for (const obj of data) {
-        if (obj.type === 'phrases') {
-            for (const phrase of obj.contents) {
-                if (!phrase.versionChapterNum) {
-                    throw new Error(`can't generate input data: corrupted structure`);
-                }
-                const inputPhrase: IBiblePhrase = {
-                    content: phrase.content,
-                    versionChapterNum: phrase.versionChapterNum,
-                    versionVerseNum: phrase.versionVerseNum,
-                    normalizedReference: {
-                        normalizedChapterNum: phrase.normalizedReference!.normalizedChapterNum,
-                        normalizedVerseNum: phrase.normalizedReference!.normalizedVerseNum
-                    }
-                };
-                if (phrase.linebreak) inputPhrase.linebreak = true;
-                if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
-                if (phrase.person) inputPhrase.person = phrase.person;
-                if (phrase.strongs && phrase.strongs.length) inputPhrase.strongs = phrase.strongs;
-                if (phrase.notes && phrase.notes.length)
-                    inputPhrase.notes = phrase.notes.map(({ key, type, content }) => ({
-                        key,
-                        type,
-                        content
-                    }));
-                if (phrase.crossReferences && phrase.crossReferences.length)
-                    inputPhrase.crossReferences = phrase.crossReferences.map(({ key, range }) => ({
-                        key,
-                        range
-                    }));
-
-                inputData.push({ type: 'phrase', ...inputPhrase });
+        if (obj.type === 'phrase') {
+            const phrase = obj;
+            if (!phrase.versionChapterNum) {
+                throw new Error(`can't generate input data: corrupted structure`);
             }
+            const inputPhrase: IBiblePhrase = {
+                content: phrase.content,
+                versionChapterNum: phrase.versionChapterNum,
+                versionVerseNum: phrase.versionVerseNum,
+                normalizedReference: {
+                    normalizedChapterNum: phrase.normalizedReference!.normalizedChapterNum,
+                    normalizedVerseNum: phrase.normalizedReference!.normalizedVerseNum
+                }
+            };
+            if (phrase.linebreak) inputPhrase.linebreak = true;
+            if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
+            if (phrase.person) inputPhrase.person = phrase.person;
+            if (phrase.strongs && phrase.strongs.length) inputPhrase.strongs = phrase.strongs;
+            if (phrase.notes && phrase.notes.length)
+                inputPhrase.notes = phrase.notes.map(({ key, type, content }) => ({
+                    key,
+                    type,
+                    content
+                }));
+            if (phrase.crossReferences && phrase.crossReferences.length)
+                inputPhrase.crossReferences = phrase.crossReferences.map(({ key, range }) => ({
+                    key,
+                    range
+                }));
+
+            inputData.push({ type: 'phrase', ...inputPhrase });
         } else if (obj.type === 'group') {
             inputData.push({
                 type: 'group',
@@ -123,31 +124,13 @@ export const generateBibleDocument = (
     paragraphs: BibleParagraph[],
     context: IBibleOutputRich['context']
 ) => {
-    type LevelGroups = 'indent' | 'quote';
-    const levelGroups: LevelGroups[] = ['indent', 'quote'];
-    type BooleanModifiers =
-        | 'bold'
-        | 'italic'
-        | 'divineName'
-        | 'emphasis'
-        | 'translationChange'
-        | 'listItem';
-    const booleanModifiers: BooleanModifiers[] = [
-        'bold',
-        'italic',
-        'divineName',
-        'emphasis',
-        'translationChange',
-        'listItem'
-    ];
-
     const rootGroup: IBibleOutputRoot = {
         type: 'root',
         parent: undefined,
         contents: []
     };
 
-    let activeGroup: BibleOutput | IBibleOutputRoot = rootGroup;
+    let activeGroup: BibleOutputContainer = rootGroup;
 
     const currentNumbering = {
         normalizedChapter: 0,
@@ -159,18 +142,14 @@ export const generateBibleDocument = (
     for (const phrase of phrases) {
         const activeSections: { sectionId: number; level: number }[] = [];
         let activeParagraph: IBibleOutputGroup<'paragraph'>['meta'] | undefined;
-        const activeModifiers: PhraseModifiers = {
+        const activeModifiers: PhraseModifiers & { quoteWho?: string; person?: string } = {
             indentLevel: 0,
-            quoteLevel: 0,
-            bold: false,
-            italic: false,
-            emphasis: false,
-            divineName: false
+            quoteLevel: 0
         };
 
         // go backwards through all groups and check if the current phrase is still within that
         // group. if not, "go out" of that group by setting the activeGroup to its parent
-        let _group = <BibleOutput | IBibleOutputRoot>activeGroup;
+        let _group = <BibleOutputContainer>activeGroup;
         while (_group.parent) {
             let isPhraseInGroup = true;
             if (_group.type === 'section') {
@@ -180,18 +159,30 @@ export const generateBibleDocument = (
                 if (_group.groupType === 'paragraph') {
                     isPhraseInGroup =
                         (<IBibleOutputGroup<'paragraph'>>_group).meta.phraseEndId >= phrase.id;
-                } else if (_group.groupType === 'indent' || _group.groupType === 'quote') {
-                    const modifierName =
-                        _group.groupType === 'indent' ? 'indentLevel' : 'quoteLevel';
+                } else if (_group.groupType === 'indent') {
                     // => this group has a level (numeric) modifier
                     // check if the current phrase has the same or higher level
                     isPhraseInGroup =
-                        !!phrase.modifiers[modifierName] &&
-                        phrase.modifiers[modifierName]! >=
-                            (<IBibleOutputGroup<LevelGroups>>_group).meta.level;
+                        !!phrase.getModifierValue('indentLevel') &&
+                        phrase.getModifierValue('indentLevel')! >=
+                            (<IBibleOutputGroup<'indent'>>_group).meta.level;
+                } else if (_group.groupType === 'quote') {
+                    isPhraseInGroup =
+                        phrase.quoteWho === _group.modifier &&
+                        !!phrase.getModifierValue('quoteLevel') &&
+                        phrase.getModifierValue('quoteLevel')! >=
+                            (<IBibleOutputGroup<'quote'>>_group).meta.level;
+                } else if (
+                    _group.groupType === 'orderedListItem' ||
+                    _group.groupType === 'unorderedListItem' ||
+                    _group.groupType === 'translationChange'
+                ) {
+                    isPhraseInGroup = phrase.getModifierValue(_group.groupType) === _group.modifier;
+                } else if (_group.groupType === 'person') {
+                    isPhraseInGroup = phrase.person === _group.modifier;
                 } else {
                     // => this group has a boolean modifier
-                    isPhraseInGroup = !!phrase.modifiers[_group.groupType];
+                    isPhraseInGroup = !!phrase.getModifierValue(_group.groupType);
                 }
             }
 
@@ -215,13 +206,21 @@ export const generateBibleDocument = (
             } else if (_group.type === 'group') {
                 if (_group.groupType === 'paragraph') {
                     activeParagraph = (<IBibleOutputGroup<'paragraph'>>_group).meta;
-                } else if (_group.groupType === 'indent' || _group.groupType === 'quote') {
-                    const modifierName =
-                        _group.groupType === 'indent' ? 'indentLevel' : 'quoteLevel';
+                } else if (_group.groupType === 'indent') {
                     // => this group has a level (numeric) modifier
-                    activeModifiers[modifierName] = (<IBibleOutputGroup<'indent' | 'quote'>>(
+                    activeModifiers['indentLevel'] = (<IBibleOutputGroup<'indent'>>(
                         _group
                     )).meta.level;
+                } else if (_group.groupType === 'quote') {
+                    activeModifiers['quoteLevel'] = (<IBibleOutputGroup<'quote'>>_group).meta.level;
+                    activeModifiers['quoteWho'] = _group.modifier;
+                } else if (
+                    _group.groupType === 'orderedListItem' ||
+                    _group.groupType === 'unorderedListItem' ||
+                    _group.groupType === 'translationChange' ||
+                    _group.groupType === 'person'
+                ) {
+                    activeModifiers[_group.groupType] = _group.modifier;
                 } else {
                     // => this group has a boolean modifier
                     activeModifiers[_group.groupType] = true;
@@ -236,6 +235,46 @@ export const generateBibleDocument = (
         /*
          * now go through all sections and the phrases modifiers and create new groups if needed
          */
+
+        // go through all levels of context
+        for (const level of Object.keys(context)
+            .sort()
+            .map(key => +key)) {
+            // look for the section where the phrase is in (if any) and open it if necessary
+            const section = context[level].includedSections.find(
+                _section => phrase.id >= _section.phraseStartId && phrase.id <= _section.phraseEndId
+            );
+            // is the section already active?
+            if (
+                section &&
+                !activeSections.find(activeSection => activeSection.sectionId === section.id)
+            ) {
+                if (
+                    // section can only be children of root or other sections. Else the strucuture
+                    // got corrupted somewhere. throw an error so we know about it
+                    (activeGroup.type !== 'root' && activeGroup.type !== 'section') ||
+                    // throw error if creating a section in the wrong level order
+                    activeSections.find(activeSection => activeSection.level >= level)
+                ) {
+                    throw new Error(`can't create output object: corrupted structure (section)`);
+                }
+
+                const newSectionMeta = {
+                    sectionId: section.id,
+                    level: section.level
+                };
+                const newSection: IBibleOutputSection = {
+                    ...section,
+                    type: 'section',
+                    meta: newSectionMeta,
+                    contents: [],
+                    parent: activeGroup
+                };
+                activeGroup.contents.push(newSection);
+                activeGroup = newSection;
+                activeSections.push(newSectionMeta);
+            }
+        }
 
         // look for the paragraph where the phrase is in (if any) and open it if necessary
         const paragraph = paragraphs.find(
@@ -266,128 +305,137 @@ export const generateBibleDocument = (
             activeParagraph = newParagraphMeta;
         }
 
-        // go through all levels of context, starting by the highest
-        for (const level of Object.keys(context)
-            .sort()
-            .reverse()
-            .map(key => +key)) {
-            // look for the section where the phrase is in (if any) and open it if necessary
-            const section = context[level].includedSections.find(
-                _section => phrase.id >= _section.phraseStartId && phrase.id <= _section.phraseEndId
-            );
-            // is the section already active?
-            if (
-                section &&
-                !activeSections.find(activeSection => activeSection.sectionId === section.id)
-            ) {
-                if (
-                    // section can only be children of root or other sections. Else the strucuture
-                    // got corrupted somewhere. throw an error so we know about it
-                    (activeGroup.type !== 'root' && activeGroup.type !== 'section') ||
-                    // throw error if creating a section in the wrong level order
-                    activeSections.find(activeSection => activeSection.level >= level)
-                )
-                    throw new Error(`can't create output object: corrupted structure (section)`);
-
-                const newSectionMeta = {
-                    sectionId: section.id,
-                    level: section.level
-                };
-                const newSection: IBibleOutputSection = {
-                    ...section,
-                    type: 'section',
-                    meta: newSectionMeta,
-                    contents: [],
-                    parent: activeGroup
-                };
-                activeGroup.contents.push(newSection);
-                activeGroup = newSection;
-                activeSections.push(newSectionMeta);
-            }
-        }
-
         // loop through modifiers and check if active check if they need to be started
 
-        for (const levelGroup of levelGroups) {
-            const levelModifier = levelGroup === 'indent' ? 'indentLevel' : 'quoteLevel';
-            if (
-                phrase.modifiers[levelModifier] &&
-                phrase.modifiers[levelModifier]! > activeModifiers[levelModifier]
+        // force a specific order of modifiers:
+        const modifiers: (keyof PhraseModifiers | 'person')[] = [
+            'unorderedListItem',
+            'orderedListItem',
+            'indentLevel',
+            'quoteLevel',
+            'emphasis',
+            'bold',
+            'italic',
+            'translationChange',
+            'person',
+            'divineName'
+        ];
+
+        for (const modifier of modifiers) {
+            let newGroup = null;
+            if (modifier === 'indentLevel') {
+                if (
+                    phrase.getModifierValue('indentLevel') &&
+                    (!activeModifiers['indentLevel'] ||
+                        phrase.getModifierValue('indentLevel')! > activeModifiers['indentLevel']!)
+                ) {
+                    // => this phrase starts a new indent group
+
+                    newGroup = <IBibleOutputGroup<'indent'>>{
+                        type: 'group',
+                        groupType: 'indent',
+                        parent: activeGroup,
+                        meta: { level: phrase.getModifierValue('indentLevel')! },
+                        contents: []
+                    };
+
+                    activeModifiers['indentLevel'] = phrase.getModifierValue('indentLevel')!;
+                }
+            } else if (modifier === 'quoteLevel') {
+                if (
+                    phrase.getModifierValue('quoteLevel') &&
+                    (!activeModifiers['quoteLevel'] ||
+                        phrase.getModifierValue('quoteLevel')! > activeModifiers['quoteLevel']!)
+                ) {
+                    // => this phrase starts a new quote group
+
+                    newGroup = <IBibleOutputGroup<'quote'>>{
+                        type: 'group',
+                        groupType: 'quote',
+                        modifier: phrase.quoteWho,
+                        parent: activeGroup,
+                        meta: { level: phrase.getModifierValue('quoteLevel')! },
+                        contents: []
+                    };
+
+                    activeModifiers['quoteLevel'] = phrase.getModifierValue('quoteLevel')!;
+                }
+            } else if (
+                modifier === 'orderedListItem' ||
+                modifier === 'unorderedListItem' ||
+                modifier === 'translationChange'
             ) {
-                // => this phrase starts a new indent group
+                if (
+                    phrase.getModifierValue(modifier) &&
+                    phrase.getModifierValue(modifier) !== activeModifiers[modifier]
+                ) {
+                    newGroup = <IBibleOutputGroup<ValueModifiers>>{
+                        type: 'group',
+                        meta: undefined, // TypeScript wants that (bug?)
+                        groupType: modifier,
+                        modifier: phrase.getModifierValue(modifier),
+                        parent: activeGroup,
+                        contents: []
+                    };
+                    activeModifiers[modifier] = phrase.getModifierValue(modifier);
+                }
+            } else if (modifier === 'person') {
+                if (phrase.person && phrase.person !== activeModifiers['person']) {
+                    newGroup = <IBibleOutputGroup<'person'>>{
+                        type: 'group',
+                        meta: undefined, // TypeScript wants that (bug?)
+                        groupType: 'person',
+                        modifier: phrase.person,
+                        parent: activeGroup,
+                        contents: []
+                    };
+                    activeModifiers[modifier] = phrase.person;
+                }
+            } else {
+                if (phrase.getModifierValue(modifier) && !activeModifiers[modifier]) {
+                    // => this phrase starts a boolean modifier
 
-                const newLevelGroup: IBibleOutputGroup<LevelGroups> = {
-                    type: 'group',
-                    groupType: levelGroup,
-                    parent: activeGroup,
-                    meta: { level: phrase.modifiers[levelModifier]! },
-                    contents: []
-                };
-
-                // RADAR: TypeScript shows an error if we use 'push()' here. Feels like a bug in TS.
-                activeGroup.contents[activeGroup.contents.length] = newLevelGroup;
-                activeGroup = newLevelGroup;
-                activeModifiers[levelModifier] = phrase.modifiers[levelModifier]!;
+                    newGroup = <IBibleOutputGroup<BooleanModifiers>>{
+                        type: 'group',
+                        meta: undefined, // TypeScript wants that (bug?)
+                        groupType: modifier,
+                        parent: activeGroup,
+                        contents: []
+                    };
+                    activeModifiers[modifier] = true;
+                }
             }
-        }
-
-        for (const booleanModifier of booleanModifiers) {
-            if (phrase.modifiers[booleanModifier] && !activeModifiers[booleanModifier]) {
-                // => this phrase starts a boolean modifier
-
-                const newBooleanGroup: IBibleOutputGroup<BooleanModifiers> = {
-                    type: 'group',
-                    meta: undefined, // TypeScript wants that (bug?)
-                    groupType: booleanModifier,
-                    parent: activeGroup,
-                    contents: []
-                };
-                // RADAR: TypeScript shows an error if we use 'push()' here. Feels like a bug in TS.
-                activeGroup.contents[activeGroup.contents.length] = newBooleanGroup;
-                activeGroup = newBooleanGroup;
-                activeModifiers[booleanModifier] = true;
+            if (newGroup) {
+                activeGroup.contents[activeGroup.contents.length] = newGroup;
+                activeGroup = newGroup;
             }
-        }
-
-        // by now we have built the structure up to the point where we can insert the phrase.
-        // if activeGroup is already a phrases-group, it has been set by they previous phrase
-        // (and the current phrase didn't change any modifiers)
-        if (activeGroup.type !== 'phrases') {
-            const newPhrasesGroup: IBibleOutputPhrases = {
-                type: 'phrases',
-                contents: [],
-                parent: activeGroup
-            };
-            // RADAR: TypeScript shows an error if we use 'push()' here. Feels like a bug in TS.
-            activeGroup.contents[activeGroup.contents.length] = newPhrasesGroup;
-            activeGroup = newPhrasesGroup;
         }
 
         // set numbering
         // get the most outer group for wich this is the first phrase
-        let numberingGroup: BibleOutput | IBibleOutputRoot | null = null;
-        _group = <BibleOutput | IBibleOutputRoot>activeGroup;
+        let numberingGroup: BibleOutputContainer | null = null;
+        let _numberingGroupTmp: BibleOutputContainer | undefined = activeGroup;
         do {
-            // if we are at the top level (phrases can't have groups as content)
-            if (_group.type === 'phrases') {
-                // if there is already content in the phrase group => we can't use that one
-                if (_group.contents.length) break;
-                else numberingGroup = _group;
+            if (_numberingGroupTmp === activeGroup) {
+                if (_numberingGroupTmp.contents.length === 0) numberingGroup = _numberingGroupTmp;
+                else break;
+            } else {
+                // as soon as we hit a group with more than one content we can break, otherwise it
+                // is a valid numbering group(=> if a parent has only one member it is the one from
+                // where we navigated via the parent attribute)
+                // tslint:disable-next-line:one-line
+                if (_numberingGroupTmp.contents.length > 1) break;
+                else if (_numberingGroupTmp.contents.length === 1)
+                    numberingGroup = _numberingGroupTmp;
+                // there should be no group that is not a phrase group and has no child
+                else if (_numberingGroupTmp.contents.length === 0)
+                    throw new Error(
+                        `can't create output object: corrupted structure (empty ancestor group)`
+                    );
             }
-            // as soon as we hit a group with more than one content we can break, otherwise it is a
-            // valid numbering group(=> if a parent has only one member it is the one from where we
-            // navigated via the parent attribute)
-            // tslint:disable-next-line:one-line
-            else if (_group.contents.length > 1) break;
-            else if (_group.contents.length === 1) numberingGroup = _group;
-            // there should be no group that is not a phrase group and has no child
-            else if (_group.contents.length === 0)
-                throw new Error(
-                    `can't create output object: corrupted structure (empty ancestor group)`
-                );
 
-            if (_group.parent) _group = _group.parent;
-        } while (!!_group.parent);
+            _numberingGroupTmp = _numberingGroupTmp.parent;
+        } while (!!_numberingGroupTmp);
 
         const numbering: IBibleOutputNumbering = {};
 
@@ -421,32 +469,27 @@ export const generateBibleDocument = (
             currentNumbering.versionVerse = phrase.versionVerseNum;
         }
 
+        const outputPhrase: IBibleOutputPhrase = { ...phrase, type: 'phrase', parent: activeGroup };
+
         if (Object.keys(numbering).length) {
             // we have no suitable numberingGroup => a new outputGroupPhrases needs to be created
             if (numberingGroup === null) {
-                const newPhrasesGroup: IBibleOutputPhrases = {
-                    type: 'phrases',
-                    contents: [],
-                    parent: activeGroup.parent
-                };
-                // RADAR: TypeScript shows an error if we use 'push()' here. Feels like a bug in TS.
-                activeGroup.parent.contents[activeGroup.parent.contents.length] = newPhrasesGroup;
-                activeGroup = newPhrasesGroup;
-                numberingGroup = activeGroup;
+                outputPhrase.numbering = numbering;
+            } else {
+                // if the numberingGroup we figured out already has numbering values set we screwed
+                // up somewhere
+                if (numberingGroup.numbering)
+                    throw new Error(
+                        `can't create output object: corrupted structure (unexpected numbering ` +
+                            `group)`
+                    );
+
+                numberingGroup.numbering = numbering;
             }
-
-            // if the numberingGroup we figured out already has numbering values set we screwed up
-            // somewhere
-            if (numberingGroup.numbering)
-                throw new Error(
-                    `can't create output object: corrupted structure (unexpected numbering group)`
-                );
-
-            numberingGroup.numbering = numbering;
         }
 
         // finally we can add our phrase to the data structure
-        activeGroup.contents.push(phrase);
+        activeGroup.contents[activeGroup.contents.length] = outputPhrase;
     }
 
     return rootGroup;
