@@ -11,7 +11,8 @@ beforeAll(async () => {
         new BibleVersion({
             version: 'ESV',
             title: 'English Standard Bible',
-            language: 'en-US'
+            language: 'en-US',
+            chapterVerseSeparator: ':'
         })
     );
     await sqlBible.setVersion('ESV');

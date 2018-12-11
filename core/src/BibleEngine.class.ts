@@ -138,6 +138,18 @@ export class BibleEngine {
         const book = await this.getBookForVersionReference(range);
         if (!book) throw new Error(`can't get formatted text: invalid book`);
 
+        const bookAbbreviations = await entityManager
+            .find(BibleBook, {
+                select: ['osisId', 'abbreviation']
+            })
+            .then(books => {
+                const dict: { [index: string]: string } = {};
+                for (const _book of books) {
+                    dict[_book.osisId] = _book.abbreviation;
+                }
+                return dict;
+            });
+
         const rangeNormalized = range.isNormalized
             ? <IBibleReferenceRangeNormalized>range
             : await this.getNormalizedReferenceRange(range);
@@ -236,7 +248,13 @@ export class BibleEngine {
             version,
             versionBook: book,
             range: rangeNormalized,
-            content: generateBibleDocument(phrases, paragraphs, context),
+            content: generateBibleDocument(
+                phrases,
+                paragraphs,
+                context,
+                bookAbbreviations,
+                version.chapterVerseSeparator
+            ),
             context,
             contextRanges
         };

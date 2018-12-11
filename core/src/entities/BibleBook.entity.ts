@@ -10,6 +10,9 @@ export class BibleBook implements IBibleBook {
     osisId: string;
 
     @Column()
+    abbreviation: string;
+
+    @Column()
     number: number;
 
     @Column()
@@ -34,14 +37,14 @@ export class BibleBook implements IBibleBook {
 
     @AfterLoad()
     parse() {
-        this.chaptersCount = JSON.parse(this.chaptersMetaJson);
+        if (this.chaptersMetaJson) this.chaptersCount = JSON.parse(this.chaptersMetaJson);
         if (this.introductionJson) this.introduction = JSON.parse(this.introductionJson);
     }
 
     @BeforeInsert()
     @BeforeUpdate()
     async prepare() {
-        this.chaptersMetaJson = JSON.stringify(this.chaptersCount);
+        if (this.chaptersCount) this.chaptersMetaJson = JSON.stringify(this.chaptersCount);
         if (this.introduction) this.introductionJson = JSON.stringify(this.introduction);
     }
 

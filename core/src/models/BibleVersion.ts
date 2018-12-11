@@ -7,5 +7,6 @@ export interface IBibleVersion {
     language: string;
     copyrightShort?: string;
     copyrightLong?: Document;
+    chapterVerseSeparator: string;
     hasStrongs?: boolean;
 }

@@ -1,12 +1,39 @@
-import { IBibleOutputRich, IBibleOutputRoot, BibleOutput } from '../models';
+import { IBibleOutputRich, IBibleOutputRoot, BibleOutput, IBibleVersion } from '../models';
 import { generateBibleDocument } from './content.functions';
 import { BibleParagraph, BiblePhrase, BibleSection } from '../entities';
 
 describe('generateBibleDocument', () => {
     let doc: IBibleOutputRoot;
 
+    const version: IBibleVersion = {
+        version: 'ESV',
+        title: 'ESV',
+        chapterVerseSeparator: ':',
+        language: 'en-US'
+    };
+
+    const bookAbbreviations = {
+        Gen: 'Gen',
+        Ps: 'Ps'
+    };
+
     const phrase1 = new BiblePhrase(
-        { content: 'phrase1', versionChapterNum: 1, versionVerseNum: 1 },
+        {
+            content: 'phrase1',
+            versionChapterNum: 1,
+            versionVerseNum: 1,
+            crossReferences: [
+                {
+                    key: 'a',
+                    range: {
+                        bookOsisId: 'Ps',
+                        versionChapterNum: 23,
+                        versionVerseNum: 5,
+                        versionVerseEndNum: 7
+                    }
+                }
+            ]
+        },
         {
             isNormalized: true,
             versionId: 1,
@@ -85,10 +112,17 @@ describe('generateBibleDocument', () => {
     });
     section2_1.id = 3;
 
+    /** should be section1 group */
     let item1: BibleOutput;
+    /** should be paragraph group */
     let item1_1: BibleOutput;
+    /** should be phrase1 */
+    let item1_1_1: BibleOutput;
+    /** should be quote group with numbering object */
     let item1_1_2: BibleOutput;
+    /** should be section2 group */
     let item2: BibleOutput;
+    /** should be section 2_1 group */
     let item2_1: BibleOutput;
 
     beforeAll(() => {
@@ -106,11 +140,18 @@ describe('generateBibleDocument', () => {
                 previousSections: []
             }
         };
-        doc = generateBibleDocument(phrases, paragraphs, context);
+        doc = generateBibleDocument(
+            phrases,
+            paragraphs,
+            context,
+            bookAbbreviations,
+            version.chapterVerseSeparator
+        );
         item1 = doc.contents[0];
         if (item1.type === 'section') {
             item1_1 = item1.contents[0];
             if (item1_1.type === 'group') {
+                item1_1_1 = item1_1.contents[0];
                 item1_1_2 = item1_1.contents[1];
             }
         }
@@ -134,13 +175,9 @@ describe('generateBibleDocument', () => {
         expect(item2_1.type === 'section' && item2_1.level === 2).toBe(true);
     });
 
-    test('should create new numbering group on verse change', () => {
-        expect(
-            item1_1 &&
-                item1_1.type === 'group' &&
-                item1_1.contents.length === 2 &&
-                !!item1_1.contents[1].numbering
-        ).toBe(true);
+    test('should add numbering object on verse change', () => {
+        expect(item1_1_1.numbering).not.toBeDefined();
+        expect(item1_1_2.numbering).toBeDefined();
     });
 
     test('should create numbering group on the most outer level possible', () => {
@@ -148,8 +185,22 @@ describe('generateBibleDocument', () => {
     });
 
     test('should group sequential phrases with the same modifier', () => {
-        expect(item1_1_2 && item1_1_2.type === 'group' && item1_1_2.contents.length === 2).toBe(
-            true
-        );
+        expect(
+            item1_1_2 &&
+                item1_1_2.type === 'group' &&
+                item1_1_2.groupType === 'quote' &&
+                item1_1_2.contents.length === 2
+        ).toBe(true);
+    });
+
+    test('should generate a label of cross references according to version paramters', () => {
+        expect.assertions(1);
+        if (
+            item1_1_1.type === 'phrase' &&
+            item1_1_1.crossReferences &&
+            item1_1_1.crossReferences.length > 0
+        ) {
+            expect(item1_1_1.crossReferences[0].label).toBe('Ps 23:5-7');
+        }
     });
 });

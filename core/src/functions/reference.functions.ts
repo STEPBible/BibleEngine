@@ -116,6 +116,31 @@ export const generateReferenceId = (reference: IBibleReferenceNormalized): numbe
 };
 
 /**
+ * returns a readable string of the reference range
+ *
+ * @param {IBibleReferenceRange} range
+ * @param {string} bookAbbreviation
+ * @param {string} chapterVerseSeparator
+ * @returns {string}
+ */
+export const generateReferenceRangeLabel = (
+    range: IBibleReferenceRange,
+    bookAbbreviation: string,
+    chapterVerseSeparator: string
+) => {
+    let label = bookAbbreviation;
+    if (range.versionChapterNum) label += ` ${range.versionChapterNum}`;
+    if (range.versionVerseNum) label += `${chapterVerseSeparator}${range.versionVerseNum}`;
+    if (range.versionChapterEndNum || range.versionVerseEndNum) label += '-';
+    if (range.versionChapterEndNum) {
+        label += `${range.versionChapterEndNum}`;
+        if (range.versionVerseEndNum) label += chapterVerseSeparator;
+    }
+    if (range.versionVerseEndNum) label += `${range.versionVerseEndNum}`;
+    return label;
+};
+
+/**
  * parses a database phrase id into a bible phrase reference object
  * @param {number} id database phrase id
  * @returns {IBiblePhraseRef}

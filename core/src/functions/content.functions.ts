@@ -17,6 +17,7 @@ import {
 } from '../models';
 import { BiblePhrase, BibleParagraph } from '../entities';
 import { BooleanModifiers, ValueModifiers } from '../models/BiblePhrase';
+import { generateReferenceRangeLabel } from './reference.functions';
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
@@ -122,7 +123,9 @@ export const convertBibleOutputToBibleInput = (data: BibleOutput[]): IBibleInput
 export const generateBibleDocument = (
     phrases: BiblePhrase[],
     paragraphs: BibleParagraph[],
-    context: IBibleOutputRich['context']
+    context: IBibleOutputRich['context'],
+    bookAbbreviations: { [index: string]: string },
+    chapterVerseSeparator: string
 ) => {
     const rootGroup: IBibleOutputRoot = {
         type: 'root',
@@ -470,6 +473,16 @@ export const generateBibleDocument = (
         }
 
         const outputPhrase: IBibleOutputPhrase = { ...phrase, type: 'phrase', parent: activeGroup };
+        if (phrase.crossReferences && phrase.crossReferences.length) {
+            outputPhrase.crossReferences = phrase.crossReferences.map(crossRef => ({
+                ...crossRef,
+                label: generateReferenceRangeLabel(
+                    crossRef.range,
+                    bookAbbreviations[crossRef.range.bookOsisId],
+                    chapterVerseSeparator
+                )
+            }));
+        }
 
         if (Object.keys(numbering).length) {
             // we have no suitable numberingGroup => a new outputGroupPhrases needs to be created

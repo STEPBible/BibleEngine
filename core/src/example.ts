@@ -15,10 +15,11 @@ export const genDb = async () => {
         new BibleVersion({
             version: 'ESV',
             title: 'English Standard Bible',
-            language: 'en-US'
+            language: 'en-US',
+            chapterVerseSeparator: ':'
         })
     );
-    for (let bookNum = 1; bookNum <= 66; bookNum++) {
+    for (let bookNum = 1; bookNum <= 2; bookNum++) {
         console.log(
             'adding book ' + bookNum
             // ' and chapter ' +
@@ -63,9 +64,10 @@ export const genDb = async () => {
                                           {
                                               key: 'a',
                                               range: {
-                                                  versionId: esvVersion.id,
-                                                  bookOsisId: 'Gen',
-                                                  versionChapterNum: 1
+                                                  bookOsisId: 'Exod',
+                                                  versionChapterNum: 1,
+                                                  versionVerseNum: 5,
+                                                  versionVerseEndNum: 7
                                               }
                                           }
                                       ]
@@ -82,6 +84,7 @@ export const genDb = async () => {
                 versionId: esvVersion.id,
                 number: bookNum,
                 osisId: getOsisIdFromBookGenericId(bookNum),
+                abbreviation: wordGen({ min: 1, max: 1, join: ' ' }),
                 title: wordGen({ min: 1, max: 3, join: ' ' }),
                 type: bookNum < 40 ? 'ot' : 'nt'
             },
@@ -95,12 +98,12 @@ export const genDb = async () => {
 export const getData = async () => {
     const output = await sqlBible.getFullDataForReferenceRange({
         versionId: 1,
-        bookOsisId: 'Gen'
-        // versionChapterNum: 1,
-        // versionVerseNum: 4,
-        // versionVerseEndNum: 6
+        bookOsisId: 'Gen',
+        versionChapterNum: 1,
+        versionVerseNum: 4,
+        versionVerseEndNum: 6
     });
-    console.dir(output, { depth: 4 });
+    console.dir(output, { depth: 8 });
 
     // const versionData = await sqlBible.getRawVersionData(1);
     // console.dir(versionData.bookData[0].content, { depth: 7 });
@@ -115,7 +118,7 @@ export const getData = async () => {
 };
 
 const run = async () => {
-    await genDb();
+    // await genDb();
     getData();
 };
 

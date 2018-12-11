@@ -77,9 +77,11 @@ export class BiblePhrase implements IBiblePhrase {
             if (hasActiveModifiers) this.modifiers = modifiers;
         }
         if (phrase.crossReferences) {
-            this.crossReferences = phrase.crossReferences.map(
-                crossReference => new BibleCrossReference(crossReference, true)
-            );
+            this.crossReferences = phrase.crossReferences.map(crossReference => {
+                if (!crossReference.range.versionId)
+                    crossReference.range.versionId = reference.versionId;
+                return new BibleCrossReference(crossReference, true);
+            });
         }
         if (phrase.notes) this.notes = phrase.notes.map(note => new BibleNote(note));
     }

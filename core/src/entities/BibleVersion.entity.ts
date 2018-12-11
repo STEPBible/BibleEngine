@@ -33,6 +33,9 @@ export class BibleVersion implements IBibleVersion {
     copyrightLongJson?: string;
     copyrightLong?: Document;
 
+    @Column()
+    chapterVerseSeparator: string;
+
     @Column({ nullable: true })
     hasStrongs?: boolean;
 
