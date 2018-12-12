@@ -26,8 +26,8 @@ export class BibleCrossReference implements IBibleCrossReference {
     // the normalizedRefIds encode the range attribute:
     range: IBibleReferenceRangeNormalized;
 
-    @Column()
-    versionId: number;
+    @Column({ nullable: true })
+    versionId?: number;
 
     @Column({ nullable: true })
     versionChapterNum?: number;
@@ -64,14 +64,16 @@ export class BibleCrossReference implements IBibleCrossReference {
 
         this.key = crossRef.key;
 
-        if (!crossRef.range.versionId)
+        if (!crossRef.range.versionId && !crossRef.range.isNormalized)
             throw new Error(`can't generate cross reference: versionId is missing`);
 
-        this.versionId = crossRef.range.versionId;
-        this.versionChapterNum = crossRef.range.versionChapterNum;
-        this.versionVerseNum = crossRef.range.versionVerseNum;
-        this.versionChapterEndNum = crossRef.range.versionChapterEndNum;
-        this.versionVerseEndNum = crossRef.range.versionVerseEndNum;
+        if (crossRef.range.versionId) {
+            this.versionId = crossRef.range.versionId;
+            this.versionChapterNum = crossRef.range.versionChapterNum;
+            this.versionVerseNum = crossRef.range.versionVerseNum;
+            this.versionChapterEndNum = crossRef.range.versionChapterEndNum;
+            this.versionVerseEndNum = crossRef.range.versionVerseEndNum;
+        }
 
         if (!crossRef.range.isNormalized) {
             if (allowCreationWithoutNormalizedReference)
@@ -80,10 +82,11 @@ export class BibleCrossReference implements IBibleCrossReference {
                 // 'finalizeVersion'
                 this.range = {
                     ...crossRef.range,
+                    versionId: crossRef.range.versionId,
                     normalizedChapterNum: crossRef.range.versionChapterNum,
                     normalizedVerseNum: crossRef.range.versionVerseNum,
                     normalizedChapterEndNum: crossRef.range.versionChapterEndNum,
-                    normalizedVerseEndNum: crossRef.range.normalizedVerseEndNum,
+                    normalizedVerseEndNum: crossRef.range.versionVerseEndNum,
                     isNormalized: true
                 };
             else {
@@ -106,7 +109,8 @@ export class BibleCrossReference implements IBibleCrossReference {
         const normalizedRef = parseReferenceId(this.normalizedRefId!);
         this.range = {
             isNormalized: true,
-            bookOsisId: normalizedRef.bookOsisId
+            bookOsisId: normalizedRef.bookOsisId,
+            versionId: this.versionId
         };
         if (normalizedRef.normalizedChapterNum)
             this.range.normalizedChapterNum = normalizedRef.normalizedChapterNum;
@@ -130,12 +134,13 @@ export class BibleCrossReference implements IBibleCrossReference {
     @BeforeInsert()
     @BeforeUpdate()
     async prepare() {
-        this.normalizedRefId = generateReferenceId(<IBibleReferenceRangeNormalized>this.range);
-        if (this.versionChapterEndNum || this.versionVerseEndNum)
+        this.normalizedRefId = generateReferenceId(this.range);
+        if (this.range.normalizedChapterEndNum || this.range.normalizedVerseEndNum)
             this.normalizedRefIdEnd = generateReferenceId({
                 isNormalized: true,
                 bookOsisId: this.range.bookOsisId,
-                normalizedChapterNum: this.range.normalizedChapterEndNum,
+                normalizedChapterNum:
+                    this.range.normalizedChapterEndNum || this.range.normalizedChapterNum,
                 normalizedVerseNum: this.range.normalizedVerseEndNum
             });
     }

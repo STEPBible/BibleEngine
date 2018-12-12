@@ -125,7 +125,7 @@ export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, col =
  * @param {string} [col='id']
  */
 export const generatePhraseIdVersionSql = (versionId: number, col = 'id') =>
-    `cast(${col} % 100000 / 100 as int) = ${versionId}`;
+    `cast(${col} % 100000 / 100 as UNSIGNED) = ${versionId}`;
 
 /**
  * generates SQL for a range-query for reference ids

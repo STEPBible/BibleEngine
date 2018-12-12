@@ -1,64 +1,81 @@
 import {
-    BibleOutput,
-    IBibleOutputGroup,
-    IBibleOutputNumbering,
-    IBibleOutputPhrase,
+    BibleContentGenerator,
+    IBibleContentGeneratorGroup,
+    IBibleContentGeneratorPhrase,
     IBibleOutputRich,
-    IBibleOutputRoot,
-    IBibleOutputSection,
+    IBibleContentGeneratorRoot,
+    IBibleContentGeneratorSection,
     IBibleVerse,
-    BibleOutputContainer
+    BibleContentGeneratorContainer,
+    IBibleOutputRoot
 } from './BibleOutput';
 import {
     IBibleReference,
     IBibleReferenceRange,
     IBibleReferenceNormalized,
     IBibleReferenceRangeNormalized,
-    IBiblePhraseRef
+    IBiblePhraseRef,
+    IBibleReferenceRangeQuery,
+    IBibleReferenceVersion,
+    IBibleReferenceRangeVersion
 } from './BibleReference';
 import { IBibleBook } from './BibleBook';
 import { IBibleSection } from './BibleSection';
-import { IBiblePhrase, PhraseModifiers } from './BiblePhrase';
-import { IBibleInput, IBibleInputGroup, IBibleInputPhrase, IBibleInputSection } from './BibleInput';
+import { IBiblePhrase, PhraseModifiers, ValueModifiers, BooleanModifiers } from './BiblePhrase';
+import {
+    IBibleContent,
+    IBibleContentGroup,
+    IBibleContentPhrase,
+    IBibleContentSection,
+    IBibleContentGroupForInput,
+    IBibleContentPhraseForInput
+} from './BibleContent';
 import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext';
 import { Document } from './Document';
 import { IBibleVersion } from './BibleVersion';
 import { IDictionaryEntry } from './DictionaryEntry';
 import { IContentGroup } from './ContentGroup';
-import { BookWithContent } from './BibleInput';
+import { BookWithContentForInput } from './BibleContent';
 import { IBibleCrossReference } from './BibleCrossReference';
 import { IBibleNote } from './BibleNote';
 
 export {
     BibleBookPlaintext,
     BibleChapterPlaintext,
-    BibleOutput,
-    BibleOutputContainer,
-    BookWithContent,
+    BibleContentGenerator,
+    BibleContentGeneratorContainer,
+    BookWithContentForInput,
+    BooleanModifiers,
     Document,
     IBibleBook,
+    IBibleContent,
+    IBibleContentGeneratorGroup,
+    IBibleContentGeneratorPhrase,
+    IBibleContentGeneratorRoot,
+    IBibleContentGeneratorSection,
+    IBibleContentGroup,
+    IBibleContentGroupForInput,
+    IBibleContentPhrase,
+    IBibleContentPhraseForInput,
+    IBibleContentSection,
     IBibleCrossReference,
-    IBibleInput,
-    IBibleInputGroup,
-    IBibleInputPhrase,
-    IBibleInputSection,
     IBibleNote,
-    IBibleOutputGroup,
-    IBibleOutputNumbering,
-    IBibleOutputPhrase,
     IBibleOutputRich,
     IBibleOutputRoot,
-    IBibleOutputSection,
     IBiblePhrase,
     IBiblePhraseRef,
     IBibleReference,
     IBibleReferenceNormalized,
     IBibleReferenceRange,
     IBibleReferenceRangeNormalized,
+    IBibleReferenceRangeQuery,
+    IBibleReferenceRangeVersion,
+    IBibleReferenceVersion,
     IBibleSection,
     IBibleVerse,
     IBibleVersion,
     IContentGroup,
     IDictionaryEntry,
-    PhraseModifiers
+    PhraseModifiers,
+    ValueModifiers
 };

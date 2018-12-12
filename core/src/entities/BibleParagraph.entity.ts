@@ -12,10 +12,10 @@ export class BibleParagraph {
     @Column()
     versionId: number;
 
-    @Column({})
+    @Column({ type: 'bigint' })
     phraseStartId: number;
 
-    @Column({})
+    @Column({ type: 'bigint' })
     phraseEndId: number;
 
     constructor(versionId: number, phraseStartId: number, phraseEndId: number) {

@@ -1,32 +1,35 @@
 import {
-    IBibleInput,
     BibleBookPlaintext,
+    BibleContentGeneratorContainer,
+    BooleanModifiers,
+    IBibleContent,
+    IBibleContentGeneratorGroup,
+    IBibleContentGeneratorPhrase,
+    IBibleContentGeneratorRoot,
+    IBibleContentGeneratorSection,
+    IBibleContentGroup,
+    IBibleContentPhrase,
+    IBibleContentSection,
     IBibleOutputRich,
     IBibleOutputRoot,
-    BibleOutput,
-    IBibleOutputGroup,
+    IContentGroup,
     PhraseModifiers,
-    IBiblePhrase,
-    IBibleOutputSection,
-    IBibleOutputPhrase,
-    IBibleOutputNumbering,
-    IBibleInputGroup,
-    IBibleInputPhrase,
-    IBibleInputSection,
-    BibleOutputContainer
+    ValueModifiers,
+    IBibleReferenceRange,
+    IBibleCrossReference
 } from '../models';
 import { BiblePhrase, BibleParagraph } from '../entities';
-import { BooleanModifiers, ValueModifiers } from '../models/BiblePhrase';
 import { generateReferenceRangeLabel } from './reference.functions';
+import { IBibleNumbering, IBibleContentForInput } from '../models/BibleContent';
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
- * @param {IBibleInput[]} contents
+ * @param {IBibleContent[]} contents
  * @param {BibleBookPlaintext} _accChapters
  * @returns {IBibleBookPlaintext}
  */
 export const convertBibleInputToBookPlaintext = (
-    contents: IBibleInput[],
+    contents: IBibleContentForInput[],
     _accChapters: BibleBookPlaintext = new Map()
 ) => {
     for (const content of contents) {
@@ -47,26 +50,39 @@ export const convertBibleInputToBookPlaintext = (
 };
 
 /**
- * converts output of BibleEngine into format that can be used as input into the BibleEngine schema
- * @param {BibleOutput[]} data
- * @returns {IBibleInput[]}
+ * remove everything from 'data' that is not needed for input, mainly to reduce JSON size
+ * @param {IBibleContent[]} data
+ * @returns {IBibleContent[]}
  */
-export const convertBibleOutputToBibleInput = (data: BibleOutput[]): IBibleInput[] => {
-    const inputData: IBibleInput[] = [];
+export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBibleContent[] => {
+    // local helper function
+    const stripCrossRef = ({ key, range, label }: IBibleCrossReference) => {
+        const refRange: IBibleReferenceRange = {
+            bookOsisId: range.bookOsisId
+        };
+        if (range.versionChapterNum) refRange.versionChapterNum = range.versionChapterNum;
+        if (range.versionVerseNum) refRange.versionVerseNum = range.versionVerseNum;
+        if (range.versionChapterEndNum) refRange.versionChapterEndNum = range.versionChapterEndNum;
+        if (range.versionVerseEndNum) refRange.versionVerseEndNum = range.versionVerseEndNum;
+        if (range.normalizedChapterNum) refRange.normalizedChapterNum = range.normalizedChapterNum;
+        if (range.normalizedVerseNum) refRange.normalizedVerseNum = range.normalizedVerseNum;
+        if (range.normalizedChapterEndNum)
+            refRange.normalizedChapterEndNum = range.normalizedChapterEndNum;
+        if (range.normalizedVerseEndNum)
+            refRange.normalizedVerseEndNum = range.normalizedVerseEndNum;
+        return {
+            key,
+            label,
+            range: refRange
+        };
+    };
+    const inputData: IBibleContent[] = [];
     for (const obj of data) {
         if (obj.type === 'phrase') {
             const phrase = obj;
-            if (!phrase.versionChapterNum) {
-                throw new Error(`can't generate input data: corrupted structure`);
-            }
-            const inputPhrase: IBiblePhrase = {
-                content: phrase.content,
-                versionChapterNum: phrase.versionChapterNum,
-                versionVerseNum: phrase.versionVerseNum,
-                normalizedReference: {
-                    normalizedChapterNum: phrase.normalizedReference!.normalizedChapterNum,
-                    normalizedVerseNum: phrase.normalizedReference!.normalizedVerseNum
-                }
+            const inputPhrase: IBibleContentPhrase = {
+                type: 'phrase',
+                content: phrase.content
             };
             if (phrase.linebreak) inputPhrase.linebreak = true;
             if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
@@ -79,34 +95,33 @@ export const convertBibleOutputToBibleInput = (data: BibleOutput[]): IBibleInput
                     content
                 }));
             if (phrase.crossReferences && phrase.crossReferences.length)
-                inputPhrase.crossReferences = phrase.crossReferences.map(({ key, range }) => ({
-                    key,
-                    range
-                }));
+                inputPhrase.crossReferences = phrase.crossReferences.map(stripCrossRef);
+
+            if (phrase.numbering) inputPhrase.numbering = phrase.numbering;
 
             inputData.push({ type: 'phrase', ...inputPhrase });
         } else if (obj.type === 'group') {
-            inputData.push({
+            const inputGroup: IBibleContentGroup<IContentGroup['groupType']> = {
                 type: 'group',
                 groupType: obj.groupType,
                 modifier: obj.modifier,
-                contents: <(IBibleInputGroup | IBibleInputPhrase)[]>(
-                    convertBibleOutputToBibleInput(obj.contents)
-                )
-            });
+                contents: <
+                    (IBibleContentGroup<IContentGroup['groupType']> | IBibleContentPhrase)[]
+                >stripUnnecessaryDataFromBibleContent(obj.contents)
+            };
+            if (obj.numbering) inputGroup.numbering = obj.numbering;
+            inputData.push(inputGroup);
         } else if (obj.type === 'section') {
-            const inputSection: IBibleInputSection = {
+            const inputSection: IBibleContentSection = {
                 type: 'section',
-                contents: convertBibleOutputToBibleInput(obj.contents)
+                contents: stripUnnecessaryDataFromBibleContent(obj.contents)
             };
             if (obj.title) inputSection.title = obj.title;
             if (obj.subTitle) inputSection.subTitle = obj.subTitle;
             if (obj.description) inputSection.description = obj.description;
             if (obj.crossReferences && obj.crossReferences.length)
-                inputSection.crossReferences = obj.crossReferences.map(({ key, range }) => ({
-                    key,
-                    range
-                }));
+                inputSection.crossReferences = obj.crossReferences.map(stripCrossRef);
+            if (obj.numbering) inputSection.numbering = obj.numbering;
             inputData.push(inputSection);
         }
     }
@@ -118,7 +133,7 @@ export const convertBibleOutputToBibleInput = (data: BibleOutput[]): IBibleInput
  * @param {BiblePhrase[]} phrases
  * @param {BibleParagraph[]} paragraphs
  * @param {IBibleOutputRich['context']} context
- * @returns {IBibleOutputRoot}
+ * @returns {IBibleContentGeneratorRoot}
  */
 export const generateBibleDocument = (
     phrases: BiblePhrase[],
@@ -126,14 +141,14 @@ export const generateBibleDocument = (
     context: IBibleOutputRich['context'],
     bookAbbreviations: { [index: string]: string },
     chapterVerseSeparator: string
-) => {
-    const rootGroup: IBibleOutputRoot = {
+): IBibleOutputRoot => {
+    const rootGroup: IBibleContentGeneratorRoot = {
         type: 'root',
         parent: undefined,
         contents: []
     };
 
-    let activeGroup: BibleOutputContainer = rootGroup;
+    let activeGroup: BibleContentGeneratorContainer = rootGroup;
 
     const currentNumbering = {
         normalizedChapter: 0,
@@ -144,7 +159,7 @@ export const generateBibleDocument = (
 
     for (const phrase of phrases) {
         const activeSections: { sectionId: number; level: number }[] = [];
-        let activeParagraph: IBibleOutputGroup<'paragraph'>['meta'] | undefined;
+        let activeParagraph: IBibleContentGeneratorGroup<'paragraph'>['meta'] | undefined;
         const activeModifiers: PhraseModifiers & { quoteWho?: string; person?: string } = {
             indentLevel: 0,
             quoteLevel: 0
@@ -152,29 +167,30 @@ export const generateBibleDocument = (
 
         // go backwards through all groups and check if the current phrase is still within that
         // group. if not, "go out" of that group by setting the activeGroup to its parent
-        let _group = <BibleOutputContainer>activeGroup;
+        let _group = <BibleContentGeneratorContainer>activeGroup;
         while (_group.parent) {
             let isPhraseInGroup = true;
             if (_group.type === 'section') {
                 // check if the current phrase is within the group-section
-                isPhraseInGroup = _group.phraseEndId >= phrase.id;
+                isPhraseInGroup = _group.meta.phraseEndId >= phrase.id;
             } else if (_group.type === 'group') {
                 if (_group.groupType === 'paragraph') {
                     isPhraseInGroup =
-                        (<IBibleOutputGroup<'paragraph'>>_group).meta.phraseEndId >= phrase.id;
+                        (<IBibleContentGeneratorGroup<'paragraph'>>_group).meta.phraseEndId >=
+                        phrase.id;
                 } else if (_group.groupType === 'indent') {
                     // => this group has a level (numeric) modifier
                     // check if the current phrase has the same or higher level
                     isPhraseInGroup =
                         !!phrase.getModifierValue('indentLevel') &&
                         phrase.getModifierValue('indentLevel')! >=
-                            (<IBibleOutputGroup<'indent'>>_group).meta.level;
+                            (<IBibleContentGeneratorGroup<'indent'>>_group).meta.level;
                 } else if (_group.groupType === 'quote') {
                     isPhraseInGroup =
                         phrase.quoteWho === _group.modifier &&
                         !!phrase.getModifierValue('quoteLevel') &&
                         phrase.getModifierValue('quoteLevel')! >=
-                            (<IBibleOutputGroup<'quote'>>_group).meta.level;
+                            (<IBibleContentGeneratorGroup<'quote'>>_group).meta.level;
                 } else if (
                     _group.groupType === 'orderedListItem' ||
                     _group.groupType === 'unorderedListItem' ||
@@ -208,14 +224,16 @@ export const generateBibleDocument = (
                 activeSections.push(_group.meta);
             } else if (_group.type === 'group') {
                 if (_group.groupType === 'paragraph') {
-                    activeParagraph = (<IBibleOutputGroup<'paragraph'>>_group).meta;
+                    activeParagraph = (<IBibleContentGeneratorGroup<'paragraph'>>_group).meta;
                 } else if (_group.groupType === 'indent') {
                     // => this group has a level (numeric) modifier
-                    activeModifiers['indentLevel'] = (<IBibleOutputGroup<'indent'>>(
+                    activeModifiers['indentLevel'] = (<IBibleContentGeneratorGroup<'indent'>>(
                         _group
                     )).meta.level;
                 } else if (_group.groupType === 'quote') {
-                    activeModifiers['quoteLevel'] = (<IBibleOutputGroup<'quote'>>_group).meta.level;
+                    activeModifiers['quoteLevel'] = (<IBibleContentGeneratorGroup<'quote'>>(
+                        _group
+                    )).meta.level;
                     activeModifiers['quoteWho'] = _group.modifier;
                 } else if (
                     _group.groupType === 'orderedListItem' ||
@@ -264,9 +282,11 @@ export const generateBibleDocument = (
 
                 const newSectionMeta = {
                     sectionId: section.id,
-                    level: section.level
+                    level: section.level,
+                    phraseStartId: section.phraseStartId,
+                    phraseEndId: section.phraseEndId
                 };
-                const newSection: IBibleOutputSection = {
+                const newSection: IBibleContentGeneratorSection = {
                     ...section,
                     type: 'section',
                     meta: newSectionMeta,
@@ -296,7 +316,7 @@ export const generateBibleDocument = (
                 phraseStartId: paragraph.phraseStartId,
                 phraseEndId: paragraph.phraseEndId
             };
-            const newParagraph: IBibleOutputGroup<'paragraph'> = {
+            const newParagraph: IBibleContentGeneratorGroup<'paragraph'> = {
                 type: 'group',
                 groupType: 'paragraph',
                 meta: newParagraphMeta,
@@ -334,7 +354,7 @@ export const generateBibleDocument = (
                 ) {
                     // => this phrase starts a new indent group
 
-                    newGroup = <IBibleOutputGroup<'indent'>>{
+                    newGroup = <IBibleContentGeneratorGroup<'indent'>>{
                         type: 'group',
                         groupType: 'indent',
                         parent: activeGroup,
@@ -352,7 +372,7 @@ export const generateBibleDocument = (
                 ) {
                     // => this phrase starts a new quote group
 
-                    newGroup = <IBibleOutputGroup<'quote'>>{
+                    newGroup = <IBibleContentGeneratorGroup<'quote'>>{
                         type: 'group',
                         groupType: 'quote',
                         modifier: phrase.quoteWho,
@@ -372,7 +392,7 @@ export const generateBibleDocument = (
                     phrase.getModifierValue(modifier) &&
                     phrase.getModifierValue(modifier) !== activeModifiers[modifier]
                 ) {
-                    newGroup = <IBibleOutputGroup<ValueModifiers>>{
+                    newGroup = <IBibleContentGeneratorGroup<ValueModifiers>>{
                         type: 'group',
                         meta: undefined, // TypeScript wants that (bug?)
                         groupType: modifier,
@@ -384,7 +404,7 @@ export const generateBibleDocument = (
                 }
             } else if (modifier === 'person') {
                 if (phrase.person && phrase.person !== activeModifiers['person']) {
-                    newGroup = <IBibleOutputGroup<'person'>>{
+                    newGroup = <IBibleContentGeneratorGroup<'person'>>{
                         type: 'group',
                         meta: undefined, // TypeScript wants that (bug?)
                         groupType: 'person',
@@ -398,7 +418,7 @@ export const generateBibleDocument = (
                 if (phrase.getModifierValue(modifier) && !activeModifiers[modifier]) {
                     // => this phrase starts a boolean modifier
 
-                    newGroup = <IBibleOutputGroup<BooleanModifiers>>{
+                    newGroup = <IBibleContentGeneratorGroup<BooleanModifiers>>{
                         type: 'group',
                         meta: undefined, // TypeScript wants that (bug?)
                         groupType: modifier,
@@ -416,8 +436,8 @@ export const generateBibleDocument = (
 
         // set numbering
         // get the most outer group for wich this is the first phrase
-        let numberingGroup: BibleOutputContainer | null = null;
-        let _numberingGroupTmp: BibleOutputContainer | undefined = activeGroup;
+        let numberingGroup: BibleContentGeneratorContainer | null = null;
+        let _numberingGroupTmp: BibleContentGeneratorContainer | undefined = activeGroup;
         do {
             if (_numberingGroupTmp === activeGroup) {
                 if (_numberingGroupTmp.contents.length === 0) numberingGroup = _numberingGroupTmp;
@@ -440,7 +460,7 @@ export const generateBibleDocument = (
             _numberingGroupTmp = _numberingGroupTmp.parent;
         } while (!!_numberingGroupTmp);
 
-        const numbering: IBibleOutputNumbering = {};
+        const numbering: IBibleNumbering['numbering'] = {};
 
         // if this phrase switches any numbers (verse/chapter, normalized/version), the related
         // value is set on the numbering object of the topmost group where this phrase is the
@@ -472,7 +492,11 @@ export const generateBibleDocument = (
             currentNumbering.versionVerse = phrase.versionVerseNum;
         }
 
-        const outputPhrase: IBibleOutputPhrase = { ...phrase, type: 'phrase', parent: activeGroup };
+        const outputPhrase: IBibleContentGeneratorPhrase = {
+            ...phrase,
+            type: 'phrase',
+            parent: activeGroup
+        };
         if (phrase.crossReferences && phrase.crossReferences.length) {
             outputPhrase.crossReferences = phrase.crossReferences.map(crossRef => ({
                 ...crossRef,

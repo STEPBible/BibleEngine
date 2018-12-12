@@ -1,4 +1,4 @@
-import { IBibleOutputRich, IBibleOutputRoot, BibleOutput, IBibleVersion } from '../models';
+import { IBibleOutputRich, IBibleVersion, IBibleOutputRoot, IBibleContent } from '../models';
 import { generateBibleDocument } from './content.functions';
 import { BibleParagraph, BiblePhrase, BibleSection } from '../entities';
 
@@ -93,6 +93,7 @@ describe('generateBibleDocument', () => {
     const section1 = new BibleSection({
         versionId: 1,
         level: 1,
+        title: 'section1',
         phraseStartId: phrase1.id,
         phraseEndId: phrase3.id
     });
@@ -100,6 +101,7 @@ describe('generateBibleDocument', () => {
     const section2 = new BibleSection({
         versionId: 1,
         level: 1,
+        title: 'section2',
         phraseStartId: phrase4.id,
         phraseEndId: phrase4.id
     });
@@ -107,23 +109,24 @@ describe('generateBibleDocument', () => {
     const section2_1 = new BibleSection({
         versionId: 1,
         level: 2,
+        title: 'section2_1',
         phraseStartId: phrase4.id,
         phraseEndId: phrase4.id
     });
     section2_1.id = 3;
 
     /** should be section1 group */
-    let item1: BibleOutput;
+    let item1: IBibleContent;
     /** should be paragraph group */
-    let item1_1: BibleOutput;
+    let item1_1: IBibleContent;
     /** should be phrase1 */
-    let item1_1_1: BibleOutput;
+    let item1_1_1: IBibleContent;
     /** should be quote group with numbering object */
-    let item1_1_2: BibleOutput;
+    let item1_1_2: IBibleContent;
     /** should be section2 group */
-    let item2: BibleOutput;
+    let item2: IBibleContent;
     /** should be section 2_1 group */
-    let item2_1: BibleOutput;
+    let item2_1: IBibleContent;
 
     beforeAll(() => {
         const phrases: BiblePhrase[] = [phrase1, phrase2, phrase3, phrase4];
@@ -166,13 +169,12 @@ describe('generateBibleDocument', () => {
     });
 
     test('should put level 1 section on the top off the hierarchy', () => {
-        expect(item1.type).toBe('section');
-        expect(item1.type === 'section' && item1.meta.sectionId === section1.id).toBe(true);
+        expect(item1.type === 'section' && item1.title === 'section1').toBe(true);
     });
 
     test('should put arrange sections in the correct order', () => {
-        expect(item2.type === 'section' && item2.level === 1).toBe(true);
-        expect(item2_1.type === 'section' && item2_1.level === 2).toBe(true);
+        expect(item2.type === 'section' && item2.title === 'section2').toBe(true);
+        expect(item2_1.type === 'section' && item2_1.title === 'section2_1').toBe(true);
     });
 
     test('should add numbering object on verse change', () => {

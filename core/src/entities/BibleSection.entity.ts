@@ -31,10 +31,10 @@ export class BibleSection implements IBibleSection {
     @Column()
     level: number;
 
-    @Column({})
+    @Column({ type: 'bigint' })
     phraseStartId: number;
 
-    @Column({})
+    @Column({ type: 'bigint' })
     phraseEndId: number;
 
     @Column({ nullable: true })

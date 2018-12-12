@@ -25,7 +25,7 @@ import {
     generateParagraphSql
 } from './functions/sql.functions';
 import {
-    convertBibleOutputToBibleInput,
+    stripUnnecessaryDataFromBibleContent,
     generateBibleDocument,
     convertBibleInputToBookPlaintext
 } from './functions/content.functions';
@@ -38,20 +38,24 @@ import {
     IBibleOutputRich,
     IBibleReferenceRangeNormalized,
     IBibleBook,
-    BookWithContent,
+    BookWithContentForInput,
     PhraseModifiers,
     IBibleReference,
     IBibleReferenceNormalized,
     IBiblePhraseRef,
-    IBibleInput
+    IBibleContent,
+    IBibleReferenceRangeQuery,
+    IBibleReferenceVersion,
+    IBibleReferenceRangeVersion
 } from './models';
+import { IBibleContentForInput } from './models/BibleContent';
 
 export class BibleEngine {
     currentVersion?: BibleVersion;
     currentVersionMetadata?: BibleBook[];
     pEntityManager: Promise<EntityManager>;
 
-    constructor(dbConfig: ConnectionOptions) {
+    constructor(dbConfig: ConnectionOptions, private remoteConfig?: { url: string }) {
         this.pEntityManager = createConnection({
             ...dbConfig,
             entities: ENTITIES,
@@ -60,7 +64,7 @@ export class BibleEngine {
         }).then(conn => conn.manager);
     }
 
-    async addBookWithContent(bookInput: BookWithContent) {
+    async addBookWithContent(bookInput: BookWithContentForInput) {
         const textData = convertBibleInputToBookPlaintext(bookInput.contents);
         bookInput.book.chaptersCount = [];
         for (const verses of textData.values()) {
@@ -128,12 +132,37 @@ export class BibleEngine {
     }
 
     async getFullDataForReferenceRange(
-        range: IBibleReferenceRange & { versionId: number }
+        rangeQuery: IBibleReferenceRangeQuery,
+        stripUnnecessaryData = false
     ): Promise<IBibleOutputRich> {
         const entityManager = await this.pEntityManager;
 
-        const version = await entityManager.findOne(BibleVersion, range.versionId);
-        if (!version) throw new Error(`can't get formatted text: invalid version`);
+        const version = await entityManager.findOne(BibleVersion, {
+            where: { version: rangeQuery.version }
+        });
+        if (!version) {
+            if (this.remoteConfig) {
+                // TODO: refactor this out into a service
+                const remoteData = await fetch(
+                    this.remoteConfig.url + '/getFullDataForReferenceRange',
+                    {
+                        body: JSON.stringify(rangeQuery),
+                        method: 'post',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                ).then(response => {
+                    return response.json();
+                });
+                // TODO: properly handle error
+                return remoteData;
+            }
+            throw new Error(`can't get formatted text: invalid version`);
+        }
+
+        const range: IBibleReferenceRangeVersion = { ...rangeQuery, versionId: version.id };
 
         const book = await this.getBookForVersionReference(range);
         if (!book) throw new Error(`can't get formatted text: invalid book`);
@@ -244,17 +273,21 @@ export class BibleEngine {
             // TODO: generate context ranges for chapter (how to deal with normalization here?)
         }
 
+        const bibleDocument = generateBibleDocument(
+            phrases,
+            paragraphs,
+            context,
+            bookAbbreviations,
+            version.chapterVerseSeparator
+        );
+        if (stripUnnecessaryData)
+            bibleDocument.contents = stripUnnecessaryDataFromBibleContent(bibleDocument.contents);
+
         return {
             version,
             versionBook: book,
             range: rangeNormalized,
-            content: generateBibleDocument(
-                phrases,
-                paragraphs,
-                context,
-                bookAbbreviations,
-                version.chapterVerseSeparator
-            ),
+            content: bibleDocument,
             context,
             contextRanges
         };
@@ -273,7 +306,7 @@ export class BibleEngine {
         return lastPhrase.length ? parsePhraseId(lastPhrase[0].id).phraseNum! + 1 : 1;
     }
 
-    async getPhrases(range: IBibleReferenceRange) {
+    async getPhrases(range: IBibleReferenceRangeNormalized | IBibleReferenceRangeVersion) {
         const entityManager = await this.pEntityManager;
         const normalizedRange =
             range.isNormalized === true
@@ -294,14 +327,14 @@ export class BibleEngine {
         const books: IBibleBook[] = await entityManager
             .find(BibleBook, { where: { versionId }, order: { number: 'ASC' } })
             .then(generateMinimizedDbObjects);
-        const bookData: { book: IBibleBook; content: IBibleInput[] }[] = [];
+        const bookData: { book: IBibleBook; content: IBibleContent[] }[] = [];
         for (const book of books) {
             bookData.push({
                 book,
                 content: await this.getFullDataForReferenceRange({
-                    versionId,
+                    version: version.version,
                     bookOsisId: book.osisId
-                }).then(fullData => convertBibleOutputToBibleInput(fullData.content.contents))
+                }).then(fullData => stripUnnecessaryDataFromBibleContent(fullData.content.contents))
             });
         }
         // const phrases = await entityManager
@@ -375,7 +408,7 @@ export class BibleEngine {
     }
 
     private async addBibleContent(
-        contents: IBibleInput[],
+        contents: IBibleContentForInput[],
         state: {
             book: IBibleBook;
             context: BibleBookPlaintext;
@@ -552,20 +585,17 @@ export class BibleEngine {
         return await entityManager.save(new BibleBook(book));
     }
 
-    private async getBookForVersionReference({ versionId, bookOsisId }: IBibleReference) {
+    private async getBookForVersionReference({ versionId, bookOsisId }: IBibleReferenceVersion) {
         const entityManager = await this.pEntityManager;
-        return entityManager.findOne(BibleBook, {
-            where: {
-                versionId,
-                osisId: bookOsisId
-            }
-        });
+        const where = { osisId: bookOsisId, versionId };
+
+        return entityManager.findOne(BibleBook, { where });
     }
 
     // we excpect this to be an async method in the future
     // - to not break code then we make it async already
     private async getNormalizedReference(
-        reference: IBibleReference
+        reference: IBibleReferenceVersion
     ): Promise<IBibleReferenceNormalized> {
         if (reference.isNormalized) return <IBibleReferenceNormalized>reference;
         // if reference has not data that can cause normalisation changes, return the reference
@@ -620,7 +650,7 @@ export class BibleEngine {
     }
 
     private async getNormalizedReferenceFromV11nRules(
-        reference: IBibleReference,
+        reference: IBibleReferenceVersion,
         context: BibleBookPlaintext
     ): Promise<IBibleReferenceNormalized> {
         if (reference.isNormalized) return <IBibleReferenceNormalized>reference;
@@ -649,7 +679,7 @@ export class BibleEngine {
     }
 
     private async getNormalizedReferenceRange(
-        range: IBibleReferenceRange
+        range: IBibleReferenceRangeVersion
     ): Promise<IBibleReferenceRangeNormalized> {
         if (range.isNormalized) return <IBibleReferenceRangeNormalized>range;
         const { normalizedChapterNum, normalizedVerseNum } = await this.getNormalizedReference(
@@ -679,7 +709,7 @@ export class BibleEngine {
     }
 
     // this is probably async when implemented
-    private async getNormalisationRulesForReference(_: IBibleReferenceRange) {
+    private async getNormalisationRulesForReference(_: IBibleReferenceRangeVersion) {
         // TODO: implement
         return [];
     }
@@ -698,7 +728,10 @@ export class BibleEngine {
                 }
             })) {
                 // get normalized reference range
-                const normalizedRange = await this.getNormalizedReferenceRange(cRef.range);
+                // we know that this crossRef has a versionId since we queried for it
+                const normalizedRange = await this.getNormalizedReferenceRange(<
+                    IBibleReferenceRangeVersion
+                >cRef.range);
                 if (cRef.versionChapterNum)
                     cRef.range.normalizedChapterNum = normalizedRange.normalizedChapterNum;
                 if (cRef.versionVerseNum)

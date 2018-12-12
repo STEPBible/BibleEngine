@@ -4,6 +4,7 @@
     "description": "BibleEngine mono-repo root package.json, used mainly to execute build scripts. This package is not published to npm.",
     "private": true,
     "workspaces": [
+        "app",
         "core",
         "server"
     ]

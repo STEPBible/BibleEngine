@@ -5,20 +5,20 @@
     "dependencies": {
         "pako": "^1.0.7",
         "reflect-metadata": "^0.1.12",
-        "typeorm": "^0.2.8"
+        "typeorm": "^0.2.8",
+        "whatwg-fetch": "^3.0.0"
     },
     "devDependencies": {
+        "@types/jest": "^23.3.9",
         "@types/node": "^10.12.12",
         "@types/pako": "^1.0.0",
-        "@types/jest": "^23.3.9",
+        "@types/whatwg-fetch": "^0.0.33",
         "jest": "^23.6.0",
         "random-words": "^1.1.0",
-        "rxjs-tslint-rules": "^4.12.0",
         "sqlite3": "^4.0.4",
         "ts-jest": "^23.10.5",
         "ts-node": "^7.0.1",
         "tslint": "^5.11.0",
-        "tslint-eslint-rules": "^5.4.0",
         "typescript": "^3.1.6"
     }
 }

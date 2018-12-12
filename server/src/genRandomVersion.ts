@@ -1,32 +1,33 @@
 import 'isomorphic-fetch';
+import { BibleEngine } from '@bible-engine/core';
+import { BibleVersion } from '@bible-engine/core/src/entities';
+import {
+    IBibleContentGroupForInput,
+    IBibleContentPhraseForInput
+} from '@bible-engine/core/src/models';
+import { getOsisIdFromBookGenericId } from '@bible-engine/core/src/data/bibleMeta';
 
 const wordGen = require('random-words');
 
-import { BibleEngine } from './BibleEngine.class';
-import { BibleVersion } from './entities';
-import { getOsisIdFromBookGenericId } from './data/bibleMeta';
-import { IBibleContentPhraseForInput, IBibleContentGroupForInput } from './models';
-
-const sqlBible = new BibleEngine(
-    {
-        type: 'sqlite',
-        database: 'bible.db'
-    },
-    {
-        url: 'http://localhost:3456'
-    }
-);
+const sqlBible = new BibleEngine({
+    type: 'mysql',
+    host: 'localhost',
+    port: 3306,
+    username: 'bibleengine',
+    password: 'bibleengine',
+    database: 'bibleengine'
+});
 
 export const genDb = async () => {
     const esvVersion = await sqlBible.addVersion(
         new BibleVersion({
-            version: 'ESV',
-            title: 'English Standard Bible',
-            language: 'en-US',
-            chapterVerseSeparator: ':'
+            version: 'EL3',
+            title: 'Elberfelder 2003',
+            language: 'de-DE',
+            chapterVerseSeparator: ','
         })
     );
-    for (let bookNum = 1; bookNum <= 2; bookNum++) {
+    for (let bookNum = 1; bookNum <= 66; bookNum++) {
         console.log(
             'adding book ' + bookNum
             // ' and chapter ' +
@@ -104,7 +105,7 @@ export const genDb = async () => {
 
 export const getData = async () => {
     const output = await sqlBible.getFullDataForReferenceRange({
-        version: 'EL3',
+        version: 'ESV',
         bookOsisId: 'Gen',
         versionChapterNum: 1,
         versionVerseNum: 4,
@@ -125,7 +126,7 @@ export const getData = async () => {
 };
 
 const run = async () => {
-    // await genDb();
+    await genDb();
     getData();
 };
 

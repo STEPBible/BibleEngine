@@ -10,11 +10,12 @@ import {
 } from 'typeorm';
 import { BibleCrossReference, BibleNote } from '.';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
-import { PhraseModifiers, IBiblePhrase, IBiblePhraseRef } from '../models';
+import { PhraseModifiers, IBiblePhraseRef } from '../models';
+import { IBiblePhraseWithNumbers } from '../models/BiblePhrase';
 
 @Entity()
-export class BiblePhrase implements IBiblePhrase {
-    @PrimaryColumn()
+export class BiblePhrase implements IBiblePhraseWithNumbers {
+    @PrimaryColumn({ type: 'bigint' })
     id: number;
 
     // the id encodes the following attribute:
@@ -29,11 +30,11 @@ export class BiblePhrase implements IBiblePhrase {
     content: string;
 
     @Column({ nullable: true })
-    linebreak: boolean;
+    linebreak?: boolean;
 
     @Column({ nullable: true })
-    modifiersJson: string;
-    modifiers: PhraseModifiers;
+    modifiersJson?: string;
+    modifiers?: PhraseModifiers;
 
     @Column({ nullable: true })
     quoteWho?: string;
@@ -58,7 +59,7 @@ export class BiblePhrase implements IBiblePhrase {
     notes: BibleNote[];
 
     constructor(
-        phrase: IBiblePhrase,
+        phrase: IBiblePhraseWithNumbers,
         reference: Required<IBiblePhraseRef>,
         modifiers?: PhraseModifiers
     ) {
@@ -100,7 +101,7 @@ export class BiblePhrase implements IBiblePhrase {
         };
 
         if (this.strongsJoined) this.strongs = this.strongsJoined.split(',');
-        this.modifiers = this.modifiersJson ? JSON.parse(this.modifiersJson) : {};
+        if (this.modifiersJson) this.modifiers = JSON.parse(this.modifiersJson);
     }
 
     @BeforeInsert()

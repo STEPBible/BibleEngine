@@ -4,7 +4,8 @@ import {
     PrimaryGeneratedColumn,
     AfterLoad,
     BeforeInsert,
-    BeforeUpdate
+    BeforeUpdate,
+    Index
 } from 'typeorm';
 import { Document, IBibleVersion } from '../models';
 
@@ -13,6 +14,7 @@ export class BibleVersion implements IBibleVersion {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Index()
     @Column()
     version: string;
 

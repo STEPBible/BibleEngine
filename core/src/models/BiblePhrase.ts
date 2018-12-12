@@ -4,15 +4,18 @@ import { IContentPhrase } from './ContentPhrase';
 import { IBibleReferenceNormalizedNumbers } from './BibleReference';
 
 export interface IBiblePhrase extends IContentPhrase {
-    versionChapterNum: number;
-    versionVerseNum: number;
-    // in case normalized number come pre-calculated (e.g. when downloading a version)
-    normalizedReference?: IBibleReferenceNormalizedNumbers;
     quoteWho?: string;
     person?: string;
     strongs?: string[];
     notes?: IBibleNote[];
     crossReferences?: IBibleCrossReference[];
+}
+
+export interface IBiblePhraseWithNumbers extends IBiblePhrase {
+    versionChapterNum: number;
+    versionVerseNum: number;
+    // in case normalized number come pre-calculated (e.g. when downloading a version)
+    normalizedReference?: IBibleReferenceNormalizedNumbers;
 }
 
 export type PhraseModifiers = {

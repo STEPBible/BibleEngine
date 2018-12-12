@@ -98,26 +98,7 @@
             "check-operator",
             "check-separator",
             "check-type"
-        ],
-        "rxjs-no-unused-add": {
-            "severity": "error"
-        },
-        "rxjs-no-operator": {
-            "severity": "error"
-        },
-        "rxjs-no-patched": {
-            "severity": "error"
-        },
-        "rxjs-no-wholesale": {
-            "severity": "error"
-        },
-        "rxjs-finnish": {
-            "severity": "error"
-        },
-        "rxjs-no-ignored-error": false
-    },
-    "rulesDirectory": [
-        "./node_modules/tslint-eslint-rules/dist/rules",
-        "./node_modules/rxjs-tslint-rules/dist/rules"
-    ]
+        ]
+    }
+
 }

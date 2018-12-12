@@ -2,10 +2,13 @@ import { BiblePhrase, BibleSection, BibleBook, BibleVersion } from '../entities'
 import {
     IBibleReferenceRange,
     IBibleReference,
-    IBibleSection,
-    IBiblePhrase,
-    IContentGroup
+    IContentGroup,
+    IBibleContentSection,
+    IBibleContent,
+    IBibleContentGroup,
+    IBibleContentPhrase
 } from '../models';
+import { IBibleNumbering } from './BibleContent';
 
 export interface IBibleOutputBase {
     version: BibleVersion;
@@ -67,45 +70,35 @@ export interface IBibleVerse {
     phrases: BiblePhrase[];
 }
 
-export interface IBibleOutputNumbering {
-    normalizedChapterIsStarting?: number;
-    normalizedChapterIsStartingInRange?: number;
-    normalizedVerseIsStarting?: number;
-    versionChapterIsStarting?: number;
-    versionChapterIsStartingInRange?: number;
-    versionVerseIsStarting?: number;
-}
-
-export type BibleOutput =
-    | IBibleOutputSection
-    | IBibleOutputGroup<IContentGroup['groupType']>
-    | IBibleOutputPhrase;
-
-export type BibleOutputContainer =
-    | IBibleOutputRoot
-    | IBibleOutputSection
-    | IBibleOutputGroup<IContentGroup['groupType']>;
-
-export interface IBibleOutputRoot {
+export interface IBibleOutputRoot extends IBibleNumbering {
     readonly type: 'root';
+    contents: IBibleContent[];
+}
+
+export type BibleContentGenerator =
+    | IBibleContentGeneratorSection
+    | IBibleContentGeneratorGroup<IContentGroup['groupType']>
+    | IBibleContentGeneratorPhrase;
+
+export type BibleContentGeneratorContainer =
+    | IBibleContentGeneratorRoot
+    | IBibleContentGeneratorSection
+    | IBibleContentGeneratorGroup<IContentGroup['groupType']>;
+
+export interface IBibleContentGeneratorRoot extends IBibleOutputRoot {
     parent: undefined;
-    numbering?: IBibleOutputNumbering;
-    contents: BibleOutput[];
+    contents: BibleContentGenerator[];
 }
 
-export interface IBibleOutputSection extends IBibleSection {
-    readonly type: 'section';
-    parent: BibleOutputContainer;
-    meta: { sectionId: number; level: number };
-    numbering?: IBibleOutputRoot | IBibleOutputSection;
-    contents: BibleOutput[]; // a section can contain everything
+export interface IBibleContentGeneratorSection extends IBibleContentSection {
+    parent: BibleContentGeneratorContainer;
+    meta: { sectionId: number; level: number; phraseStartId: number; phraseEndId: number };
+    contents: BibleContentGenerator[]; // a section can contain everything
 }
 
-export interface IBibleOutputGroup<T extends IContentGroup['groupType']> extends IContentGroup {
-    readonly type: 'group';
-    readonly groupType: T;
-    parent: BibleOutputContainer;
-    numbering?: IBibleOutputNumbering;
+export interface IBibleContentGeneratorGroup<T extends IContentGroup['groupType']>
+    extends IBibleContentGroup<T> {
+    parent: BibleContentGeneratorContainer;
     meta: T extends 'paragraph'
         ? { paragraphId: number; phraseStartId: number; phraseEndId: number }
         : T extends 'quote'
@@ -113,11 +106,9 @@ export interface IBibleOutputGroup<T extends IContentGroup['groupType']> extends
         : T extends 'indent'
         ? { level: number }
         : undefined;
-    contents: (IBibleOutputGroup<T> | IBibleOutputPhrase)[];
+    contents: (IBibleContentGeneratorGroup<T> | IBibleContentGeneratorPhrase)[];
 }
 
-export interface IBibleOutputPhrase extends IBiblePhrase {
-    readonly type: 'phrase';
-    parent: BibleOutputContainer;
-    numbering?: IBibleOutputNumbering;
+export interface IBibleContentGeneratorPhrase extends IBibleContentPhrase {
+    parent: BibleContentGeneratorContainer;
 }
