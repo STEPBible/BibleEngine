@@ -16,11 +16,12 @@ import {
     PhraseModifiers,
     ValueModifiers,
     IBibleReferenceRange,
-    IBibleCrossReference
+    IBibleCrossReference,
+    IBibleContentForInput,
+    IBibleNumbering
 } from '../models';
 import { BiblePhrase, BibleParagraph } from '../entities';
 import { generateReferenceRangeLabel } from './reference.functions';
-import { IBibleNumbering, IBibleContentForInput } from '../models/BibleContent';
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
@@ -47,85 +48,6 @@ export const convertBibleInputToBookPlaintext = (
     }
 
     return _accChapters;
-};
-
-/**
- * remove everything from 'data' that is not needed for input, mainly to reduce JSON size
- * @param {IBibleContent[]} data
- * @returns {IBibleContent[]}
- */
-export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBibleContent[] => {
-    // local helper function
-    const stripCrossRef = ({ key, range, label }: IBibleCrossReference) => {
-        const refRange: IBibleReferenceRange = {
-            bookOsisId: range.bookOsisId
-        };
-        if (range.versionChapterNum) refRange.versionChapterNum = range.versionChapterNum;
-        if (range.versionVerseNum) refRange.versionVerseNum = range.versionVerseNum;
-        if (range.versionChapterEndNum) refRange.versionChapterEndNum = range.versionChapterEndNum;
-        if (range.versionVerseEndNum) refRange.versionVerseEndNum = range.versionVerseEndNum;
-        if (range.normalizedChapterNum) refRange.normalizedChapterNum = range.normalizedChapterNum;
-        if (range.normalizedVerseNum) refRange.normalizedVerseNum = range.normalizedVerseNum;
-        if (range.normalizedChapterEndNum)
-            refRange.normalizedChapterEndNum = range.normalizedChapterEndNum;
-        if (range.normalizedVerseEndNum)
-            refRange.normalizedVerseEndNum = range.normalizedVerseEndNum;
-        return {
-            key,
-            label,
-            range: refRange
-        };
-    };
-    const inputData: IBibleContent[] = [];
-    for (const obj of data) {
-        if (obj.type === 'phrase') {
-            const phrase = obj;
-            const inputPhrase: IBibleContentPhrase = {
-                type: 'phrase',
-                content: phrase.content
-            };
-            if (phrase.linebreak) inputPhrase.linebreak = true;
-            if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
-            if (phrase.person) inputPhrase.person = phrase.person;
-            if (phrase.strongs && phrase.strongs.length) inputPhrase.strongs = phrase.strongs;
-            if (phrase.notes && phrase.notes.length)
-                inputPhrase.notes = phrase.notes.map(({ key, type, content }) => ({
-                    key,
-                    type,
-                    content
-                }));
-            if (phrase.crossReferences && phrase.crossReferences.length)
-                inputPhrase.crossReferences = phrase.crossReferences.map(stripCrossRef);
-
-            if (phrase.numbering) inputPhrase.numbering = phrase.numbering;
-
-            inputData.push({ type: 'phrase', ...inputPhrase });
-        } else if (obj.type === 'group') {
-            const inputGroup: IBibleContentGroup<IContentGroup['groupType']> = {
-                type: 'group',
-                groupType: obj.groupType,
-                modifier: obj.modifier,
-                contents: <
-                    (IBibleContentGroup<IContentGroup['groupType']> | IBibleContentPhrase)[]
-                >stripUnnecessaryDataFromBibleContent(obj.contents)
-            };
-            if (obj.numbering) inputGroup.numbering = obj.numbering;
-            inputData.push(inputGroup);
-        } else if (obj.type === 'section') {
-            const inputSection: IBibleContentSection = {
-                type: 'section',
-                contents: stripUnnecessaryDataFromBibleContent(obj.contents)
-            };
-            if (obj.title) inputSection.title = obj.title;
-            if (obj.subTitle) inputSection.subTitle = obj.subTitle;
-            if (obj.description) inputSection.description = obj.description;
-            if (obj.crossReferences && obj.crossReferences.length)
-                inputSection.crossReferences = obj.crossReferences.map(stripCrossRef);
-            if (obj.numbering) inputSection.numbering = obj.numbering;
-            inputData.push(inputSection);
-        }
-    }
-    return inputData;
 };
 
 /**
@@ -530,4 +452,83 @@ export const generateBibleDocument = (
     }
 
     return rootGroup;
+};
+
+/**
+ * remove everything from 'data' that is not needed for input, mainly to reduce JSON size
+ * @param {IBibleContent[]} data
+ * @returns {IBibleContent[]}
+ */
+export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBibleContent[] => {
+    // local helper function
+    const stripCrossRef = ({ key, range, label }: IBibleCrossReference) => {
+        const refRange: IBibleReferenceRange = {
+            bookOsisId: range.bookOsisId
+        };
+        if (range.versionChapterNum) refRange.versionChapterNum = range.versionChapterNum;
+        if (range.versionVerseNum) refRange.versionVerseNum = range.versionVerseNum;
+        if (range.versionChapterEndNum) refRange.versionChapterEndNum = range.versionChapterEndNum;
+        if (range.versionVerseEndNum) refRange.versionVerseEndNum = range.versionVerseEndNum;
+        if (range.normalizedChapterNum) refRange.normalizedChapterNum = range.normalizedChapterNum;
+        if (range.normalizedVerseNum) refRange.normalizedVerseNum = range.normalizedVerseNum;
+        if (range.normalizedChapterEndNum)
+            refRange.normalizedChapterEndNum = range.normalizedChapterEndNum;
+        if (range.normalizedVerseEndNum)
+            refRange.normalizedVerseEndNum = range.normalizedVerseEndNum;
+        return {
+            key,
+            label,
+            range: refRange
+        };
+    };
+    const inputData: IBibleContent[] = [];
+    for (const obj of data) {
+        if (obj.type === 'phrase') {
+            const phrase = obj;
+            const inputPhrase: IBibleContentPhrase = {
+                type: 'phrase',
+                content: phrase.content
+            };
+            if (phrase.linebreak) inputPhrase.linebreak = true;
+            if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
+            if (phrase.person) inputPhrase.person = phrase.person;
+            if (phrase.strongs && phrase.strongs.length) inputPhrase.strongs = phrase.strongs;
+            if (phrase.notes && phrase.notes.length)
+                inputPhrase.notes = phrase.notes.map(({ key, type, content }) => ({
+                    key,
+                    type,
+                    content
+                }));
+            if (phrase.crossReferences && phrase.crossReferences.length)
+                inputPhrase.crossReferences = phrase.crossReferences.map(stripCrossRef);
+
+            if (phrase.numbering) inputPhrase.numbering = phrase.numbering;
+
+            inputData.push({ type: 'phrase', ...inputPhrase });
+        } else if (obj.type === 'group') {
+            const inputGroup: IBibleContentGroup<IContentGroup['groupType']> = {
+                type: 'group',
+                groupType: obj.groupType,
+                modifier: obj.modifier,
+                contents: <
+                    (IBibleContentGroup<IContentGroup['groupType']> | IBibleContentPhrase)[]
+                >stripUnnecessaryDataFromBibleContent(obj.contents)
+            };
+            if (obj.numbering) inputGroup.numbering = obj.numbering;
+            inputData.push(inputGroup);
+        } else if (obj.type === 'section') {
+            const inputSection: IBibleContentSection = {
+                type: 'section',
+                contents: stripUnnecessaryDataFromBibleContent(obj.contents)
+            };
+            if (obj.title) inputSection.title = obj.title;
+            if (obj.subTitle) inputSection.subTitle = obj.subTitle;
+            if (obj.description) inputSection.description = obj.description;
+            if (obj.crossReferences && obj.crossReferences.length)
+                inputSection.crossReferences = obj.crossReferences.map(stripCrossRef);
+            if (obj.numbering) inputSection.numbering = obj.numbering;
+            inputData.push(inputSection);
+        }
+    }
+    return inputData;
 };

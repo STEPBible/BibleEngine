@@ -46,9 +46,9 @@ import {
     IBibleContent,
     IBibleReferenceRangeQuery,
     IBibleReferenceVersion,
-    IBibleReferenceRangeVersion
+    IBibleReferenceRangeVersion,
+    IBibleContentForInput
 } from './models';
-import { IBibleContentForInput } from './models/BibleContent';
 
 export class BibleEngine {
     currentVersion?: BibleVersion;

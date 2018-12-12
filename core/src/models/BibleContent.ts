@@ -1,7 +1,6 @@
 import { IBibleSectionBase } from './BibleSection';
-import { IBiblePhrase, IBiblePhraseWithNumbers } from './BiblePhrase';
+import { IBiblePhrase } from './BiblePhrase';
 import { IContentGroup } from './ContentGroup';
-import { IBibleBook } from './BibleBook';
 
 export type IBibleContent =
     | IBibleContentSection
@@ -38,88 +37,3 @@ export interface IBibleContentGroup<T extends IContentGroup['groupType']>
 export interface IBibleContentPhrase extends IBiblePhrase, IBibleNumbering {
     readonly type: 'phrase';
 }
-
-export type IBibleContentForInput =
-    | IBibleContentSectionForInput
-    | IBibleContentGroupForInput<IContentGroup['groupType']>
-    | IBibleContentPhraseForInput;
-
-export type BookWithContentForInput = {
-    book: IBibleBook;
-    contents: IBibleContentForInput[];
-};
-
-export interface IBibleContentSectionForInput extends IBibleSectionBase {
-    readonly type: 'section';
-    contents: IBibleContentForInput[];
-}
-
-export interface IBibleContentGroupForInput<T extends IContentGroup['groupType']>
-    extends IContentGroup {
-    readonly type: 'group';
-    readonly groupType: T;
-
-    contents: (IBibleContentGroupForInput<T> | IBibleContentPhraseForInput)[];
-}
-
-export interface IBibleContentPhraseForInput extends IBiblePhraseWithNumbers {
-    readonly type: 'phrase';
-}
-
-/* REFERENCE
-{
-    book: { osisId: 'Gen' ... },
-    contents: [
-        {
-            type: 'section',
-            title: 'New Title',
-            contents: [
-                {
-                    type: 'group',
-                    groupType: 'paragraph',
-                    contents: [
-                        {
-                            type: 'phrase',
-                            versionChapterNum: 1,
-                            versionVerseNum: 1,
-                            content: 'In the'
-                        },
-                        {
-                            type: 'group',
-                            groupType: 'bold',
-                            contents: [{
-                                type: 'phrase',
-                                versionChapterNum: 1,
-                                versionVerseNum: 1,
-                                content: 'beginning',
-                                strongs: 'G123'
-                            }]
-                        },
-                        {
-                            type: 'group',
-                            groupType: 'indent',
-                            contents: [
-                                {
-                                    type: 'group',
-                                    groupType: 'italic',
-                                    contents: [{
-                                        type: 'phrase',
-                                        content: 'was',
-                                        ...
-                                    }]
-                                },
-                                {
-                                    type: 'phrase',
-                                    content: 'light',
-                                    linebreak: true,
-                                    ...
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
-}
-*/

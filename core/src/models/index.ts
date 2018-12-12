@@ -27,17 +27,21 @@ import {
     IBibleContentGroup,
     IBibleContentPhrase,
     IBibleContentSection,
-    IBibleContentGroupForInput,
-    IBibleContentPhraseForInput
+    IBibleNumbering
 } from './BibleContent';
 import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext';
 import { Document } from './Document';
 import { IBibleVersion } from './BibleVersion';
 import { IDictionaryEntry } from './DictionaryEntry';
 import { IContentGroup } from './ContentGroup';
-import { BookWithContentForInput } from './BibleContent';
 import { IBibleCrossReference } from './BibleCrossReference';
 import { IBibleNote } from './BibleNote';
+import {
+    IBibleContentForInput,
+    BookWithContentForInput,
+    IBibleContentGroupForInput,
+    IBibleContentPhraseForInput
+} from './BibleInput';
 
 export {
     BibleBookPlaintext,
@@ -49,6 +53,7 @@ export {
     Document,
     IBibleBook,
     IBibleContent,
+    IBibleContentForInput,
     IBibleContentGeneratorGroup,
     IBibleContentGeneratorPhrase,
     IBibleContentGeneratorRoot,
@@ -60,6 +65,7 @@ export {
     IBibleContentSection,
     IBibleCrossReference,
     IBibleNote,
+    IBibleNumbering,
     IBibleOutputRich,
     IBibleOutputRoot,
     IBiblePhrase,
