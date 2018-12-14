@@ -58,8 +58,15 @@ export const generateParagraphSql = (
     tableAlias: string
 ) => {
     const refEnd: IBiblePhraseRef = generateEndReferenceFromRange(range);
-    const rangePhraseIdStart = generatePhraseId(range);
-    const rangePhraseIdEnd = generatePhraseId(refEnd);
+    // we want to catch the previous and next paragraph as well
+    // by using the approach we even get rid of the 'OR' query (using a second index)
+    // by just selection 1 more chapter at the beginning and end
+    // Note: in order to not loose our original intention to make a wider range (i.e.
+    //       selecting the previous paragraph), the start of the range has to also
+    //       catch the start of the previous paragraph (i.e. it must be two times the length
+    //       of the longest paragraph before the actual range.start)
+    const rangePhraseIdStart = generatePhraseId(range) - 200000000;
+    const rangePhraseIdEnd = generatePhraseId(refEnd) + 100000000;
     const colVersion = `${tableAlias}.versionId`;
     const colSectionStart = `${tableAlias}.phraseStartId`;
     const colSectionEnd = `${tableAlias}.phraseEndId`;
@@ -71,7 +78,7 @@ export const generateParagraphSql = (
     // the three conditions select:
     // - paragraphs that wrap around the range
     // - paragraphs that start within the range
-    // - paragraphs that end within the range (seperate index)
+    // - [DISABLED] paragraphs that end within the range (seperate index)
     //
     // (paragraphs that are fully contained in the range or selected by both the 2nd and 3rd
     //  condition)
@@ -82,11 +89,12 @@ export const generateParagraphSql = (
                 ( ${colSectionStart} >= ${rangePhraseIdStart} AND
                     ${colSectionStart} <= ${rangePhraseIdEnd} )
             )
-        ) OR (
+        )
+        /* [DISABLED] OR (
             ${colVersion} = ${range.versionId} AND
             ${colSectionEnd} >= ${rangePhraseIdStart} AND
             ${colSectionEnd} <= ${rangePhraseIdEnd}
-        )`;
+        ) */`;
 };
 
 /**

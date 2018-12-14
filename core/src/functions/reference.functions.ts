@@ -3,7 +3,9 @@ import {
     IBibleReference,
     IBibleReferenceNormalized,
     IBiblePhraseRef,
-    IBibleReferenceRangeNormalized
+    IBibleReferenceRangeNormalized,
+    IBibleSectionGeneric,
+    IBibleCrossReference
 } from '../models';
 import { pad } from './utils.functions';
 import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from '../data/bibleMeta';
@@ -116,6 +118,28 @@ export const generateReferenceId = (reference: IBibleReferenceNormalized): numbe
 };
 
 /**
+ * Generates a range object from two phrase ids
+ * @param {number} phraseStartId
+ * @param {number} phraseEndId
+ * @returns {IBibleReferenceRangeNormalized}
+ */
+export const generateRangeFromGenericSection = (
+    genericSection: IBibleSectionGeneric
+): IBibleReferenceRangeNormalized => {
+    const refStart = parsePhraseId(genericSection.phraseStartId);
+    const refEnd = parsePhraseId(genericSection.phraseEndId);
+    return {
+        isNormalized: true,
+        versionId: refStart.versionId,
+        bookOsisId: refStart.bookOsisId,
+        normalizedChapterNum: refStart.normalizedChapterNum,
+        normalizedVerseNum: refStart.normalizedVerseNum,
+        normalizedChapterEndNum: refEnd.normalizedChapterNum,
+        normalizedVerseEndNum: refEnd.normalizedVerseNum
+    };
+};
+
+/**
  * returns a readable string of the reference range
  *
  * @param {IBibleReferenceRange} range
@@ -139,6 +163,16 @@ export const generateReferenceRangeLabel = (
     if (range.versionVerseEndNum) label += `${range.versionVerseEndNum}`;
     return label;
 };
+
+/**
+ * checks if there is any normalized property set (thus it has been normalized) or else if there is
+ * no version number set (thus it does not need normalization)
+ * @param {IBibleReference} ref
+ * @returns {boolean}
+ */
+export const isReferenceNormalized = (ref: IBibleReference) =>
+    // if *ChaperNum is not set we know that there is no other **Num set
+    !!ref.normalizedChapterNum || !ref.versionChapterNum;
 
 /**
  * parses a database phrase id into a bible phrase reference object
@@ -184,4 +218,42 @@ export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
     if (normalizedVerseNum) ref.normalizedVerseNum = normalizedVerseNum;
 
     return ref;
+};
+
+/**
+ * returns cross reference object with only the necessary data
+ * @param {IBibleCrossReference} { key, range, label }
+ * @returns {IBibleCrossReference}
+ */
+export const slimDownCrossReference = ({
+    key,
+    range,
+    label
+}: IBibleCrossReference): IBibleCrossReference => ({
+    key,
+    label,
+    range: slimDownReferenceRange(range)
+});
+
+/**
+ * returns reference range with only necessary data. also 'versionId', and 'isNormalized' are
+ * removed. BibleEngine will detect if the range is normalized, so we can savely strip the property
+ * (its main purpose is to enable normalization checks on TS level)
+ * @param {IBibleReferenceRange} range
+ * @returns {IBibleReferenceRange}
+ */
+export const slimDownReferenceRange = (range: IBibleReferenceRange) => {
+    const refRange: IBibleReferenceRange = {
+        bookOsisId: range.bookOsisId
+    };
+    if (range.versionChapterNum) refRange.versionChapterNum = range.versionChapterNum;
+    if (range.versionVerseNum) refRange.versionVerseNum = range.versionVerseNum;
+    if (range.versionChapterEndNum) refRange.versionChapterEndNum = range.versionChapterEndNum;
+    if (range.versionVerseEndNum) refRange.versionVerseEndNum = range.versionVerseEndNum;
+    if (range.normalizedChapterNum) refRange.normalizedChapterNum = range.normalizedChapterNum;
+    if (range.normalizedVerseNum) refRange.normalizedVerseNum = range.normalizedVerseNum;
+    if (range.normalizedChapterEndNum)
+        refRange.normalizedChapterEndNum = range.normalizedChapterEndNum;
+    if (range.normalizedVerseEndNum) refRange.normalizedVerseEndNum = range.normalizedVerseEndNum;
+    return refRange;
 };

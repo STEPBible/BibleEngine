@@ -8,7 +8,11 @@ import {
     BeforeInsert,
     BeforeUpdate
 } from 'typeorm';
-import { generateReferenceId, parseReferenceId } from '../functions/reference.functions';
+import {
+    generateReferenceId,
+    parseReferenceId,
+    isReferenceNormalized
+} from '../functions/reference.functions';
 import { IBibleReferenceRangeNormalized, IBibleCrossReference } from '../models';
 import { BiblePhrase, BibleSection } from '../entities';
 
@@ -64,7 +68,7 @@ export class BibleCrossReference implements IBibleCrossReference {
 
         this.key = crossRef.key;
 
-        if (!crossRef.range.versionId && !crossRef.range.isNormalized)
+        if (!crossRef.range.versionId && !isReferenceNormalized(crossRef.range))
             throw new Error(`can't generate cross reference: versionId is missing`);
 
         if (crossRef.range.versionId) {
@@ -75,7 +79,7 @@ export class BibleCrossReference implements IBibleCrossReference {
             this.versionVerseEndNum = crossRef.range.versionVerseEndNum;
         }
 
-        if (!crossRef.range.isNormalized) {
+        if (!isReferenceNormalized(crossRef.range)) {
             if (allowCreationWithoutNormalizedReference)
                 // we need this during the creation of the version, since we can't normalize
                 // references there. normalization is done at the end in a seperate step via

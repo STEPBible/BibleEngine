@@ -29,16 +29,24 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
     @Column()
     content: string;
 
+    // this column does not need to be indexed, however it is conceptually very different to what we
+    // save within 'modifiers' (it's tied to only one phrase), so we keep it on a seperate column.
     @Column({ nullable: true })
     linebreak?: boolean;
 
+    // everything that is not tied to one single phrase, thus forming groups in the content
+    // hierarchy, is saved within 'modifiers'. We don't need to index this, so it's save to group
+    // those values together as one serialized JSON in the database. Thus we also keep the schema
+    // and types clean and more easy to understand, plus we can easily add new modifiers
     @Column({ nullable: true })
     modifiersJson?: string;
     modifiers?: PhraseModifiers;
 
+    // this is a seperate column so that we can index it
     @Column({ nullable: true })
     quoteWho?: string;
 
+    // this is a seperate column so that we can index it
     @Column({ nullable: true })
     person?: string;
 

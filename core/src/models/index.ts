@@ -20,7 +20,7 @@ import {
     IBibleReferenceRangeVersion
 } from './BibleReference';
 import { IBibleBook } from './BibleBook';
-import { IBibleSection } from './BibleSection';
+import { IBibleSection, IBibleSectionGeneric, IBibleSectionEntity } from './BibleSection';
 import { IBiblePhrase, PhraseModifiers, ValueModifiers, BooleanModifiers } from './BiblePhrase';
 import {
     IBibleContent,
@@ -78,6 +78,8 @@ export {
     IBibleReferenceRangeVersion,
     IBibleReferenceVersion,
     IBibleSection,
+    IBibleSectionEntity,
+    IBibleSectionGeneric,
     IBibleVerse,
     IBibleVersion,
     IContentGroup,

@@ -14,6 +14,12 @@ export interface IBiblePhraseRef extends IBibleReferenceBase {
 }
 
 export interface IBibleReference extends IBibleReferenceBase {
+    /**
+     * we need this property to enable checking for normalization on the TypeScript level, i.e. not
+     * only during runtime. During runtime we check for normalization via isReferenceNormalized() -
+     * this allows us work with objects that have the property not set (e.g. because it was stripped
+     * to save space for transmission) and re-set the flag
+     */
     isNormalized?: boolean;
     versionChapterNum?: number;
     versionVerseNum?: number;

@@ -1,4 +1,4 @@
-import { BiblePhrase, BibleSection, BibleBook, BibleVersion } from '../entities';
+import { BiblePhrase } from '../entities';
 import {
     IBibleReferenceRange,
     IBibleReference,
@@ -6,18 +6,29 @@ import {
     IBibleContentSection,
     IBibleContent,
     IBibleContentGroup,
-    IBibleContentPhrase
+    IBibleContentPhrase,
+    IBibleSection,
+    IBibleVersion,
+    IBibleBook
 } from '../models';
 import { IBibleNumbering } from './BibleContent';
 
 export interface IBibleOutputBase {
-    version: BibleVersion;
-    versionBook: BibleBook;
+    version: IBibleVersion;
+    versionBook: IBibleBook;
     range: IBibleReferenceRange;
 }
 
 export interface IBibleOutputPlaintext extends IBibleOutputBase {
     verses: IBibleVerse[];
+}
+
+export interface IBibleContextRangeBase {
+    completeRange?: IBibleReferenceRange;
+    completeStartingRange?: IBibleReferenceRange;
+    completeEndingRange?: IBibleReferenceRange;
+    previousRange?: IBibleReferenceRange;
+    nextRange?: IBibleReferenceRange;
 }
 
 export interface IBibleOutputRich extends IBibleOutputBase {
@@ -31,37 +42,33 @@ export interface IBibleOutputRich extends IBibleOutputBase {
             /**
              * the sections that start or end within the current range
              */
-            includedSections: BibleSection[];
+            includedSections: IBibleSection[];
             /**
              * the section that wraps the current range (without being contained in it)
              */
-            wrappingSection?: BibleSection;
+            wrappingSection?: IBibleSection;
             /**
              * the sections of this level before the current range that have no intersection
              * with the current range
              */
-            previousSections: BibleSection[];
+            previousSections: IBibleSection[];
             /**
              * this sections of this level after the current range that have no intersection
              * with the current range
              */
-            nextSections: BibleSection[];
+            nextSections: IBibleSection[];
         };
     };
 
     /**
-     * pre-generated ranges to use in context queries for paragraph, section (level 1) and chapter
+     * pre-generated ranges to use in context queries for paragraph, sections (per level) and
+     * chapter
      */
     contextRanges: {
-        [key in 'paragraph' | 'section' | 'chapter']: {
-            // RADAR: we might enable this again
-            // completeStartingRange?: IBibleReferenceRange;
-            completeRange?: IBibleReferenceRange;
-            // RADAR: we might enable this again
-            // completeEndingRange?: IBibleReferenceRange;
-            previousRange?: IBibleReferenceRange;
-            nextRange?: IBibleReferenceRange;
-        }
+        paragraph: IBibleContextRangeBase;
+        versionChapter: IBibleContextRangeBase;
+        normalizedChapter: IBibleContextRangeBase;
+        sections: { [index: number]: IBibleContextRangeBase };
     };
 }
 
@@ -92,7 +99,7 @@ export interface IBibleContentGeneratorRoot extends IBibleOutputRoot {
 
 export interface IBibleContentGeneratorSection extends IBibleContentSection {
     parent: BibleContentGeneratorContainer;
-    meta: { sectionId: number; level: number; phraseStartId: number; phraseEndId: number };
+    meta: { level: number; phraseStartId: number; phraseEndId: number };
     contents: BibleContentGenerator[]; // a section can contain everything
 }
 

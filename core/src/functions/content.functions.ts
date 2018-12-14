@@ -15,13 +15,11 @@ import {
     IContentGroup,
     PhraseModifiers,
     ValueModifiers,
-    IBibleReferenceRange,
-    IBibleCrossReference,
     IBibleContentForInput,
     IBibleNumbering
 } from '../models';
 import { BiblePhrase, BibleParagraph } from '../entities';
-import { generateReferenceRangeLabel } from './reference.functions';
+import { generateReferenceRangeLabel, slimDownCrossReference } from './reference.functions';
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
@@ -80,7 +78,7 @@ export const generateBibleDocument = (
     };
 
     for (const phrase of phrases) {
-        const activeSections: { sectionId: number; level: number }[] = [];
+        const activeSections: { level: number; phraseStartId: number; phraseEndId: number }[] = [];
         let activeParagraph: IBibleContentGeneratorGroup<'paragraph'>['meta'] | undefined;
         const activeModifiers: PhraseModifiers & { quoteWho?: string; person?: string } = {
             indentLevel: 0,
@@ -190,7 +188,12 @@ export const generateBibleDocument = (
             // is the section already active?
             if (
                 section &&
-                !activeSections.find(activeSection => activeSection.sectionId === section.id)
+                !activeSections.find(
+                    activeSection =>
+                        activeSection.level === level &&
+                        activeSection.phraseStartId === section.phraseStartId &&
+                        activeSection.phraseEndId === section.phraseEndId
+                )
             ) {
                 if (
                     // section can only be children of root or other sections. Else the strucuture
@@ -203,8 +206,7 @@ export const generateBibleDocument = (
                 }
 
                 const newSectionMeta = {
-                    sectionId: section.id,
-                    level: section.level,
+                    level,
                     phraseStartId: section.phraseStartId,
                     phraseEndId: section.phraseEndId
                 };
@@ -361,7 +363,8 @@ export const generateBibleDocument = (
         let numberingGroup: BibleContentGeneratorContainer | null = null;
         let _numberingGroupTmp: BibleContentGeneratorContainer | undefined = activeGroup;
         do {
-            if (_numberingGroupTmp === activeGroup) {
+            if (_numberingGroupTmp.type !== 'group') continue;
+            else if (_numberingGroupTmp === activeGroup) {
                 if (_numberingGroupTmp.contents.length === 0) numberingGroup = _numberingGroupTmp;
                 else break;
             } else {
@@ -378,9 +381,7 @@ export const generateBibleDocument = (
                         `can't create output object: corrupted structure (empty ancestor group)`
                     );
             }
-
-            _numberingGroupTmp = _numberingGroupTmp.parent;
-        } while (!!_numberingGroupTmp);
+        } while (!!(_numberingGroupTmp = _numberingGroupTmp.parent));
 
         const numbering: IBibleNumbering['numbering'] = {};
 
@@ -460,27 +461,6 @@ export const generateBibleDocument = (
  * @returns {IBibleContent[]}
  */
 export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBibleContent[] => {
-    // local helper function
-    const stripCrossRef = ({ key, range, label }: IBibleCrossReference) => {
-        const refRange: IBibleReferenceRange = {
-            bookOsisId: range.bookOsisId
-        };
-        if (range.versionChapterNum) refRange.versionChapterNum = range.versionChapterNum;
-        if (range.versionVerseNum) refRange.versionVerseNum = range.versionVerseNum;
-        if (range.versionChapterEndNum) refRange.versionChapterEndNum = range.versionChapterEndNum;
-        if (range.versionVerseEndNum) refRange.versionVerseEndNum = range.versionVerseEndNum;
-        if (range.normalizedChapterNum) refRange.normalizedChapterNum = range.normalizedChapterNum;
-        if (range.normalizedVerseNum) refRange.normalizedVerseNum = range.normalizedVerseNum;
-        if (range.normalizedChapterEndNum)
-            refRange.normalizedChapterEndNum = range.normalizedChapterEndNum;
-        if (range.normalizedVerseEndNum)
-            refRange.normalizedVerseEndNum = range.normalizedVerseEndNum;
-        return {
-            key,
-            label,
-            range: refRange
-        };
-    };
     const inputData: IBibleContent[] = [];
     for (const obj of data) {
         if (obj.type === 'phrase') {
@@ -500,7 +480,7 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
                     content
                 }));
             if (phrase.crossReferences && phrase.crossReferences.length)
-                inputPhrase.crossReferences = phrase.crossReferences.map(stripCrossRef);
+                inputPhrase.crossReferences = phrase.crossReferences.map(slimDownCrossReference);
 
             if (phrase.numbering) inputPhrase.numbering = phrase.numbering;
 
@@ -525,7 +505,7 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
             if (obj.subTitle) inputSection.subTitle = obj.subTitle;
             if (obj.description) inputSection.description = obj.description;
             if (obj.crossReferences && obj.crossReferences.length)
-                inputSection.crossReferences = obj.crossReferences.map(stripCrossRef);
+                inputSection.crossReferences = obj.crossReferences.map(slimDownCrossReference);
             if (obj.numbering) inputSection.numbering = obj.numbering;
             inputData.push(inputSection);
         }
