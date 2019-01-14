@@ -65,8 +65,8 @@ export const generateParagraphSql = (
     //       selecting the previous paragraph), the start of the range has to also
     //       catch the start of the previous paragraph (i.e. it must be two times the length
     //       of the longest paragraph before the actual range.start)
-    const rangePhraseIdStart = generatePhraseId(range) - 200000000;
-    const rangePhraseIdEnd = generatePhraseId(refEnd) + 100000000;
+    const rangePhraseIdStart = generatePhraseId(range) - 20000000000;
+    const rangePhraseIdEnd = generatePhraseId(refEnd) + 10000000000;
     const colVersion = `${tableAlias}.versionId`;
     const colSectionStart = `${tableAlias}.phraseStartId`;
     const colSectionEnd = `${tableAlias}.phraseEndId`;
@@ -151,7 +151,8 @@ export const generateReferenceIdSql = (range: IBibleReferenceRangeNormalized, co
             range.normalizedVerseEndNum ||
             (range.normalizedVerseNum && !range.normalizedChapterEndNum)
                 ? range.normalizedVerseNum
-                : 999
+                : 999,
+        normalizedSubverseNum: range.normalizedSubverseEndNum || 99
     };
     let sql = `${col} BETWEEN '${generateReferenceId(range)}' AND '${generateReferenceId(refEnd)}'`;
 

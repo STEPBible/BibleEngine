@@ -10,7 +10,8 @@ export interface IContentGroup {
         | 'italic'
         | 'emphasis'
         | 'divineName'
-        | 'translationChange';
+        | 'translationChange'
+        | 'title';
 
     /**
      * 'quote' | 'person' => who?

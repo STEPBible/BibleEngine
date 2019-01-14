@@ -1,7 +1,7 @@
 import { IBibleNote } from './BibleNote';
 import { IBibleCrossReference } from './BibleCrossReference';
 import { IContentPhrase } from './ContentPhrase';
-import { IBibleReferenceNormalizedNumbers } from './BibleReference';
+import { IBibleReferenceNormalizedNumbers, IBibleReferenceVersionNumbers } from './BibleReference';
 
 export interface IBiblePhrase extends IContentPhrase {
     quoteWho?: string;
@@ -11,11 +11,25 @@ export interface IBiblePhrase extends IContentPhrase {
     crossReferences?: IBibleCrossReference[];
 }
 
-export interface IBiblePhraseWithNumbers extends IBiblePhrase {
-    versionChapterNum: number;
-    versionVerseNum: number;
-    // in case normalized number come pre-calculated (e.g. when downloading a version)
+export interface IBiblePhraseWithNumbers extends IBiblePhrase, IBibleReferenceVersionNumbers {
+    /**
+     * TODO: implement
+     * in some cases after normalization we can't be exactly sure where the verse boundaries are
+     * within a group of verses. In this case we put all the text in the first verse and add an
+     * empty phrase for each of the other verses. The first verse sets 'joinToRefId' to the last
+     * verse of the group, all the others set it to the first verse, that contains the content.
+     * If a phrase is encountered that has 'joinToRefId' set to a verse before, this has to be
+     * fetched instead and the verse indicator needs to show a verse-span instead of a single number
+     */
+    joinToRefId?: number;
+
+    versionChapterNum: number; // has to be set
+    versionVerseNum: number; // has to be set
+
+    /** in case normalized numbers come pre-calculated (e.g. when downloading a version) */
     normalizedReference?: IBibleReferenceNormalizedNumbers;
+
+    sourceTypeId?: number;
 }
 
 export type PhraseModifiers = {
@@ -28,10 +42,11 @@ export type PhraseModifiers = {
     translationChange?: string;
     bold?: boolean;
     italic?: boolean;
-    emphasis?: boolean;
     divineName?: boolean;
+    emphasis?: boolean;
+    title?: boolean;
 };
 
 export type ValueModifiers = 'translationChange' | 'orderedListItem' | 'unorderedListItem';
 
-export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis';
+export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'title';

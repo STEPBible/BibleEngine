@@ -7,6 +7,7 @@ import { BiblePhraseOriginalWord } from './BiblePhraseOriginalWord.entity';
 import { BibleCrossReference } from './BibleCrossReference.entity';
 import { BibleNote } from './BibleNote.entity';
 import { DictionaryEntry } from './DictionaryEntry.entity';
+import { V11nRule } from './V11nRule.entity';
 
 export {
     BibleVersion,
@@ -17,7 +18,8 @@ export {
     BiblePhraseOriginalWord,
     BibleCrossReference,
     BibleNote,
-    DictionaryEntry
+    DictionaryEntry,
+    V11nRule
 };
 export const ENTITIES = [
     BibleVersion,
@@ -27,5 +29,6 @@ export const ENTITIES = [
     BiblePhrase,
     BibleCrossReference,
     BibleNote,
-    DictionaryEntry
+    DictionaryEntry,
+    V11nRule
 ];

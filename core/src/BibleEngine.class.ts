@@ -10,17 +10,15 @@ import {
     BibleSection,
     BibleCrossReference,
     DictionaryEntry,
-    BibleParagraph
+    BibleParagraph,
+    V11nRule
 } from './entities';
 import {
     parsePhraseId,
     generatePhraseId,
-    generateContextRangeFromVersionRange,
-    generateNormalizedReferenceFromVersionReference,
+    generateNormalizedReferenceFromVersionRange,
     isReferenceNormalized,
-    generateRangeFromGenericSection,
-    slimDownReferenceRange,
-    slimDownCrossReference
+    generateReferenceId
 } from './functions/reference.functions';
 import {
     generatePhraseIdSql,
@@ -31,9 +29,16 @@ import {
 import {
     stripUnnecessaryDataFromBibleContent,
     generateBibleDocument,
-    convertBibleInputToBookPlaintext
+    convertBibleInputToBookPlaintext,
+    generateContextRanges,
+    generateContextSections,
+    stripUnnecessaryDataFromBibleVersion,
+    stripUnnecessaryDataFromBibleBook,
+    stripUnnecessaryDataFromBibleReferenceRange,
+    stripUnnecessaryDataFromBibleContextData
 } from './functions/content.functions';
 import { generateMinimizedDbObject, generateMinimizedDbObjects } from './functions/utils.functions';
+import { isTestMatching } from './functions/v11n.functions';
 import {
     BibleBookPlaintext,
     IDictionaryEntry,
@@ -44,17 +49,15 @@ import {
     IBibleBook,
     BookWithContentForInput,
     PhraseModifiers,
-    IBibleReference,
     IBibleReferenceNormalized,
     IBiblePhraseRef,
     IBibleContent,
+    IBiblePhraseWithNumbers,
     IBibleReferenceRangeQuery,
     IBibleReferenceVersion,
     IBibleReferenceRangeVersion,
-    IBibleContentForInput,
-    IBibleSection
+    IBibleContentForInput
 } from './models';
-import { getNormalizedVerseCount, getNormalizedChapterCountForOsisId } from './data/bibleMeta';
 
 export class BibleEngine {
     currentVersion?: BibleVersion;
@@ -77,25 +80,20 @@ export class BibleEngine {
             bookInput.book.chaptersCount.push(verses.size);
         }
         await this.addBook(bookInput.book);
-        await this.addBibleContent(bookInput.contents, {
-            book: bookInput.book,
-            context: textData,
-            modifierState: { quoteLevel: 0, indentLevel: 0 },
-            columnModifierState: {},
-            phraseStack: [],
-            paragraphStack: [],
-            sectionStack: [],
-            currentPhraseNum: 0,
-            currentNormalizedChapter: 0,
-            currentNormalizedVerse: -1,
-            sectionLevel: 0,
-            recursionLevel: 0
+
+        await this.addBibleBookContent(bookInput.contents, bookInput.book, textData).catch(e => {
+            console.error('Aborting book import: ' + e);
         });
     }
 
     async addDictionaryEntry(dictionaryEntry: IDictionaryEntry) {
         const entityManager = await this.pEntityManager;
         entityManager.save(new DictionaryEntry(dictionaryEntry));
+    }
+
+    async addV11nRules(rules: V11nRule[]) {
+        const entityManager = await this.pEntityManager;
+        return entityManager.save(rules, { chunk: rules.length / 500 });
     }
 
     async addVersion(version: IBibleVersion) {
@@ -144,7 +142,7 @@ export class BibleEngine {
         const entityManager = await this.pEntityManager;
 
         const version = await entityManager.findOne(BibleVersion, {
-            where: { version: rangeQuery.version }
+            where: { version: rangeQuery.queryVersion }
         });
         if (!version) {
             if (this.remoteConfig) {
@@ -208,294 +206,17 @@ export class BibleEngine {
             .addOrderBy('id')
             .getMany();
 
-        const context: IBibleOutputRich['context'] = {};
-        const contextRanges: IBibleOutputRich['contextRanges'] = {
-            paragraph: {},
-            sections: {},
-            versionChapter: {},
-            normalizedChapter: {}
-        };
+        /* GENERATE STRUCTURED DATA */
+        const context = generateContextSections(phrases, sections);
 
-        if (phrases.length) {
-            const firstPhraseId = phrases[0].id;
-            const lastPhraseId = phrases[phrases.length - 1].id;
-            for (const section of sections) {
-                if (section.level > 1) {
-                    let isSectionWithinParentLevel = false;
-                    for (const parentSection of [
-                        ...context[section.level - 1].includedSections,
-                        context[section.level - 1].wrappingSection
-                    ]) {
-                        if (
-                            parentSection &&
-                            ((section.phraseStartId >= parentSection.phraseStartId &&
-                                section.phraseStartId <= parentSection.phraseEndId) ||
-                                (section.phraseEndId >= parentSection.phraseStartId &&
-                                    section.phraseEndId <= parentSection.phraseEndId))
-                        ) {
-                            isSectionWithinParentLevel = true;
-                            break;
-                        }
-                    }
-
-                    if (!isSectionWithinParentLevel) continue;
-                }
-
-                if (!context[section.level]) {
-                    context[section.level] = {
-                        includedSections: [],
-                        previousSections: [],
-                        nextSections: []
-                    };
-                    contextRanges.sections[section.level] = {};
-                }
-
-                // check if this section wraps the entire range
-                if (section.phraseStartId < firstPhraseId && section.phraseEndId > lastPhraseId)
-                    context[section.level].wrappingSection = section;
-                // check if this section starts or ends within the range
-                else if (
-                    (section.phraseStartId >= firstPhraseId &&
-                        section.phraseStartId <= lastPhraseId) ||
-                    (section.phraseEndId >= firstPhraseId && section.phraseEndId <= lastPhraseId)
-                )
-                    context[section.level].includedSections.push(section);
-                // check if this section is before the range
-                else if (section.phraseEndId < firstPhraseId)
-                    context[section.level].previousSections.push(section);
-                // check if this section is after the range
-                else if (section.phraseStartId > lastPhraseId)
-                    context[section.level].nextSections.push(section);
-            }
-
-            /* GENERATE CONTEXTRANGES */
-
-            // paragraph context ranges
-            for (const paragraph of paragraphs) {
-                // paragraphs are sequentially sorted
-
-                // the last paragraph before the range not included in the range will end up as
-                // 'previousRange'
-                if (paragraph.phraseEndId < firstPhraseId)
-                    contextRanges.paragraph.previousRange = generateRangeFromGenericSection(
-                        paragraph
-                    );
-                // the first paragraph after the range not included in the range will be set as
-                // 'nextRange'
-                else if (
-                    paragraph.phraseStartId > lastPhraseId &&
-                    !contextRanges.paragraph.nextRange
-                )
-                    contextRanges.paragraph.nextRange = generateRangeFromGenericSection(paragraph);
-                else if (
-                    paragraph.phraseStartId < firstPhraseId &&
-                    paragraph.phraseEndId > lastPhraseId
-                )
-                    contextRanges.paragraph.completeRange = generateRangeFromGenericSection(
-                        paragraph
-                    );
-                else if (
-                    paragraph.phraseStartId < firstPhraseId &&
-                    paragraph.phraseEndId >= firstPhraseId &&
-                    paragraph.phraseEndId <= lastPhraseId
-                )
-                    contextRanges.paragraph.completeStartingRange = generateRangeFromGenericSection(
-                        paragraph
-                    );
-                else if (
-                    paragraph.phraseStartId >= firstPhraseId &&
-                    paragraph.phraseStartId <= lastPhraseId &&
-                    paragraph.phraseEndId > lastPhraseId
-                )
-                    contextRanges.paragraph.completeEndingRange = generateRangeFromGenericSection(
-                        paragraph
-                    );
-            }
-            if (
-                paragraphs.length === 1 &&
-                (paragraphs[0].phraseStartId < firstPhraseId ||
-                    paragraphs[0].phraseEndId > lastPhraseId)
-            ) {
-                contextRanges.paragraph.completeRange = generateRangeFromGenericSection(
-                    paragraphs[0]
-                );
-            }
-
-            // context ranges for chapter (version & normalized)
-            if (range.versionChapterNum) {
-                if (range.versionChapterNum > 1)
-                    contextRanges.versionChapter.previousRange = {
-                        bookOsisId: book.osisId,
-                        versionChapterNum: range.versionChapterNum - 1
-                    };
-                if (
-                    (range.versionChapterEndNum &&
-                        range.versionChapterEndNum < book.chaptersCount.length) ||
-                    (!range.versionChapterEndNum &&
-                        range.versionChapterNum &&
-                        range.versionChapterNum < book.chaptersCount.length)
-                ) {
-                    contextRanges.versionChapter.nextRange = {
-                        bookOsisId: book.osisId,
-                        versionChapterNum: range.versionChapterEndNum
-                            ? range.versionChapterEndNum + 1
-                            : range.versionChapterNum! + 1
-                    };
-                }
-                if (
-                    (!range.versionChapterEndNum ||
-                        range.versionChapterNum === range.versionChapterEndNum) &&
-                    range.versionVerseNum &&
-                    (!range.versionVerseEndNum ||
-                        range.versionVerseNum > 1 ||
-                        range.versionVerseEndNum <
-                            book.getChapterVerseCount(range.versionChapterNum))
-                ) {
-                    contextRanges.versionChapter.completeRange = {
-                        bookOsisId: book.osisId,
-                        versionChapterNum: range.versionChapterNum
-                    };
-                }
-                if (
-                    range.versionVerseNum &&
-                    range.versionVerseNum > 1 &&
-                    range.versionChapterEndNum &&
-                    range.versionChapterEndNum > range.versionChapterNum
-                ) {
-                    contextRanges.versionChapter.completeStartingRange = {
-                        bookOsisId: book.osisId,
-                        versionChapterNum: range.versionChapterNum
-                    };
-                }
-                if (
-                    range.versionChapterEndNum &&
-                    range.versionChapterEndNum !== range.versionChapterNum &&
-                    range.versionVerseEndNum &&
-                    range.versionVerseEndNum < book.getChapterVerseCount(range.versionChapterEndNum)
-                ) {
-                    contextRanges.versionChapter.completeEndingRange = {
-                        bookOsisId: book.osisId,
-                        versionChapterNum: range.versionChapterEndNum
-                    };
-                }
-            }
-            if (rangeNormalized.normalizedChapterNum) {
-                if (rangeNormalized.normalizedChapterNum > 1)
-                    contextRanges.normalizedChapter.previousRange = {
-                        bookOsisId: book.osisId,
-                        normalizedChapterNum: rangeNormalized.normalizedChapterNum - 1
-                    };
-                if (
-                    (rangeNormalized.normalizedChapterEndNum &&
-                        rangeNormalized.normalizedChapterEndNum <
-                            getNormalizedChapterCountForOsisId(book.osisId)) ||
-                    (!rangeNormalized.normalizedChapterEndNum &&
-                        rangeNormalized.normalizedChapterNum &&
-                        rangeNormalized.normalizedChapterNum <
-                            getNormalizedChapterCountForOsisId(book.osisId))
-                ) {
-                    contextRanges.normalizedChapter.nextRange = {
-                        bookOsisId: book.osisId,
-                        normalizedChapterNum: rangeNormalized.normalizedChapterEndNum
-                            ? rangeNormalized.normalizedChapterEndNum + 1
-                            : rangeNormalized.normalizedChapterNum! + 1
-                    };
-                }
-                if (
-                    (!rangeNormalized.normalizedChapterEndNum ||
-                        rangeNormalized.normalizedChapterNum ===
-                            rangeNormalized.normalizedChapterEndNum) &&
-                    rangeNormalized.normalizedVerseNum &&
-                    (!rangeNormalized.normalizedVerseEndNum ||
-                        rangeNormalized.normalizedVerseNum > 1 ||
-                        rangeNormalized.normalizedVerseEndNum <
-                            getNormalizedVerseCount(
-                                book.osisId,
-                                rangeNormalized.normalizedChapterNum
-                            ))
-                ) {
-                    contextRanges.normalizedChapter.completeRange = {
-                        bookOsisId: book.osisId,
-                        normalizedChapterNum: rangeNormalized.normalizedChapterNum
-                    };
-                }
-                if (
-                    rangeNormalized.normalizedVerseNum &&
-                    rangeNormalized.normalizedVerseNum > 1 &&
-                    rangeNormalized.normalizedChapterEndNum &&
-                    rangeNormalized.normalizedChapterEndNum > rangeNormalized.normalizedChapterNum
-                ) {
-                    contextRanges.normalizedChapter.completeStartingRange = {
-                        bookOsisId: book.osisId,
-                        normalizedChapterNum: rangeNormalized.normalizedChapterNum
-                    };
-                }
-                if (
-                    rangeNormalized.normalizedChapterEndNum &&
-                    rangeNormalized.normalizedChapterEndNum !==
-                        rangeNormalized.normalizedChapterNum &&
-                    rangeNormalized.normalizedVerseEndNum &&
-                    rangeNormalized.normalizedVerseEndNum <
-                        getNormalizedVerseCount(
-                            book.osisId,
-                            rangeNormalized.normalizedChapterEndNum
-                        )
-                ) {
-                    contextRanges.normalizedChapter.completeEndingRange = {
-                        bookOsisId: book.osisId,
-                        normalizedChapterNum: rangeNormalized.normalizedChapterEndNum
-                    };
-                }
-            }
-
-            for (const sectionLevel of Object.keys(context).map(_sectionLevel => +_sectionLevel)) {
-                if (context[sectionLevel] && context[sectionLevel].wrappingSection) {
-                    contextRanges.sections[
-                        sectionLevel
-                    ].completeRange = generateRangeFromGenericSection(
-                        context[sectionLevel].wrappingSection!
-                    );
-                } else if (context[sectionLevel].includedSections.length > 0) {
-                    // => if there is a wrapping section, there can't be includedSections on the
-                    //    same level
-                    if (context[sectionLevel].includedSections[0].phraseStartId < firstPhraseId) {
-                        contextRanges.sections[
-                            sectionLevel
-                        ].completeStartingRange = generateRangeFromGenericSection(
-                            context[sectionLevel].includedSections[0]
-                        );
-                    }
-                    if (
-                        context[sectionLevel].includedSections[
-                            context[sectionLevel].includedSections.length - 1
-                        ].phraseEndId > lastPhraseId
-                    ) {
-                        contextRanges.sections[
-                            sectionLevel
-                        ].completeEndingRange = generateRangeFromGenericSection(
-                            context[sectionLevel].includedSections[
-                                context[sectionLevel].includedSections.length - 1
-                            ]
-                        );
-                    }
-                }
-
-                if (context[sectionLevel] && context[sectionLevel].previousSections.length)
-                    contextRanges.sections[
-                        sectionLevel
-                    ].previousRange = generateRangeFromGenericSection(
-                        context[sectionLevel].previousSections[
-                            context[sectionLevel].previousSections.length - 1
-                        ]
-                    );
-                if (context[sectionLevel] && context[sectionLevel].nextSections.length)
-                    contextRanges.sections[
-                        sectionLevel
-                    ].nextRange = generateRangeFromGenericSection(
-                        context[sectionLevel].nextSections[0]
-                    );
-            }
-        }
+        const contextRanges = generateContextRanges(
+            range,
+            rangeNormalized,
+            phrases,
+            paragraphs,
+            context,
+            book
+        );
 
         const bibleDocument = generateBibleDocument(
             phrases,
@@ -505,77 +226,15 @@ export class BibleEngine {
             version.chapterVerseSeparator
         );
 
-        // when we are transmitting the data we want the returned object to be as slim as possible.
-        // also: when we transmit to a client, local ids have to be stripped (versionId, sectionId)
         if (stripUnnecessaryData) {
+            // when we are transmitting the data we want the returned object to be as slim as
+            // possible. also: when we transmit to a client, local ids have to be stripped
+            // (versionId, sectionId)
             bibleDocument.contents = stripUnnecessaryDataFromBibleContent(bibleDocument.contents);
-
-            delete version.id;
-            delete version.copyrightLongJson;
-            delete version.descriptionJson;
-            if (!version.copyrightLong) delete version.copyrightLong;
-            if (!version.description) delete version.description;
-            if (!version.copyrightShort) delete version.copyrightShort;
-            if (!version.hasStrongs) delete version.hasStrongs;
-
-            delete book.versionId;
-            delete book.chaptersMetaJson;
-            delete book.introductionJson;
-            if (!book.introduction) delete book.introduction;
-
-            delete rangeNormalized.versionId;
-            delete rangeNormalized.isNormalized;
-
-            for (const rangeContext of <('paragraph' | 'versionChapter' | 'normalizedChapter')[]>[
-                'paragraph',
-                'versionChapter',
-                'normalizedChapter'
-            ]) {
-                for (const rangeType of <(keyof IBibleOutputRich['contextRanges']['paragraph'])[]>(
-                    Object.keys(contextRanges[rangeContext])
-                )) {
-                    contextRanges[rangeContext][rangeType] = slimDownReferenceRange(
-                        contextRanges[rangeContext][rangeType]!
-                    );
-                }
-            }
-
-            for (const level of Object.keys(context).map(_level => +_level)) {
-                for (const rangeType of <
-                    (keyof IBibleOutputRich['contextRanges']['sections'][0])[]
-                >Object.keys(contextRanges['sections'][level])) {
-                    contextRanges['sections'][level][rangeType] = slimDownReferenceRange(
-                        contextRanges['sections'][level][rangeType]!
-                    );
-                }
-
-                // local helper
-                const slimDownBibleSection = (section: IBibleSection): IBibleSection => {
-                    const slimSection: IBibleSection = {
-                        phraseStartId: section.phraseStartId,
-                        phraseEndId: section.phraseEndId
-                    };
-                    if (section.title) slimSection.title = section.title;
-                    if (section.subTitle) slimSection.subTitle = section.subTitle;
-                    if (section.description) slimSection.description = section.description;
-                    if (section.crossReferences)
-                        slimSection.crossReferences = section.crossReferences.map(
-                            slimDownCrossReference
-                        );
-                    return slimSection;
-                };
-                if (context[level].wrappingSection)
-                    context[level].wrappingSection = slimDownBibleSection(
-                        context[level].wrappingSection!
-                    );
-                context[level].includedSections = context[level].includedSections.map(
-                    slimDownBibleSection
-                );
-                context[level].nextSections = context[level].nextSections.map(slimDownBibleSection);
-                context[level].previousSections = context[level].previousSections.map(
-                    slimDownBibleSection
-                );
-            }
+            stripUnnecessaryDataFromBibleVersion(version);
+            stripUnnecessaryDataFromBibleBook(book);
+            stripUnnecessaryDataFromBibleReferenceRange(rangeNormalized);
+            stripUnnecessaryDataFromBibleContextData(context, contextRanges);
         }
 
         return {
@@ -627,7 +286,7 @@ export class BibleEngine {
             bookData.push({
                 book,
                 content: await this.getFullDataForReferenceRange({
-                    version: version.version,
+                    queryVersion: version.version,
                     bookOsisId: book.osisId
                 }).then(fullData => stripUnnecessaryDataFromBibleContent(fullData.content.contents))
             });
@@ -702,79 +361,220 @@ export class BibleEngine {
         this.currentVersion = versionDb;
     }
 
-    private async addBibleContent(
+    private async addBibleBookContent(
         contents: IBibleContentForInput[],
+        book: IBibleBook,
+        context: BibleBookPlaintext,
         state: {
-            book: IBibleBook;
-            context: BibleBookPlaintext;
             modifierState: PhraseModifiers;
             columnModifierState: { quoteWho?: string; person?: string };
+            sectionLevel: number;
+            recursionLevel: number;
             phraseStack: BiblePhrase[];
             paragraphStack: BibleParagraph[];
             sectionStack: BibleSection[];
-            currentNormalizedChapter: number;
-            currentNormalizedVerse: number;
+            usedRefIds: Set<number>;
+            currentVersionChapter: number;
+            currentVersionVerse: number;
+            currentVersionSubverse?: number;
             currentPhraseNum: number;
-            sectionLevel: number;
-            recursionLevel: number;
+            currentNormalizedReference?: IBibleReferenceNormalized;
+            currentSourceTypeId?: number;
+            currentJoinToRefId?: number;
+        } = {
+            modifierState: { quoteLevel: 0, indentLevel: 0 },
+            columnModifierState: {},
+            sectionLevel: 0,
+            recursionLevel: 0,
+            phraseStack: [],
+            paragraphStack: [],
+            sectionStack: [],
+            usedRefIds: new Set(),
+            currentPhraseNum: 0,
+            currentVersionChapter: 0,
+            currentVersionVerse: -1,
+            currentVersionSubverse: 0
         }
     ): Promise<{ firstPhraseId: number | undefined; lastPhraseId: number | undefined }> {
         const entityManager = await this.pEntityManager;
         let firstPhraseId: number | undefined, lastPhraseId: number | undefined;
         for (const content of contents) {
             if (content.type === 'phrase') {
-                const nRef = await this.getNormalizedReferenceFromV11nRules(
-                    {
-                        versionId: state.book.versionId,
-                        bookOsisId: state.book.osisId,
-                        versionChapterNum: content.versionChapterNum,
-                        versionVerseNum: content.versionVerseNum
-                    },
-                    state.context
-                );
-                if (!nRef.normalizedChapterNum || !nRef.normalizedVerseNum)
-                    throw new Error(`can't add phrases: normalisation failed`);
+                // does this phrase start a new (sub-)verse? if yes, we need to look for v11n-rules
+                // and determine the normalized numbering. if needed we also need to create empty
+                // verses (if a verse of the standard version does not exist in our source version
+                // or when one source verse is a verse range in the standard version)
+                // also: this updates all the current* attributes on the state object
+                if (
+                    !state.currentNormalizedReference ||
+                    content.versionChapterNum !== state.currentVersionChapter ||
+                    content.versionVerseNum !== state.currentVersionVerse ||
+                    content.versionSubverseNum !== state.currentVersionSubverse
+                ) {
+                    state.currentVersionChapter = content.versionChapterNum;
+                    state.currentVersionVerse = content.versionVerseNum;
+                    state.currentVersionSubverse = content.versionSubverseNum;
+                    state.currentJoinToRefId = undefined;
+                    state.currentSourceTypeId = undefined;
+                    // currentPhraseNum will be dealt with on the basis of the normalized numbers
+
+                    let nRef: IBibleReferenceNormalized | undefined;
+
+                    if (content.normalizedReference) {
+                        state.currentJoinToRefId = content.joinToRefId;
+                        state.currentSourceTypeId = content.sourceTypeId;
+                        nRef = {
+                            ...content.normalizedReference,
+                            bookOsisId: book.osisId,
+                            isNormalized: true
+                        };
+                    } else {
+                        const reference = {
+                            versionId: book.versionId,
+                            bookOsisId: book.osisId,
+                            versionChapterNum: content.versionChapterNum,
+                            versionVerseNum: content.versionVerseNum,
+                            versionSubverseNum: content.versionSubverseNum
+                        };
+                        let firstStandardRefId: number | undefined;
+
+                        const normalisationRules = await this.getNormalisationRulesForRange(
+                            reference
+                        );
+
+                        for (const rule of normalisationRules) {
+                            if (!isTestMatching(rule.tests, context)) continue;
+
+                            // if the rule is matching we know the sourceType of the phrase. we save
+                            // this with the phrase so that later we can just query for the
+                            // sourceType without running the tests (which need context) - also,
+                            // phrases that don't have a sourceType then don't have related rules,
+                            // saving us the effort to look for rules in the first place
+                            // (Note: for rules with the action "Keep verse" assigning this property
+                            //        will be the only action taken)
+                            state.currentSourceTypeId = rule.sourceTypeId;
+
+                            // we need this for both the empty and merge rules
+                            const emptyPhraseReference: Required<IBiblePhraseRef> = {
+                                isNormalized: true,
+                                bookOsisId: rule.standardRef.bookOsisId,
+                                versionId: reference.versionId,
+                                normalizedChapterNum: rule.standardRef.normalizedChapterNum!,
+                                normalizedVerseNum: rule.standardRef.normalizedVerseNum!,
+                                normalizedSubverseNum: rule.standardRef.normalizedSubverseNum || 0,
+                                phraseNum: 0
+                            };
+
+                            if (rule.action === 'Empty verse') {
+                                // since this phrase does not relate to any verse in the
+                                // source version, we set the versionNumbers to the standardRef
+                                const emptyPhrase = {
+                                    content: '',
+                                    versionChapterNum: rule.standardRef.normalizedChapterNum!,
+                                    versionVerseNum: rule.standardRef.normalizedVerseNum!
+                                };
+
+                                state.phraseStack.push(
+                                    new BiblePhrase(
+                                        emptyPhrase,
+                                        emptyPhraseReference,
+                                        state.modifierState
+                                    )
+                                );
+                            } else if (rule.action === 'Renumber verse') {
+                                // only the first standardRef is relevant for creating the
+                                // normalized reference for this phrase. Additional refs occur when
+                                // the sourceRef generates a range. we create an empty phrase for
+                                // each of them and keep track of last ref of the range to link the
+                                // content-phrase to it laster
+                                if (firstStandardRefId)
+                                    throw new Error(
+                                        `v11n: trying to renumber an already renumbered ref`
+                                    );
+
+                                nRef = rule.standardRef;
+                                firstStandardRefId = rule.standardRefId;
+                            } else if (rule.action === 'Merged above') {
+                                if (!firstStandardRefId)
+                                    throw new Error(
+                                        `v11n: trying to continue a range that wasn't started`
+                                    );
+
+                                const emptyPhrase: IBiblePhraseWithNumbers = {
+                                    content: '',
+                                    versionChapterNum: content.versionChapterNum,
+                                    versionVerseNum: content.versionVerseNum,
+                                    // we link the empty phrases to the first standardRef
+                                    joinToRefId: firstStandardRefId
+                                };
+
+                                state.phraseStack.push(
+                                    new BiblePhrase(
+                                        emptyPhrase,
+                                        // this is set to the standardRef of the current rule
+                                        // above
+                                        emptyPhraseReference,
+                                        state.modifierState
+                                    )
+                                );
+
+                                // the last standardRefId in this range needs to be linked on the
+                                // starting verse of the range
+                                if (
+                                    !state.currentJoinToRefId ||
+                                    state.currentJoinToRefId < rule.standardRefId
+                                )
+                                    state.currentJoinToRefId = rule.standardRefId;
+                            }
+                        }
+
+                        // no rule updpated the numbering
+                        if (!nRef) nRef = generateNormalizedReferenceFromVersionRange(reference);
+                    }
+
+                    if (
+                        state.currentNormalizedReference &&
+                        nRef.normalizedChapterNum ===
+                            state.currentNormalizedReference.normalizedChapterNum &&
+                        nRef.normalizedVerseNum ===
+                            state.currentNormalizedReference.normalizedVerseNum &&
+                        nRef.normalizedSubverseNum ===
+                            state.currentNormalizedReference.normalizedSubverseNum
+                    ) {
+                        state.currentPhraseNum++;
+                    } else {
+                        const newRefId = generateReferenceId(nRef);
+                        if (state.usedRefIds.has(newRefId))
+                            throw new Error(
+                                `normalization caused the duplicate reference ${newRefId} - this ` +
+                                    `is caused by inconsistencies in the v11n rules and would ` +
+                                    `cause the reference to be overwritten`
+                            );
+
+                        state.usedRefIds.add(newRefId);
+                        state.currentPhraseNum = 1;
+                        state.currentNormalizedReference = nRef;
+                    }
+                    // end new version verse handling
+                } else {
+                    state.currentPhraseNum++;
+                }
 
                 if (
-                    nRef.normalizedChapterNum === state.currentNormalizedChapter &&
-                    nRef.normalizedVerseNum === state.currentNormalizedVerse
-                ) {
-                    state.currentPhraseNum++;
-                } else {
-                    // chapter switch?
-                    // if (
-                    //     nRef.normalizedChapterNum !== state.currentNormalizedChapter &&
-                    //     state.phraseStack.length
-                    // ) {
-                    //     // we save the stack for each chapter (otherwise it might become too big)
-                    //     // RADAR: test if we have to save more often (low-mem devices?)
-                    //     entityManager.save(state.phraseStack);
-                    //     state.phraseStack = [];
-                    // }
-
-                    state.currentPhraseNum = 1;
-                    state.currentNormalizedChapter = nRef.normalizedChapterNum;
-                    state.currentNormalizedVerse = nRef.normalizedVerseNum;
-
-                    /*
-                     * RADAR: we disable the following block since we actually don't want content
-                     *        from the same verse in the same version be saved in two instances.
-                     *        Let's rather have a db-uniqe error then to know something went bad.
-                     *        For now, we leave the code for reference.
-
-                    // since we have a verse switch we check if there are already phrases for this
-                    // verse and version in the database and fetch the next phraseNum accordingly
-                    state.currentPhraseNum = await this.getNextPhraseNumForNormalizedVerseNum(nRef);
-                    */
-                }
+                    !state.currentNormalizedReference.normalizedChapterNum ||
+                    !state.currentNormalizedReference.normalizedVerseNum
+                )
+                    throw new Error(`can't add phrases: normalisation failed`);
 
                 // we are using a phraseStack to improve performance when adding to the database
                 const phraseRef: Required<IBiblePhraseRef> = {
                     isNormalized: true,
-                    bookOsisId: state.book.osisId,
-                    normalizedChapterNum: nRef.normalizedChapterNum,
-                    normalizedVerseNum: nRef.normalizedVerseNum,
-                    versionId: state.book.versionId,
+                    bookOsisId: book.osisId,
+                    normalizedChapterNum: state.currentNormalizedReference.normalizedChapterNum,
+                    normalizedVerseNum: state.currentNormalizedReference.normalizedVerseNum,
+                    normalizedSubverseNum:
+                        state.currentNormalizedReference.normalizedSubverseNum || 0,
+                    versionId: book.versionId,
                     phraseNum: state.currentPhraseNum
                 };
                 const phraseId = generatePhraseId(phraseRef);
@@ -785,6 +585,8 @@ export class BibleEngine {
                     content.quoteWho = state.columnModifierState.quoteWho;
                 if (state.columnModifierState.person)
                     content.person = state.columnModifierState.person;
+                if (state.currentJoinToRefId) content.joinToRefId = state.currentJoinToRefId;
+                if (state.currentSourceTypeId) content.sourceTypeId = state.currentSourceTypeId;
 
                 state.phraseStack.push(new BiblePhrase(content, phraseRef, state.modifierState));
             } else if (content.type === 'group' && content.groupType !== 'paragraph') {
@@ -802,6 +604,7 @@ export class BibleEngine {
                 else if (content.groupType === 'divineName') state.modifierState.divineName = true;
                 else if (content.groupType === 'emphasis') state.modifierState.emphasis = true;
                 else if (content.groupType === 'italic') state.modifierState.italic = true;
+                else if (content.groupType === 'title') state.modifierState.title = true;
                 else if (content.groupType === 'translationChange')
                     state.modifierState.translationChange = content.modifier;
                 else if (content.groupType === 'person')
@@ -814,7 +617,7 @@ export class BibleEngine {
                 const {
                     firstPhraseId: groupFirstPhraseId,
                     lastPhraseId: groupLastPhraseId
-                } = await this.addBibleContent(content.contents, state);
+                } = await this.addBibleBookContent(content.contents, book, context, state);
                 state.recursionLevel--;
                 if (groupFirstPhraseId && !firstPhraseId) firstPhraseId = groupFirstPhraseId;
                 if (groupLastPhraseId) lastPhraseId = groupLastPhraseId;
@@ -831,14 +634,14 @@ export class BibleEngine {
                 let {
                     firstPhraseId: sectionFirstPhraseId,
                     lastPhraseId: sectionLastPhraseId
-                } = await this.addBibleContent(content.contents, state);
+                } = await this.addBibleBookContent(content.contents, book, context, state);
                 state.recursionLevel--;
 
                 if (sectionFirstPhraseId && sectionLastPhraseId) {
                     if (content.type === 'group' && content.groupType === 'paragraph') {
                         state.paragraphStack.push(
                             new BibleParagraph(
-                                state.book.versionId,
+                                book.versionId,
                                 sectionFirstPhraseId,
                                 sectionLastPhraseId
                             )
@@ -846,7 +649,7 @@ export class BibleEngine {
                     } else if (content.type === 'section') {
                         state.sectionStack.push(
                             new BibleSection({
-                                versionId: state.book.versionId,
+                                versionId: book.versionId,
                                 phraseStartId: sectionFirstPhraseId,
                                 phraseEndId: sectionLastPhraseId,
                                 level: state.sectionLevel,
@@ -887,126 +690,130 @@ export class BibleEngine {
         return entityManager.findOne(BibleBook, { where });
     }
 
-    // we excpect this to be an async method in the future
-    // - to not break code then we make it async already
-    private async getNormalizedReference(
-        reference: IBibleReferenceVersion
-    ): Promise<IBibleReferenceNormalized> {
-        if (isReferenceNormalized(reference)) return { ...reference, isNormalized: true };
-        // if reference has not data that can cause normalisation changes, return the reference
-        // (-range) right away
-        if (
-            !reference.versionId ||
-            !reference.versionChapterNum ||
-            !reference.versionVerseNum // RADAR: is it safe to return here if no versionVerse?
-        )
-            return generateNormalizedReferenceFromVersionReference(reference);
-
-        // RADAR: test if it is really faster to check for the existence of v11n rules for this
-        // reference before looking into the phrases table
-        const normalisationRules = await this.getNormalisationRulesForReference(reference);
-
-        // there are no rules for this reference(-range) than can cause normalisation changes
-        if (!normalisationRules.length)
-            return generateNormalizedReferenceFromVersionReference(reference);
-
-        // see if we already have the reference in the database
-        const referenceContextRange = generateContextRangeFromVersionRange(reference);
-        const entityManager = await this.pEntityManager;
-        const refPhrase = await entityManager.findOne(BiblePhrase, {
-            where: {
-                id: Raw(col =>
-                    generatePhraseIdSql(
-                        {
-                            isNormalized: true,
-                            bookOsisId: reference.bookOsisId,
-                            normalizedChapterNum: referenceContextRange.versionChapterNum,
-                            normalizedVerseNum: referenceContextRange.versionVerseNum,
-                            normalizedChapterEndNum: referenceContextRange.versionChapterEndNum,
-                            normalizedVerseEndNum: referenceContextRange.versionVerseEndNum,
-                            versionId: reference.versionId
-                        },
-                        col
-                    )
-                ),
-                versionChapterNum: reference.versionChapterNum,
-                versionVerseNum: reference.versionVerseNum
-            }
-        });
-
-        if (!refPhrase) throw new Error(`can't get normalized reference: version data not in DB`);
-
-        return {
-            ...reference,
-            isNormalized: true,
-            normalizedChapterNum: refPhrase.normalizedReference.normalizedChapterNum,
-            normalizedVerseNum: refPhrase.normalizedReference.normalizedVerseNum
-        };
-    }
-
-    private async getNormalizedReferenceFromV11nRules(
-        reference: IBibleReferenceVersion,
-        context: BibleBookPlaintext
-    ): Promise<IBibleReferenceNormalized> {
-        if (isReferenceNormalized(reference)) return { ...reference, isNormalized: true };
-
-        // if reference has not data that can cause normalisation changes or if normalisation data
-        // already there, return the reference(-range) right away
-        if (
-            !reference.versionId ||
-            !reference.versionChapterNum ||
-            !reference.versionVerseNum // RADAR: is it safe to return here if no versionVerse?
-        )
-            return generateNormalizedReferenceFromVersionReference(reference);
-
-        const normalisationRules = await this.getNormalisationRulesForReference(reference);
-
-        // there are no rules for this reference(-range) than can cause normalisation changes
-        if (!normalisationRules.length)
-            return generateNormalizedReferenceFromVersionReference(reference);
-
-        for (const rule of normalisationRules) {
-            this.runV11nRuleOnReference(reference, rule, context);
-        }
-
-        // TODO: normalize this using the v11n-normalisation data from STEPData
-        return generateNormalizedReferenceFromVersionReference(reference);
-    }
-
     private async getNormalizedReferenceRange(
         range: IBibleReferenceRangeVersion
     ): Promise<IBibleReferenceRangeNormalized> {
         if (isReferenceNormalized(range)) return { ...range, isNormalized: true };
-        const { normalizedChapterNum, normalizedVerseNum } = await this.getNormalizedReference(
-            range
-        );
+
+        // if reference has not data that can cause normalisation changes, return the reference
+        // (-range) right away
+        if (!range.versionId || !range.versionChapterNum || !range.versionVerseNum)
+            return generateNormalizedReferenceFromVersionRange(range);
+
+        const rules = await this.getNormalisationRulesForRange(range);
+
+        // there are no rules for this reference(-range) than can cause normalisation changes
+        if (!rules.length) return generateNormalizedReferenceFromVersionRange(range);
+
+        // now we need to determine the normalized range that the given version range could
+        // potentially end up in - thus we can narrow down the phrases we need to look at
+        let standardRefIdStart: number | undefined;
+        let standardRefStart: IBibleReferenceNormalized | undefined;
+        let standardRefIdEnd: number | undefined;
+        let standardRefEnd: IBibleReferenceNormalized | undefined;
+        for (const rule of rules) {
+            if (!standardRefIdStart || standardRefIdStart > rule.standardRefId) {
+                standardRefIdStart = rule.standardRefId;
+                standardRefStart = rule.standardRef;
+            }
+            if (!standardRefIdEnd || standardRefIdEnd < rule.standardRefId) {
+                standardRefIdEnd = rule.standardRefId;
+                standardRefEnd = rule.standardRef;
+            }
+        }
+        const potentialNormalizedRange: IBibleReferenceRangeNormalized = {
+            isNormalized: true,
+            versionId: range.versionId,
+            bookOsisId: range.bookOsisId,
+            normalizedChapterNum: standardRefStart!.normalizedChapterNum,
+            normalizedVerseNum: standardRefStart!.normalizedVerseNum,
+            normalizedSubverseNum: standardRefStart!.normalizedSubverseNum,
+            normalizedChapterEndNum: standardRefEnd!.normalizedChapterNum,
+            normalizedVerseEndNum: standardRefEnd!.normalizedVerseNum,
+            normalizedSubverseEndNum: standardRefEnd!.normalizedSubverseNum
+        };
+
+        const entityManager = await this.pEntityManager;
+        // const phraseStart = await entityManager.findOne(BiblePhrase, {
+        //     where: {
+        //         id: Raw(col => generatePhraseIdSql(pontentialNormalizedRange, col)),
+        //         versionChapterNum: range.versionChapterNum,
+        //         // if there was no verseNum we would have returned above already
+        //         versionVerseNum: range.versionVerseNum
+        //     }
+        // });
+
+        const { phraseIdStart } = await entityManager
+            .createQueryBuilder(BiblePhrase, 'phrase')
+            .select('MIN(phrase.id)', 'phraseIdStart')
+            .where(
+                generatePhraseIdSql(potentialNormalizedRange, 'phrase.id') +
+                    ' AND phrase.versionChapterNum = :cNum AND phrase.versionVerseNum = :vNum',
+                { cNum: range.versionChapterNum, vNum: range.versionVerseNum }
+            )
+            .getRawOne();
+
+        if (!phraseIdStart) throw new Error(`can't get normalized refrence: version data missing`);
+        const phraseStart = parsePhraseId(phraseIdStart);
+
         const normRange: IBibleReferenceRangeNormalized = {
             ...range,
             isNormalized: true,
-            normalizedChapterNum,
-            normalizedVerseNum
+            normalizedChapterNum: phraseStart.normalizedChapterNum,
+            normalizedVerseNum: phraseStart.normalizedVerseNum,
+            normalizedSubverseNum: phraseStart.normalizedSubverseNum || undefined
         };
-        if (range.versionChapterEndNum || range.versionVerseEndNum) {
-            const {
-                normalizedChapterNum: normalizedChapterEndNum,
-                normalizedVerseNum: normalizedVerseEndNum
-            } = await this.getNormalizedReference({
-                versionId: range.versionId,
-                bookOsisId: range.bookOsisId,
-                versionChapterNum: range.versionChapterEndNum || range.versionChapterNum,
-                versionVerseNum: range.versionVerseEndNum
-            });
-            normRange.normalizedChapterEndNum = normalizedChapterEndNum;
-            normRange.normalizedVerseEndNum = normalizedVerseEndNum;
+
+        // we only come here when there is a verseNum - in this case an end chapter without an end
+        // verse wouldn't make sense, so we can safely ignore this case
+        if (range.versionVerseEndNum) {
+            // const phraseEnd = await entityManager.findOne(BiblePhrase, {
+            //     where: {
+            //         id: Raw(col => generatePhraseIdSql(pontentialNormalizedRange, col)),
+            //         versionChapterNum: range.versionChapterEndNum
+            //             ? range.versionChapterEndNum
+            //             : range.versionChapterNum,
+            //         versionVerseNum: range.versionVerseEndNum
+            //     }
+            // });
+            const { phraseIdEnd } = await entityManager
+                .createQueryBuilder(BiblePhrase, 'phrase')
+                .select('MAX(phrase.id)', 'phraseIdEnd')
+                .where(
+                    generatePhraseIdSql(potentialNormalizedRange, 'phrase.id') +
+                        ' AND phrase.versionChapterNum = :cNum AND phrase.versionVerseNum = :vNum',
+                    {
+                        cNum: range.versionChapterEndNum
+                            ? range.versionChapterEndNum
+                            : range.versionChapterNum,
+                        vNum: range.versionVerseEndNum
+                    }
+                )
+                .getRawOne();
+
+            if (!phraseIdEnd)
+                throw new Error(`can't get normalized refrence: version data missing`);
+            const phraseEnd = parsePhraseId(phraseIdEnd);
+
+            normRange.normalizedChapterEndNum = phraseEnd.normalizedChapterNum;
+            normRange.normalizedVerseEndNum = phraseEnd.normalizedVerseNum;
+            if (phraseEnd.normalizedSubverseNum)
+                normRange.normalizedSubverseEndNum = phraseEnd.normalizedSubverseNum;
         }
 
         return normRange;
     }
 
-    // this is probably async when implemented
-    private async getNormalisationRulesForReference(_: IBibleReferenceRangeVersion) {
-        // TODO: implement
-        return [];
+    private async getNormalisationRulesForRange(range: IBibleReferenceRangeVersion) {
+        const entityManager = await this.pEntityManager;
+        return entityManager.find(V11nRule, {
+            where: {
+                sourceRefId: Raw(col =>
+                    generateReferenceIdSql(generateNormalizedReferenceFromVersionRange(range), col)
+                )
+            },
+            order: { id: 'ASC' }
+        });
     }
 
     private async normalizeCrossReferencesForVersion(versionId: number) {
@@ -1024,9 +831,10 @@ export class BibleEngine {
             })) {
                 // get normalized reference range
                 // we know that this crossRef has a versionId since we queried for it
-                const normalizedRange = await this.getNormalizedReferenceRange(<
-                    IBibleReferenceRangeVersion
-                >cRef.range);
+                const normalizedRange = await this.getNormalizedReferenceRange(
+                    // prettier-ignore
+                    <IBibleReferenceRangeVersion>cRef.range
+                );
                 if (cRef.versionChapterNum)
                     cRef.range.normalizedChapterNum = normalizedRange.normalizedChapterNum;
                 if (cRef.versionVerseNum)
@@ -1039,14 +847,5 @@ export class BibleEngine {
                 entityManager.save(cRef);
             }
         }
-    }
-
-    private runV11nRuleOnReference(
-        reference: IBibleReference,
-        rule: any,
-        context: BibleBookPlaintext
-    ) {
-        // TODO: implement
-        return !rule || !context ? reference : reference;
     }
 }

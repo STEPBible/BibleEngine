@@ -1,11 +1,11 @@
 import 'isomorphic-fetch';
-import { BibleEngine } from '@bible-engine/core';
-import { BibleVersion } from '@bible-engine/core/src/entities';
 import {
+    BibleEngine,
+    BibleVersion,
     IBibleContentGroupForInput,
-    IBibleContentPhraseForInput
-} from '@bible-engine/core/src/models';
-import { getOsisIdFromBookGenericId } from '@bible-engine/core/src/data/bibleMeta';
+    IBibleContentPhraseForInput,
+    getOsisIdFromBookGenericId
+} from '@bible-engine/core';
 
 const wordGen = require('random-words');
 
@@ -105,7 +105,7 @@ export const genDb = async () => {
 
 export const getData = async () => {
     const output = await sqlBible.getFullDataForReferenceRange({
-        version: 'ESV',
+        queryVersion: 'ESV',
         bookOsisId: 'Gen',
         versionChapterNum: 1,
         versionVerseNum: 4,

@@ -21,10 +21,18 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
     // the id encodes the following attribute:
     normalizedReference: Required<IBiblePhraseRef>;
 
+    @Column({ nullable: true })
+    joinToRefId?: number;
+
     @Column()
     versionChapterNum: number;
     @Column()
     versionVerseNum: number;
+    @Column({ nullable: true })
+    versionSubverseNum?: number;
+
+    @Column({ nullable: true })
+    sourceTypeId?: number;
 
     @Column()
     content: string;
@@ -104,6 +112,7 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
             bookOsisId: phraseRef.bookOsisId,
             normalizedChapterNum: phraseRef.normalizedChapterNum!,
             normalizedVerseNum: phraseRef.normalizedVerseNum!,
+            normalizedSubverseNum: phraseRef.normalizedSubverseNum!,
             versionId: phraseRef.versionId!,
             phraseNum: phraseRef.phraseNum!
         };

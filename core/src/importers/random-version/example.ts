@@ -1,17 +1,20 @@
 import 'isomorphic-fetch';
 
+import { resolve } from 'path';
+import { BibleEngine } from '../../BibleEngine.class';
+import { BibleVersion } from '../../entities';
+import { getOsisIdFromBookGenericId } from '../../functions/v11n.functions';
+import { IBibleContentPhraseForInput, IBibleContentGroupForInput } from '../../models';
+import { IBibleContentSectionForInput } from '../../models/BibleInput';
+
 const wordGen = require('random-words');
 
-import { BibleEngine } from './BibleEngine.class';
-import { BibleVersion } from './entities';
-import { getOsisIdFromBookGenericId } from './data/bibleMeta';
-import { IBibleContentPhraseForInput, IBibleContentGroupForInput } from './models';
-import { IBibleContentSectionForInput } from './models/BibleInput';
+const dirProjectRoot = resolve(__dirname + '/../../..');
 
 const sqlBible = new BibleEngine(
     {
         type: 'sqlite',
-        database: 'bible.db'
+        database: `${dirProjectRoot}/output/bible.db`
     },
     {
         url: 'http://localhost:3456'
@@ -27,7 +30,7 @@ export const genDb = async () => {
             chapterVerseSeparator: ':'
         })
     );
-    for (let bookNum = 1; bookNum <= 2; bookNum++) {
+    for (let bookNum = 1; bookNum <= 66; bookNum++) {
         console.log(
             'adding book ' + bookNum
             // ' and chapter ' +
@@ -132,7 +135,7 @@ export const genDb = async () => {
 export const getData = async () => {
     const output = await sqlBible.getFullDataForReferenceRange(
         {
-            version: 'ESV',
+            queryVersion: 'ESV',
             bookOsisId: 'Gen',
             versionChapterNum: 1,
             versionChapterEndNum: 4,
@@ -156,7 +159,7 @@ export const getData = async () => {
 };
 
 const run = async () => {
-    // await genDb();
+    await genDb();
     getData();
 };
 

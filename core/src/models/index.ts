@@ -21,7 +21,13 @@ import {
 } from './BibleReference';
 import { IBibleBook } from './BibleBook';
 import { IBibleSection, IBibleSectionGeneric, IBibleSectionEntity } from './BibleSection';
-import { IBiblePhrase, PhraseModifiers, ValueModifiers, BooleanModifiers } from './BiblePhrase';
+import {
+    IBiblePhrase,
+    PhraseModifiers,
+    ValueModifiers,
+    BooleanModifiers,
+    IBiblePhraseWithNumbers
+} from './BiblePhrase';
 import {
     IBibleContent,
     IBibleContentGroup,
@@ -42,6 +48,7 @@ import {
     IBibleContentGroupForInput,
     IBibleContentPhraseForInput
 } from './BibleInput';
+import { IV11nRule } from './V11nRule';
 
 export {
     BibleBookPlaintext,
@@ -70,6 +77,7 @@ export {
     IBibleOutputRoot,
     IBiblePhrase,
     IBiblePhraseRef,
+    IBiblePhraseWithNumbers,
     IBibleReference,
     IBibleReferenceNormalized,
     IBibleReferenceRange,
@@ -84,6 +92,7 @@ export {
     IBibleVersion,
     IContentGroup,
     IDictionaryEntry,
+    IV11nRule,
     PhraseModifiers,
     ValueModifiers
 };

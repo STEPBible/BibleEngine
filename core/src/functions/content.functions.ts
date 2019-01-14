@@ -16,10 +16,19 @@ import {
     PhraseModifiers,
     ValueModifiers,
     IBibleContentForInput,
-    IBibleNumbering
+    IBibleNumbering,
+    IBibleReferenceRange,
+    IBibleReferenceRangeNormalized,
+    IBibleSection
 } from '../models';
-import { BiblePhrase, BibleParagraph } from '../entities';
-import { generateReferenceRangeLabel, slimDownCrossReference } from './reference.functions';
+import { BiblePhrase, BibleParagraph, BibleSection, BibleBook, BibleVersion } from '../entities';
+import {
+    generateReferenceRangeLabel,
+    slimDownCrossReference,
+    generateRangeFromGenericSection,
+    slimDownReferenceRange
+} from './reference.functions';
+import { getNormalizedChapterCountForOsisId, getNormalizedVerseCount } from './v11n.functions';
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
@@ -35,13 +44,16 @@ export const convertBibleInputToBookPlaintext = (
         if (content.type !== 'phrase')
             convertBibleInputToBookPlaintext(content.contents, _accChapters);
         else {
+            const subverseNum = content.versionSubverseNum || 0;
             if (!_accChapters.has(content.versionChapterNum))
                 _accChapters.set(content.versionChapterNum, new Map());
             const chapter = _accChapters.get(content.versionChapterNum)!; // we know it's set
-            const verse = chapter.has(content.versionVerseNum)
-                ? chapter.get(content.versionVerseNum) + ' ' + content.content
+            if (!chapter.has(content.versionVerseNum)) chapter.set(content.versionVerseNum, []);
+            const verse = chapter.get(content.versionVerseNum)!; // we know it's set
+            const subverse = verse[subverseNum]
+                ? verse[subverseNum] + ' ' + content.content
                 : content.content;
-            chapter.set(content.versionVerseNum, verse);
+            verse[subverseNum] = subverse;
         }
     }
 
@@ -260,6 +272,7 @@ export const generateBibleDocument = (
             'orderedListItem',
             'indentLevel',
             'quoteLevel',
+            'title',
             'emphasis',
             'bold',
             'italic',
@@ -455,6 +468,300 @@ export const generateBibleDocument = (
     return rootGroup;
 };
 
+export const generateContextSections = (phrases: BiblePhrase[], sections: BibleSection[]) => {
+    const context: IBibleOutputRich['context'] = {};
+
+    if (phrases.length) {
+        const firstPhraseId = phrases[0].id;
+        const lastPhraseId = phrases[phrases.length - 1].id;
+        for (const section of sections) {
+            if (section.level > 1) {
+                let isSectionWithinParentLevel = false;
+                for (const parentSection of [
+                    ...context[section.level - 1].includedSections,
+                    context[section.level - 1].wrappingSection
+                ]) {
+                    if (
+                        parentSection &&
+                        ((section.phraseStartId >= parentSection.phraseStartId &&
+                            section.phraseStartId <= parentSection.phraseEndId) ||
+                            (section.phraseEndId >= parentSection.phraseStartId &&
+                                section.phraseEndId <= parentSection.phraseEndId))
+                    ) {
+                        isSectionWithinParentLevel = true;
+                        break;
+                    }
+                }
+
+                if (!isSectionWithinParentLevel) continue;
+            }
+
+            if (!context[section.level]) {
+                context[section.level] = {
+                    includedSections: [],
+                    previousSections: [],
+                    nextSections: []
+                };
+            }
+
+            // check if this section wraps the entire range
+            if (section.phraseStartId < firstPhraseId && section.phraseEndId > lastPhraseId)
+                context[section.level].wrappingSection = section;
+            // check if this section starts or ends within the range
+            else if (
+                (section.phraseStartId >= firstPhraseId && section.phraseStartId <= lastPhraseId) ||
+                (section.phraseEndId >= firstPhraseId && section.phraseEndId <= lastPhraseId)
+            )
+                context[section.level].includedSections.push(section);
+            // check if this section is before the range
+            else if (section.phraseEndId < firstPhraseId)
+                context[section.level].previousSections.push(section);
+            // check if this section is after the range
+            else if (section.phraseStartId > lastPhraseId)
+                context[section.level].nextSections.push(section);
+        }
+    }
+    return context;
+};
+
+export const generateContextRanges = (
+    range: IBibleReferenceRange,
+    rangeNormalized: IBibleReferenceRangeNormalized,
+    phrases: BiblePhrase[],
+    paragraphs: BibleParagraph[],
+    context: IBibleOutputRich['context'],
+    book: BibleBook
+) => {
+    const contextRanges: IBibleOutputRich['contextRanges'] = {
+        paragraph: {},
+        sections: {},
+        versionChapter: {},
+        normalizedChapter: {}
+    };
+
+    if (phrases.length) {
+        const firstPhraseId = phrases[0].id;
+        const lastPhraseId = phrases[phrases.length - 1].id;
+
+        // paragraph context ranges
+        for (const paragraph of paragraphs) {
+            // paragraphs are sequentially sorted
+
+            // the last paragraph before the range not included in the range will end up as
+            // 'previousRange'
+            if (paragraph.phraseEndId < firstPhraseId)
+                contextRanges.paragraph.previousRange = generateRangeFromGenericSection(paragraph);
+            // the first paragraph after the range not included in the range will be set as
+            // 'nextRange'
+            else if (paragraph.phraseStartId > lastPhraseId && !contextRanges.paragraph.nextRange)
+                contextRanges.paragraph.nextRange = generateRangeFromGenericSection(paragraph);
+            else if (
+                paragraph.phraseStartId < firstPhraseId &&
+                paragraph.phraseEndId > lastPhraseId
+            )
+                contextRanges.paragraph.completeRange = generateRangeFromGenericSection(paragraph);
+            else if (
+                paragraph.phraseStartId < firstPhraseId &&
+                paragraph.phraseEndId >= firstPhraseId &&
+                paragraph.phraseEndId <= lastPhraseId
+            )
+                contextRanges.paragraph.completeStartingRange = generateRangeFromGenericSection(
+                    paragraph
+                );
+            else if (
+                paragraph.phraseStartId >= firstPhraseId &&
+                paragraph.phraseStartId <= lastPhraseId &&
+                paragraph.phraseEndId > lastPhraseId
+            )
+                contextRanges.paragraph.completeEndingRange = generateRangeFromGenericSection(
+                    paragraph
+                );
+        }
+        if (
+            paragraphs.length === 1 &&
+            (paragraphs[0].phraseStartId < firstPhraseId ||
+                paragraphs[0].phraseEndId > lastPhraseId)
+        ) {
+            contextRanges.paragraph.completeRange = generateRangeFromGenericSection(paragraphs[0]);
+        }
+
+        // context ranges for chapter (version & normalized)
+        if (range.versionChapterNum) {
+            if (range.versionChapterNum > 1)
+                contextRanges.versionChapter.previousRange = {
+                    bookOsisId: book.osisId,
+                    versionChapterNum: range.versionChapterNum - 1
+                };
+            if (
+                (range.versionChapterEndNum &&
+                    range.versionChapterEndNum < book.chaptersCount.length) ||
+                (!range.versionChapterEndNum &&
+                    range.versionChapterNum &&
+                    range.versionChapterNum < book.chaptersCount.length)
+            ) {
+                contextRanges.versionChapter.nextRange = {
+                    bookOsisId: book.osisId,
+                    versionChapterNum: range.versionChapterEndNum
+                        ? range.versionChapterEndNum + 1
+                        : range.versionChapterNum! + 1
+                };
+            }
+            if (
+                (!range.versionChapterEndNum ||
+                    range.versionChapterNum === range.versionChapterEndNum) &&
+                range.versionVerseNum &&
+                (!range.versionVerseEndNum ||
+                    range.versionVerseNum > 1 ||
+                    range.versionVerseEndNum < book.getChapterVerseCount(range.versionChapterNum))
+            ) {
+                contextRanges.versionChapter.completeRange = {
+                    bookOsisId: book.osisId,
+                    versionChapterNum: range.versionChapterNum
+                };
+            }
+            if (
+                range.versionVerseNum &&
+                range.versionVerseNum > 1 &&
+                range.versionChapterEndNum &&
+                range.versionChapterEndNum > range.versionChapterNum
+            ) {
+                contextRanges.versionChapter.completeStartingRange = {
+                    bookOsisId: book.osisId,
+                    versionChapterNum: range.versionChapterNum
+                };
+            }
+            if (
+                range.versionChapterEndNum &&
+                range.versionChapterEndNum !== range.versionChapterNum &&
+                range.versionVerseEndNum &&
+                range.versionVerseEndNum < book.getChapterVerseCount(range.versionChapterEndNum)
+            ) {
+                contextRanges.versionChapter.completeEndingRange = {
+                    bookOsisId: book.osisId,
+                    versionChapterNum: range.versionChapterEndNum
+                };
+            }
+        }
+        if (rangeNormalized.normalizedChapterNum) {
+            if (rangeNormalized.normalizedChapterNum > 1)
+                contextRanges.normalizedChapter.previousRange = {
+                    bookOsisId: book.osisId,
+                    normalizedChapterNum: rangeNormalized.normalizedChapterNum - 1
+                };
+            if (
+                (rangeNormalized.normalizedChapterEndNum &&
+                    rangeNormalized.normalizedChapterEndNum <
+                        getNormalizedChapterCountForOsisId(book.osisId)) ||
+                (!rangeNormalized.normalizedChapterEndNum &&
+                    rangeNormalized.normalizedChapterNum &&
+                    rangeNormalized.normalizedChapterNum <
+                        getNormalizedChapterCountForOsisId(book.osisId))
+            ) {
+                contextRanges.normalizedChapter.nextRange = {
+                    bookOsisId: book.osisId,
+                    normalizedChapterNum: rangeNormalized.normalizedChapterEndNum
+                        ? rangeNormalized.normalizedChapterEndNum + 1
+                        : rangeNormalized.normalizedChapterNum! + 1
+                };
+            }
+            if (
+                (!rangeNormalized.normalizedChapterEndNum ||
+                    rangeNormalized.normalizedChapterNum ===
+                        rangeNormalized.normalizedChapterEndNum) &&
+                rangeNormalized.normalizedVerseNum &&
+                (!rangeNormalized.normalizedVerseEndNum ||
+                    rangeNormalized.normalizedVerseNum > 1 ||
+                    rangeNormalized.normalizedVerseEndNum <
+                        getNormalizedVerseCount(book.osisId, rangeNormalized.normalizedChapterNum))
+            ) {
+                contextRanges.normalizedChapter.completeRange = {
+                    bookOsisId: book.osisId,
+                    normalizedChapterNum: rangeNormalized.normalizedChapterNum
+                };
+            }
+            if (
+                rangeNormalized.normalizedVerseNum &&
+                rangeNormalized.normalizedVerseNum > 1 &&
+                rangeNormalized.normalizedChapterEndNum &&
+                rangeNormalized.normalizedChapterEndNum > rangeNormalized.normalizedChapterNum
+            ) {
+                contextRanges.normalizedChapter.completeStartingRange = {
+                    bookOsisId: book.osisId,
+                    normalizedChapterNum: rangeNormalized.normalizedChapterNum
+                };
+            }
+            if (
+                rangeNormalized.normalizedChapterEndNum &&
+                rangeNormalized.normalizedChapterEndNum !== rangeNormalized.normalizedChapterNum &&
+                rangeNormalized.normalizedVerseEndNum &&
+                rangeNormalized.normalizedVerseEndNum <
+                    getNormalizedVerseCount(book.osisId, rangeNormalized.normalizedChapterEndNum)
+            ) {
+                contextRanges.normalizedChapter.completeEndingRange = {
+                    bookOsisId: book.osisId,
+                    normalizedChapterNum: rangeNormalized.normalizedChapterEndNum
+                };
+            }
+        }
+
+        for (const sectionLevel of Object.keys(context).map(_sectionLevel => +_sectionLevel)) {
+            if (!contextRanges.sections[sectionLevel]) contextRanges.sections[sectionLevel] = {};
+
+            if (context[sectionLevel] && context[sectionLevel].wrappingSection) {
+                contextRanges.sections[
+                    sectionLevel
+                ].completeRange = generateRangeFromGenericSection(
+                    context[sectionLevel].wrappingSection!
+                );
+            } else if (context[sectionLevel].includedSections.length > 0) {
+                // => if there is a wrapping section, there can't be includedSections on the
+                //    same level
+                if (context[sectionLevel].includedSections[0].phraseStartId < firstPhraseId) {
+                    contextRanges.sections[
+                        sectionLevel
+                    ].completeStartingRange = generateRangeFromGenericSection(
+                        context[sectionLevel].includedSections[0]
+                    );
+                }
+                if (
+                    context[sectionLevel].includedSections[
+                        context[sectionLevel].includedSections.length - 1
+                    ].phraseEndId > lastPhraseId
+                ) {
+                    contextRanges.sections[
+                        sectionLevel
+                    ].completeEndingRange = generateRangeFromGenericSection(
+                        context[sectionLevel].includedSections[
+                            context[sectionLevel].includedSections.length - 1
+                        ]
+                    );
+                }
+            }
+
+            if (context[sectionLevel] && context[sectionLevel].previousSections.length)
+                contextRanges.sections[
+                    sectionLevel
+                ].previousRange = generateRangeFromGenericSection(
+                    context[sectionLevel].previousSections[
+                        context[sectionLevel].previousSections.length - 1
+                    ]
+                );
+            if (context[sectionLevel] && context[sectionLevel].nextSections.length)
+                contextRanges.sections[sectionLevel].nextRange = generateRangeFromGenericSection(
+                    context[sectionLevel].nextSections[0]
+                );
+        }
+    }
+    return contextRanges;
+};
+
+export const stripUnnecessaryDataFromBibleBook = (book: BibleBook) => {
+    delete book.versionId;
+    delete book.chaptersMetaJson;
+    delete book.introductionJson;
+    if (!book.introduction) delete book.introduction;
+};
+
 /**
  * remove everything from 'data' that is not needed for input, mainly to reduce JSON size
  * @param {IBibleContent[]} data
@@ -465,10 +772,19 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
     for (const obj of data) {
         if (obj.type === 'phrase') {
             const phrase = obj;
+            // RADAR: we leave both the numbering object and the version*Num attributes on the
+            //        phrase. We need the latter when this is used for input, however they are very
+            //        redundant. Optimize? Maybe by optionally stripping version*Nums via parameter?
             const inputPhrase: IBibleContentPhrase = {
                 type: 'phrase',
-                content: phrase.content
+                content: phrase.content,
+                versionChapterNum: phrase.versionChapterNum,
+                versionVerseNum: phrase.versionVerseNum
             };
+            if (phrase.versionSubverseNum)
+                inputPhrase.versionSubverseNum = phrase.versionSubverseNum;
+            if (phrase.sourceTypeId) inputPhrase.sourceTypeId = phrase.sourceTypeId;
+            if (phrase.joinToRefId) inputPhrase.joinToRefId = phrase.joinToRefId;
             if (phrase.linebreak) inputPhrase.linebreak = true;
             if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
             if (phrase.person) inputPhrase.person = phrase.person;
@@ -511,4 +827,69 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
         }
     }
     return inputData;
+};
+
+export const stripUnnecessaryDataFromBibleContextData = (
+    context: IBibleOutputRich['context'],
+    contextRanges: IBibleOutputRich['contextRanges']
+) => {
+    for (const rangeContext of <('paragraph' | 'versionChapter' | 'normalizedChapter')[]>[
+        'paragraph',
+        'versionChapter',
+        'normalizedChapter'
+    ]) {
+        for (const rangeType of <(keyof IBibleOutputRich['contextRanges']['paragraph'])[]>(
+            Object.keys(contextRanges[rangeContext])
+        )) {
+            contextRanges[rangeContext][rangeType] = slimDownReferenceRange(
+                contextRanges[rangeContext][rangeType]!
+            );
+        }
+    }
+
+    for (const level of Object.keys(context).map(_level => +_level)) {
+        for (const rangeType of <(keyof IBibleOutputRich['contextRanges']['sections'][0])[]>(
+            Object.keys(contextRanges['sections'][level])
+        )) {
+            contextRanges['sections'][level][rangeType] = slimDownReferenceRange(
+                contextRanges['sections'][level][rangeType]!
+            );
+        }
+
+        // local helper
+        const slimDownBibleSection = (section: IBibleSection): IBibleSection => {
+            const slimSection: IBibleSection = {
+                phraseStartId: section.phraseStartId,
+                phraseEndId: section.phraseEndId
+            };
+            if (section.title) slimSection.title = section.title;
+            if (section.subTitle) slimSection.subTitle = section.subTitle;
+            if (section.description) slimSection.description = section.description;
+            if (section.crossReferences)
+                slimSection.crossReferences = section.crossReferences.map(slimDownCrossReference);
+            return slimSection;
+        };
+        if (context[level].wrappingSection)
+            context[level].wrappingSection = slimDownBibleSection(context[level].wrappingSection!);
+        context[level].includedSections = context[level].includedSections.map(slimDownBibleSection);
+        context[level].nextSections = context[level].nextSections.map(slimDownBibleSection);
+        context[level].previousSections = context[level].previousSections.map(slimDownBibleSection);
+    }
+};
+
+export const stripUnnecessaryDataFromBibleReferenceRange = (
+    rangeNormalized: IBibleReferenceRangeNormalized
+) => {
+    delete rangeNormalized.versionId;
+    delete rangeNormalized.isNormalized;
+};
+
+export const stripUnnecessaryDataFromBibleVersion = (version: BibleVersion) => {
+    delete version.id;
+    delete version.copyrightLongJson;
+    delete version.descriptionJson;
+    if (!version.copyrightLong) delete version.copyrightLong;
+    if (!version.description) delete version.description;
+    if (!version.copyrightShort) delete version.copyrightShort;
+    if (!version.hasStrongs) delete version.hasStrongs;
 };

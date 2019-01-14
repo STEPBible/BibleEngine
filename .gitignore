@@ -4,3 +4,5 @@ node_modules/
 yarn-error.log
 *.beif
 ESV.beifz
+core/output
+notes

@@ -1,3 +1,5 @@
+import { BibleBookPlaintext } from '../models';
+
 /**
  * @description OSIS book ID with chapter/verse statistics and English names
  */
@@ -9,46 +11,46 @@ export const BOOK_DATA: {
 	*/
     Gen: {
         genericId: 1,
-        names: { eng: ['Genesis', 'Ge', 'Gen'] }
+        names: { en: ['Genesis', 'Ge', 'Gen'] }
     },
     Exod: {
         genericId: 2,
-        names: { eng: ['Exodus', 'Ex', 'Exo'] }
+        names: { en: ['Exodus', 'Ex', 'Exo'] }
     },
     Lev: {
         genericId: 3,
-        names: { eng: ['Leviticus', 'Le', 'Lev'] }
+        names: { en: ['Leviticus', 'Le', 'Lev'] }
     },
     Num: {
         genericId: 4,
-        names: { eng: ['Numbers', 'Nu', 'Num'] }
+        names: { en: ['Numbers', 'Nu', 'Num'] }
     },
     Deut: {
         genericId: 5,
-        names: { eng: ['Deuteronomy', 'Dt', 'Deut', 'Deu', 'De'] }
+        names: { en: ['Deuteronomy', 'Dt', 'Deut', 'Deu', 'De'] }
     },
     Josh: {
         genericId: 6,
-        names: { eng: ['Joshua', 'Js', 'Jos', 'Jos', 'Josh'] }
+        names: { en: ['Joshua', 'Js', 'Jos', 'Jos', 'Josh'] }
     },
     Judg: {
         genericId: 7,
-        names: { eng: ['Judges', 'Jg', 'Jdg', 'Jdgs'] }
+        names: { en: ['Judges', 'Jg', 'Jdg', 'Jdgs'] }
     },
     Ruth: {
         genericId: 8,
-        names: { eng: ['Ruth', 'Ru', 'Rut'] }
+        names: { en: ['Ruth', 'Ru', 'Rut'] }
     },
     '1Sam': {
         genericId: 9,
         names: {
-            eng: ['1 Samuel', '1S', '1 Sam', '1Sam', '1 Sa', '1Sa', 'I Samuel', 'I Sam', 'I Sa']
+            en: ['1 Samuel', '1S', '1 Sam', '1Sam', '1 Sa', '1Sa', 'I Samuel', 'I Sam', 'I Sa']
         }
     },
     '2Sam': {
         genericId: 10,
         names: {
-            eng: [
+            en: [
                 '2 Samuel',
                 '2S',
                 '2 Sam',
@@ -65,13 +67,13 @@ export const BOOK_DATA: {
     '1Kgs': {
         genericId: 11,
         names: {
-            eng: ['1 Kings', '1K', '1 Kin', '1Kin', '1 Ki', 'IK', '1Ki', 'I Kings', 'I Kin', 'I Ki']
+            en: ['1 Kings', '1K', '1 Kin', '1Kin', '1 Ki', 'IK', '1Ki', 'I Kings', 'I Kin', 'I Ki']
         }
     },
     '2Kgs': {
         genericId: 12,
         names: {
-            eng: [
+            en: [
                 '2 Kings',
                 '2K',
                 '2 Kin',
@@ -88,7 +90,7 @@ export const BOOK_DATA: {
     '1Chr': {
         genericId: 13,
         names: {
-            eng: [
+            en: [
                 '1 Chronicles',
                 '1Ch',
                 '1 Chr',
@@ -104,7 +106,7 @@ export const BOOK_DATA: {
     '2Chr': {
         genericId: 14,
         names: {
-            eng: [
+            en: [
                 '2 Chronicles',
                 '2Ch',
                 '2 Chr',
@@ -120,36 +122,36 @@ export const BOOK_DATA: {
     },
     Ezra: {
         genericId: 15,
-        names: { eng: ['Ezra', 'Ezr'] }
+        names: { en: ['Ezra', 'Ezr'] }
     },
     Neh: {
         genericId: 16,
-        names: { eng: ['Nehemiah', 'Ne', 'Neh', 'Neh', 'Ne'] }
+        names: { en: ['Nehemiah', 'Ne', 'Neh', 'Neh', 'Ne'] }
     },
     Esth: {
         genericId: 17,
-        names: { eng: ['Esther', 'Es', 'Est', 'Esth'] }
+        names: { en: ['Esther', 'Es', 'Est', 'Esth'] }
     },
     Job: {
         genericId: 18,
-        names: { eng: ['Job', 'Jb', 'Job'] }
+        names: { en: ['Job', 'Jb', 'Job'] }
     },
     Ps: {
         genericId: 19,
-        names: { eng: ['Psalm', 'Ps', 'Psa'] }
+        names: { en: ['Psalm', 'Ps', 'Psa'] }
     },
     Prov: {
         genericId: 20,
-        names: { eng: ['Proverbs', 'Pr', 'Prov', 'Pro'] }
+        names: { en: ['Proverbs', 'Pr', 'Prov', 'Pro'] }
     },
     Eccl: {
         genericId: 21,
-        names: { eng: ['Ecclesiastes', 'Ec', 'Ecc', 'Qohelet'] }
+        names: { en: ['Ecclesiastes', 'Ec', 'Ecc', 'Qohelet'] }
     },
     Song: {
         genericId: 22,
         names: {
-            eng: [
+            en: [
                 'Song of Songs',
                 'So',
                 'Sos',
@@ -157,77 +159,78 @@ export const BOOK_DATA: {
                 'SOS',
                 'SongOfSongs',
                 'SongofSolomon',
-                'Canticle of Canticles'
+                'Canticle of Canticles',
+                'Sng'
             ]
         }
     },
     Isa: {
         genericId: 23,
-        names: { eng: ['Isaiah', 'Is', 'Isa'] }
+        names: { en: ['Isaiah', 'Is', 'Isa'] }
     },
     Jer: {
         genericId: 24,
-        names: { eng: ['Jeremiah', 'Je', 'Jer'] }
+        names: { en: ['Jeremiah', 'Je', 'Jer'] }
     },
     Lam: {
         genericId: 25,
-        names: { eng: ['Lamentations', 'La', 'Lam', 'Lament'] }
+        names: { en: ['Lamentations', 'La', 'Lam', 'Lament'] }
     },
     Ezek: {
         genericId: 26,
-        names: { eng: ['Ezekiel', 'Ek', 'Ezek', 'Eze'] }
+        names: { en: ['Ezekiel', 'Ek', 'Ezek', 'Eze', 'Ezk'] }
     },
     Dan: {
         genericId: 27,
-        names: { eng: ['Daniel', 'Da', 'Dan', 'Dl', 'Dnl'] }
+        names: { en: ['Daniel', 'Da', 'Dan', 'Dl', 'Dnl'] }
     },
     Hos: {
         genericId: 28,
-        names: { eng: ['Hosea', 'Ho', 'Hos'] }
+        names: { en: ['Hosea', 'Ho', 'Hos'] }
     },
     Joel: {
         genericId: 29,
-        names: { eng: ['Joel', 'Jl', 'Joel', 'Joe'] }
+        names: { en: ['Joel', 'Jl', 'Joel', 'Joe', 'Jol'] }
     },
     Amos: {
         genericId: 30,
-        names: { eng: ['Amos', 'Am', 'Amos', 'Amo'] }
+        names: { en: ['Amos', 'Am', 'Amos', 'Amo'] }
     },
     Obad: {
         genericId: 31,
-        names: { eng: ['Obadiah', 'Ob', 'Oba', 'Obd', 'Odbh'] }
+        names: { en: ['Obadiah', 'Ob', 'Oba', 'Obd', 'Odbh'] }
     },
     Jonah: {
         genericId: 32,
-        names: { eng: ['Jonah', 'Jh', 'Jon', 'Jnh'] }
+        names: { en: ['Jonah', 'Jh', 'Jon', 'Jnh'] }
     },
     Mic: {
         genericId: 33,
-        names: { eng: ['Micah', 'Mi', 'Mic'] }
+        names: { en: ['Micah', 'Mi', 'Mic'] }
     },
     Nah: {
         genericId: 34,
-        names: { eng: ['Nahum', 'Na', 'Nah', 'Nah', 'Na'] }
+        names: { en: ['Nahum', 'Na', 'Nah', 'Nah', 'Na', 'Nam'] }
     },
     Hab: {
         genericId: 35,
-        names: { eng: ['Habakkuk', 'Hb', 'Hab', 'Hk', 'Habk'] }
+        names: { en: ['Habakkuk', 'Hb', 'Hab', 'Hk', 'Habk'] }
     },
     Zeph: {
         genericId: 36,
-        names: { eng: ['Zephaniah', 'Zp', 'Zep', 'Zeph'] }
+        names: { en: ['Zephaniah', 'Zp', 'Zep', 'Zeph'] }
     },
     Hag: {
         genericId: 37,
-        names: { eng: ['Haggai', 'Ha', 'Hag', 'Hagg'] }
+        names: { en: ['Haggai', 'Ha', 'Hag', 'Hagg'] }
     },
     Zech: {
         genericId: 38,
-        names: { eng: ['Zechariah', 'Zc', 'Zech', 'Zec'] }
+        names: { en: ['Zechariah', 'Zc', 'Zech', 'Zec'] }
     },
     Mal: {
         genericId: 39,
-        names: { eng: ['Malachi', 'Ml', 'Mal', 'Mlc'] }
+        names: { en: ['Malachi', 'Ml', 'Mal', 'Mlc'] }
     },
 
     /*
@@ -236,32 +239,32 @@ export const BOOK_DATA: {
 
     Matt: {
         genericId: 40,
-        names: { eng: ['Matthew', 'Mt', 'Matt', 'Mat'] }
+        names: { en: ['Matthew', 'Mt', 'Matt', 'Mat'] }
     },
     Mark: {
         genericId: 41,
-        names: { eng: ['Mark', 'Mk', 'Mar', 'Mrk'] }
+        names: { en: ['Mark', 'Mk', 'Mar', 'Mrk'] }
     },
     Luke: {
         genericId: 42,
-        names: { eng: ['Luke', 'Lk', 'Luk', 'Lu'] }
+        names: { en: ['Luke', 'Lk', 'Luk', 'Lu'] }
     },
     John: {
         genericId: 43,
-        names: { eng: ['John', 'Jn', 'Joh', 'Jo'] }
+        names: { en: ['John', 'Jn', 'Joh', 'Jo', 'Jhn'] }
     },
     Acts: {
         genericId: 44,
-        names: { eng: ['Acts', 'Ac', 'Act'] }
+        names: { en: ['Acts', 'Ac', 'Act'] }
     },
     Rom: {
         genericId: 45,
-        names: { eng: ['Romans', 'Ro', 'Rom', 'Rmn', 'Rmns'] }
+        names: { en: ['Romans', 'Ro', 'Rom', 'Rmn', 'Rmns'] }
     },
     '1Cor': {
         genericId: 46,
         names: {
-            eng: [
+            en: [
                 '1 Corinthians',
                 '1Co',
                 '1 Cor',
@@ -278,7 +281,7 @@ export const BOOK_DATA: {
     '2Cor': {
         genericId: 47,
         names: {
-            eng: [
+            en: [
                 '2 Corinthians',
                 '2Co',
                 '2 Cor',
@@ -294,24 +297,24 @@ export const BOOK_DATA: {
     },
     Gal: {
         genericId: 48,
-        names: { eng: ['Galatians', 'Ga', 'Gal', 'Gltns'] }
+        names: { en: ['Galatians', 'Ga', 'Gal', 'Gltns'] }
     },
     Eph: {
         genericId: 49,
-        names: { eng: ['Ephesians', 'Ep', 'Eph', 'Ephn'] }
+        names: { en: ['Ephesians', 'Ep', 'Eph', 'Ephn'] }
     },
     Phil: {
         genericId: 50,
-        names: { eng: ['Philippians', 'Pp', 'Phi', 'Phil', 'Phi'] }
+        names: { en: ['Philippians', 'Pp', 'Phi', 'Phil', 'Phi', 'Php'] }
     },
     Col: {
         genericId: 51,
-        names: { eng: ['Colossians', 'Co', 'Col', 'Colo', 'Cln', 'Clns'] }
+        names: { en: ['Colossians', 'Co', 'Col', 'Colo', 'Cln', 'Clns'] }
     },
     '1Thess': {
         genericId: 52,
         names: {
-            eng: [
+            en: [
                 '1 Thessalonians',
                 '1Th',
                 '1 Thess',
@@ -333,7 +336,7 @@ export const BOOK_DATA: {
     '2Thess': {
         genericId: 53,
         names: {
-            eng: [
+            en: [
                 '2 Thessalonians',
                 '2Th',
                 '2 Thess',
@@ -356,7 +359,7 @@ export const BOOK_DATA: {
     '1Tim': {
         genericId: 54,
         names: {
-            eng: [
+            en: [
                 '1 Timothy',
                 '1Ti',
                 '1 Tim',
@@ -373,7 +376,7 @@ export const BOOK_DATA: {
     '2Tim': {
         genericId: 55,
         names: {
-            eng: [
+            en: [
                 '2 Timothy',
                 '2Ti',
                 '2 Tim',
@@ -390,42 +393,55 @@ export const BOOK_DATA: {
     },
     Titus: {
         genericId: 56,
-        names: { eng: ['Titus', 'Ti', 'Tit', 'Tt', 'Ts'] }
+        names: { en: ['Titus', 'Ti', 'Tit', 'Tt', 'Ts'] }
     },
     Phlm: {
         genericId: 57,
-        names: { eng: ['Philemon', 'Pm', 'Phile', 'Phile', 'Philm', 'Pm'] }
+        names: { en: ['Philemon', 'Pm', 'Phile', 'Phile', 'Philm', 'Pm', 'Phm'] }
     },
     Heb: {
         genericId: 58,
-        names: { eng: ['Hebrews', 'He', 'Heb', 'Hw'] }
+        names: { en: ['Hebrews', 'He', 'Heb', 'Hw'] }
     },
     Jas: {
         genericId: 59,
-        names: { eng: ['James', 'Jm', 'Jam', 'Jas', 'Ja'] }
+        names: { en: ['James', 'Jm', 'Jam', 'Jas', 'Ja'] }
     },
     '1Pet': {
         genericId: 60,
-        names: { eng: ['1 Peter', '1P', '1 Pet', '1Pet', 'IPe', '1P', 'I Peter', 'I Pet', 'I Pe'] }
+        names: {
+            en: ['1 Peter', '1P', '1 Pet', '1Pet', 'IPe', '1P', 'I Peter', 'I Pet', 'I Pe', '1Pe']
+        }
     },
     '2Pet': {
         genericId: 61,
         names: {
-            eng: ['2 Peter', '2P', '2 Pet', '2Pet', '2Pe', 'IIP', 'II Peter', 'II Pet', 'II Pe']
+            en: [
+                '2 Peter',
+                '2P',
+                '2 Pet',
+                '2Pet',
+                '2Pe',
+                'IIP',
+                'II Peter',
+                'II Pet',
+                'II Pe',
+                '2Pe'
+            ]
         }
     },
     '1John': {
         genericId: 62,
-        names: { eng: ['1 John', '1J', '1 Jn', '1Jn', '1 Jo', 'IJo', 'I John', 'I Jo', 'I Jn'] }
+        names: { en: ['1 John', '1J', '1 Jn', '1Jn', '1 Jo', 'IJo', 'I John', 'I Jo', 'I Jn'] }
     },
     '2John': {
         genericId: 63,
-        names: { eng: ['2 John', '2J', '2 Jn', '2Jn', '2 Jo', 'IIJo', 'II John', 'II Jo', 'II Jn'] }
+        names: { en: ['2 John', '2J', '2 Jn', '2Jn', '2 Jo', 'IIJo', 'II John', 'II Jo', 'II Jn'] }
     },
     '3John': {
         genericId: 64,
         names: {
-            eng: [
+            en: [
                 '3 John',
                 '3J',
                 '3 Jn',
@@ -441,11 +457,11 @@ export const BOOK_DATA: {
     },
     Jude: {
         genericId: 65,
-        names: { eng: ['Jude', 'Jude', 'Jude'] }
+        names: { en: ['Jude', 'Jude', 'Jude'] }
     },
     Rev: {
         genericId: 66,
-        names: { eng: ['Revelation', 'Re', 'Rev', 'Rvltn'] }
+        names: { en: ['Revelation', 'Re', 'Rev', 'Rvltn'] }
     },
 
     /*
@@ -454,75 +470,75 @@ export const BOOK_DATA: {
 
     Tob: {
         genericId: 70,
-        names: { eng: ['Tobit'] }
+        names: { en: ['Tobit'] }
     },
     Jdt: {
         genericId: 71,
-        names: { eng: ['Judith'] }
+        names: { en: ['Judith'] }
     },
     AddEsth: {
         genericId: 72,
-        names: { eng: ['Additions to Esther'] }
+        names: { en: ['Additions to Esther'] }
     },
     Wis: {
         genericId: 73,
-        names: { eng: ['Wisdom', 'Wisdom of Solomon'] }
+        names: { en: ['Wisdom', 'Wisdom of Solomon'] }
     },
     Sir: {
         genericId: 74,
-        names: { eng: ['Sirach', 'Ecclesiasticus'] }
+        names: { en: ['Sirach', 'Ecclesiasticus'] }
     },
     Bar: {
         genericId: 75,
-        names: { eng: ['Baruch'] }
+        names: { en: ['Baruch'] }
     },
     EpJer: {
         genericId: 76,
-        names: { eng: ['Letter of Jeremiah'] }
+        names: { en: ['Letter of Jeremiah', 'Lje'] }
     },
     PrAzar: {
         genericId: 77,
-        names: { eng: ['Prayer of Azariah'] }
+        names: { en: ['Prayer of Azariah'] }
     },
     Sus: {
         genericId: 78,
-        names: { eng: ['Susanna'] }
+        names: { en: ['Susanna'] }
     },
     Bel: {
         genericId: 79,
-        names: { eng: ['Bel and the Dragon'] }
+        names: { en: ['Bel and the Dragon'] }
     },
     '1Macc': {
         genericId: 80,
-        names: { eng: ['1 Maccabees'] }
+        names: { en: ['1 Maccabees'] }
     },
     '2Macc': {
         genericId: 81,
-        names: { eng: ['2 Maccabees'] }
+        names: { en: ['2 Maccabees'] }
     },
     '3Macc': {
         genericId: 82,
-        names: { eng: ['3 Maccabees'] }
+        names: { en: ['3 Maccabees'] }
     },
     '4Macc': {
         genericId: 83,
-        names: { eng: ['4 Maccabees'] }
+        names: { en: ['4 Maccabees'] }
     },
     PrMan: {
         genericId: 84,
-        names: { eng: ['Prayer of Manasseh', 'Song of the Three Children'] }
+        names: { en: ['Prayer of Manasseh', 'Song of the Three Children'] }
     },
     '1Esd': {
         genericId: 85,
-        names: { eng: ['1 Esdras'] }
+        names: { en: ['1 Esdras'] }
     },
     '2Esd': {
         genericId: 86,
-        names: { eng: ['2 Esdras', '5 Ezra'] }
+        names: { en: ['2 Esdras', '5 Ezra'] }
     },
     Ps151: {
         genericId: 87,
-        names: { eng: ['Psalm'] }
+        names: { en: ['Psalm'] }
     }
 };
 
@@ -800,10 +816,51 @@ export const NORMALIZED_VERSE_NUMS = [
         15, 27, 21]
 ];
 
-export const getBookGenericIdFromOsisId = (osisId: string) => {
-    if (!BOOK_DATA[osisId]) throw new Error(`invalid osis id '${osisId}'`);
+const sourceTypes = new Map([
+    [0, 'All'],
+    [1, 'English'],
+    [2, 'English+Hebrew'],
+    [3, 'English+Greek'],
+    [4, 'English+Latin'],
+    [5, 'English+Latin+Greek'],
+    [6, 'English+Hebrew+Greek'],
+    [7, 'English+Hebrew+Latin'],
+    [8, 'English+Hebrew+Latin+Greek'],
+    [9, 'English2'],
+    [10, 'Latin'],
+    [11, 'LatinUndivided'],
+    [12, 'Latin+Greek'],
+    [13, 'Latin2-DRA'],
+    [14, 'Greek'],
+    [15, 'GreekUndivided'],
+    [16, 'Greek2'],
+    [17, 'Greek2Undivided'],
+    [18, 'Greek2-NETS'],
+    [19, 'Hebrew'],
+    [20, 'Hebrew+Greek'],
+    [21, 'Hebrew+Latin'],
+    [22, 'Hebrew+Latin+Greek'],
+    [23, 'Hebrew2'],
+    [24, 'Slavonic'],
+    [25, 'Spanish RV']
+]);
+
+export const getBookGenericIdFromOsisId = (osisId: string, checkAlternatives = false) => {
+    if (!BOOK_DATA[osisId]) {
+        if (checkAlternatives) {
+            const fallbackOsisId = getOsisIdFromBookString(osisId);
+            if (fallbackOsisId) return BOOK_DATA[fallbackOsisId].genericId;
+        }
+        throw new Error(`invalid osis id '${osisId}'`);
+    }
     return BOOK_DATA[osisId].genericId;
 };
+
+export const getNormalizedChapterCountForOsisId = (osisId: string) =>
+    NORMALIZED_VERSE_NUMS[getBookGenericIdFromOsisId(osisId) - 1].length;
+
+export const getNormalizedVerseCount = (osisId: string, chapterNum: number) =>
+    NORMALIZED_VERSE_NUMS[getBookGenericIdFromOsisId(osisId) - 1][chapterNum - 1];
 
 export const getOsisIdFromBookGenericId = (bookGenericId: number) => {
     if (
@@ -815,13 +872,125 @@ export const getOsisIdFromBookGenericId = (bookGenericId: number) => {
     )
         throw new Error(`invalid generic book id ${bookGenericId}`);
 
-    if (bookGenericId <= 39) return OT_BOOKS[bookGenericId - 1];
-    else if (bookGenericId <= 66) return NT_BOOKS[bookGenericId - 1];
-    else return AP_BOOKS[bookGenericId - 1];
+    let osisId: string;
+    if (bookGenericId <= 39) osisId = OT_BOOKS[bookGenericId - 1];
+    else if (bookGenericId <= 66) osisId = NT_BOOKS[bookGenericId - OT_BOOKS.length - 1];
+    else osisId = AP_BOOKS[bookGenericId - 1];
+
+    // safeguard in case this file becomes inconsistent / corrupted
+    if (bookGenericId !== getBookGenericIdFromOsisId(osisId))
+        throw new Error(`standardV11n data got corrupted`);
+
+    return osisId;
 };
 
-export const getNormalizedChapterCountForOsisId = (osisId: string) =>
-    NORMALIZED_VERSE_NUMS[getBookGenericIdFromOsisId(osisId) - 1].length;
+export const getOsisIdFromBookString = (bookString: string, language = 'en') => {
+    if (BOOK_DATA[bookString]) return bookString;
+    else {
+        for (const _osisId of Object.keys(BOOK_DATA)) {
+            if (BOOK_DATA[_osisId].names[language].includes(bookString)) return _osisId;
+        }
+    }
+    return false;
+};
 
-export const getNormalizedVerseCount = (osisId: string, chapterNum: number) =>
-    NORMALIZED_VERSE_NUMS[getBookGenericIdFromOsisId(osisId) - 1][chapterNum - 1];
+export const getSourceTypeFromId = (sourceTypeId: number) => sourceTypes.get(sourceTypeId);
+
+export const getSourceTypeId = (sourceType: string) => {
+    for (const entry of sourceTypes) if (entry[1] === sourceType) return entry[0];
+    return undefined;
+};
+
+export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
+    if (!test) return true;
+
+    type TestReference = {
+        chapterNumber: number;
+        verseNumber: number;
+        subverseNumber?: number;
+        factor: number;
+    };
+    const tests = test.split(' & ');
+
+    for (const testString of tests) {
+        // if we have a failing test we can always return false since tests are always "match-all"
+
+        const testParts = testString.match(/(.*)([=<>])(.*)/);
+        if (!testParts) throw new Error(`v11n rule test parse error`);
+
+        const refBaseFactorParts = testParts[1].split('*');
+        const refBaseReferenceParts = refBaseFactorParts[0].split('.');
+        const refBaseNumbers = refBaseReferenceParts[1].split(':');
+        const refBase: TestReference = {
+            chapterNumber: +refBaseNumbers[0],
+            verseNumber: +refBaseNumbers[1],
+            subverseNumber: refBaseReferenceParts[2] ? +refBaseReferenceParts[2] : 0,
+            factor: refBaseFactorParts[1] ? +refBaseFactorParts[1] : 1
+        };
+        const contextChapter = context.get(refBase.chapterNumber);
+
+        if (testParts[2] === '=') {
+            const refTest = <'Last' | 'Exist' | 'NotExist'>testParts[3];
+
+            if (refTest === 'Last') {
+                if (
+                    !contextChapter ||
+                    !contextChapter.has(refBase.verseNumber) ||
+                    contextChapter.has(refBase.verseNumber + 1)
+                )
+                    return false;
+            } else if (refTest === 'Exist') {
+                if (
+                    !contextChapter ||
+                    !contextChapter.has(refBase.verseNumber) ||
+                    (refBase.subverseNumber &&
+                        !contextChapter.get(refBase.verseNumber)![refBase.subverseNumber])
+                )
+                    return false;
+            } else if (refTest === 'NotExist') {
+                if (
+                    contextChapter &&
+                    contextChapter.has(refBase.verseNumber) &&
+                    (!refBase.subverseNumber ||
+                        contextChapter.get(refBase.verseNumber)![refBase.subverseNumber])
+                )
+                    return false;
+            }
+        } else {
+            const refCompareFactorParts = testParts[3].split('*');
+            const refCompareSubverseParts = refCompareFactorParts[0].split('.');
+            const refCompareNumbers = refCompareSubverseParts[0].split(':');
+            const refCompare: TestReference = {
+                chapterNumber: +refCompareNumbers[0],
+                verseNumber: +refCompareNumbers[1],
+                subverseNumber: refCompareSubverseParts[1] ? +refCompareSubverseParts[1] : 0,
+                factor: refCompareFactorParts[1] ? +refCompareFactorParts[1] : 1
+            };
+            const contextCompareChapter = context.get(refCompare.chapterNumber);
+
+            if (!contextChapter || !contextCompareChapter) return false;
+
+            const baseVerse = contextChapter.get(refBase.verseNumber);
+            const compareVerse = contextCompareChapter.get(refCompare.verseNumber);
+
+            if (!baseVerse || !compareVerse) return false;
+
+            const baseText = refBase.subverseNumber
+                ? baseVerse[refBase.subverseNumber]
+                : baseVerse.join(' ');
+            const compareText = refCompare.subverseNumber
+                ? compareVerse[refCompare.subverseNumber]
+                : compareVerse.join(' ');
+
+            const baseLength = baseText.length * refBase.factor;
+            const compareLength = compareText.length * refCompare.factor;
+            if (testParts[2] === '<') {
+                if (baseLength > compareLength) return false;
+            } else if (testParts[2] === '>') {
+                if (baseLength < compareLength) return false;
+            }
+        }
+    }
+
+    return true;
+};

@@ -22,7 +22,9 @@ export interface IBibleContentGroupForInput<T extends IContentGroup['groupType']
     readonly type: 'group';
     readonly groupType: T;
 
-    contents: (IBibleContentGroupForInput<T> | IBibleContentPhraseForInput)[];
+    contents: (
+        | IBibleContentGroupForInput<IContentGroup['groupType']>
+        | IBibleContentPhraseForInput)[];
 }
 
 export interface IBibleContentPhraseForInput extends IBiblePhraseWithNumbers {

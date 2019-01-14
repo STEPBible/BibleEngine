@@ -8,7 +8,7 @@ import {
     IBibleCrossReference
 } from '../models';
 import { pad } from './utils.functions';
-import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from '../data/bibleMeta';
+import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from './v11n.functions';
 
 /**
  * generates a bible reference range object with the version properties set such that it includes
@@ -39,8 +39,10 @@ export const generateContextRangeFromVersionRange = ({
         contextRange.versionChapterEndNum = versionChapterEndNum
             ? versionChapterEndNum + 1
             : versionChapterNum + 1;
-        contextRange.versionVerseNum = 1;
+        contextRange.versionVerseNum = 0;
         contextRange.versionVerseEndNum = 999;
+        contextRange.versionSubverseNum = 0;
+        contextRange.versionSubverseEndNum = 99;
     }
     return contextRange;
 };
@@ -75,17 +77,21 @@ export const generateEndReferenceFromRange = (
  * normalization! This should only be used if we know that version numbers are identical to the
  * normalized numbers.
  *
- * @param {IBibleReference} reference
+ * @param {IBibleReference} range
  * @returns {IBibleReferenceNormalized}
  */
-export const generateNormalizedReferenceFromVersionReference = (
-    reference: IBibleReference
-): IBibleReferenceNormalized => {
+export const generateNormalizedReferenceFromVersionRange = (
+    range: IBibleReferenceRange
+): IBibleReferenceRangeNormalized => {
     return {
-        ...reference,
+        ...range,
         isNormalized: true,
-        normalizedChapterNum: reference.normalizedChapterNum || reference.versionChapterNum,
-        normalizedVerseNum: reference.normalizedVerseNum || reference.versionVerseNum
+        normalizedChapterNum: range.normalizedChapterNum || range.versionChapterNum,
+        normalizedVerseNum: range.normalizedVerseNum || range.versionVerseNum,
+        normalizedSubverseNum: range.normalizedSubverseNum || range.versionSubverseNum,
+        normalizedChapterEndNum: range.normalizedChapterEndNum || range.versionChapterEndNum,
+        normalizedVerseEndNum: range.normalizedVerseEndNum || range.versionVerseEndNum,
+        normalizedSubverseEndNum: range.normalizedSubverseEndNum || range.versionSubverseEndNum
     };
 };
 
@@ -114,6 +120,8 @@ export const generateReferenceId = (reference: IBibleReferenceNormalized): numbe
     else refId += '000';
     if (reference.normalizedVerseNum) refId += '' + pad(reference.normalizedVerseNum, 3);
     else refId += '000';
+    if (reference.normalizedSubverseNum) refId += '' + pad(reference.normalizedSubverseNum, 2);
+    else refId += '00';
     return +refId;
 };
 
@@ -203,6 +211,9 @@ export const parsePhraseId = (id: number): IBiblePhraseRef => {
  */
 export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
     let _id = id;
+    const normalizedSubverseNum = _id % 100;
+    _id -= normalizedSubverseNum;
+    _id /= 100;
     const normalizedVerseNum = _id % 1000;
     _id -= normalizedVerseNum;
     _id /= 1000;
@@ -216,6 +227,7 @@ export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
     };
     if (normalizedChapterNum) ref.normalizedChapterNum = normalizedChapterNum;
     if (normalizedVerseNum) ref.normalizedVerseNum = normalizedVerseNum;
+    if (normalizedSubverseNum) ref.normalizedSubverseNum = normalizedSubverseNum;
 
     return ref;
 };

@@ -40,6 +40,7 @@ describe('generateBibleDocument', () => {
             bookOsisId: 'Gen',
             normalizedChapterNum: 1,
             normalizedVerseNum: 1,
+            normalizedSubverseNum: 0,
             phraseNum: 1
         }
     );
@@ -53,6 +54,7 @@ describe('generateBibleDocument', () => {
             bookOsisId: 'Gen',
             normalizedChapterNum: 1,
             normalizedVerseNum: 2,
+            normalizedSubverseNum: 0,
             phraseNum: 2
         },
         { quoteLevel: 1 }
@@ -67,6 +69,7 @@ describe('generateBibleDocument', () => {
             bookOsisId: 'Gen',
             normalizedChapterNum: 1,
             normalizedVerseNum: 2,
+            normalizedSubverseNum: 0,
             phraseNum: 3
         },
         { quoteLevel: 1 }
@@ -81,6 +84,7 @@ describe('generateBibleDocument', () => {
             bookOsisId: 'Gen',
             normalizedChapterNum: 1,
             normalizedVerseNum: 2,
+            normalizedSubverseNum: 0,
             phraseNum: 4
         },
         { translationChange: 'change' }
@@ -183,7 +187,7 @@ describe('generateBibleDocument', () => {
     });
 
     test('should create numbering group on the most outer level possible', () => {
-        expect(doc.numbering).toBeDefined();
+        expect(item1_1.numbering).toBeDefined();
     });
 
     test('should group sequential phrases with the same modifier', () => {

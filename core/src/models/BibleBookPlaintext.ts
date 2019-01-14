@@ -1,3 +1,2 @@
-export type BibleVersePlaintext = string;
-export type BibleChapterPlaintext = Map<number, BibleVersePlaintext>;
+export type BibleChapterPlaintext = Map<number, string[]>;
 export type BibleBookPlaintext = Map<number, BibleChapterPlaintext>;

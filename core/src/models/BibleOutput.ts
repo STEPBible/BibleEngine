@@ -113,7 +113,9 @@ export interface IBibleContentGeneratorGroup<T extends IContentGroup['groupType'
         : T extends 'indent'
         ? { level: number }
         : undefined;
-    contents: (IBibleContentGeneratorGroup<T> | IBibleContentGeneratorPhrase)[];
+    contents: (
+        | IBibleContentGeneratorGroup<IContentGroup['groupType']>
+        | IBibleContentGeneratorPhrase)[];
 }
 
 export interface IBibleContentGeneratorPhrase extends IBibleContentPhrase {

@@ -25,7 +25,13 @@ export class BibleCrossReference implements IBibleCrossReference {
     normalizedRefId: number;
 
     @Column({ nullable: true })
+    partIndicator?: string;
+
+    @Column({ nullable: true })
     normalizedRefIdEnd?: number;
+
+    @Column({ nullable: true })
+    partIndicatorEnd?: string;
 
     // the normalizedRefIds encode the range attribute:
     range: IBibleReferenceRangeNormalized;
@@ -145,7 +151,10 @@ export class BibleCrossReference implements IBibleCrossReference {
                 bookOsisId: this.range.bookOsisId,
                 normalizedChapterNum:
                     this.range.normalizedChapterEndNum || this.range.normalizedChapterNum,
-                normalizedVerseNum: this.range.normalizedVerseEndNum
+                normalizedVerseNum: this.range.normalizedVerseEndNum,
+                normalizedSubverseNum: this.range.normalizedSubverseEndNum
             });
+        if (this.range.partIndicator) this.partIndicator = this.range.partIndicator;
+        if (this.range.partIndicatorEnd) this.partIndicatorEnd = this.range.partIndicatorEnd;
     }
 }

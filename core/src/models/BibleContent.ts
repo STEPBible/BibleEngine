@@ -1,5 +1,5 @@
 import { IBibleSectionBase } from './BibleSection';
-import { IBiblePhrase } from './BiblePhrase';
+import { IBiblePhraseWithNumbers } from './BiblePhrase';
 import { IContentGroup } from './ContentGroup';
 
 export type IBibleContent =
@@ -31,9 +31,9 @@ export interface IBibleContentGroup<T extends IContentGroup['groupType']>
     readonly type: 'group';
     readonly groupType: T;
 
-    contents: (IBibleContentGroup<T> | IBibleContentPhrase)[];
+    contents: (IBibleContentGroup<IContentGroup['groupType']> | IBibleContentPhrase)[];
 }
 
-export interface IBibleContentPhrase extends IBiblePhrase, IBibleNumbering {
+export interface IBibleContentPhrase extends IBiblePhraseWithNumbers, IBibleNumbering {
     readonly type: 'phrase';
 }
