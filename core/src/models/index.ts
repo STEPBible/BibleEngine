@@ -36,7 +36,7 @@ import {
     IBibleNumbering
 } from './BibleContent';
 import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext';
-import { Document } from './Document';
+import { DocumentDefault } from './Document';
 import { IBibleVersion } from './BibleVersion';
 import { IDictionaryEntry } from './DictionaryEntry';
 import { IContentGroup } from './ContentGroup';
@@ -57,7 +57,7 @@ export {
     BibleContentGeneratorContainer,
     BookWithContentForInput,
     BooleanModifiers,
-    Document,
+    DocumentDefault as Document,
     IBibleBook,
     IBibleContent,
     IBibleContentForInput,

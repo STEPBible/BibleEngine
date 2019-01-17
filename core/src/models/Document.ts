@@ -18,4 +18,4 @@ export interface DocumentSection extends IContentSection {
     contents: (DocumentSection | DocumentGroup | DocumentPhrase)[];
 }
 
-export type Document = (DocumentSection | DocumentGroup | DocumentPhrase)[];
+export type DocumentDefault = (DocumentSection | DocumentGroup | DocumentPhrase)[];

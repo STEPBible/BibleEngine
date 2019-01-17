@@ -1,4 +1,4 @@
-import { Document } from './Document';
+import { DocumentDefault } from './Document';
 
 export interface IDictionaryEntry {
     strong: string;
@@ -6,5 +6,5 @@ export interface IDictionaryEntry {
     lemma?: string;
     transliteration?: string;
     gloss: string;
-    content?: Document;
+    content?: DocumentDefault;
 }

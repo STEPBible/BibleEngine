@@ -915,12 +915,21 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
     for (const testString of tests) {
         // if we have a failing test we can always return false since tests are always "match-all"
 
-        const testParts = testString.match(/(.*)([=<>])(.*)/);
-        if (!testParts) throw new Error(`v11n rule test parse error`);
+        let testParts = testString.match(/(.*)([=<>])(.*)/);
+        if (!testParts) {
+            // throw new Error(`v11n rule test parse error: ${testString}`);
+            // TODO: this is temporary while we wait for the correction of a bug in the rules
+            testParts = ['', testString, '=', 'Last'];
+        }
 
         const refBaseFactorParts = testParts[1].split('*');
         const refBaseReferenceParts = refBaseFactorParts[0].split('.');
         const refBaseNumbers = refBaseReferenceParts[1].split(':');
+
+        // TODO: this is temporary until the problem of "T"-reference is solved conceptually
+        //       depending on the outcome, we might convert T (and a possible V) to subverse 0 (1)
+        if (refBaseNumbers[1].indexOf('T') !== -1) return false;
+
         const refBase: TestReference = {
             chapterNumber: +refBaseNumbers[0],
             verseNumber: +refBaseNumbers[1],

@@ -19,6 +19,9 @@ export class BibleBook implements IBibleBook {
     title: string;
 
     @Column({ nullable: true })
+    longTitle?: string;
+
+    @Column({ nullable: true })
     introductionJson?: string;
 
     introduction?: Document;

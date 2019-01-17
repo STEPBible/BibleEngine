@@ -1,4 +1,4 @@
-import { Document } from './Document';
+import { DocumentDefault } from './Document';
 import { IContentSection } from './ContentSection';
 import { IBibleCrossReference } from './BibleCrossReference';
 
@@ -8,7 +8,7 @@ export interface IBibleSectionGeneric {
 }
 
 export interface IBibleSectionBase extends IContentSection {
-    description?: Document;
+    description?: DocumentDefault;
     crossReferences?: IBibleCrossReference[];
 }
 

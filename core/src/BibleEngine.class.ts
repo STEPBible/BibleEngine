@@ -486,10 +486,11 @@ export class BibleEngine {
                                 // normalized reference for this phrase. Additional refs occur when
                                 // the sourceRef generates a range. we create an empty phrase for
                                 // each of them and keep track of last ref of the range to link the
-                                // content-phrase to it laster
+                                // content-phrase to it later
                                 if (firstStandardRefId)
                                     throw new Error(
-                                        `v11n: trying to renumber an already renumbered ref`
+                                        `v11n: trying to renumber an already renumbered ref: ` +
+                                            `${firstStandardRefId}`
                                     );
 
                                 nRef = rule.standardRef;
@@ -586,7 +587,8 @@ export class BibleEngine {
                 if (state.columnModifierState.person)
                     content.person = state.columnModifierState.person;
                 if (state.currentJoinToRefId) content.joinToRefId = state.currentJoinToRefId;
-                if (state.currentSourceTypeId) content.sourceTypeId = state.currentSourceTypeId;
+                if (state.currentSourceTypeId !== undefined)
+                    content.sourceTypeId = state.currentSourceTypeId;
 
                 state.phraseStack.push(new BiblePhrase(content, phraseRef, state.modifierState));
             } else if (content.type === 'group' && content.groupType !== 'paragraph') {
@@ -670,7 +672,9 @@ export class BibleEngine {
 
         if (state.recursionLevel === 0) {
             // we are at the end of the root method => persist everything
-            await entityManager.save(state.phraseStack, { chunk: state.phraseStack.length / 500 });
+            await entityManager.save(state.phraseStack, {
+                chunk: Math.ceil(state.phraseStack.length / 100)
+            });
             await entityManager.save(state.paragraphStack);
             await entityManager.save(state.sectionStack);
         }
