@@ -1,10 +1,10 @@
 import { IBibleSectionBase } from './BibleSection';
 import { IBiblePhraseWithNumbers } from './BiblePhrase';
-import { IContentGroup } from './ContentGroup';
+import { IContentGroup, ContentGroupType } from './ContentGroup';
 
 export type IBibleContent =
     | IBibleContentSection
-    | IBibleContentGroup<IContentGroup['groupType']>
+    | IBibleContentGroup<ContentGroupType>
     | IBibleContentPhrase;
 
 export interface IBibleNumbering {
@@ -25,13 +25,13 @@ export interface IBibleContentSection extends IBibleSectionBase, IBibleNumbering
     contents: IBibleContent[];
 }
 
-export interface IBibleContentGroup<T extends IContentGroup['groupType']>
-    extends IContentGroup,
+export interface IBibleContentGroup<T extends ContentGroupType>
+    extends IContentGroup<T>,
         IBibleNumbering {
     readonly type: 'group';
     readonly groupType: T;
 
-    contents: (IBibleContentGroup<IContentGroup['groupType']> | IBibleContentPhrase)[];
+    contents: (IBibleContentGroup<ContentGroupType> | IBibleContentPhrase)[];
 }
 
 export interface IBibleContentPhrase extends IBiblePhraseWithNumbers, IBibleNumbering {

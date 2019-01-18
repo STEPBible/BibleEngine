@@ -2,7 +2,6 @@ import { BiblePhrase } from '../entities';
 import {
     IBibleReferenceRange,
     IBibleReference,
-    IContentGroup,
     IBibleContentSection,
     IBibleContent,
     IBibleContentGroup,
@@ -12,6 +11,7 @@ import {
     IBibleBook
 } from '../models';
 import { IBibleNumbering } from './BibleContent';
+import { ContentGroupType } from './ContentGroup';
 
 export interface IBibleOutputBase {
     version: IBibleVersion;
@@ -84,13 +84,13 @@ export interface IBibleOutputRoot extends IBibleNumbering {
 
 export type BibleContentGenerator =
     | IBibleContentGeneratorSection
-    | IBibleContentGeneratorGroup<IContentGroup['groupType']>
+    | IBibleContentGeneratorGroup<ContentGroupType>
     | IBibleContentGeneratorPhrase;
 
 export type BibleContentGeneratorContainer =
     | IBibleContentGeneratorRoot
     | IBibleContentGeneratorSection
-    | IBibleContentGeneratorGroup<IContentGroup['groupType']>;
+    | IBibleContentGeneratorGroup<ContentGroupType>;
 
 export interface IBibleContentGeneratorRoot extends IBibleOutputRoot {
     parent: undefined;
@@ -103,7 +103,7 @@ export interface IBibleContentGeneratorSection extends IBibleContentSection {
     contents: BibleContentGenerator[]; // a section can contain everything
 }
 
-export interface IBibleContentGeneratorGroup<T extends IContentGroup['groupType']>
+export interface IBibleContentGeneratorGroup<T extends ContentGroupType>
     extends IBibleContentGroup<T> {
     parent: BibleContentGeneratorContainer;
     meta: T extends 'paragraph'
@@ -113,9 +113,7 @@ export interface IBibleContentGeneratorGroup<T extends IContentGroup['groupType'
         : T extends 'indent'
         ? { level: number }
         : undefined;
-    contents: (
-        | IBibleContentGeneratorGroup<IContentGroup['groupType']>
-        | IBibleContentGeneratorPhrase)[];
+    contents: (IBibleContentGeneratorGroup<ContentGroupType> | IBibleContentGeneratorPhrase)[];
 }
 
 export interface IBibleContentGeneratorPhrase extends IBibleContentPhrase {

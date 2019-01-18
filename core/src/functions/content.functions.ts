@@ -2,6 +2,7 @@ import {
     BibleBookPlaintext,
     BibleContentGeneratorContainer,
     BooleanModifiers,
+    ContentGroupType,
     IBibleContent,
     IBibleContentGeneratorGroup,
     IBibleContentGeneratorPhrase,
@@ -12,14 +13,14 @@ import {
     IBibleContentSection,
     IBibleOutputRich,
     IBibleOutputRoot,
-    IContentGroup,
     PhraseModifiers,
     ValueModifiers,
     IBibleContentForInput,
     IBibleNumbering,
     IBibleReferenceRange,
     IBibleReferenceRangeNormalized,
-    IBibleSection
+    IBibleSection,
+    IBibleNote
 } from '../models';
 import { BiblePhrase, BibleParagraph, BibleSection, BibleBook, BibleVersion } from '../entities';
 import {
@@ -126,7 +127,8 @@ export const generateBibleDocument = (
                 } else if (
                     _group.groupType === 'orderedListItem' ||
                     _group.groupType === 'unorderedListItem' ||
-                    _group.groupType === 'translationChange'
+                    _group.groupType === 'translationChange' ||
+                    _group.groupType === 'title'
                 ) {
                     isPhraseInGroup = phrase.getModifierValue(_group.groupType) === _group.modifier;
                 } else if (_group.groupType === 'person') {
@@ -171,6 +173,7 @@ export const generateBibleDocument = (
                     _group.groupType === 'orderedListItem' ||
                     _group.groupType === 'unorderedListItem' ||
                     _group.groupType === 'translationChange' ||
+                    _group.groupType === 'title' ||
                     _group.groupType === 'person'
                 ) {
                     activeModifiers[_group.groupType] = _group.modifier;
@@ -278,7 +281,8 @@ export const generateBibleDocument = (
             'italic',
             'translationChange',
             'person',
-            'divineName'
+            'divineName',
+            'poetry'
         ];
 
         for (const modifier of modifiers) {
@@ -323,7 +327,8 @@ export const generateBibleDocument = (
             } else if (
                 modifier === 'orderedListItem' ||
                 modifier === 'unorderedListItem' ||
-                modifier === 'translationChange'
+                modifier === 'translationChange' ||
+                modifier === 'title'
             ) {
                 if (
                     phrase.getModifierValue(modifier) &&
@@ -505,7 +510,11 @@ export const generateContextSections = (phrases: BiblePhrase[], sections: BibleS
             }
 
             // check if this section wraps the entire range
-            if (section.phraseStartId < firstPhraseId && section.phraseEndId > lastPhraseId)
+            if (
+                section.phraseStartId <= firstPhraseId &&
+                section.phraseEndId >= lastPhraseId &&
+                (section.phraseStartId !== firstPhraseId || section.phraseEndId !== lastPhraseId)
+            )
                 context[section.level].wrappingSection = section;
             // check if this section starts or ends within the range
             else if (
@@ -786,15 +795,19 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
             if (phrase.sourceTypeId) inputPhrase.sourceTypeId = phrase.sourceTypeId;
             if (phrase.joinToRefId) inputPhrase.joinToRefId = phrase.joinToRefId;
             if (phrase.linebreak) inputPhrase.linebreak = true;
+            if (phrase.skipSpace) inputPhrase.skipSpace = phrase.skipSpace;
             if (phrase.quoteWho) inputPhrase.quoteWho = phrase.quoteWho;
             if (phrase.person) inputPhrase.person = phrase.person;
             if (phrase.strongs && phrase.strongs.length) inputPhrase.strongs = phrase.strongs;
             if (phrase.notes && phrase.notes.length)
-                inputPhrase.notes = phrase.notes.map(({ key, type, content }) => ({
-                    key,
-                    type,
-                    content
-                }));
+                inputPhrase.notes = phrase.notes.map(({ key, type, content }) => {
+                    const note: IBibleNote = {
+                        content
+                    };
+                    if (key) note.key = key;
+                    if (type) note.type = type;
+                    return note;
+                });
             if (phrase.crossReferences && phrase.crossReferences.length)
                 inputPhrase.crossReferences = phrase.crossReferences.map(slimDownCrossReference);
 
@@ -802,13 +815,13 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
 
             inputData.push({ type: 'phrase', ...inputPhrase });
         } else if (obj.type === 'group') {
-            const inputGroup: IBibleContentGroup<IContentGroup['groupType']> = {
+            const inputGroup: IBibleContentGroup<ContentGroupType> = {
                 type: 'group',
                 groupType: obj.groupType,
                 modifier: obj.modifier,
-                contents: <
-                    (IBibleContentGroup<IContentGroup['groupType']> | IBibleContentPhrase)[]
-                >stripUnnecessaryDataFromBibleContent(obj.contents)
+                contents: <(IBibleContentGroup<ContentGroupType> | IBibleContentPhrase)[]>(
+                    stripUnnecessaryDataFromBibleContent(obj.contents)
+                )
             };
             if (obj.numbering) inputGroup.numbering = obj.numbering;
             inputData.push(inputGroup);

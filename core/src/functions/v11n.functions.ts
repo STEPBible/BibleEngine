@@ -826,7 +826,7 @@ const sourceTypes = new Map([
     [6, 'English+Hebrew+Greek'],
     [7, 'English+Hebrew+Latin'],
     [8, 'English+Hebrew+Latin+Greek'],
-    [9, 'English2'],
+    [9, 'EngTitleSeparate'],
     [10, 'Latin'],
     [11, 'LatinUndivided'],
     [12, 'Latin+Greek'],
@@ -917,18 +917,12 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
 
         let testParts = testString.match(/(.*)([=<>])(.*)/);
         if (!testParts) {
-            // throw new Error(`v11n rule test parse error: ${testString}`);
-            // TODO: this is temporary while we wait for the correction of a bug in the rules
-            testParts = ['', testString, '=', 'Last'];
+            throw new Error(`v11n rule test parse error: ${testString}`);
         }
 
         const refBaseFactorParts = testParts[1].split('*');
         const refBaseReferenceParts = refBaseFactorParts[0].split('.');
         const refBaseNumbers = refBaseReferenceParts[1].split(':');
-
-        // TODO: this is temporary until the problem of "T"-reference is solved conceptually
-        //       depending on the outcome, we might convert T (and a possible V) to subverse 0 (1)
-        if (refBaseNumbers[1].indexOf('T') !== -1) return false;
 
         const refBase: TestReference = {
             chapterNumber: +refBaseNumbers[0],

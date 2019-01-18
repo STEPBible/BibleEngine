@@ -1,4 +1,4 @@
-import { DocumentDefault } from './Document';
+import { DocumentRoot } from './Document';
 
 export interface IBibleBook {
     versionId: number;
@@ -9,5 +9,5 @@ export interface IBibleBook {
     title: string;
     longTitle?: string;
     chaptersCount?: number[];
-    introduction?: DocumentDefault;
+    introduction?: DocumentRoot;
 }

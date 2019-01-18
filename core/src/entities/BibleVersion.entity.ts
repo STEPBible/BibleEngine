@@ -7,7 +7,7 @@ import {
     BeforeUpdate,
     Index
 } from 'typeorm';
-import { Document, IBibleVersion } from '../models';
+import { DocumentRoot, IBibleVersion } from '../models';
 
 @Entity()
 export class BibleVersion implements IBibleVersion {
@@ -23,7 +23,7 @@ export class BibleVersion implements IBibleVersion {
 
     @Column({ nullable: true })
     descriptionJson?: string;
-    description?: Document;
+    description?: DocumentRoot;
 
     @Column({ length: 5 })
     language: string;
@@ -33,7 +33,7 @@ export class BibleVersion implements IBibleVersion {
 
     @Column({ nullable: true })
     copyrightLongJson?: string;
-    copyrightLong?: Document;
+    copyrightLong?: DocumentRoot;
 
     @Column()
     chapterVerseSeparator: string;

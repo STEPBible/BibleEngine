@@ -1,12 +1,12 @@
-import { DocumentDefault } from './Document';
+import { DocumentRoot } from './Document';
 
 export interface IBibleVersion {
     version: string;
     title: string;
-    description?: DocumentDefault;
+    description?: DocumentRoot;
     language: string;
     copyrightShort?: string;
-    copyrightLong?: DocumentDefault;
+    copyrightLong?: DocumentRoot;
     chapterVerseSeparator: string;
     hasStrongs?: boolean;
 }

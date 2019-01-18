@@ -1,4 +1,4 @@
-import { TreeElement, DefaultNode, TreeTextNode } from './models/parse5';
+import { TreeElement, DefaultNode } from './models/parse5';
 import {
     BookWithContentForInput,
     IBibleContentForInput,
@@ -7,12 +7,13 @@ import {
     IBibleContentGroupForInput
 } from '../../models/BibleInput';
 import {
-    DocumentDefault,
+    DocumentRoot,
     DocumentSection,
     DocumentPhrase,
-    DocumentGroup
+    DocumentGroup,
+    DocumentElement
 } from '../../models/Document';
-import { IContentGroup } from '../../models';
+import { ContentGroupType } from '../../models/ContentGroup';
 
 export const getTextFromNode = (node: DefaultNode) => {
     if (node.nodeName === '#text') return node.value;
@@ -40,14 +41,14 @@ export const visitNode = (
         contentWithPendingNotes?: (IBibleContentPhraseForInput | IBibleContentSectionForInput)[];
     },
     localState: {
-        currentDocument?: DocumentDefault;
+        currentDocument?: DocumentElement[];
         currentContentGroup: IBibleContentForInput[];
     }
 ) => {
     if (node.nodeName === 'h1') {
-        globalState.bookData.book.longTitle = (<TreeTextNode>node.childNodes[0]).value;
-        globalState.bookData.book.introduction = [];
-        localState.currentDocument = globalState.bookData.book.introduction;
+        globalState.bookData.book.longTitle = getTextFromNode(node);
+        globalState.bookData.book.introduction = { type: 'root', contents: [] };
+        localState.currentDocument = globalState.bookData.book.introduction.contents;
     } else if (
         node.nodeName === 'h2' ||
         node.nodeName === 'h3' ||
@@ -137,12 +138,12 @@ export const visitNode = (
         // add following content to this section
         localState.currentContentGroup = newSection.contents;
     } else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'kap')) {
-        globalState.currentChapterNumber = +(<TreeTextNode>node.childNodes[0]).value;
+        globalState.currentChapterNumber = +getTextFromNode(node);
         // if a new chapter is set, it overwrites the backup number
         if (globalState.currentBackupChapterNumber)
             globalState.currentBackupChapterNumber = undefined;
     } else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'vers')) {
-        const verseRef = (<TreeTextNode>node.childNodes[0]).value;
+        const verseRef = getTextFromNode(node);
         const verseParts = verseRef.split(',');
         if (verseParts.length > 1) {
             globalState.currentBackupChapterNumber = globalState.currentChapterNumber;
@@ -161,7 +162,7 @@ export const visitNode = (
 
         const newSection: DocumentSection = {
             type: 'section',
-            title: (<TreeTextNode>node.childNodes[0]).value,
+            title: getTextFromNode(node),
             contents: []
         };
         localState.currentDocument.push(newSection);
@@ -169,16 +170,16 @@ export const visitNode = (
     } else if (node.nodeName === 'p' && hasAttribute(node, 'class', 'u1')) {
         if (
             !globalState.bookData.book.introduction ||
-            !globalState.bookData.book.introduction[0] ||
-            globalState.bookData.book.introduction[0].type !== 'section'
+            !globalState.bookData.book.introduction.contents[0] ||
+            globalState.bookData.book.introduction.contents[0].type !== 'section'
         )
             throw new Error(
                 `we expect class=u1 to only occur as a subtitle in the book introduction`
             );
 
-        (<DocumentSection>globalState.bookData.book.introduction[0]).subTitle = (<TreeTextNode>(
-            node.childNodes[0]
-        )).value;
+        (<DocumentSection>(
+            globalState.bookData.book.introduction.contents[0]
+        )).subTitle = getTextFromNode(node);
 
         // the following condition is included at the top along with the heading tags
         // else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'u2'))
@@ -188,10 +189,10 @@ export const visitNode = (
         // skip the outline
         return;
     } else if (node.nodeName === 'div' && hasAttribute(node, 'class', 'fn')) {
-        const newNote: DocumentDefault = [];
+        const newNote: DocumentRoot = { type: 'root', contents: [] };
         const childState = {
             ...localState,
-            currentDocument: newNote
+            currentDocument: newNote.contents
         };
         for (const childNode of node.childNodes) visitNode(childNode, globalState, childState);
         const firstContentWithPendingNote = globalState.contentWithPendingNotes
@@ -204,9 +205,9 @@ export const visitNode = (
             throw new Error(`no content with pending note: ${noteText}`);
 
         if (firstContentWithPendingNote.type === 'phrase') {
-            const expectedNoteReference = `${firstContentWithPendingNote.versionChapterNum},${
-                firstContentWithPendingNote.versionVerseNum
-            }:`;
+            const expectedNoteReference =
+                `${firstContentWithPendingNote.versionChapterNum},` +
+                `${firstContentWithPendingNote.versionVerseNum}:`;
 
             if (noteText.indexOf(expectedNoteReference) !== 0)
                 throw new Error(
@@ -214,17 +215,13 @@ export const visitNode = (
                         `${expectedNoteReference}`
                 );
 
-            firstContentWithPendingNote.notes = [
-                {
-                    type: 'note',
-                    key: '*',
-                    content: newNote
-                }
-            ];
+            firstContentWithPendingNote.notes = [{ content: newNote }];
         } else {
             firstContentWithPendingNote.description = newNote;
         }
     } else if (node.nodeName === '#text') {
+        const punctuationChars = ['.', ',', ':', '?', '!', ';'];
+
         const text = node.value
             .trim()
             // .replace(/\r?\n|\r/g, ' ')
@@ -235,8 +232,23 @@ export const visitNode = (
             type: 'phrase',
             content: text
         };
-        if (localState.currentDocument) localState.currentDocument.push(newPhrase);
-        else {
+        if (punctuationChars.indexOf(text.slice(0, 1)) !== -1) newPhrase.skipSpace = 'before';
+
+        if (localState.currentDocument) {
+            if (localState.currentDocument.length === 0) {
+                // remove the reference text at the beginning of notes
+                const colonIndex = text.indexOf(':');
+                if (/^[0-9]{1,3},[0-9]{1,3}:$/.test(text.slice(0, colonIndex + 1))) {
+                    const remainingText = text.slice(colonIndex + 1).trim();
+                    if (!remainingText) return;
+                    else newPhrase.content = remainingText;
+                }
+            }
+
+            // TODO: parse for bible references and link them
+
+            localState.currentDocument.push(newPhrase);
+        } else {
             if (!globalState.currentChapterNumber || !globalState.currentVerseNumber)
                 throw new Error(
                     `verse numbers are missing in node: <${node.nodeName}>${text}</${
@@ -255,30 +267,50 @@ export const visitNode = (
             if (textByNotes.length > 1) {
                 for (let i = 0; i < textByNotes.length; i++) {
                     if (i === textByNotes.length - 1) {
-                        if (textByNotes[i].trim())
-                            localState.currentContentGroup.push({
+                        const phraseText = textByNotes[i].trim();
+                        if (phraseText) {
+                            const phrase: IBibleContentPhraseForInput = {
                                 ...numbers,
                                 type: 'phrase',
-                                content: textByNotes[i].trim()
-                            });
+                                content: phraseText
+                            };
+                            if (punctuationChars.indexOf(phraseText.slice(0, 1)) !== -1)
+                                phrase.skipSpace = 'before';
+                            localState.currentContentGroup.push(phrase);
+                        }
                     } else {
+                        // RADAR: it would be nicer if the note would not in every case only be
+                        //        attached to the word directly before the note marker. the notes
+                        //        in the NeÜ actually sometimes give a hint to what they are exactly
+                        //        referring to by putting this text at the beginning in <em> tags.
+                        //        However in order to use this, we would need to look ahead from a
+                        //        parsing point of view, which we can't. This isn't trivial to solve
+                        //        if at all possible (with reasonable effort), so we stick with the
+                        //        "last word approach" for now.
+
                         // last word should get a note (if index is -1 it gets 0 which is correct)
                         let lastWordIndex = textByNotes[i].lastIndexOf(' ') + 1;
                         if (lastWordIndex > 0) {
-                            const startingText = textByNotes[i].slice(0, lastWordIndex - 1);
-                            if (startingText.trim())
-                                localState.currentContentGroup.push({
+                            const startingText = textByNotes[i].slice(0, lastWordIndex - 1).trim();
+                            if (startingText) {
+                                const phrase: IBibleContentPhraseForInput = {
                                     ...numbers,
                                     type: 'phrase',
                                     content: startingText
-                                });
+                                };
+                                if (punctuationChars.indexOf(startingText.slice(0, 1)) !== -1)
+                                    phrase.skipSpace = 'before';
+                                localState.currentContentGroup.push(phrase);
+                            }
                         }
-                        const textWithNote = textByNotes[i].slice(lastWordIndex);
+                        const textWithNote = textByNotes[i].slice(lastWordIndex).trim();
                         const phraseWithPendingNote: IBibleContentPhraseForInput = {
                             ...numbers,
                             type: 'phrase',
                             content: textWithNote
                         };
+                        if (punctuationChars.indexOf(textWithNote.slice(0, 1)) !== -1)
+                            phraseWithPendingNote.skipSpace = 'before';
                         localState.currentContentGroup.push(phraseWithPendingNote);
                         if (!globalState.contentWithPendingNotes)
                             globalState.contentWithPendingNotes = [];
@@ -300,7 +332,7 @@ export const visitNode = (
             localState.currentDocument = undefined;
         }
 
-        let groupType: IContentGroup['groupType'];
+        let groupType: ContentGroupType | undefined;
         if (
             node.nodeName === 'p' ||
             (node.nodeName === 'div' &&
@@ -308,24 +340,51 @@ export const visitNode = (
         ) {
             groupType = 'paragraph';
         } else if (node.nodeName === 'b') groupType = 'bold';
-        else groupType = 'emphasis';
+        else if (node.nodeName === 'em') groupType = 'emphasis';
+        else if (node.nodeName === 'i') groupType = 'italic';
 
-        const newGroup: DocumentGroup = {
-            type: 'group',
-            groupType,
-            contents: []
-        };
-        const newBibleGroup: IBibleContentGroupForInput<IContentGroup['groupType']> = {
-            ...newGroup,
-            contents: []
-        };
         const childState = {
             ...localState
         };
-        if (localState.currentDocument) {
-            childState.currentDocument = newGroup.contents;
-        } else {
-            childState.currentContentGroup = newBibleGroup.contents;
+        let newGroup: DocumentGroup<ContentGroupType> | undefined;
+        let newBibleGroup: IBibleContentGroupForInput<ContentGroupType> | undefined;
+
+        // tags that we don't recognize above, have no effect - their child content will be added to
+        // the local state
+        if (groupType) {
+            newGroup = {
+                type: 'group',
+                groupType,
+                contents: []
+            };
+            newBibleGroup = {
+                ...newGroup,
+                contents: []
+            };
+
+            if (localState.currentDocument) {
+                childState.currentDocument = newGroup.contents;
+            } else {
+                if (node.nodeName === 'p' && hasAttribute(node, 'class', 'einl')) {
+                    const titleBibleGroup: IBibleContentGroupForInput<'title'> = {
+                        type: 'group',
+                        groupType: 'title',
+                        contents: []
+                    };
+                    newBibleGroup.contents.push(titleBibleGroup);
+                    childState.currentContentGroup = titleBibleGroup.contents;
+                } else if (node.nodeName === 'p' && hasAttribute(node, 'class', 'poet')) {
+                    const titlePoetryGroup: IBibleContentGroupForInput<'poetry'> = {
+                        type: 'group',
+                        groupType: 'poetry',
+                        contents: []
+                    };
+                    newBibleGroup.contents.push(titlePoetryGroup);
+                    childState.currentContentGroup = titlePoetryGroup.contents;
+                } else {
+                    childState.currentContentGroup = newBibleGroup.contents;
+                }
+            }
         }
 
         // see comment further down
@@ -334,9 +393,10 @@ export const visitNode = (
         for (const childNode of node.childNodes) visitNode(childNode, globalState, childState);
 
         if (localState.currentDocument) {
-            if (newGroup.contents.length) localState.currentDocument.push(newGroup);
+            if (newGroup && newGroup.contents.length) localState.currentDocument.push(newGroup);
         } else {
-            if (newBibleGroup.contents.length) localState.currentContentGroup.push(newBibleGroup);
+            if (newBibleGroup && newBibleGroup.contents.length)
+                localState.currentContentGroup.push(newBibleGroup);
 
             // we need to check for a special case, when a level 4 section is started within a
             // ContentGroup. due to the way the HTML is structured for the NEUE (Ps119, Hos) we

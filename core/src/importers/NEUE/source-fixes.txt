@@ -1,3 +1,5 @@
+ERRORS
+======
 1Mo 19,22: "*" missing for note
 5Mo 3,11: "*" missing for "Sarg aus Eisenstein"
 Ps 1: notes for 1,1 & 1,2 at the wrong place
@@ -9,7 +11,14 @@ Jes 11,10: wrong verse seperator in note
 Kla 4,1: missing reference at beginning of note
 Dan 12,7: note in the wrong order
 Mt 13,32: note has wrong reference ("Mt 13,23")
-Mt 20,6.9: to have this attached at both verses, note has to be duplicated to Mt 20,9 (and referenced only to one verse)
-Lk 22,43: since the note marker is at verse 44, the reference in the note needs to point to that
 3Jo: duplicate "<p>" at beginning of bible text
 3Jo: spelling error in title
+
+NORMALIZATIONS
+==============
+Mt 20,6.9: to have this attached at both verses, note has to be duplicated to Mt 20,9 (and referenced only to one verse)
+Lk 22,43: since the note marker is at verse 44, the reference in the note needs to point to that
+
+REPLACEMENTS
+============
+<img src="note.png" width="10" height="10"> => ♪

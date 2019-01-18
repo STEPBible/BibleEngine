@@ -12,6 +12,7 @@ import { BibleCrossReference, BibleNote } from '.';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
 import { PhraseModifiers, IBiblePhraseRef } from '../models';
 import { IBiblePhraseWithNumbers } from '../models/BiblePhrase';
+import { IContentPhrase } from '../models/ContentPhrase';
 
 @Entity()
 export class BiblePhrase implements IBiblePhraseWithNumbers {
@@ -41,6 +42,9 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
     // save within 'modifiers' (it's tied to only one phrase), so we keep it on a seperate column.
     @Column({ nullable: true })
     linebreak?: boolean;
+
+    @Column({ nullable: true, type: 'text', length: 6 })
+    skipSpace?: IContentPhrase['skipSpace'];
 
     // everything that is not tied to one single phrase, thus forming groups in the content
     // hierarchy, is saved within 'modifiers'. We don't need to index this, so it's save to group
@@ -86,12 +90,7 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
         Object.assign(this, phrase);
         this.normalizedReference = reference;
         if (modifiers) {
-            // we don't want to save an modifier object without an active modifier to save space
-            let hasActiveModifiers = !!Object.values(modifiers).find(
-                modifierValue => modifierValue !== false && modifierValue !== 0
-            );
-
-            if (hasActiveModifiers) this.modifiers = modifiers;
+            this.modifiers = modifiers;
         }
         if (phrase.crossReferences) {
             this.crossReferences = phrase.crossReferences.map(crossReference => {
@@ -126,7 +125,17 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
     async prepare() {
         this.id = generatePhraseId(this.normalizedReference);
         if (this.strongs) this.strongsJoined = this.strongs.join(',');
-        if (this.modifiers) this.modifiersJson = JSON.stringify(this.modifiers);
+        if (this.modifiers) {
+            // we only save active modifiers to save space
+            const modifiers: any = {};
+            for (const [key, val] of Object.entries(this.modifiers)) {
+                if (val !== false && val !== 0 && val !== null && val !== undefined)
+                    modifiers[key] = val;
+            }
+
+            this.modifiersJson =
+                Object.values(modifiers).length > 0 ? JSON.stringify(modifiers) : undefined;
+        }
     }
 
     getModifierValue<T extends keyof PhraseModifiers>(modifier: T): PhraseModifiers[T] {
@@ -139,7 +148,8 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
                 modifier === 'quote' ||
                 modifier === 'translationChange' ||
                 modifier === 'orderedListItem' ||
-                modifier === 'unorderedListItem'
+                modifier === 'unorderedListItem' ||
+                modifier === 'title'
             )
                 return undefined;
             else return false;

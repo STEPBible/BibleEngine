@@ -1,7 +1,7 @@
-import { DocumentDefault } from './Document';
+import { DocumentRoot } from './Document';
 
 export interface IBibleNote {
-    type: string;
-    key: string;
-    content: DocumentDefault;
+    type?: string;
+    key?: string;
+    content: DocumentRoot;
 }

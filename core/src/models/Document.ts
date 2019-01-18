@@ -1,6 +1,6 @@
 import { IBibleReferenceRangeNormalized } from '.';
 import { IContentSection } from './ContentSection';
-import { IContentGroup } from './ContentGroup';
+import { IContentGroup, ContentGroupType } from './ContentGroup';
 import { IContentPhrase } from './ContentPhrase';
 
 export interface DocumentPhrase extends IContentPhrase {
@@ -8,14 +8,20 @@ export interface DocumentPhrase extends IContentPhrase {
     bibleReference?: IBibleReferenceRangeNormalized;
 }
 
-export interface DocumentGroup extends IContentGroup {
+export interface DocumentGroup<T extends ContentGroupType> extends IContentGroup<T> {
     readonly type: 'group';
-    contents: (DocumentGroup | DocumentPhrase)[];
+    readonly groupType: T;
+    contents: (DocumentGroup<ContentGroupType> | DocumentPhrase)[];
 }
 
 export interface DocumentSection extends IContentSection {
     readonly type: 'section';
-    contents: (DocumentSection | DocumentGroup | DocumentPhrase)[];
+    contents: DocumentElement[];
 }
 
-export type DocumentDefault = (DocumentSection | DocumentGroup | DocumentPhrase)[];
+export type DocumentRoot = {
+    readonly type: 'root';
+    contents: DocumentElement[];
+};
+
+export type DocumentElement = DocumentSection | DocumentGroup<ContentGroupType> | DocumentPhrase;

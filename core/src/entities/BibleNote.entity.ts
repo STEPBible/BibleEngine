@@ -9,7 +9,7 @@ import {
     BeforeUpdate
 } from 'typeorm';
 import { BiblePhrase } from './BiblePhrase.entity';
-import { Document, IBibleNote } from '../models';
+import { IBibleNote, DocumentRoot } from '../models';
 
 @Entity()
 export class BibleNote implements IBibleNote {
@@ -17,15 +17,15 @@ export class BibleNote implements IBibleNote {
     id: number;
 
     @Column({ nullable: true })
-    key: string;
+    key?: string;
 
     @Column({ nullable: true })
-    type: string;
+    type?: string;
 
     @Column()
     contentJson: string;
 
-    content: Document;
+    content: DocumentRoot;
 
     @Column({ nullable: true })
     @Index()

@@ -10,7 +10,7 @@ import {
     BeforeUpdate
 } from 'typeorm';
 import { BibleCrossReference } from '.';
-import { Document, IBibleSectionEntity } from '../models';
+import { IBibleSectionEntity, DocumentRoot } from '../models';
 
 @Entity()
 @Index(['versionId', 'phraseStartId', 'phraseEndId'])
@@ -45,7 +45,7 @@ export class BibleSection implements IBibleSectionEntity {
     @Column({ nullable: true })
     descriptionJson?: string;
 
-    description?: Document;
+    description?: DocumentRoot;
 
     @OneToMany(() => BibleCrossReference, crossReference => crossReference.section, {
         cascade: true

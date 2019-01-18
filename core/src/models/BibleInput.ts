@@ -1,10 +1,11 @@
 import { IContentGroup, IBibleBook } from '.';
 import { IBibleSectionBase } from './BibleSection';
 import { IBiblePhraseWithNumbers } from './BiblePhrase';
+import { ContentGroupType } from './ContentGroup';
 
 export type IBibleContentForInput =
     | IBibleContentSectionForInput
-    | IBibleContentGroupForInput<IContentGroup['groupType']>
+    | IBibleContentGroupForInput<ContentGroupType>
     | IBibleContentPhraseForInput;
 
 export type BookWithContentForInput = {
@@ -17,14 +18,11 @@ export interface IBibleContentSectionForInput extends IBibleSectionBase {
     contents: IBibleContentForInput[];
 }
 
-export interface IBibleContentGroupForInput<T extends IContentGroup['groupType']>
-    extends IContentGroup {
+export interface IBibleContentGroupForInput<T extends ContentGroupType> extends IContentGroup<T> {
     readonly type: 'group';
     readonly groupType: T;
 
-    contents: (
-        | IBibleContentGroupForInput<IContentGroup['groupType']>
-        | IBibleContentPhraseForInput)[];
+    contents: (IBibleContentGroupForInput<ContentGroupType> | IBibleContentPhraseForInput)[];
 }
 
 export interface IBibleContentPhraseForInput extends IBiblePhraseWithNumbers {

@@ -40,13 +40,18 @@ export type PhraseModifiers = {
     orderedListItem?: string;
     unorderedListItem?: string;
     translationChange?: string;
+    title?: 'pullout' | 'inline';
     bold?: boolean;
     italic?: boolean;
     divineName?: boolean;
     emphasis?: boolean;
-    title?: boolean;
+    poetry?: boolean;
 };
 
-export type ValueModifiers = 'translationChange' | 'orderedListItem' | 'unorderedListItem';
+export type ValueModifiers =
+    | 'translationChange'
+    | 'orderedListItem'
+    | 'unorderedListItem'
+    | 'title';
 
-export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'title';
+export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'poetry';

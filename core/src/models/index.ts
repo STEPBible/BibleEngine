@@ -36,10 +36,10 @@ import {
     IBibleNumbering
 } from './BibleContent';
 import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext';
-import { DocumentDefault } from './Document';
+import { DocumentRoot, DocumentElement } from './Document';
 import { IBibleVersion } from './BibleVersion';
 import { IDictionaryEntry } from './DictionaryEntry';
-import { IContentGroup } from './ContentGroup';
+import { IContentGroup, ContentGroupType } from './ContentGroup';
 import { IBibleCrossReference } from './BibleCrossReference';
 import { IBibleNote } from './BibleNote';
 import {
@@ -57,7 +57,9 @@ export {
     BibleContentGeneratorContainer,
     BookWithContentForInput,
     BooleanModifiers,
-    DocumentDefault as Document,
+    ContentGroupType,
+    DocumentRoot,
+    DocumentElement,
     IBibleBook,
     IBibleContent,
     IBibleContentForInput,

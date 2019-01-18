@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
-import { Document, IDictionaryEntry } from '../models';
+import { IDictionaryEntry, DocumentRoot } from '../models';
 
 @Entity()
 export class DictionaryEntry implements IDictionaryEntry {
@@ -20,7 +20,7 @@ export class DictionaryEntry implements IDictionaryEntry {
 
     @Column({ nullable: true })
     contentJson?: string;
-    content?: Document;
+    content?: DocumentRoot;
 
     constructor(dict: IDictionaryEntry) {
         Object.assign(this, dict);

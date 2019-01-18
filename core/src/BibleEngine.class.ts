@@ -56,7 +56,8 @@ import {
     IBibleReferenceRangeQuery,
     IBibleReferenceVersion,
     IBibleReferenceRangeVersion,
-    IBibleContentForInput
+    IBibleContentForInput,
+    IBibleContentGroupForInput
 } from './models';
 
 export class BibleEngine {
@@ -365,11 +366,7 @@ export class BibleEngine {
         contents: IBibleContentForInput[],
         book: IBibleBook,
         context: BibleBookPlaintext,
-        state: {
-            modifierState: PhraseModifiers;
-            columnModifierState: { quoteWho?: string; person?: string };
-            sectionLevel: number;
-            recursionLevel: number;
+        globalState: {
             phraseStack: BiblePhrase[];
             paragraphStack: BibleParagraph[];
             sectionStack: BibleSection[];
@@ -382,10 +379,6 @@ export class BibleEngine {
             currentSourceTypeId?: number;
             currentJoinToRefId?: number;
         } = {
-            modifierState: { quoteLevel: 0, indentLevel: 0 },
-            columnModifierState: {},
-            sectionLevel: 0,
-            recursionLevel: 0,
             phraseStack: [],
             paragraphStack: [],
             sectionStack: [],
@@ -394,6 +387,17 @@ export class BibleEngine {
             currentVersionChapter: 0,
             currentVersionVerse: -1,
             currentVersionSubverse: 0
+        },
+        localState: {
+            modifierState: PhraseModifiers;
+            columnModifierState: { quoteWho?: string; person?: string };
+            sectionLevel: number;
+            recursionLevel: number;
+        } = {
+            modifierState: { quoteLevel: 0, indentLevel: 0 },
+            columnModifierState: {},
+            sectionLevel: 0,
+            recursionLevel: 0
         }
     ): Promise<{ firstPhraseId: number | undefined; lastPhraseId: number | undefined }> {
         const entityManager = await this.pEntityManager;
@@ -406,23 +410,23 @@ export class BibleEngine {
                 // or when one source verse is a verse range in the standard version)
                 // also: this updates all the current* attributes on the state object
                 if (
-                    !state.currentNormalizedReference ||
-                    content.versionChapterNum !== state.currentVersionChapter ||
-                    content.versionVerseNum !== state.currentVersionVerse ||
-                    content.versionSubverseNum !== state.currentVersionSubverse
+                    !globalState.currentNormalizedReference ||
+                    content.versionChapterNum !== globalState.currentVersionChapter ||
+                    content.versionVerseNum !== globalState.currentVersionVerse ||
+                    content.versionSubverseNum !== globalState.currentVersionSubverse
                 ) {
-                    state.currentVersionChapter = content.versionChapterNum;
-                    state.currentVersionVerse = content.versionVerseNum;
-                    state.currentVersionSubverse = content.versionSubverseNum;
-                    state.currentJoinToRefId = undefined;
-                    state.currentSourceTypeId = undefined;
+                    globalState.currentVersionChapter = content.versionChapterNum;
+                    globalState.currentVersionVerse = content.versionVerseNum;
+                    globalState.currentVersionSubverse = content.versionSubverseNum;
+                    globalState.currentJoinToRefId = undefined;
+                    globalState.currentSourceTypeId = undefined;
                     // currentPhraseNum will be dealt with on the basis of the normalized numbers
 
                     let nRef: IBibleReferenceNormalized | undefined;
 
                     if (content.normalizedReference) {
-                        state.currentJoinToRefId = content.joinToRefId;
-                        state.currentSourceTypeId = content.sourceTypeId;
+                        globalState.currentJoinToRefId = content.joinToRefId;
+                        globalState.currentSourceTypeId = content.sourceTypeId;
                         nRef = {
                             ...content.normalizedReference,
                             bookOsisId: book.osisId,
@@ -452,7 +456,7 @@ export class BibleEngine {
                             // saving us the effort to look for rules in the first place
                             // (Note: for rules with the action "Keep verse" assigning this property
                             //        will be the only action taken)
-                            state.currentSourceTypeId = rule.sourceTypeId;
+                            globalState.currentSourceTypeId = rule.sourceTypeId;
 
                             // we need this for both the empty and merge rules
                             const emptyPhraseReference: Required<IBiblePhraseRef> = {
@@ -474,12 +478,10 @@ export class BibleEngine {
                                     versionVerseNum: rule.standardRef.normalizedVerseNum!
                                 };
 
-                                state.phraseStack.push(
-                                    new BiblePhrase(
-                                        emptyPhrase,
-                                        emptyPhraseReference,
-                                        state.modifierState
-                                    )
+                                globalState.phraseStack.push(
+                                    new BiblePhrase(emptyPhrase, emptyPhraseReference, {
+                                        ...localState.modifierState
+                                    })
                                 );
                             } else if (rule.action === 'Renumber verse') {
                                 // only the first standardRef is relevant for creating the
@@ -509,23 +511,23 @@ export class BibleEngine {
                                     joinToRefId: firstStandardRefId
                                 };
 
-                                state.phraseStack.push(
+                                globalState.phraseStack.push(
                                     new BiblePhrase(
                                         emptyPhrase,
                                         // this is set to the standardRef of the current rule
                                         // above
                                         emptyPhraseReference,
-                                        state.modifierState
+                                        { ...localState.modifierState }
                                     )
                                 );
 
                                 // the last standardRefId in this range needs to be linked on the
                                 // starting verse of the range
                                 if (
-                                    !state.currentJoinToRefId ||
-                                    state.currentJoinToRefId < rule.standardRefId
+                                    !globalState.currentJoinToRefId ||
+                                    globalState.currentJoinToRefId < rule.standardRefId
                                 )
-                                    state.currentJoinToRefId = rule.standardRefId;
+                                    globalState.currentJoinToRefId = rule.standardRefId;
                             }
                         }
 
@@ -534,36 +536,36 @@ export class BibleEngine {
                     }
 
                     if (
-                        state.currentNormalizedReference &&
+                        globalState.currentNormalizedReference &&
                         nRef.normalizedChapterNum ===
-                            state.currentNormalizedReference.normalizedChapterNum &&
+                            globalState.currentNormalizedReference.normalizedChapterNum &&
                         nRef.normalizedVerseNum ===
-                            state.currentNormalizedReference.normalizedVerseNum &&
+                            globalState.currentNormalizedReference.normalizedVerseNum &&
                         nRef.normalizedSubverseNum ===
-                            state.currentNormalizedReference.normalizedSubverseNum
+                            globalState.currentNormalizedReference.normalizedSubverseNum
                     ) {
-                        state.currentPhraseNum++;
+                        globalState.currentPhraseNum++;
                     } else {
                         const newRefId = generateReferenceId(nRef);
-                        if (state.usedRefIds.has(newRefId))
+                        if (globalState.usedRefIds.has(newRefId))
                             throw new Error(
                                 `normalization caused the duplicate reference ${newRefId} - this ` +
                                     `is caused by inconsistencies in the v11n rules and would ` +
                                     `cause the reference to be overwritten`
                             );
 
-                        state.usedRefIds.add(newRefId);
-                        state.currentPhraseNum = 1;
-                        state.currentNormalizedReference = nRef;
+                        globalState.usedRefIds.add(newRefId);
+                        globalState.currentPhraseNum = 1;
+                        globalState.currentNormalizedReference = nRef;
                     }
                     // end new version verse handling
                 } else {
-                    state.currentPhraseNum++;
+                    globalState.currentPhraseNum++;
                 }
 
                 if (
-                    !state.currentNormalizedReference.normalizedChapterNum ||
-                    !state.currentNormalizedReference.normalizedVerseNum
+                    !globalState.currentNormalizedReference.normalizedChapterNum ||
+                    !globalState.currentNormalizedReference.normalizedVerseNum
                 )
                     throw new Error(`can't add phrases: normalisation failed`);
 
@@ -571,77 +573,105 @@ export class BibleEngine {
                 const phraseRef: Required<IBiblePhraseRef> = {
                     isNormalized: true,
                     bookOsisId: book.osisId,
-                    normalizedChapterNum: state.currentNormalizedReference.normalizedChapterNum,
-                    normalizedVerseNum: state.currentNormalizedReference.normalizedVerseNum,
+                    normalizedChapterNum:
+                        globalState.currentNormalizedReference.normalizedChapterNum,
+                    normalizedVerseNum: globalState.currentNormalizedReference.normalizedVerseNum,
                     normalizedSubverseNum:
-                        state.currentNormalizedReference.normalizedSubverseNum || 0,
+                        globalState.currentNormalizedReference.normalizedSubverseNum || 0,
                     versionId: book.versionId,
-                    phraseNum: state.currentPhraseNum
+                    phraseNum: globalState.currentPhraseNum
                 };
                 const phraseId = generatePhraseId(phraseRef);
                 if (!firstPhraseId) firstPhraseId = phraseId;
                 lastPhraseId = phraseId;
 
-                if (state.columnModifierState.quoteWho)
-                    content.quoteWho = state.columnModifierState.quoteWho;
-                if (state.columnModifierState.person)
-                    content.person = state.columnModifierState.person;
-                if (state.currentJoinToRefId) content.joinToRefId = state.currentJoinToRefId;
-                if (state.currentSourceTypeId !== undefined)
-                    content.sourceTypeId = state.currentSourceTypeId;
+                if (localState.columnModifierState.quoteWho)
+                    content.quoteWho = localState.columnModifierState.quoteWho;
+                if (localState.columnModifierState.person)
+                    content.person = localState.columnModifierState.person;
+                if (globalState.currentJoinToRefId)
+                    content.joinToRefId = globalState.currentJoinToRefId;
+                if (globalState.currentSourceTypeId !== undefined)
+                    content.sourceTypeId = globalState.currentSourceTypeId;
 
-                state.phraseStack.push(new BiblePhrase(content, phraseRef, state.modifierState));
+                globalState.phraseStack.push(
+                    new BiblePhrase(content, phraseRef, { ...localState.modifierState })
+                );
             } else if (content.type === 'group' && content.groupType !== 'paragraph') {
-                const backupModifierState = { ...state.modifierState };
-                const backupColumnModifierState = { ...state.columnModifierState };
+                const childState = {
+                    modifierState: { ...localState.modifierState },
+                    columnModifierState: { ...localState.columnModifierState },
+                    sectionLevel: localState.sectionLevel,
+                    recursionLevel: localState.recursionLevel + 1
+                };
 
                 if (content.groupType === 'quote') {
-                    if (!state.modifierState.quoteLevel) state.modifierState.quoteLevel = 0;
-                    state.modifierState.quoteLevel++;
-                    state.columnModifierState.quoteWho = content.modifier;
+                    if (!childState.modifierState.quoteLevel)
+                        childState.modifierState.quoteLevel = 0;
+                    childState.modifierState.quoteLevel++;
+                    childState.columnModifierState.quoteWho = content.modifier;
                 } else if (content.groupType === 'indent') {
-                    if (!state.modifierState.indentLevel) state.modifierState.indentLevel = 0;
-                    state.modifierState.indentLevel++;
-                } else if (content.groupType === 'bold') state.modifierState.bold = true;
-                else if (content.groupType === 'divineName') state.modifierState.divineName = true;
-                else if (content.groupType === 'emphasis') state.modifierState.emphasis = true;
-                else if (content.groupType === 'italic') state.modifierState.italic = true;
-                else if (content.groupType === 'title') state.modifierState.title = true;
+                    if (!childState.modifierState.indentLevel)
+                        childState.modifierState.indentLevel = 0;
+                    childState.modifierState.indentLevel++;
+                } else if (content.groupType === 'bold') childState.modifierState.bold = true;
+                else if (content.groupType === 'divineName')
+                    childState.modifierState.divineName = true;
+                else if (content.groupType === 'emphasis') childState.modifierState.emphasis = true;
+                else if (content.groupType === 'italic') childState.modifierState.italic = true;
+                else if (content.groupType === 'title')
+                    childState.modifierState.title = (<IBibleContentGroupForInput<'title'>>(
+                        content
+                    )).modifier = content.modifier === 'pullout' ? 'pullout' : 'inline';
+                else if (content.groupType === 'poetry') childState.modifierState.poetry = true;
                 else if (content.groupType === 'translationChange')
-                    state.modifierState.translationChange = content.modifier;
+                    childState.modifierState.translationChange = content.modifier;
                 else if (content.groupType === 'person')
-                    state.columnModifierState.person = content.modifier;
+                    childState.columnModifierState.person = content.modifier;
                 else if (content.groupType === 'orderedListItem')
-                    state.modifierState.orderedListItem = content.modifier;
+                    childState.modifierState.orderedListItem = content.modifier;
                 else if (content.groupType === 'unorderedListItem')
-                    state.modifierState.orderedListItem = content.modifier;
-                state.recursionLevel++;
+                    childState.modifierState.orderedListItem = content.modifier;
                 const {
                     firstPhraseId: groupFirstPhraseId,
                     lastPhraseId: groupLastPhraseId
-                } = await this.addBibleBookContent(content.contents, book, context, state);
-                state.recursionLevel--;
+                } = await this.addBibleBookContent(
+                    content.contents,
+                    book,
+                    context,
+                    globalState,
+                    childState
+                );
                 if (groupFirstPhraseId && !firstPhraseId) firstPhraseId = groupFirstPhraseId;
                 if (groupLastPhraseId) lastPhraseId = groupLastPhraseId;
-
-                state.modifierState = backupModifierState;
-                state.columnModifierState = backupColumnModifierState;
             } else if (
                 (content.type === 'group' && content.groupType === 'paragraph') ||
                 content.type === 'section'
             ) {
-                if (content.type === 'section') state.sectionLevel++;
+                const childState = {
+                    modifierState: { ...localState.modifierState },
+                    columnModifierState: { ...localState.columnModifierState },
+                    sectionLevel:
+                        content.type === 'section'
+                            ? localState.sectionLevel + 1
+                            : localState.sectionLevel,
+                    recursionLevel: localState.recursionLevel + 1
+                };
 
-                state.recursionLevel++;
                 let {
                     firstPhraseId: sectionFirstPhraseId,
                     lastPhraseId: sectionLastPhraseId
-                } = await this.addBibleBookContent(content.contents, book, context, state);
-                state.recursionLevel--;
+                } = await this.addBibleBookContent(
+                    content.contents,
+                    book,
+                    context,
+                    globalState,
+                    childState
+                );
 
                 if (sectionFirstPhraseId && sectionLastPhraseId) {
                     if (content.type === 'group' && content.groupType === 'paragraph') {
-                        state.paragraphStack.push(
+                        globalState.paragraphStack.push(
                             new BibleParagraph(
                                 book.versionId,
                                 sectionFirstPhraseId,
@@ -649,12 +679,12 @@ export class BibleEngine {
                             )
                         );
                     } else if (content.type === 'section') {
-                        state.sectionStack.push(
+                        globalState.sectionStack.push(
                             new BibleSection({
                                 versionId: book.versionId,
                                 phraseStartId: sectionFirstPhraseId,
                                 phraseEndId: sectionLastPhraseId,
-                                level: state.sectionLevel,
+                                level: localState.sectionLevel,
                                 title: content.title,
                                 crossReferences: content.crossReferences,
                                 description: content.description
@@ -665,18 +695,16 @@ export class BibleEngine {
                     if (!firstPhraseId) firstPhraseId = sectionFirstPhraseId;
                     lastPhraseId = sectionLastPhraseId;
                 }
-
-                if (content.type === 'section') state.sectionLevel--;
             }
         }
 
-        if (state.recursionLevel === 0) {
+        if (localState.recursionLevel === 0) {
             // we are at the end of the root method => persist everything
-            await entityManager.save(state.phraseStack, {
-                chunk: Math.ceil(state.phraseStack.length / 100)
+            await entityManager.save(globalState.phraseStack, {
+                chunk: Math.ceil(globalState.phraseStack.length / 100)
             });
-            await entityManager.save(state.paragraphStack);
-            await entityManager.save(state.sectionStack);
+            await entityManager.save(globalState.paragraphStack);
+            await entityManager.save(globalState.sectionStack);
         }
 
         return { firstPhraseId, lastPhraseId };

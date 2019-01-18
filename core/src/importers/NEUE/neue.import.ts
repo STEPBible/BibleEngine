@@ -1,14 +1,6 @@
 /**
  * TODO: parse cross-refs and link them
- * TODO: better link notes to correct text if possible
  * TODO: parse version meta/index file
- * TODO: add poetry type (p class="poet")
- * TODO: look for missed group types
- * TODO: entities are not decoded (at least in book titles)
- * TODO: some characters are not recoginzed (10020120000101)
- * TODO: some phrases start with space (10010260000104)
- * TODO: look for solution for single-punctuation-phrases (must not add space before in client) -
- *       happens when splitting phrase after noteMarker
  */
 
 import { BibleEngine } from '../../BibleEngine.class';
@@ -37,7 +29,7 @@ const sqlBible = new BibleEngine({
     });
 
     for (const [bookFile, bookMeta] of bookList.entries()) {
-        // if (bookMeta.bookNum !== 19) continue;
+        // if (bookMeta.bookNum !== 1) continue;
 
         const bookHtml = readFileSync(resolve(__dirname) + '/html/' + bookFile, 'utf-8');
         const bibleNodes = <TreeDocumentFragment>(
@@ -65,7 +57,7 @@ const sqlBible = new BibleEngine({
         };
         for (const node of bibleNodes.childNodes) visitNode(node, globalState, localState);
 
-        // console.dir(bookData, { depth: 3 });
+        // console.dir((<any>bookData.contents[0]).contents[0], { depth: 8 });
 
         await sqlBible.addBookWithContent(bookData);
     }
