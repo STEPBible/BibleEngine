@@ -1,11 +1,11 @@
-import { IBibleReferenceRangeNormalized } from '.';
+import { IBibleReferenceRange } from '.';
 import { IContentSection } from './ContentSection';
 import { IContentGroup, ContentGroupType } from './ContentGroup';
 import { IContentPhrase } from './ContentPhrase';
 
 export interface DocumentPhrase extends IContentPhrase {
     readonly type: 'phrase';
-    bibleReference?: IBibleReferenceRangeNormalized;
+    bibleReference?: IBibleReferenceRange;
 }
 
 export interface DocumentGroup<T extends ContentGroupType> extends IContentGroup<T> {

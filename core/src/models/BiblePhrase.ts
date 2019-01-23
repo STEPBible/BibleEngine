@@ -46,6 +46,7 @@ export type PhraseModifiers = {
     divineName?: boolean;
     emphasis?: boolean;
     poetry?: boolean;
+    sela?: boolean;
 };
 
 export type ValueModifiers =
@@ -54,4 +55,4 @@ export type ValueModifiers =
     | 'unorderedListItem'
     | 'title';
 
-export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'poetry';
+export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'poetry' | 'sela';

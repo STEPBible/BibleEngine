@@ -66,16 +66,19 @@ export const genDb = async () => {
                                                   {
                                                       type: 'study',
                                                       key: '1',
-                                                      content: [
-                                                          {
-                                                              type: 'phrase',
-                                                              content: wordGen({
-                                                                  min: 1,
-                                                                  max: 30,
-                                                                  join: ' '
-                                                              })
-                                                          }
-                                                      ]
+                                                      content: {
+                                                          type: 'root',
+                                                          contents: [
+                                                              {
+                                                                  type: 'phrase',
+                                                                  content: wordGen({
+                                                                      min: 1,
+                                                                      max: 30,
+                                                                      join: ' '
+                                                                  })
+                                                              }
+                                                          ]
+                                                      }
                                                   }
                                               ]
                                             : undefined,

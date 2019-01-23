@@ -76,3 +76,36 @@ export interface IBibleReferenceRangeQuery extends IBibleReferenceRange {
     // TODO: implement
     targetVersion?: string;
 }
+
+/* types / interfaces neded for bible-passage-reference-parser */
+export type BibleReferenceBCV = {
+    b: 'string';
+    c: number;
+    v: number;
+    type: 'integer' | 'bc' | 'c' | 'bcv' | 'cv' | 'v';
+};
+
+export type BibleReferenceParsedEntity = {
+    osis: string;
+    type: 'range' | 'integer' | 'bc' | 'c' | 'bcv' | 'cv' | 'v';
+    indices: [number, number];
+    start: BibleReferenceBCV;
+    end: BibleReferenceBCV;
+};
+
+export interface BibleReferenceParser {
+    parse: (text: string) => BibleReferenceParserResult;
+    parse_with_context: (text: string, context: string) => BibleReferenceParserResult;
+    set_options: (
+        options: {
+            punctuation_strategy?: 'eu' | 'us';
+            invalid_passage_strategy?: 'include' | 'ignore';
+            invalid_sequence_strategy?: 'include' | 'ignore';
+            passage_existence_strategy?: 'b' | 'bc' | 'bcv' | 'bv' | 'c' | 'cv' | 'v' | 'none';
+        }
+    ) => void;
+}
+
+export interface BibleReferenceParserResult {
+    parsed_entities: () => { entities: BibleReferenceParsedEntity[] }[];
+}

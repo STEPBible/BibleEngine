@@ -1,23 +1,42 @@
 /**
- * TODO: parse cross-refs and link them
  * TODO: parse version meta/index file
  */
 
 import { BibleEngine } from '../../BibleEngine.class';
 import { resolve } from 'path';
-import { readFileSync } from 'fs-extra';
+import { createReadStream } from 'fs';
 import { parseFragment } from 'parse5';
+import { decodeStream, encodeStream } from 'iconv-lite';
 
 import { bookList } from './meta/books';
 import { TreeDocumentFragment } from './models/parse5';
 import { BookWithContentForInput } from '../../models/BibleInput';
 import { visitNode } from './helpers';
+import { BibleReferenceParser } from '../../models/BibleReference';
+
+function streamToString(stream: NodeJS.ReadWriteStream): Promise<string> {
+    const chunks: Uint8Array[] = [];
+    return new Promise((_resolve, reject) => {
+        stream.on('data', chunk => chunks.push(chunk));
+        stream.on('error', reject);
+        stream.on('end', () => _resolve(Buffer.concat(chunks).toString('utf8')));
+    });
+}
 
 const dirProjectRoot = resolve(__dirname + '/../../..');
 
 const sqlBible = new BibleEngine({
     type: 'sqlite',
     database: `${dirProjectRoot}/output/bible.db`
+});
+
+const bcv_parser = require('bible-passage-reference-parser/js/de_bcv_parser').bcv_parser;
+const bcv: BibleReferenceParser = new bcv_parser({});
+bcv.set_options({
+    punctuation_strategy: 'eu',
+    invalid_passage_strategy: 'include',
+    invalid_sequence_strategy: 'include',
+    passage_existence_strategy: 'bc'
 });
 
 (async () => {
@@ -29,9 +48,16 @@ const sqlBible = new BibleEngine({
     });
 
     for (const [bookFile, bookMeta] of bookList.entries()) {
-        // if (bookMeta.bookNum !== 1) continue;
+        // if (bookMeta.bookNum !== 2) continue;
 
-        const bookHtml = readFileSync(resolve(__dirname) + '/html/' + bookFile, 'utf-8');
+        // Convert encoding streaming example
+        const bookHtml = await streamToString(
+            createReadStream(resolve(__dirname) + '/html/' + bookFile)
+                .pipe(decodeStream('windows1252'))
+                .pipe(encodeStream('utf8'))
+        );
+
+        // const bookHtmlLatin1 = readFileSync(resolve(__dirname) + '/html/' + bookFile, 'latin1');
         const bibleNodes = <TreeDocumentFragment>(
             parseFragment(bookHtml.substring(bookHtml.indexOf('<h1'), bookHtml.indexOf('<hr')))
         );
@@ -50,6 +76,7 @@ const sqlBible = new BibleEngine({
             contents: []
         };
         const globalState = {
+            refParser: bcv,
             bookData
         };
         const localState = {

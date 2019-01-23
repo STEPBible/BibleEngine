@@ -9,6 +9,7 @@ import {
 } from '../models';
 import { pad } from './utils.functions';
 import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from './v11n.functions';
+import { BibleReferenceParser, BibleReferenceParsedEntity } from '../models/BibleReference';
 
 /**
  * generates a bible reference range object with the version properties set such that it includes
@@ -170,6 +171,95 @@ export const generateReferenceRangeLabel = (
     }
     if (range.versionVerseEndNum) label += `${range.versionVerseEndNum}`;
     return label;
+};
+
+/**
+ * returns all bible references within the given text
+ *
+ * @param {BibleReferenceParser} parser
+ * @param {string} text
+ * @param { { bookOsisId: string; chapterNum: number; localRefMatcher?: RegExp; }} [context]
+ * @returns {BibleReferenceParsedEntity[]}
+ */
+export const getReferencesFromText = (
+    /** parser that needs to be configured to the language of `text` */
+    parser: BibleReferenceParser,
+    text: string,
+    context?: {
+        bookOsisId: string;
+        chapterNum?: number;
+        /**
+         * BCV parser does only detect local refs at the beginning of the string. This additional
+         * regex can be provided to help the parser find all of them
+         * example (german): `/(Kapitel|V\.|Vers) ([0-9,.\-; ]|(und|bis|Kapitel|V\.|Vers))+/g`
+         */
+        localRefMatcher?: RegExp;
+    }
+) => {
+    const entities: BibleReferenceParsedEntity[] = [];
+
+    const contextOsisString = !context
+        ? ''
+        : context.chapterNum
+        ? `${context.bookOsisId} ${context.chapterNum}`
+        : context.bookOsisId;
+
+    if (context && context.localRefMatcher) {
+        // since for some reason the BCV parser does only match local/context-refs at the beginning
+        // of the string/text, we detect them manually in a first run
+        const localRefs = text.match(context.localRefMatcher);
+
+        if (localRefs) {
+            let lastRefIndex = 0;
+            for (const localRef of localRefs) {
+                const parsedLocalEntities = parser
+                    .parse_with_context(localRef, contextOsisString)
+                    .parsed_entities();
+                if (parsedLocalEntities[0]) {
+                    for (const entity of <BibleReferenceParsedEntity[]>(
+                        parsedLocalEntities[0].entities
+                    )) {
+                        // we need to make sure to only search from where we last stopped in case
+                        // a reference occurs multiple times in the search-string
+                        const localRefIndex = text.indexOf(localRef, lastRefIndex);
+                        lastRefIndex = entity.indices[1] + localRefIndex;
+                        entities.push({
+                            ...entity,
+                            indices: [
+                                entity.indices[0] + localRefIndex,
+                                entity.indices[1] + localRefIndex
+                            ]
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    const parsedEntities =
+        context && !context.localRefMatcher
+            ? parser.parse_with_context(text, contextOsisString).parsed_entities()
+            : parser.parse(text).parsed_entities();
+
+    if (parsedEntities[0]) {
+        outer_loop: for (const entity of <BibleReferenceParsedEntity[]>parsedEntities[0].entities) {
+            if (context && context.localRefMatcher) {
+                let isEntityAlreadyMatched = false;
+                // make sure we don't match a reference that we already did within localRefs
+                for (const existingEntity of entities) {
+                    if (existingEntity.indices[0] === entity.indices[0]) {
+                        isEntityAlreadyMatched = true;
+                        break;
+                    }
+                }
+                if (isEntityAlreadyMatched) continue;
+            }
+
+            entities.push(entity);
+        }
+    }
+
+    return entities;
 };
 
 /**

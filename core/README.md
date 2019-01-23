@@ -1,146 +1,60 @@
-# sqlBible
+# @bible-engine/core
 
-## Usage
+## Adding a bible
+
+Please have a look at the example importer `importers/random-version/example.ts` to get a rough idea of the process. Importers for real bibles and/or formats can give you a good starting point, depending on your source format:
+
+-   `NEUE`: HTML files (custom format)
+-   `osis`: OSIS format _(coming soon)_
+-   `NETS`: plain text _(coming soon)_
+
+If you want to want to start clean, go from here:
 
 ```typescript
-// initialize SqlBible
-import SqlBible from 'sql-bible';
-
-const sqlBible = new SqlBible({
+const sqlBible = new BibleEngine({
     type: 'sqlite',
-    database: './bible.db'
+    database: `${dirProjectRoot}/output/bible.db`
 });
 
-/**
- * INPUT
- */
-
-// if you haven't created a version yet, do
-const esvVersionId = await sqlBible.addVersion(
+const version = await sqlBible.addVersion(
     new BibleVersion({
-        version: 'ESV',
-        description: 'English Standard Bible',
-        language: 'en-US'
+        version: 'XSB',
+        title: 'X Standard Bible',
+        language: 'en-US',
+        chapterVerseSeparator: ':'
     })
 );
 
-// you add one bible book at a time. first we compile the content of the book
+const books = [{ num: 1, file: 'gen.xml' }];
 
-// ideally, adding verses should be done paragraph by paragraph:
-// a paragraph is a list of phrases:
-const phrases: BiblePhrase[] = [];
+for (const book of books) {
+    /*
+     * Of course the real magic needs to happen in the following line.
+     * Your method needs to return data as defined in `models/BibleInput.ts`
+     */
+    const contents = myParserMethod(book.file);
 
-
-// we add cross references directly to a phrase
-// (we use a sqlBible-method here since normalized references need to be created)
-const cRef = await sqlBible.createCrossReference({
-    versionId: esvVersionId,
-    bookOsisId: 'Gen',
-    versionChapterNum: 1
-});
-
-// .. notes likewise
-const note1 = new BibleNote();
-note1.setPhrases([
-    { text: 'this is' },
-    { text: 'very', italic: true },
-    { text: 'important', crossReferences: [cRef] }
-]);
-
-const phrase1 = new BiblePhrase({
-    versionId: esvVersionId,
-    bookOsisId: 'Gen',
-    versionChapterNum: 1,
-    versionVerseNum: 1,
-    text: 'In the beginning',
-    strong: 'G1230',
-    notes: [note1]
-});
-
-const phrase2 = new BiblePhrase({
-    versionId: esvVersionId,
-    bookOsisId: 'Gen',
-    versionChapterNum: 1,
-    versionVerseNum: 1,
-    text: 'god',
-    bold: true,
-    strong: 'G5630',
-    crossReferences: [cRef]
-});
-
-phrases.push(phrase1, phrase2);
-
-const phrases1 = phrases2 = phrases3 = phrases;
-
-const bookContent = {
-    type: 'sections';
-    sections: [
-        {
-            level: 1,
-            title: 'Creation',
-            content: {
-                type: 'sections',
-                sections: [
-                    {
-                        level: 0,
-                        content: {
-                            type: 'phrases',
-                            phrases: phrases1
-                        }
-                    }, {
-                        level: 0,
-                        content: {
-                            type: 'phrases',
-                            phrases: phrases2
-                        }
-                    }
-                ]
-            }
-        }, {
-            level: 1,
-            title: 'Fall',
-            content: {
-                type: 'sections',
-                sections: [
-                    {
-                        level: 0,
-                        content: {
-                            type: 'phrases',
-                            phrases: phrases3
-                        }
-                    }
-                ]
-            }
-        }
-    ]
+    await sqlBible.addBookWithContent({
+        book: {
+            versionId: version.id,
+            number: book.num,
+            osisId: getOsisIdFromBookGenericId(book.num),
+            abbreviation: book.abbr,
+            title: book.title,
+            type: 'ot'
+        },
+        contents
+    });
 }
 
-// ... and then feed it to sqlBible
-const bookGenesis = await sqlBible.addBook(
-    new BibleBook({
-        versionId: esvVersionId,
-        number: 1, // order of book in version
-        osisId: 'Gen',
-        title: 'Genesis',
-        type: 'ot',
-        content
-    })
-);
+sqlBible.finalizeVersion(version.id);
+```
 
-// after you added all books of a versions, you need to run
-sqlBible.finalizeVersion(esvVersionId);
+## using versification normalization
 
-/**
- * OUTPUT
- */
+If you want your bible to be converted to standard versification (version versification is still available, however the interal references use standard versification, thus verses can be matched correctly across all bibles) you need to run the `v11n-rules` importer before importing the bible:
 
-// on a basic output level you can get a list of phrases like this:
-const phrases = await sqlBible.getPhrases({
-    versionId: 1,
-    bookOsisId: 'Gen',
-    versionChapterNum: 1,
-    versionVerseNum: 3
-});
-
-// more output methods and features coming soon
+```
+cd core
+npx ts-node src/importers/v11n-rules/v11n-rules.ts
 ```

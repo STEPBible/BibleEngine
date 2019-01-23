@@ -276,13 +276,14 @@ export const generateBibleDocument = (
             'indentLevel',
             'quoteLevel',
             'title',
+            'poetry',
             'emphasis',
             'bold',
             'italic',
             'translationChange',
             'person',
             'divineName',
-            'poetry'
+            'sela'
         ];
 
         for (const modifier of modifiers) {

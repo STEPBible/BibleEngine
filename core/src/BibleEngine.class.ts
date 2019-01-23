@@ -624,6 +624,7 @@ export class BibleEngine {
                         content
                     )).modifier = content.modifier === 'pullout' ? 'pullout' : 'inline';
                 else if (content.groupType === 'poetry') childState.modifierState.poetry = true;
+                else if (content.groupType === 'sela') childState.modifierState.sela = true;
                 else if (content.groupType === 'translationChange')
                     childState.modifierState.translationChange = content.modifier;
                 else if (content.groupType === 'person')

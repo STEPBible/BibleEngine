@@ -14,6 +14,8 @@ import {
     DocumentElement
 } from '../../models/Document';
 import { ContentGroupType } from '../../models/ContentGroup';
+import { BibleReferenceParser, IBibleReferenceRange } from '../../models/BibleReference';
+import { getReferencesFromText } from '../../functions/reference.functions';
 
 export const getTextFromNode = (node: DefaultNode) => {
     if (node.nodeName === '#text') return node.value;
@@ -30,6 +32,7 @@ export const hasAttribute = (node: TreeElement, name: string, value?: string) =>
 export const visitNode = (
     node: DefaultNode,
     globalState: {
+        refParser: BibleReferenceParser;
         bookData: BookWithContentForInput;
         currentChapterNumber?: number;
         currentBackupChapterNumber?: number;
@@ -215,8 +218,26 @@ export const visitNode = (
                         `${expectedNoteReference}`
                 );
 
-            firstContentWithPendingNote.notes = [{ content: newNote }];
+            if (
+                newNote.contents.length === 1 &&
+                newNote.contents[0].type === 'phrase' &&
+                (<DocumentPhrase>newNote.contents[0]).bibleReference
+            ) {
+                // if the note only consists of one phrase with a bible reference, we add it as a
+                // cross reference instead
+                if (!firstContentWithPendingNote.crossReferences)
+                    firstContentWithPendingNote.crossReferences = [];
+                firstContentWithPendingNote.crossReferences.push({
+                    key: '*',
+                    label: (<DocumentPhrase>newNote.contents[0]).content,
+                    range: (<DocumentPhrase>newNote.contents[0]).bibleReference!
+                });
+            } else {
+                if (!firstContentWithPendingNote.notes) firstContentWithPendingNote.notes = [];
+                firstContentWithPendingNote.notes.push({ content: newNote });
+            }
         } else {
+            // it's a section
             firstContentWithPendingNote.description = newNote;
         }
     } else if (node.nodeName === '#text') {
@@ -225,7 +246,8 @@ export const visitNode = (
         const text = node.value
             .trim()
             // .replace(/\r?\n|\r/g, ' ')
-            .replace(/\s{2,}/g, ' ');
+            .replace(/\s{2,}/g, ' ')
+            .replace('[SELA]', '♪');
         if (!text) return;
 
         const newPhrase: DocumentPhrase = {
@@ -245,9 +267,91 @@ export const visitNode = (
                 }
             }
 
-            // TODO: parse for bible references and link them
+            const localRefRegex = /(Kapitel|V\.|Vers) ([0-9,.\-–; ]|(und|bis|Kapitel|V\.|Vers))+/g;
+            const textReferences = getReferencesFromText(globalState.refParser, newPhrase.content, {
+                bookOsisId: globalState.bookData.book.osisId,
+                chapterNum: globalState.currentChapterNumber,
+                localRefMatcher: localRefRegex
+            });
 
-            localState.currentDocument.push(newPhrase);
+            if (textReferences.length) {
+                // sort reference by starting indices
+                textReferences.sort((a, b) => a.indices[0] - b.indices[0]);
+
+                let currentIndex = 0;
+                for (const ref of textReferences) {
+                    const refText = newPhrase.content.slice(ref.indices[0], ref.indices[1]).trim();
+
+                    if (currentIndex > ref.indices[0])
+                        throw new Error(
+                            `reference entities overlap at ${globalState.currentChapterNumber}:` +
+                                `${globalState.currentVerseNumber} with refText ${refText} ` +
+                                `between currentIndex ${currentIndex} and indices[0] ` +
+                                `${ref.indices[0]}`
+                        );
+
+                    if (currentIndex < ref.indices[0]) {
+                        // create phrase from text at range currentIndex to start of reference
+                        const fillText = newPhrase.content
+                            .slice(currentIndex, ref.indices[0])
+                            .trim();
+                        if (fillText) {
+                            const fillPhrase: DocumentPhrase = {
+                                type: 'phrase',
+                                content: fillText
+                            };
+                            if (punctuationChars.indexOf(fillText.slice(0, 1)) !== -1)
+                                fillPhrase.skipSpace = 'before';
+                            localState.currentDocument.push(fillPhrase);
+                        }
+                    }
+
+                    // create phrase from reference with crossRef attached to it
+                    const bibleReference: IBibleReferenceRange = {
+                        bookOsisId: ref.start.b,
+                        versionId: globalState.bookData.book.versionId,
+                        versionChapterNum: ref.start.c
+                    };
+                    if (
+                        ref.type === 'v' ||
+                        ref.type === 'cv' ||
+                        ref.type === 'bcv' ||
+                        ref.type === 'integer' ||
+                        (ref.type === 'range' && ref.start.type !== 'c' && ref.start.type !== 'bc')
+                    ) {
+                        bibleReference.versionVerseNum = ref.start.v;
+                        if (ref.start.v !== ref.end.v || ref.start.c !== ref.end.c)
+                            bibleReference.versionVerseEndNum = ref.end.v;
+                    }
+                    if (ref.start.c !== ref.end.c) {
+                        bibleReference.versionChapterEndNum = ref.end.c;
+                    }
+                    const refPhrase: DocumentPhrase = {
+                        type: 'phrase',
+                        content: refText,
+                        bibleReference
+                    };
+                    if (punctuationChars.indexOf(refText.slice(0, 1)) !== -1)
+                        refPhrase.skipSpace = 'before';
+                    localState.currentDocument.push(refPhrase);
+
+                    currentIndex = ref.indices[1];
+                }
+
+                if (currentIndex <= newPhrase.content.length - 1) {
+                    // create phrase from text after last reference
+                    const endText = newPhrase.content.slice(currentIndex).trim();
+                    if (endText) {
+                        const endPhrase: DocumentPhrase = {
+                            type: 'phrase',
+                            content: endText
+                        };
+                        if (punctuationChars.indexOf(endText.slice(0, 1)) !== -1)
+                            endPhrase.skipSpace = 'before';
+                        localState.currentDocument.push(endPhrase);
+                    }
+                }
+            } else localState.currentDocument.push(newPhrase);
         } else {
             if (!globalState.currentChapterNumber || !globalState.currentVerseNumber)
                 throw new Error(
@@ -332,16 +436,42 @@ export const visitNode = (
             localState.currentDocument = undefined;
         }
 
+        if (node.nodeName === 'br') {
+            const currentContainer = localState.currentDocument
+                ? localState.currentDocument
+                : localState.currentContentGroup;
+            const lastElement = currentContainer.length
+                ? currentContainer[currentContainer.length - 1]
+                : null;
+            if (lastElement && lastElement.type === 'phrase') {
+                lastElement.linebreak = true;
+            } else {
+                // we put this here to check if this case exist in the source files - in case
+                // not, we can safe the effort to implement it
+                throw new Error(`can't attach linebreak - last element is not a phrase`);
+            }
+            return;
+        }
+
         let groupType: ContentGroupType | undefined;
         if (
             node.nodeName === 'p' ||
-            (node.nodeName === 'div' &&
-                node.attrs.find(attr => attr.name === 'class' && attr.value === 'e'))
+            (node.nodeName === 'div' && hasAttribute(node, 'class', 'e'))
         ) {
             groupType = 'paragraph';
         } else if (node.nodeName === 'b') groupType = 'bold';
-        else if (node.nodeName === 'em') groupType = 'emphasis';
+        else if (
+            node.nodeName === 'em' ||
+            // we removed all reference link-tags from the source, the remaining ones we convert to
+            // an emphasis style (since we have nothing to link to in BibleEngine, but the linked
+            // text still represents some kind of entity, that we emphasis in this way)
+            node.nodeName === 'a'
+        )
+            groupType = 'emphasis';
         else if (node.nodeName === 'i') groupType = 'italic';
+        else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'sela')) {
+            groupType = 'sela';
+        }
 
         const childState = {
             ...localState

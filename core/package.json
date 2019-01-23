@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "main": "src/index.ts",
     "dependencies": {
+        "bible-passage-reference-parser": "^2.0.1",
         "pako": "^1.0.7",
         "reflect-metadata": "^0.1.12",
         "typeorm": "^0.2.11",
@@ -16,6 +17,7 @@
         "@types/parse5": "^5.0.0",
         "@types/whatwg-fetch": "^0.0.33",
         "fs-extra": "^7.0.1",
+        "iconv-lite": "^0.4.24",
         "jest": "^23.6.0",
         "parse5": "^5.1.0",
         "random-words": "^1.1.0",

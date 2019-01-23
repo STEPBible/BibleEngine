@@ -11,7 +11,8 @@ export type ContentGroupType =
     | 'divineName'
     | 'translationChange'
     | 'title'
-    | 'poetry';
+    | 'poetry'
+    | 'sela';
 
 export interface IContentGroup<T extends ContentGroupType> {
     readonly groupType: T;
