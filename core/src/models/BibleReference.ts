@@ -13,9 +13,13 @@ export interface IBibleReferenceVersionNumbers {
 export interface IBibleReferenceBase extends IBibleReferenceNormalizedNumbers {
     bookOsisId: string;
     versionId?: number;
+    // we add the null value here so that we are able to define the value in cases when we force
+    // all properties to be defined (like in BiblePhraseRef)
+    versionUid?: string | null;
 }
 
-export interface IBiblePhraseRef extends IBibleReferenceBase {
+export interface IBiblePhraseRef
+    extends Pick<IBibleReferenceBase, Exclude<keyof IBibleReferenceBase, 'versionUid'>> {
     phraseNum?: number;
     isNormalized: true;
 }
@@ -46,35 +50,43 @@ export interface IBibleReferenceRange extends IBibleReference {
 }
 
 export interface IBibleReferenceNormalized extends IBibleReference {
+    // force `isNormalized` to be "true"
     isNormalized: true;
 }
 
 export interface IBibleReferenceVersion extends IBibleReference {
+    // force `versionId` to be defined
+    // RADAR: it should also be possible to satisfy this condition if versionUid is defined
+    //        however we don't know how to express this either-or condition in typescript
     versionId: number;
 }
 
 export interface IBibleReferenceVersionNormalized extends IBibleReferenceVersion {
+    // force `isNormalized` to be "true"
     isNormalized: true;
 }
 
 export interface IBibleReferenceRangeNormalized extends IBibleReferenceRange {
+    // force `isNormalized` to be "true"
     isNormalized: true;
 }
 
 export interface IBibleReferenceRangeVersion extends IBibleReferenceRange {
+    // force `versionId` to be defined
     versionId: number;
 }
 
 export interface IBibleReferenceRangeVersionNormalized extends IBibleReferenceRangeVersion {
+    // force `isNormalized` to be "true"
     isNormalized: true;
 }
 
 export interface IBibleReferenceRangeQuery extends IBibleReferenceRange {
     /** we don't allow versionId in a query since it local and remote ids are not the same */
     versionId?: undefined;
-    queryVersion: string;
+    versionUid: string;
     // TODO: implement
-    targetVersion?: string;
+    targetVersionUid?: string;
 }
 
 /* types / interfaces neded for bible-passage-reference-parser */

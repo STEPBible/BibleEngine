@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { createConnection, ConnectionOptions, Raw, EntityManager } from 'typeorm';
+import { createConnection, ConnectionOptions, Raw, EntityManager } from '../typeorm';
 // import { deflate } from 'pako';
 
 import {
@@ -143,7 +143,7 @@ export class BibleEngine {
         const entityManager = await this.pEntityManager;
 
         const version = await entityManager.findOne(BibleVersion, {
-            where: { version: rangeQuery.queryVersion }
+            where: { uid: rangeQuery.versionUid }
         });
         if (!version) {
             if (this.remoteConfig) {
@@ -287,7 +287,7 @@ export class BibleEngine {
             bookData.push({
                 book,
                 content: await this.getFullDataForReferenceRange({
-                    queryVersion: version.version,
+                    versionUid: version.uid,
                     bookOsisId: book.osisId
                 }).then(fullData => stripUnnecessaryDataFromBibleContent(fullData.content.contents))
             });
@@ -358,7 +358,7 @@ export class BibleEngine {
     async setVersion(version: string) {
         const entityManager = await this.pEntityManager;
 
-        const versionDb = await entityManager.findOne(BibleVersion, { version });
+        const versionDb = await entityManager.findOne(BibleVersion, { uid: version });
         this.currentVersion = versionDb;
     }
 
@@ -625,6 +625,8 @@ export class BibleEngine {
                     )).modifier = content.modifier === 'pullout' ? 'pullout' : 'inline';
                 else if (content.groupType === 'poetry') childState.modifierState.poetry = true;
                 else if (content.groupType === 'sela') childState.modifierState.sela = true;
+                else if (content.groupType === 'link')
+                    childState.modifierState.link = content.modifier;
                 else if (content.groupType === 'translationChange')
                     childState.modifierState.translationChange = content.modifier;
                 else if (content.groupType === 'person')

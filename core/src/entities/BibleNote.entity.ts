@@ -7,7 +7,7 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from 'typeorm';
+} from '../../typeorm';
 import { BiblePhrase } from './BiblePhrase.entity';
 import { IBibleNote, DocumentRoot } from '../models';
 

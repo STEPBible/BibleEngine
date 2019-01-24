@@ -7,7 +7,7 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from 'typeorm';
+} from '../../typeorm';
 import { BibleCrossReference, BibleNote } from '.';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
 import { PhraseModifiers, IBiblePhraseRef } from '../models';
@@ -149,7 +149,8 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
                 modifier === 'translationChange' ||
                 modifier === 'orderedListItem' ||
                 modifier === 'unorderedListItem' ||
-                modifier === 'title'
+                modifier === 'title' ||
+                modifier === 'link'
             )
                 return undefined;
             else return false;

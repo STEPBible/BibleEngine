@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from '../../typeorm';
 import { IBibleSectionGeneric } from '../models';
 
 @Entity()

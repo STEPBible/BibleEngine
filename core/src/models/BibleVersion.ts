@@ -1,7 +1,7 @@
 import { DocumentRoot } from './Document';
 
 export interface IBibleVersion {
-    version: string;
+    uid: string;
     title: string;
     description?: DocumentRoot;
     language: string;

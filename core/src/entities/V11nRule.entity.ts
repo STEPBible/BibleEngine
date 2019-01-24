@@ -6,7 +6,7 @@ import {
     BeforeUpdate,
     PrimaryGeneratedColumn,
     Index
-} from 'typeorm';
+} from '../../typeorm';
 import { IV11nRule, IBibleReference, IBibleReferenceNormalized } from '../models';
 import {
     generateReferenceId,

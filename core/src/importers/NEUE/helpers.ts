@@ -17,6 +17,12 @@ import { ContentGroupType } from '../../models/ContentGroup';
 import { BibleReferenceParser, IBibleReferenceRange } from '../../models/BibleReference';
 import { getReferencesFromText } from '../../functions/reference.functions';
 
+export const getAttribute = (node: TreeElement, name: string) => {
+    const attr = node.attrs.find(_attr => _attr.name === name);
+    if (attr) return attr.value;
+    else return null;
+};
+
 export const getTextFromNode = (node: DefaultNode) => {
     if (node.nodeName === '#text') return node.value;
     else {
@@ -32,8 +38,9 @@ export const hasAttribute = (node: TreeElement, name: string, value?: string) =>
 export const visitNode = (
     node: DefaultNode,
     globalState: {
+        versionUid: string;
+        bookData?: BookWithContentForInput;
         refParser: BibleReferenceParser;
-        bookData: BookWithContentForInput;
         currentChapterNumber?: number;
         currentBackupChapterNumber?: number;
         currentVerseNumber?: number;
@@ -42,13 +49,17 @@ export const visitNode = (
         currentLevel3Section?: IBibleContentSectionForInput;
         currentLevel4Section?: IBibleContentSectionForInput;
         contentWithPendingNotes?: (IBibleContentPhraseForInput | IBibleContentSectionForInput)[];
+        documentRoot?: DocumentRoot;
+        currentDocumentLevel1Section?: DocumentSection;
+        currentDocumentLevel2Section?: DocumentSection;
+        currentDocumentLevel3Section?: DocumentSection;
     },
     localState: {
         currentDocument?: DocumentElement[];
-        currentContentGroup: IBibleContentForInput[];
+        currentContentGroup?: IBibleContentForInput[];
     }
 ) => {
-    if (node.nodeName === 'h1') {
+    if (node.nodeName === 'h1' && globalState.bookData) {
         globalState.bookData.book.longTitle = getTextFromNode(node);
         globalState.bookData.book.introduction = { type: 'root', contents: [] };
         localState.currentDocument = globalState.bookData.book.introduction.contents;
@@ -67,85 +78,121 @@ export const visitNode = (
 
         let sectionTitle = getTextFromNode(node);
 
-        // introduction is finished and bible text is starting
-        localState.currentDocument = undefined;
-        const newSection: IBibleContentSectionForInput = {
-            type: 'section',
-            title: sectionTitle,
-            contents: []
-        };
+        if (localState.currentDocument && globalState.documentRoot) {
+            const newSection: DocumentSection = {
+                type: 'section',
+                title: sectionTitle,
+                contents: []
+            };
 
-        // look for a note marker in the section title
-        if (sectionTitle.indexOf('*') !== -1) {
-            sectionTitle = sectionTitle.replace('*', '');
-            newSection.title = sectionTitle;
-            if (!globalState.contentWithPendingNotes) globalState.contentWithPendingNotes = [];
-            globalState.contentWithPendingNotes.push(newSection);
-        }
-
-        // since sections are not hierarchical in HTML (but only indicated by heading tags), we need
-        // to keep track of the level of sections to know where we need to stay in the level or go
-        // up / down one level
-        // we have some additional complexity here since sections level are sometimes skipped
-        if (node.nodeName === 'h2') {
-            // top level section always go to the root of the document
-            globalState.bookData.contents.push(newSection);
-            globalState.currentLevel1Section = newSection;
-            globalState.currentLevel2Section = undefined;
-            globalState.currentLevel3Section = undefined;
-            globalState.currentLevel4Section = undefined;
-        } else if (node.nodeName === 'h3') {
-            // if there is a skipped section level we need to add the section the next higher level
-            if (!globalState.currentLevel1Section) {
-                globalState.bookData.contents.push(newSection);
-            } else {
-                globalState.currentLevel1Section.contents.push(newSection);
+            // since sections are not hierarchical in HTML (but only indicated by heading tags), we
+            // need to keep track of the level of sections to know where we need to stay in the
+            // level or go up / down one level. we have some additional complexity here since
+            // sections level are sometimes skipped
+            if (node.nodeName === 'h2') {
+                // top level section always go to the root of the document
+                globalState.documentRoot.contents.push(newSection);
+                globalState.currentDocumentLevel1Section = newSection;
+                globalState.currentDocumentLevel2Section = undefined;
+                globalState.currentDocumentLevel3Section = undefined;
+            } else if (node.nodeName === 'h3') {
+                // if there is a skipped level we need to add the section the next higher level
+                if (!globalState.currentDocumentLevel1Section) {
+                    globalState.documentRoot.contents.push(newSection);
+                } else globalState.currentDocumentLevel1Section.contents.push(newSection);
+                globalState.currentDocumentLevel2Section = newSection;
+                globalState.currentDocumentLevel3Section = undefined;
+            } else if (node.nodeName === 'h4') {
+                // if there is a skipped level we need to add the section the next higher level
+                if (!globalState.currentDocumentLevel2Section) {
+                    if (!globalState.currentDocumentLevel1Section) {
+                        globalState.documentRoot.contents.push(newSection);
+                    } else globalState.currentDocumentLevel1Section.contents.push(newSection);
+                } else globalState.currentDocumentLevel2Section.contents.push(newSection);
+                globalState.currentDocumentLevel3Section = newSection;
             }
 
-            globalState.currentLevel2Section = newSection;
-            globalState.currentLevel3Section = undefined;
-            globalState.currentLevel4Section = undefined;
-        } else if (node.nodeName === 'h4') {
-            // if there is a skipped section level we need to add the section the next higher level
-            if (!globalState.currentLevel2Section) {
+            // add following content to this section
+            localState.currentDocument = newSection.contents;
+        } else if (globalState.bookData) {
+            // in the neÜ-source documents within bible-books (introduction, notes) don't use header
+            // tags, in other words: a header tag indicates the start of the bible content
+            // => introduction is finished and bible text is starting
+            localState.currentDocument = undefined;
+            const newSection: IBibleContentSectionForInput = {
+                type: 'section',
+                title: sectionTitle,
+                contents: []
+            };
+
+            // look for a note marker in the section title
+            if (sectionTitle.indexOf('*') !== -1) {
+                sectionTitle = sectionTitle.replace('*', '');
+                newSection.title = sectionTitle;
+                if (!globalState.contentWithPendingNotes) globalState.contentWithPendingNotes = [];
+                globalState.contentWithPendingNotes.push(newSection);
+            }
+
+            // since sections are not hierarchical in HTML (but only indicated by heading tags), we
+            // need to keep track of the level of sections to know where we need to stay in the
+            // level or go up / down one level. we have some additional complexity here since
+            // sections level are sometimes skipped
+            if (node.nodeName === 'h2') {
+                // top level section always go to the root of the document
+                globalState.bookData.contents.push(newSection);
+
+                globalState.currentLevel1Section = newSection;
+                globalState.currentLevel2Section = undefined;
+                globalState.currentLevel3Section = undefined;
+                globalState.currentLevel4Section = undefined;
+            } else if (node.nodeName === 'h3') {
+                // if there is a skipped level we need to add the section the next higher level
                 if (!globalState.currentLevel1Section) {
                     globalState.bookData.contents.push(newSection);
-                } else {
-                    globalState.currentLevel1Section.contents.push(newSection);
-                }
-            } else {
-                globalState.currentLevel2Section.contents.push(newSection);
-            }
-
-            globalState.currentLevel3Section = newSection;
-            globalState.currentLevel4Section = undefined;
-        } else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'u2')) {
-            // if there is a skipped section level we need to add the section the next higher level
-            if (!globalState.currentLevel3Section) {
+                } else globalState.currentLevel1Section.contents.push(newSection);
+                globalState.currentLevel2Section = newSection;
+                globalState.currentLevel3Section = undefined;
+                globalState.currentLevel4Section = undefined;
+            } else if (node.nodeName === 'h4') {
+                // if there is a skipped level we need to add the section the next higher level
                 if (!globalState.currentLevel2Section) {
                     if (!globalState.currentLevel1Section) {
                         globalState.bookData.contents.push(newSection);
-                    } else {
-                        globalState.currentLevel1Section.contents.push(newSection);
-                    }
-                } else {
-                    globalState.currentLevel2Section.contents.push(newSection);
-                }
-            } else {
-                globalState.currentLevel3Section.contents.push(newSection);
+                    } else globalState.currentLevel1Section.contents.push(newSection);
+                } else globalState.currentLevel2Section.contents.push(newSection);
+                globalState.currentLevel3Section = newSection;
+                globalState.currentLevel4Section = undefined;
+            } else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'u2')) {
+                // if there is a skipped level we need to add the section the next higher level
+                if (!globalState.currentLevel3Section) {
+                    if (!globalState.currentLevel2Section) {
+                        if (!globalState.currentLevel1Section) {
+                            globalState.bookData.contents.push(newSection);
+                        } else globalState.currentLevel1Section.contents.push(newSection);
+                    } else globalState.currentLevel2Section.contents.push(newSection);
+                } else globalState.currentLevel3Section.contents.push(newSection);
+                globalState.currentLevel4Section = newSection;
             }
 
-            globalState.currentLevel4Section = newSection;
-        }
-
-        // add following content to this section
-        localState.currentContentGroup = newSection.contents;
-    } else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'kap')) {
+            // add following content to this section
+            localState.currentContentGroup = newSection.contents;
+        } else throw new Error(`can't determine container for heading`);
+    } else if (
+        globalState.bookData &&
+        !localState.currentDocument &&
+        node.nodeName === 'span' &&
+        hasAttribute(node, 'class', 'kap')
+    ) {
         globalState.currentChapterNumber = +getTextFromNode(node);
         // if a new chapter is set, it overwrites the backup number
         if (globalState.currentBackupChapterNumber)
             globalState.currentBackupChapterNumber = undefined;
-    } else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'vers')) {
+    } else if (
+        globalState.bookData &&
+        !localState.currentDocument &&
+        node.nodeName === 'span' &&
+        hasAttribute(node, 'class', 'vers')
+    ) {
         const verseRef = getTextFromNode(node);
         const verseParts = verseRef.split(',');
         if (verseParts.length > 1) {
@@ -159,7 +206,7 @@ export const visitNode = (
                 globalState.currentBackupChapterNumber = undefined;
             }
         }
-    } else if (node.nodeName === 'p' && hasAttribute(node, 'class', 'u0')) {
+    } else if (globalState.bookData && node.nodeName === 'p' && hasAttribute(node, 'class', 'u0')) {
         if (!localState.currentDocument)
             throw new Error(`we expect class=u0 to only occur in a book introduction`);
 
@@ -170,7 +217,7 @@ export const visitNode = (
         };
         localState.currentDocument.push(newSection);
         localState.currentDocument = newSection.contents;
-    } else if (node.nodeName === 'p' && hasAttribute(node, 'class', 'u1')) {
+    } else if (globalState.bookData && node.nodeName === 'p' && hasAttribute(node, 'class', 'u1')) {
         if (
             !globalState.bookData.book.introduction ||
             !globalState.bookData.book.introduction.contents[0] ||
@@ -186,12 +233,19 @@ export const visitNode = (
 
         // the following condition is included at the top along with the heading tags
         // else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'u2'))
-    } else if (node.nodeName === 'p' && hasAttribute(node, 'class', 'u3')) {
+    } else if (globalState.bookData && node.nodeName === 'p' && hasAttribute(node, 'class', 'u3')) {
         if (!localState.currentDocument)
             throw new Error(`we expect class=u3 to only occur in a book introduction`);
         // skip the outline
         return;
-    } else if (node.nodeName === 'div' && hasAttribute(node, 'class', 'fn')) {
+    } else if (!globalState.bookData && localState.currentDocument && node.nodeName === 'ul') {
+        // skip the document outline
+        return;
+    } else if (
+        globalState.bookData &&
+        node.nodeName === 'div' &&
+        hasAttribute(node, 'class', 'fn')
+    ) {
         const newNote: DocumentRoot = { type: 'root', contents: [] };
         const childState = {
             ...localState,
@@ -257,7 +311,12 @@ export const visitNode = (
         if (punctuationChars.indexOf(text.slice(0, 1)) !== -1) newPhrase.skipSpace = 'before';
 
         if (localState.currentDocument) {
-            if (localState.currentDocument.length === 0) {
+            // if this is a bible-note:
+            if (
+                globalState.bookData &&
+                globalState.currentChapterNumber &&
+                localState.currentDocument.length === 0
+            ) {
                 // remove the reference text at the beginning of notes
                 const colonIndex = text.indexOf(':');
                 if (/^[0-9]{1,3},[0-9]{1,3}:$/.test(text.slice(0, colonIndex + 1))) {
@@ -268,11 +327,17 @@ export const visitNode = (
             }
 
             const localRefRegex = /(Kapitel|V\.|Vers) ([0-9,.\-–; ]|(und|bis|Kapitel|V\.|Vers))+/g;
-            const textReferences = getReferencesFromText(globalState.refParser, newPhrase.content, {
-                bookOsisId: globalState.bookData.book.osisId,
-                chapterNum: globalState.currentChapterNumber,
-                localRefMatcher: localRefRegex
-            });
+            const textReferences = getReferencesFromText(
+                globalState.refParser,
+                newPhrase.content,
+                globalState.bookData
+                    ? {
+                          bookOsisId: globalState.bookData.book.osisId,
+                          chapterNum: globalState.currentChapterNumber,
+                          localRefMatcher: localRefRegex
+                      }
+                    : undefined
+            );
 
             if (textReferences.length) {
                 // sort reference by starting indices
@@ -307,9 +372,15 @@ export const visitNode = (
                     }
 
                     // create phrase from reference with crossRef attached to it
+                    //
+                    // This is reference is "hard-coded" into the serialized document in the DB, and
+                    // we can only use the version numbmers here (normalization is not available at
+                    // this point). In order to be able to use this data across installations (e.g.
+                    // in a client-server use-case), we use the universal versionUid instead of
+                    // versionId.
                     const bibleReference: IBibleReferenceRange = {
                         bookOsisId: ref.start.b,
-                        versionId: globalState.bookData.book.versionId,
+                        versionUid: globalState.versionUid,
                         versionChapterNum: ref.start.c
                     };
                     if (
@@ -352,7 +423,7 @@ export const visitNode = (
                     }
                 }
             } else localState.currentDocument.push(newPhrase);
-        } else {
+        } else if (globalState.bookData && localState.currentContentGroup) {
             if (!globalState.currentChapterNumber || !globalState.currentVerseNumber)
                 throw new Error(
                     `verse numbers are missing in node: <${node.nodeName}>${text}</${
@@ -413,7 +484,12 @@ export const visitNode = (
                             type: 'phrase',
                             content: textWithNote
                         };
-                        if (punctuationChars.indexOf(textWithNote.slice(0, 1)) !== -1)
+                        // there are cases when `textWithNote` is an empty string (i.e. when right
+                        // after a group node)
+                        if (
+                            !textWithNote ||
+                            punctuationChars.indexOf(textWithNote.slice(0, 1)) !== -1
+                        )
                             phraseWithPendingNote.skipSpace = 'before';
                         localState.currentContentGroup.push(phraseWithPendingNote);
                         if (!globalState.contentWithPendingNotes)
@@ -428,7 +504,7 @@ export const visitNode = (
                 };
                 localState.currentContentGroup.push(newBiblePhrase);
             }
-        }
+        } else throw new Error(`can't find container for text node`);
     } else {
         // in cases where there are no sections, a chapter marker indicates that introduction is
         // finished and bible text is starting
@@ -440,15 +516,20 @@ export const visitNode = (
             const currentContainer = localState.currentDocument
                 ? localState.currentDocument
                 : localState.currentContentGroup;
-            const lastElement = currentContainer.length
-                ? currentContainer[currentContainer.length - 1]
-                : null;
+            const lastElement =
+                currentContainer && currentContainer.length
+                    ? currentContainer[currentContainer.length - 1]
+                    : null;
+            if (!lastElement) return;
+
             if (lastElement && lastElement.type === 'phrase') {
                 lastElement.linebreak = true;
             } else {
                 // we put this here to check if this case exist in the source files - in case
                 // not, we can safe the effort to implement it
-                throw new Error(`can't attach linebreak - last element is not a phrase`);
+                throw new Error(
+                    `can't attach linebreak - last element is not a phrase: ${lastElement.type}`
+                );
             }
             return;
         }
@@ -459,7 +540,13 @@ export const visitNode = (
             (node.nodeName === 'div' && hasAttribute(node, 'class', 'e'))
         ) {
             groupType = 'paragraph';
-        } else if (node.nodeName === 'b') groupType = 'bold';
+        } else if (
+            node.nodeName === 'a' &&
+            hasAttribute(node, 'href') &&
+            getAttribute(node, 'href')!.indexOf('http') === 0
+        )
+            groupType = 'link';
+        else if (node.nodeName === 'b') groupType = 'bold';
         else if (
             node.nodeName === 'em' ||
             // we removed all reference link-tags from the source, the remaining ones we convert to
@@ -471,6 +558,13 @@ export const visitNode = (
         else if (node.nodeName === 'i') groupType = 'italic';
         else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'sela')) {
             groupType = 'sela';
+        } else if (
+            // if parsing a document file, the following tag is not a note but a rather an indent
+            !globalState.bookData &&
+            node.nodeName === 'div' &&
+            hasAttribute(node, 'class', 'fn')
+        ) {
+            groupType = 'indent';
         }
 
         const childState = {
@@ -493,6 +587,7 @@ export const visitNode = (
             };
 
             if (localState.currentDocument) {
+                if (groupType === 'link') newGroup.modifier = getAttribute(node, 'href')!;
                 childState.currentDocument = newGroup.contents;
             } else {
                 if (node.nodeName === 'p' && hasAttribute(node, 'class', 'einl')) {
@@ -524,7 +619,7 @@ export const visitNode = (
 
         if (localState.currentDocument) {
             if (newGroup && newGroup.contents.length) localState.currentDocument.push(newGroup);
-        } else {
+        } else if (globalState.bookData && localState.currentContentGroup) {
             if (newBibleGroup && newBibleGroup.contents.length)
                 localState.currentContentGroup.push(newBibleGroup);
 
@@ -535,6 +630,6 @@ export const visitNode = (
                 if (globalState.currentLevel4Section)
                     localState.currentContentGroup = globalState.currentLevel4Section.contents;
             }
-        }
+        } else throw new Error(`can't find container for group node`);
     }
 };

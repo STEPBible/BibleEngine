@@ -8,7 +8,7 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from 'typeorm';
+} from '../../typeorm';
 import { BibleCrossReference } from '.';
 import { IBibleSectionEntity, DocumentRoot } from '../models';
 

@@ -24,7 +24,7 @@ const sqlBible = new BibleEngine(
 export const genDb = async () => {
     const esvVersion = await sqlBible.addVersion(
         new BibleVersion({
-            version: 'ESV',
+            uid: 'ESV',
             title: 'English Standard Bible',
             language: 'en-US',
             chapterVerseSeparator: ':'
@@ -138,7 +138,7 @@ export const genDb = async () => {
 export const getData = async () => {
     const output = await sqlBible.getFullDataForReferenceRange(
         {
-            queryVersion: 'ESV',
+            versionUid: 'ESV',
             bookOsisId: 'Gen',
             versionChapterNum: 1,
             versionChapterEndNum: 4,

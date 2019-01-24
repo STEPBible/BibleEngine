@@ -128,7 +128,8 @@ export const generateBibleDocument = (
                     _group.groupType === 'orderedListItem' ||
                     _group.groupType === 'unorderedListItem' ||
                     _group.groupType === 'translationChange' ||
-                    _group.groupType === 'title'
+                    _group.groupType === 'title' ||
+                    _group.groupType === 'link'
                 ) {
                     isPhraseInGroup = phrase.getModifierValue(_group.groupType) === _group.modifier;
                 } else if (_group.groupType === 'person') {
@@ -174,7 +175,8 @@ export const generateBibleDocument = (
                     _group.groupType === 'unorderedListItem' ||
                     _group.groupType === 'translationChange' ||
                     _group.groupType === 'title' ||
-                    _group.groupType === 'person'
+                    _group.groupType === 'person' ||
+                    _group.groupType === 'link'
                 ) {
                     activeModifiers[_group.groupType] = _group.modifier;
                 } else {
@@ -280,6 +282,7 @@ export const generateBibleDocument = (
             'emphasis',
             'bold',
             'italic',
+            'link',
             'translationChange',
             'person',
             'divineName',
@@ -329,7 +332,8 @@ export const generateBibleDocument = (
                 modifier === 'orderedListItem' ||
                 modifier === 'unorderedListItem' ||
                 modifier === 'translationChange' ||
-                modifier === 'title'
+                modifier === 'title' ||
+                modifier === 'link'
             ) {
                 if (
                     phrase.getModifierValue(modifier) &&

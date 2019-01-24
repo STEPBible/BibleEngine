@@ -32,3 +32,6 @@ MANUAL PREPARATIONS BEFORE PARSING
 
 <a href="[a-z0-9.]*?#[0-9]{1,3}">(.*?)</a> => $1
 (a lot of a-tags only link part of the reference, some refs are not linked at all. we remove all of them and use ref-detection to properly catch and link all of them.)
+
+index.html: remove all <a href="#vorwort"> /^\</a> 
+(optional, removes those characters from heading titles)

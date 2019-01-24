@@ -1,7 +1,3 @@
-/**
- * TODO: parse version meta/index file
- */
-
 import { BibleEngine } from '../../BibleEngine.class';
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
@@ -13,6 +9,9 @@ import { TreeDocumentFragment } from './models/parse5';
 import { BookWithContentForInput } from '../../models/BibleInput';
 import { visitNode } from './helpers';
 import { BibleReferenceParser } from '../../models/BibleReference';
+import { DocumentRoot } from '../../models';
+
+import copyrightLong from './meta/copyright';
 
 function streamToString(stream: NodeJS.ReadWriteStream): Promise<string> {
     const chunks: Uint8Array[] = [];
@@ -40,11 +39,43 @@ bcv.set_options({
 });
 
 (async () => {
+    const versionUid = 'NEUE';
+
+    const description: DocumentRoot = {
+        type: 'root',
+        contents: []
+    };
+
+    const descriptionHtml = await streamToString(
+        createReadStream(resolve(__dirname) + '/html/index.htm')
+            .pipe(decodeStream('windows1252'))
+            .pipe(encodeStream('utf8'))
+    );
+
+    const descriptionNodes = <TreeDocumentFragment>(
+        parseFragment(
+            descriptionHtml.substring(
+                descriptionHtml.indexOf('<h2'),
+                descriptionHtml.lastIndexOf('</td>')
+            )
+        )
+    );
+    if (!descriptionNodes) throw new Error(`can't parse index.html`);
+
+    const descriptionGlobalState = { versionUid, refParser: bcv, documentRoot: description };
+    const descriptionLocalState = { currentDocument: description.contents };
+    for (const node of descriptionNodes.childNodes)
+        visitNode(node, descriptionGlobalState, descriptionLocalState);
+
     const version = await sqlBible.addVersion({
-        version: 'NEUE',
+        uid: versionUid,
         title: 'Neue evangelistische Übersetzung',
+        copyrightShort: '© Karl-Heinz Vanheiden',
+        copyrightLong,
+        description,
         chapterVerseSeparator: ',',
-        language: 'de-DE'
+        language: 'de-DE',
+        hasStrongs: false
     });
 
     for (const [bookFile, bookMeta] of bookList.entries()) {
@@ -76,8 +107,9 @@ bcv.set_options({
             contents: []
         };
         const globalState = {
-            refParser: bcv,
-            bookData
+            versionUid,
+            bookData,
+            refParser: bcv
         };
         const localState = {
             currentContentGroup: bookData.contents

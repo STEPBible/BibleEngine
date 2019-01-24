@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+    Entity,
+    Column,
+    PrimaryColumn,
+    AfterLoad,
+    BeforeInsert,
+    BeforeUpdate
+} from '../../typeorm';
 import { IDictionaryEntry, DocumentRoot } from '../models';
 
 @Entity()

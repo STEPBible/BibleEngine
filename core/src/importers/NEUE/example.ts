@@ -11,7 +11,7 @@ const sqlBible = new BibleEngine({
 sqlBible
     .getFullDataForReferenceRange(
         {
-            queryVersion: 'NEUE',
+            versionUid: 'NEUE',
             bookOsisId: 'Gen',
             versionChapterNum: 1,
             versionChapterEndNum: 2

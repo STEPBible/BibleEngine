@@ -199,7 +199,8 @@ export interface TreeElement extends DefaultTreeElement {
         | 'i'
         | 'strong'
         | 'img'
-        | 'br';
+        | 'br'
+        | 'ul';
 }
 export type DefaultNode =
     // | TreeDocumentType

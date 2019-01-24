@@ -40,6 +40,7 @@ export type PhraseModifiers = {
     orderedListItem?: string;
     unorderedListItem?: string;
     translationChange?: string;
+    link?: string;
     title?: 'pullout' | 'inline';
     bold?: boolean;
     italic?: boolean;
@@ -53,6 +54,7 @@ export type ValueModifiers =
     | 'translationChange'
     | 'orderedListItem'
     | 'unorderedListItem'
-    | 'title';
+    | 'title'
+    | 'link';
 
 export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'poetry' | 'sela';

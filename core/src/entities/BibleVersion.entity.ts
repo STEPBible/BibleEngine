@@ -6,7 +6,7 @@ import {
     BeforeInsert,
     BeforeUpdate,
     Index
-} from 'typeorm';
+} from '../../typeorm';
 import { DocumentRoot, IBibleVersion } from '../models';
 
 @Entity()
@@ -14,9 +14,9 @@ export class BibleVersion implements IBibleVersion {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Index()
+    @Index({ unique: true })
     @Column()
-    version: string;
+    uid: string;
 
     @Column()
     title: string;

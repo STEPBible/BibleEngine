@@ -6,7 +6,7 @@ describe('generateBibleDocument', () => {
     let doc: IBibleOutputRoot;
 
     const version: IBibleVersion = {
-        version: 'ESV',
+        uid: 'ESV',
         title: 'ESV',
         chapterVerseSeparator: ':',
         language: 'en-US'

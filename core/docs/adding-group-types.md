@@ -12,7 +12,7 @@ If the type is just an "on/off" thing, you can ignore this.
 
 ## `models/BiblePhrase.ts`
 
-If the type needs a modifier, add it to `ValueModifiers`, otherwise (if it's only either on or off) to `BooleanModifiers`.
+If the type needs a modifier (other than on/off), add it to `ValueModifiers`, otherwise (if it's only either on or off) to `BooleanModifiers`.
 
 Add the type as an optional property to `PhraseModifiers` with the appropriate modifier type (`boolean` if no modifier).
 
@@ -20,7 +20,7 @@ You may notice that there is no straightforward relation between `ContentGroupTy
 
 ## `entities/BiblePhrase.entity.ts`
 
-If the new type has a modifier, the method `getModifierValue()` needs to be updated to return `undefined` for this type.
+If the new type has a modifier (other than on/off), the method `getModifierValue()` needs to be updated to return `undefined` for this type.
 
 ## `BibleEngine.class.ts` > `addBibleContent()` (Input)
 
@@ -28,8 +28,10 @@ The new type needs to be taken care of while constructing the `childState` befor
 
 ## `functions/content.functions.ts` > `generateBibleDocument()` (Output)
 
-The method makes to walks two times through the document in its current state, one time to determine if a phrase is still within the current `activeGroup` and after that to determine the current `activeModifiers` for a phrase. If the new type has a modifier, it needs to be checked for in both occasions.
+The method makes to walks two times through the document in its current state, one time to determine if a phrase is still within the current `activeGroup` and after that to determine the current `activeModifiers` for a phrase. If the new type has a modifier (other than on/off), it needs to be checked for in both occasions.
 
-Finally, the new type needs to be added to the `modifiers` array. The order of the types here determines, which types become outer and inner groups in case they start at the exact same phrase. Groups that usually only span over one words should come after ones that usually span over a group of words which should after those that span over sentences or paragraphs.
+The new type then needs to be added to the `modifiers` array. The order of the types here determines, which types become outer and inner groups in case they start at the exact same phrase. Groups that usually only span over one words should come after ones that usually span over a group of words which should after those that span over sentences or paragraphs.
 
 When a type is not added to `modifiers` at all, it will be ignored in the output.
+
+If the new type has a modifier (other than on/off), it needs to be handled accordingly within the loop over `modifiers`.

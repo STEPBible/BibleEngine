@@ -9,7 +9,7 @@ const sqlBible = new BibleEngine({
 beforeAll(async () => {
     await sqlBible.addVersion(
         new BibleVersion({
-            version: 'ESV',
+            uid: 'ESV',
             title: 'English Standard Bible',
             language: 'en-US',
             chapterVerseSeparator: ':'
@@ -21,5 +21,5 @@ beforeAll(async () => {
 test('BibleEngine version is set correctly', async () => {
     expect(sqlBible.currentVersion!.language).toEqual('en-US');
     expect(sqlBible.currentVersion!.title).toEqual('English Standard Bible');
-    expect(sqlBible.currentVersion!.version).toEqual('ESV');
+    expect(sqlBible.currentVersion!.uid).toEqual('ESV');
 });
