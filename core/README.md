@@ -11,6 +11,10 @@ Please have a look at the example importer `importers/random-version/example.ts`
 If you want to want to start clean, go from here:
 
 ```typescript
+// since BibleEngine is currently not published you need to clone the repository
+// and add the package via `file:../BibleEngine/core` to your project
+import { BibleEngine } from '@bible-engine/core';
+
 const sqlBible = new BibleEngine({
     type: 'sqlite',
     database: `${dirProjectRoot}/output/bible.db`
@@ -50,11 +54,21 @@ for (const book of books) {
 sqlBible.finalizeVersion(version.id);
 ```
 
-## using versification normalization
+## Using versification normalization
 
 If you want your bible to be converted to standard versification (version versification is still available, however the interal references use standard versification, thus verses can be matched correctly across all bibles) you need to run the `v11n-rules` importer before importing the bible:
 
-```
+```shell
 cd core
 npx ts-node src/importers/v11n-rules/v11n-rules.ts
 ```
+
+## Reading from `BibleEngine`
+
+If you use `BibleEngine` outside of node, you need to adjust the import path as follows:
+
+```typescript
+import { BibleEngine } from '@bible-engine/core/browser/src';
+```
+
+Additionally your `tsconfig.json` needs to include the setting `"preserveSymlinks": true`

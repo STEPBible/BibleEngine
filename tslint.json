@@ -2,22 +2,13 @@
     "defaultSeverity": "warning",
     "rules": {
         "class-name": true,
-        "comment-format": [
-            true,
-            "check-space"
-        ],
+        "comment-format": [true, "check-space"],
         "curly": false,
         "eofline": true,
         "forin": true,
-        "indent": [
-            true,
-            "spaces"
-        ],
+        "indent": [true, "spaces", 4],
         "label-position": true,
-        "max-line-length": [
-            true,
-            100
-        ],
+        "max-line-length": [true, 100],
         "member-access": false,
         "member-ordering": [
             true,
@@ -47,35 +38,19 @@
         "no-duplicate-variable": true,
         "no-empty": true,
         "no-eval": true,
-        "no-inferrable-types": [
-            true
-        ],
+        "no-inferrable-types": [true],
         "no-shadowed-variable": true,
         "no-string-literal": false,
         "no-switch-case-fall-through": true,
-        "no-unused-variable": [
-            true
-        ],
-        "trailing-comma": [
-            true
-        ],
+        "no-unused-variable": [true],
+        "trailing-comma": [true],
         "no-trailing-whitespace": true,
         "no-unused-expression": true,
         "no-use-before-declare": true,
         "no-var-keyword": true,
         "object-literal-sort-keys": false,
-        "one-line": [
-            true,
-            "check-open-brace",
-            "check-catch",
-            "check-else",
-            "check-whitespace"
-        ],
-        "quotemark": [
-            true,
-            "single",
-            "avoid-escape"
-        ],
+        "one-line": [true, "check-open-brace", "check-catch", "check-else", "check-whitespace"],
+        "quotemark": [true, "single", "avoid-escape"],
         "radix": true,
         "triple-equals": {
             "severity": "error"
@@ -100,5 +75,4 @@
             "check-type"
         ]
     }
-
 }
