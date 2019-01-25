@@ -12,7 +12,7 @@ If you want to want to start clean, go from here:
 
 ```typescript
 // since BibleEngine is currently not published you need to clone the repository
-// and add the package via `file:../BibleEngine/core` to your project
+// and add the package via `file:../BibleEngine/core` to your project (or use yarn link)
 import { BibleEngine } from '@bible-engine/core';
 
 const sqlBible = new BibleEngine({
