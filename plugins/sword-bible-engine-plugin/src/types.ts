@@ -126,7 +126,8 @@ export enum OsisXmlNodeType {
   ITALIC = 'italic',
   MILESTONE = 'x-milestone',
   UNDERLINE = 'underline',
-  PSALM = 'psalm'
+  PSALM = 'psalm',
+  PARAGRAPH = 'paragraph'
 }
 
 export enum OsisXmlNodeSubType {

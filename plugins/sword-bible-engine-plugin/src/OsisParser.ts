@@ -68,6 +68,7 @@ export function getBibleEngineInputFromXML(
       if (DEBUG_OUTPUT_ENABLED) {
         const prettifyXML = require('xml-formatter');
         console.log(prettifyXML(textWithoutUnusedTags));
+        console.log('********************************************');
       }
 
       parser.write(textWithoutUnusedTags);
@@ -114,7 +115,7 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
         const indentGroup = getIndentGroup(node, context);
         context.phrases = [];
         if (context.paragraph) {
-          context.paragraph.contents.push(indentGroup);
+          context.paragraph!.contents.push(indentGroup);
           return;
         }
         context.titleSection.contents.push(indentGroup);
@@ -123,8 +124,39 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
     }
     case OsisXmlTag.DIVINE_NAME: {
       context.divineNameNode = node;
+      break;
+    }
+    case OsisXmlTag.DIVISION: {
+      if (isStartOfParagraph(node)) {
+        if (context.paragraph && context.paragraph!.contents.length) {
+          throw new Error("Can't add a paragraph when one already exists");
+        }
+        context.paragraph = getNewParagraph();
+      }
+      if (isEndOfParagraph(node)) {
+        if (!context.paragraph) {
+          context.paragraph = getNewParagraph();
+        }
+        context.paragraph!.contents = context.phrases;
+        context.phrases = [];
+        context.titleSection!.contents.push(context.paragraph!);
+        context.paragraph = undefined;
+      }
+      break;
     }
   }
+}
+
+function isStartOfParagraph(node: OsisXmlNode) {
+  return (
+    node.attributes.type === OsisXmlNodeType.PARAGRAPH && node.attributes.sID
+  );
+}
+
+function isEndOfParagraph(node: OsisXmlNode) {
+  return (
+    node.attributes.type === OsisXmlNodeType.PARAGRAPH && node.attributes.eID
+  );
 }
 
 function parseTextNode(text: string, context: ParserContext) {
