@@ -1,0 +1,1992 @@
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv1"/>
+    <div sID="gen5" type="section"/>
+     
+    <title>
+        The Creation of the World
+    </title>
+     
+    <div sID="gen6" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv1"/>
+    In the 
+    <note n="a" osisID="Gen.1.1!crossReference.a" osisRef="Gen.1.1" type="crossReference">
+        <reference osisRef="Job.38.4-Job.38.7">
+            Job 38:4-7
+        </reference>
+        ; 
+        <reference osisRef="Ps.33.6">
+            Ps. 33:6
+        </reference>
+        ; 
+        <reference osisRef="Ps.136.5">
+            136:5
+        </reference>
+        ; 
+        <reference osisRef="Isa.42.5">
+            Isa. 42:5
+        </reference>
+        ; 
+        <reference osisRef="Isa.45.18">
+            45:18
+        </reference>
+        ; 
+        <reference osisRef="John.1.1-John.1.3">
+            John 1:1-3
+        </reference>
+        ; 
+        <reference osisRef="Acts.14.15">
+            Acts 14:15
+        </reference>
+        ; 
+        <reference osisRef="Acts.17.24">
+            17:24
+        </reference>
+        ; 
+        <reference osisRef="Col.1.16-Col.1.17">
+            Col. 1:16, 17
+        </reference>
+        ; 
+        <reference osisRef="Heb.1.10">
+            Heb. 1:10
+        </reference>
+        ; 
+        <reference osisRef="Heb.11.3">
+            11:3
+        </reference>
+        ; 
+        <reference osisRef="Rev.4.11">
+            Rev. 4:11
+        </reference>
+    </note>
+    <w lemma="strong:H7225 strong:H9003" src="014 011">
+        beginning
+    </w>
+    , 
+    <w lemma="strong:H0430" src="034">
+        God
+    </w>
+     
+    <w lemma="strong:H1254!a" src="024">
+        created
+    </w>
+     the 
+    <w lemma="strong:H8064 strong:H0853 strong:H9009" src="054 044 051">
+        heavens
+    </w>
+     and the 
+    <w lemma="strong:H0776 strong:H9002 strong:H0853 strong:H9009" src="074 060 064 071">
+        earth
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    The 
+    <w lemma="strong:H0776 strong:H9002 strong:H9009" src="014 010 011">
+        earth
+    </w>
+     
+    <w lemma="strong:H1961" src="024">
+        was
+    </w>
+     
+    <note n="b" osisID="Gen.1.2!crossReference.b" osisRef="Gen.1.2" type="crossReference">
+        <reference osisRef="Jer.4.23">
+            Jer. 4:23
+        </reference>
+    </note>
+    <w lemma="strong:H8414" src="034">
+        without form
+    </w>
+     and 
+    <w lemma="strong:H0922 strong:H9002" src="044 040">
+        void
+    </w>
+    , and 
+    <w lemma="strong:H2822 strong:H9002" src="054 050">
+        darkness
+    </w>
+     was 
+    <w lemma="strong:H5921!a" src="064">
+        over
+    </w>
+     the 
+    <w lemma="strong:H6440" src="074">
+        face
+    </w>
+     of the 
+    <w lemma="strong:H8415" src="084">
+        deep
+    </w>
+    . And the 
+    <w lemma="strong:H7307 strong:H9002" src="094 090">
+        Spirit
+    </w>
+     of 
+    <w lemma="strong:H0430" src="104">
+        God
+    </w>
+     was 
+    <w lemma="strong:H7363!b" src="114">
+        hovering
+    </w>
+     
+    <w lemma="strong:H5921!a" src="124">
+        over
+    </w>
+     the 
+    <w lemma="strong:H6440" src="134">
+        face
+    </w>
+     of the 
+    <w lemma="strong:H4325 strong:H9009" src="144 141">
+        waters
+    </w>
+    . 
+    <div eID="gen6" type="paragraph"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv2"/>
+    <div sID="gen7" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv2"/>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="014">
+        said
+    </w>
+    , 
+    <note n="c" osisID="Gen.1.3!crossReference.c" osisRef="Gen.1.3" type="crossReference">
+        <reference osisRef="2Cor.4.6">
+            2 Cor. 4:6
+        </reference>
+    </note>
+    <q level="1" marker="“" sID="01001003.1"/>
+    Let there 
+    <w lemma="strong:H1961" src="034">
+        be
+    </w>
+     
+    <w lemma="strong:H0216" src="044">
+        light
+    </w>
+    ,
+    <q eID="01001003.1" level="1" marker="”"/>
+     and there was 
+    <w lemma="strong:H0216 strong:H1961" src="064 054">
+        light
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H7200" src="014">
+        saw
+    </w>
+     that the 
+    <w lemma="strong:H0216 strong:H0853 strong:H9009 strong:H3588!a" src="044 034 041 054">
+        light
+    </w>
+     was 
+    <w lemma="strong:H2896!a" src="064">
+        good
+    </w>
+    . And 
+    <w lemma="strong:H0430" src="084">
+        God
+    </w>
+     
+    <w lemma="strong:H0914 strong:H0996" src="074 094">
+        separated
+    </w>
+     the 
+    <w lemma="strong:H0216 strong:H9009" src="104 101">
+        light
+    </w>
+     
+    <w lemma="strong:H0996 strong:H9002" src="114 110">
+        from
+    </w>
+     the 
+    <w lemma="strong:H2822 strong:H9009" src="124 121">
+        darkness
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H7121" src="014">
+        called
+    </w>
+     the 
+    <w lemma="strong:H0216 strong:H9005" src="034 031">
+        light
+    </w>
+     
+    <w lemma="strong:H3117" src="044">
+        Day
+    </w>
+    , and the 
+    <w lemma="strong:H2822 strong:H9002 strong:H9005" src="054 050 051">
+        darkness
+    </w>
+     he 
+    <w lemma="strong:H7121" src="064">
+        called
+    </w>
+     
+    <w lemma="strong:H3915" src="074">
+        Night
+    </w>
+    . And there was 
+    <w lemma="strong:H6153 strong:H1961" src="094 084">
+        evening
+    </w>
+     and there was 
+    <w lemma="strong:H1242 strong:H1961" src="114 104">
+        morning
+    </w>
+    , the 
+    <w lemma="strong:H0259" src="134">
+        first
+    </w>
+     
+    <w lemma="strong:H3117" src="124">
+        day
+    </w>
+    . 
+    <div eID="gen7" type="paragraph"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv3"/>
+    <div sID="gen8" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv3"/>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="014">
+        said
+    </w>
+    , 
+    <note n="d" osisID="Gen.1.6!crossReference.d" osisRef="Gen.1.6" type="crossReference">
+        <reference osisRef="Job.37.18">
+            Job 37:18
+        </reference>
+        ; 
+        <reference osisRef="Ps.136.5">
+            Ps. 136:5
+        </reference>
+        ; 
+        <reference osisRef="Jer.10.12">
+            Jer. 10:12
+        </reference>
+        ; 
+        <reference osisRef="Jer.51.15">
+            51:15
+        </reference>
+    </note>
+    <q level="1" marker="“" sID="01001006.1"/>
+    Let there be an 
+    <w lemma="strong:H7549 strong:H1961" src="044 034">
+        expanse
+    </w>
+    <note n="1" osisID="Gen.1.6!note.1" osisRef="Gen.1.6" type="alternative">
+        Or 
+        <hi type="italic">
+            a canopy
+        </hi>
+        ; also verses 7, 8, 14, 15, 17, 20
+    </note>
+     in the 
+    <w lemma="strong:H8432 strong:H9003" src="054 051">
+        midst
+    </w>
+     of the 
+    <w lemma="strong:H4325 strong:H9009" src="064 061">
+        waters
+    </w>
+    , and let it 
+    <w lemma="strong:H0914 strong:H1961" src="084 074">
+        separate
+    </w>
+     the 
+    <w lemma="strong:H4325 strong:H0996" src="104 094">
+        waters
+    </w>
+     from the 
+    <w lemma="strong:H4325 strong:H9005" src="114 111">
+        waters
+    </w>
+    .
+    <q eID="01001006.1" level="1" marker="”"/>
+</xml>
+**********************************************************
+<xml>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H6213!a" src="014">
+        made
+    </w>
+    <note n="1" osisID="Gen.1.7!note.1" osisRef="Gen.1.7" type="alternative">
+        Or 
+        <hi type="italic">
+            fashioned
+        </hi>
+        ; also verse 16
+    </note>
+     the 
+    <w lemma="strong:H7549 strong:H0853 strong:H9009" src="044 034 041">
+        expanse
+    </w>
+     and 
+    <note n="e" osisID="Gen.1.7!crossReference.e" osisRef="Gen.1.7" type="crossReference">
+        <reference osisRef="Prov.8.27-Prov.8.29">
+            Prov. 8:27-29
+        </reference>
+    </note>
+    <w lemma="strong:H0914" src="054">
+        separated
+    </w>
+     the 
+    <w lemma="strong:H4325 strong:H0996 strong:H9009" src="074 064 071">
+        waters
+    </w>
+     
+    <w lemma="strong:H0834!a" src="084">
+        that
+    </w>
+     were 
+    <w lemma="strong:H8478 strong:H9006" src="094 091">
+        under
+    </w>
+     the 
+    <w lemma="strong:H7549 strong:H9005" src="104 101">
+        expanse
+    </w>
+     from the 
+    <w lemma="strong:H4325 strong:H9002 strong:H0996 strong:H9009" src="124 110 114 121">
+        waters
+    </w>
+     
+    <w lemma="strong:H0834!a" src="134">
+        that
+    </w>
+     were 
+    <note n="f" osisID="Gen.1.7!crossReference.f" osisRef="Gen.1.7" type="crossReference">
+        <reference osisRef="Ps.148.4">
+            Ps. 148:4
+        </reference>
+    </note>
+    <w lemma="strong:H5921!a strong:H9006" src="144 141">
+        above
+    </w>
+     the 
+    <w lemma="strong:H7549 strong:H9005" src="154 151">
+        expanse
+    </w>
+    . And it was 
+    <w lemma="strong:H3651!c strong:H1961" src="174 164">
+        so
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H7121" src="014">
+        called
+    </w>
+     the 
+    <w lemma="strong:H7549 strong:H9005" src="034 031">
+        expanse
+    </w>
+     
+    <w lemma="strong:H8064" src="044">
+        Heaven
+    </w>
+    .
+    <note n="1" osisID="Gen.1.8!note.1" osisRef="Gen.1.8" type="alternative">
+        Or 
+        <hi type="italic">
+            Sky
+        </hi>
+        ; also verses 9, 14, 15, 17, 20, 26, 28, 30; 2:1
+    </note>
+     And there was 
+    <w lemma="strong:H6153 strong:H1961" src="064 054">
+        evening
+    </w>
+     and there was 
+    <w lemma="strong:H1242 strong:H1961" src="084 074">
+        morning
+    </w>
+    , the 
+    <w lemma="strong:H8145" src="104">
+        second
+    </w>
+     
+    <w lemma="strong:H3117" src="094">
+        day
+    </w>
+    . 
+    <div eID="gen8" type="paragraph"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv4"/>
+    <div sID="gen9" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv4"/>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="014">
+        said
+    </w>
+    , 
+    <note n="g" osisID="Gen.1.9!crossReference.g" osisRef="Gen.1.9" type="crossReference">
+        <reference osisRef="Job.38.8-Job.38.11">
+            Job 38:8-11
+        </reference>
+        ; 
+        <reference osisRef="Ps.33.7">
+            Ps. 33:7
+        </reference>
+        ; 
+        <reference osisRef="Ps.136.6">
+            136:6
+        </reference>
+        ; 
+        <reference osisRef="Jer.5.22">
+            Jer. 5:22
+        </reference>
+        ; 
+        <reference osisRef="2Pet.3.5">
+            2 Pet. 3:5
+        </reference>
+    </note>
+    <q level="1" marker="“" sID="01001009.1"/>
+    Let the 
+    <w lemma="strong:H4325 strong:H9009" src="044 041">
+        waters
+    </w>
+     
+    <w lemma="strong:H9006 strong:H8478" src="051 054">
+        under
+    </w>
+     the 
+    <w lemma="strong:H8064 strong:H9009" src="064 061">
+        heavens
+    </w>
+     be 
+    <w lemma="strong:H6960!b" src="034">
+        gathered together
+    </w>
+     
+    <w lemma="strong:H0413" src="074">
+        into
+    </w>
+     
+    <w lemma="strong:H0259" src="094">
+        one
+    </w>
+     
+    <w lemma="strong:H4725" src="084">
+        place
+    </w>
+    , and let the 
+    <w lemma="strong:H3004 strong:H9009" src="114 111">
+        dry land
+    </w>
+     
+    <w lemma="strong:H7200" src="104">
+        appear
+    </w>
+    .
+    <q eID="01001009.1" level="1" marker="”"/>
+     And it was 
+    <w lemma="strong:H3651!c strong:H1961" src="134 124">
+        so
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H7121" src="014">
+        called
+    </w>
+     the 
+    <w lemma="strong:H3004 strong:H9005" src="034 031">
+        dry land
+    </w>
+     
+    <w lemma="strong:H0776" src="044">
+        Earth
+    </w>
+    ,
+    <note n="1" osisID="Gen.1.10!note.1" osisRef="Gen.1.10" type="alternative">
+        Or 
+        <hi type="italic">
+            Land
+        </hi>
+        ; also verses 11, 12, 22, 24, 25, 26, 28, 30; 2:1
+    </note>
+     and the 
+    <w lemma="strong:H4325 strong:H9009" src="064 061">
+        waters
+    </w>
+     that were 
+    <w lemma="strong:H4723!c strong:H9002 strong:H9005" src="054 050 051">
+        gathered together
+    </w>
+     he 
+    <w lemma="strong:H7121" src="074">
+        called
+    </w>
+     
+    <w lemma="strong:H3220" src="084">
+        Seas
+    </w>
+    . And 
+    <w lemma="strong:H0430" src="104">
+        God
+    </w>
+     
+    <w lemma="strong:H7200" src="094">
+        saw
+    </w>
+     that it was 
+    <w lemma="strong:H2896!a strong:H3588!a" src="124 114">
+        good
+    </w>
+    . 
+    <div eID="gen9" type="paragraph"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv5"/>
+    <div sID="gen10" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv5"/>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="014">
+        said
+    </w>
+    , 
+    <note n="h" osisID="Gen.1.11!crossReference.h" osisRef="Gen.1.11" type="crossReference">
+        <reference osisRef="Ps.104.14">
+            Ps. 104:14
+        </reference>
+    </note>
+    <q level="1" marker="“" sID="01001011.1"/>
+    Let the 
+    <w lemma="strong:H0776 strong:H9009" src="044 041">
+        earth
+    </w>
+     
+    <w lemma="strong:H1876" src="034">
+        sprout
+    </w>
+     
+    <w lemma="strong:H1877" src="054">
+        vegetation
+    </w>
+    , 
+    <w lemma="strong:H6212" src="064">
+        plants
+    </w>
+    <note n="1" osisID="Gen.1.11!note.1" osisRef="Gen.1.11" type="alternative">
+        Or 
+        <hi type="italic">
+            small plants
+        </hi>
+        ; also verses 12, 29
+    </note>
+     
+    <w lemma="strong:H2232" src="074">
+        yielding
+    </w>
+     
+    <w lemma="strong:H2233" src="084">
+        seed
+    </w>
+    , and 
+    <w lemma="strong:H6529" src="104">
+        fruit
+    </w>
+     
+    <w lemma="strong:H6086" src="094">
+        trees
+    </w>
+     
+    <w lemma="strong:H6213!a" src="114">
+        bearing
+    </w>
+     
+    <w lemma="strong:H6529" src="124">
+        fruit
+    </w>
+     in 
+    <w lemma="strong:H0834!a strong:H9023" src="144 136">
+        which
+    </w>
+     is their 
+    <w lemma="strong:H2233" src="154">
+        seed
+    </w>
+    , each according to its 
+    <w lemma="strong:H4327 strong:H9005" src="134 131">
+        kind
+    </w>
+    , on the 
+    <w lemma="strong:H0776 strong:H9023 strong:H9003 strong:H9033 strong:H5921!a strong:H9009" src="184 156 161 166 174 181">
+        earth
+    </w>
+    .
+    <q eID="01001011.1" level="1" marker="”"/>
+     And it was 
+    <w lemma="strong:H3651!c strong:H1961" src="204 194">
+        so
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    The 
+    <w lemma="strong:H0776 strong:H9009" src="024 021">
+        earth
+    </w>
+     
+    <w lemma="strong:H3318" src="014">
+        brought forth
+    </w>
+     
+    <w lemma="strong:H1877" src="034">
+        vegetation
+    </w>
+    , 
+    <w lemma="strong:H6212" src="044">
+        plants
+    </w>
+     
+    <w lemma="strong:H2232" src="054">
+        yielding
+    </w>
+     
+    <w lemma="strong:H2233" src="064">
+        seed
+    </w>
+     according to their own 
+    <w lemma="strong:H4327 strong:H9005" src="074 071">
+        kinds
+    </w>
+    , and 
+    <w lemma="strong:H6086 strong:H9023 strong:H9002" src="084 076 080">
+        trees
+    </w>
+     
+    <w lemma="strong:H6213!a" src="094">
+        bearing
+    </w>
+     
+    <w lemma="strong:H6529" src="104">
+        fruit
+    </w>
+     in 
+    <w lemma="strong:H0834!a" src="114">
+        which
+    </w>
+     is their 
+    <w lemma="strong:H2233" src="124">
+        seed
+    </w>
+    , each according to its 
+    <w lemma="strong:H4327 strong:H9023 strong:H9003 strong:H9033 strong:H9005" src="144 126 131 136 141">
+        kind
+    </w>
+    . And 
+    <w lemma="strong:H0430" src="164">
+        God
+    </w>
+     
+    <w lemma="strong:H7200 strong:H9023" src="154 146">
+        saw
+    </w>
+     that it was 
+    <w lemma="strong:H2896!a strong:H3588!a" src="184 174">
+        good
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    And there was 
+    <w lemma="strong:H6153 strong:H1961" src="024 014">
+        evening
+    </w>
+     and there was 
+    <w lemma="strong:H1242 strong:H1961" src="044 034">
+        morning
+    </w>
+    , the 
+    <w lemma="strong:H7992" src="064">
+        third
+    </w>
+     
+    <w lemma="strong:H3117" src="054">
+        day
+    </w>
+    . 
+    <div eID="gen10" type="paragraph"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv6"/>
+    <div sID="gen11" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv6"/>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="014">
+        said
+    </w>
+    , 
+    <q level="1" marker="“" sID="01001014.1"/>
+    Let there be 
+    <w lemma="strong:H3974 strong:H1961" src="044 034">
+        lights
+    </w>
+     in the 
+    <w lemma="strong:H7549 strong:H9003" src="054 051">
+        expanse
+    </w>
+     of the 
+    <w lemma="strong:H8064 strong:H9009" src="064 061">
+        heavens
+    </w>
+     to 
+    <w lemma="strong:H0914 strong:H9005" src="074 071">
+        separate
+    </w>
+     the 
+    <w lemma="strong:H3117 strong:H0996 strong:H9009" src="094 084 091">
+        day
+    </w>
+     from the 
+    <w lemma="strong:H3915 strong:H9002 strong:H0996 strong:H9009" src="114 100 104 111">
+        night
+    </w>
+    . And let them be for 
+    <note n="i" osisID="Gen.1.14!crossReference.i" osisRef="Gen.1.14" type="crossReference">
+        <reference osisRef="Jer.10.2">
+            Jer. 10:2
+        </reference>
+        ; 
+        <reference osisRef="Ezek.32.7-Ezek.32.8">
+            Ezek. 32:7, 8
+        </reference>
+        ; 
+        <reference osisRef="Joel.2.30-Joel.2.31">
+            Joel 2:30, 31
+        </reference>
+        ; 
+        <reference osisRef="Joel.3.15">
+            3:15
+        </reference>
+        ; 
+        <reference osisRef="Matt.24.29">
+            Matt. 24:29
+        </reference>
+        ; 
+        <reference osisRef="Luke.21.25">
+            Luke 21:25
+        </reference>
+    </note>
+    <w lemma="strong:H0226 strong:H1961 strong:H9005" src="134 124 131">
+        signs
+    </w>
+     and for 
+    <note n="j" osisID="Gen.1.14!crossReference.j" osisRef="Gen.1.14" type="crossReference">
+        <reference osisRef="Ps.104.19">
+            Ps. 104:19
+        </reference>
+    </note>
+    <w lemma="strong:H4150 strong:H9002 strong:H9005" src="144 140 141">
+        seasons
+    </w>
+    ,
+    <note n="1" osisID="Gen.1.14!note.1" osisRef="Gen.1.14" type="alternative">
+        Or 
+        <hi type="italic">
+            appointed times
+        </hi>
+    </note>
+     and for 
+    <w lemma="strong:H3117 strong:H9002 strong:H9005" src="154 150 151">
+        days
+    </w>
+     and 
+    <w lemma="strong:H8141 strong:H9002" src="164 160">
+        years
+    </w>
+    ,
+</xml>
+**********************************************************
+<xml>
+    and let them be 
+    <w lemma="strong:H3974 strong:H1961 strong:H9005" src="024 014 021">
+        lights
+    </w>
+     in the 
+    <w lemma="strong:H7549 strong:H9003" src="034 031">
+        expanse
+    </w>
+     of the 
+    <w lemma="strong:H8064 strong:H9009" src="044 041">
+        heavens
+    </w>
+     to 
+    <w lemma="strong:H0215 strong:H9005" src="054 051">
+        give light
+    </w>
+     upon the 
+    <w lemma="strong:H0776 strong:H5921!a strong:H9009" src="074 064 071">
+        earth
+    </w>
+    .
+    <q eID="01001014.1" level="1" marker="”"/>
+     And it was 
+    <w lemma="strong:H3651!c strong:H1961" src="094 084">
+        so
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <note n="k" osisID="Gen.1.16!crossReference.k" osisRef="Gen.1.16" type="crossReference">
+        <reference osisRef="Deut.4.19">
+            Deut. 4:19
+        </reference>
+        ; 
+        <reference osisRef="Ps.136.7-Ps.136.9">
+            Ps. 136:7-9
+        </reference>
+    </note>
+    <w lemma="strong:H6213!a" src="014">
+        made
+    </w>
+     the 
+    <w lemma="strong:H8147 strong:H0853" src="044 034">
+        two
+    </w>
+     
+    <w lemma="strong:H1419!a strong:H9009" src="064 061">
+        great
+    </w>
+     
+    <w lemma="strong:H3974 strong:H9009" src="054 051">
+        lights
+    </w>
+    —the 
+    <w lemma="strong:H1419!a strong:H9009" src="094 091">
+        greater
+    </w>
+     
+    <w lemma="strong:H3974 strong:H0853 strong:H9009" src="084 074 081">
+        light
+    </w>
+     to 
+    <w lemma="strong:H4475 strong:H9005" src="104 101">
+        rule
+    </w>
+     the 
+    <w lemma="strong:H3117 strong:H9009" src="114 111">
+        day
+    </w>
+     and the 
+    <w lemma="strong:H6996!b strong:H9009" src="144 141">
+        lesser
+    </w>
+     
+    <w lemma="strong:H3974 strong:H9002 strong:H0853 strong:H9009" src="134 120 124 131">
+        light
+    </w>
+     to 
+    <w lemma="strong:H4475 strong:H9005" src="154 151">
+        rule
+    </w>
+     the 
+    <w lemma="strong:H3915 strong:H9009" src="164 161">
+        night
+    </w>
+    —and the 
+    <w lemma="strong:H3556 strong:H9002 strong:H0853 strong:H9009" src="184 170 174 181">
+        stars
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    And 
+    <w lemma="strong:H0430 strong:H0853 strong:H9038" src="034 024 026">
+        God
+    </w>
+     
+    <w lemma="strong:H5414" src="014">
+        set
+    </w>
+     them in the 
+    <w lemma="strong:H7549 strong:H9003" src="044 041">
+        expanse
+    </w>
+     of the 
+    <w lemma="strong:H8064 strong:H9009" src="054 051">
+        heavens
+    </w>
+     to 
+    <w lemma="strong:H0215 strong:H9005" src="064 061">
+        give light
+    </w>
+     on the 
+    <w lemma="strong:H0776 strong:H5921!a strong:H9009" src="084 074 081">
+        earth
+    </w>
+    ,
+</xml>
+**********************************************************
+<xml>
+    to 
+    <note n="l" osisID="Gen.1.18!crossReference.l" osisRef="Gen.1.18" type="crossReference">
+        <reference osisRef="Jer.31.35">
+            Jer. 31:35
+        </reference>
+    </note>
+    <w lemma="strong:H4910 strong:H9002 strong:H9005" src="014 010 011">
+        rule
+    </w>
+     over the 
+    <w lemma="strong:H3117 strong:H9003" src="024 021">
+        day
+    </w>
+     and over the 
+    <w lemma="strong:H3915 strong:H9002 strong:H9003" src="034 030 031">
+        night
+    </w>
+    , and to 
+    <w lemma="strong:H0914 strong:H9002 strong:H9005" src="044 040 041">
+        separate
+    </w>
+     the 
+    <w lemma="strong:H0216 strong:H0996 strong:H9009" src="064 054 061">
+        light
+    </w>
+     from the 
+    <w lemma="strong:H2822 strong:H9002 strong:H0996 strong:H9009" src="084 070 074 081">
+        darkness
+    </w>
+    . And 
+    <w lemma="strong:H0430" src="104">
+        God
+    </w>
+     
+    <w lemma="strong:H7200" src="094">
+        saw
+    </w>
+     that it was 
+    <w lemma="strong:H2896!a strong:H3588!a" src="124 114">
+        good
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    And there was 
+    <w lemma="strong:H6153 strong:H1961" src="024 014">
+        evening
+    </w>
+     and there was 
+    <w lemma="strong:H1242 strong:H1961" src="044 034">
+        morning
+    </w>
+    , the 
+    <w lemma="strong:H7243" src="064">
+        fourth
+    </w>
+     
+    <w lemma="strong:H3117" src="054">
+        day
+    </w>
+    . 
+    <div eID="gen11" type="paragraph"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv7"/>
+    <div sID="gen12" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv7"/>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="014">
+        said
+    </w>
+    , 
+    <q level="1" marker="“" sID="01001020.1"/>
+    Let the 
+    <w lemma="strong:H4325 strong:H9009" src="044 041">
+        waters
+    </w>
+     
+    <w lemma="strong:H8317" src="034">
+        swarm
+    </w>
+     with 
+    <w lemma="strong:H8318" src="054">
+        swarms
+    </w>
+     of 
+    <w lemma="strong:H2416!a" src="074">
+        living
+    </w>
+     
+    <w lemma="strong:H5315" src="064">
+        creatures
+    </w>
+    , and let 
+    <w lemma="strong:H5775 strong:H9002" src="084 080">
+        birds
+    </w>
+    <note n="1" osisID="Gen.1.20!note.1" osisRef="Gen.1.20" type="alternative">
+        Or 
+        <hi type="italic">
+            flying things
+        </hi>
+        ; see Leviticus 11:19–20
+    </note>
+     
+    <w lemma="strong:H5774!a" src="094">
+        fly
+    </w>
+     
+    <w lemma="strong:H5921!a" src="104">
+        above
+    </w>
+     the 
+    <w lemma="strong:H0776 strong:H9009" src="114 111">
+        earth
+    </w>
+     
+    <w lemma="strong:H6440 strong:H5921!a" src="134 124">
+        across
+    </w>
+     the 
+    <w lemma="strong:H7549" src="144">
+        expanse
+    </w>
+     of the 
+    <w lemma="strong:H8064 strong:H9009" src="154 151">
+        heavens
+    </w>
+    .
+    <q eID="01001020.1" level="1" marker="”"/>
+</xml>
+**********************************************************
+<xml>
+    So 
+    <note n="m" osisID="Gen.1.21!crossReference.m" osisRef="Gen.1.21" type="crossReference">
+        <reference osisRef="Ps.104.25-Ps.104.26">
+            Ps. 104:25, 26
+        </reference>
+    </note>
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H1254!a" src="014">
+        created
+    </w>
+     the 
+    <w lemma="strong:H1419!a strong:H9009" src="054 051">
+        great
+    </w>
+     
+    <w lemma="strong:H8577!b strong:H0853 strong:H9009" src="044 034 041">
+        sea creatures
+    </w>
+     and 
+    <w lemma="strong:H3605 strong:H9002 strong:H0853" src="074 060 064">
+        every
+    </w>
+     
+    <w lemma="strong:H2416!a strong:H9009" src="094 091">
+        living
+    </w>
+     
+    <w lemma="strong:H5315" src="084">
+        creature
+    </w>
+     that 
+    <w lemma="strong:H7430 strong:H9009" src="104 101">
+        moves
+    </w>
+    , with which the 
+    <w lemma="strong:H4325 strong:H9009" src="134 131">
+        waters
+    </w>
+     
+    <w lemma="strong:H8317 strong:H0834!a" src="124 114">
+        swarm
+    </w>
+    , according to their 
+    <w lemma="strong:H4327 strong:H9005" src="144 141">
+        kinds
+    </w>
+    , and 
+    <w lemma="strong:H3605 strong:H9028 strong:H9002 strong:H0853" src="164 146 150 154">
+        every
+    </w>
+     
+    <w lemma="strong:H3671" src="184">
+        winged
+    </w>
+     
+    <w lemma="strong:H5775" src="174">
+        bird
+    </w>
+     according to its 
+    <w lemma="strong:H4327 strong:H9005" src="194 191">
+        kind
+    </w>
+    . And 
+    <w lemma="strong:H0430" src="214">
+        God
+    </w>
+     
+    <w lemma="strong:H7200 strong:H9023" src="204 196">
+        saw
+    </w>
+     that it was 
+    <w lemma="strong:H2896!a strong:H3588!a" src="234 224">
+        good
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    And 
+    <w lemma="strong:H0430 strong:H0853 strong:H9038" src="034 024 026">
+        God
+    </w>
+     
+    <w lemma="strong:H1288" src="014">
+        blessed
+    </w>
+     them, 
+    <w lemma="strong:H0559 strong:H9005" src="044 041">
+        saying
+    </w>
+    , 
+    <note n="n" osisID="Gen.1.22!crossReference.n" osisRef="Gen.1.22" type="crossReference">
+        <reference osisRef="Gen.8.17">
+            ch. 8:17
+        </reference>
+        ; 
+        <reference osisRef="Gen.9.1">
+            9:1
+        </reference>
+    </note>
+    <q level="1" marker="“" sID="01001022.1"/>
+    Be 
+    <w lemma="strong:H6509" src="054">
+        fruitful
+    </w>
+     and 
+    <w lemma="strong:H7235!a" src="064">
+        multiply
+    </w>
+     and 
+    <w lemma="strong:H4390" src="074">
+        fill
+    </w>
+     the 
+    <w lemma="strong:H4325 strong:H0853 strong:H9009" src="094 084 091">
+        waters
+    </w>
+     in the 
+    <w lemma="strong:H3220 strong:H9003" src="104 101">
+        seas
+    </w>
+    , and let 
+    <w lemma="strong:H5775 strong:H9002 strong:H9009" src="114 110 111">
+        birds
+    </w>
+     
+    <w lemma="strong:H7235!a" src="124">
+        multiply
+    </w>
+     on the 
+    <w lemma="strong:H0776 strong:H9003" src="134 131">
+        earth
+    </w>
+    .
+    <q eID="01001022.1" level="1" marker="”"/>
+</xml>
+**********************************************************
+<xml>
+    And there was 
+    <w lemma="strong:H6153 strong:H1961" src="024 014">
+        evening
+    </w>
+     and there was 
+    <w lemma="strong:H1242 strong:H1961" src="044 034">
+        morning
+    </w>
+    , the 
+    <w lemma="strong:H2549" src="064">
+        fifth
+    </w>
+     
+    <w lemma="strong:H3117" src="054">
+        day
+    </w>
+    . 
+    <div eID="gen12" type="paragraph"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv8"/>
+    <div sID="gen13" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv8"/>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="014">
+        said
+    </w>
+    , 
+    <q level="1" marker="“" sID="01001024.1"/>
+    Let the 
+    <w lemma="strong:H0776 strong:H9009" src="044 041">
+        earth
+    </w>
+     
+    <w lemma="strong:H3318" src="034">
+        bring forth
+    </w>
+     
+    <w lemma="strong:H2416!a" src="064">
+        living
+    </w>
+     
+    <w lemma="strong:H5315" src="054">
+        creatures
+    </w>
+     according to their 
+    <w lemma="strong:H4327 strong:H9005" src="074 071">
+        kinds
+    </w>
+    —
+    <w lemma="strong:H0929 strong:H9024" src="084 076">
+        livestock
+    </w>
+     and 
+    <w lemma="strong:H7431 strong:H9002" src="094 090">
+        creeping things
+    </w>
+     and 
+    <w lemma="strong:H2416!c strong:H9002" src="104 100">
+        beasts
+    </w>
+     of the 
+    <w lemma="strong:H0776" src="114">
+        earth
+    </w>
+     according to their 
+    <w lemma="strong:H4327 strong:H9005" src="124 121">
+        kinds
+    </w>
+    .
+    <q eID="01001024.1" level="1" marker="”"/>
+     And it was 
+    <w lemma="strong:H3651!c strong:H9024 strong:H1961" src="144 126 134">
+        so
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H6213!a" src="014">
+        made
+    </w>
+     the 
+    <w lemma="strong:H2416!c strong:H0853" src="044 034">
+        beasts
+    </w>
+     of the 
+    <w lemma="strong:H0776 strong:H9009" src="054 051">
+        earth
+    </w>
+     according to their 
+    <w lemma="strong:H4327 strong:H9005" src="064 061">
+        kinds
+    </w>
+     and the 
+    <w lemma="strong:H0929 strong:H9024 strong:H9002 strong:H0853 strong:H9009" src="084 066 070 074 081">
+        livestock
+    </w>
+     according to their 
+    <w lemma="strong:H4327 strong:H9005" src="094 091">
+        kinds
+    </w>
+    , and 
+    <w lemma="strong:H3605 strong:H9024 strong:H9002 strong:H0853" src="114 096 100 104">
+        everything
+    </w>
+     that 
+    <w lemma="strong:H7431" src="124">
+        creeps
+    </w>
+     on the 
+    <w lemma="strong:H0127 strong:H9009" src="134 131">
+        ground
+    </w>
+     according to its 
+    <w lemma="strong:H4327 strong:H9005" src="144 141">
+        kind
+    </w>
+    . And 
+    <w lemma="strong:H0430" src="164">
+        God
+    </w>
+     
+    <w lemma="strong:H7200 strong:H9023" src="154 146">
+        saw
+    </w>
+     that it was 
+    <w lemma="strong:H2896!a strong:H3588!a" src="184 174">
+        good
+    </w>
+    . 
+    <div eID="gen13" type="paragraph"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv9"/>
+    <div sID="gen14" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv9"/>
+    Then 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="014">
+        said
+    </w>
+    , 
+    <note n="o" osisID="Gen.1.26!crossReference.o" osisRef="Gen.1.26" type="crossReference">
+        <reference osisRef="Gen.3.22">
+            ch. 3:22
+        </reference>
+        ; 
+        <reference osisRef="Gen.11.7">
+            11:7
+        </reference>
+        ; 
+        <reference osisRef="Isa.6.8">
+            Isa. 6:8
+        </reference>
+    </note>
+    <q level="1" marker="“" sID="01001026.1"/>
+    Let us 
+    <w lemma="strong:H6213!a" src="034">
+        make
+    </w>
+     
+    <w lemma="strong:H0120" src="044">
+        man
+    </w>
+    <note n="1" osisID="Gen.1.26!note.1" osisRef="Gen.1.26" subType="x-name-meaning" type="explanation">
+        The Hebrew word for 
+        <hi type="italic">
+            man
+        </hi>
+         (
+        <hi type="italic">
+            adam
+        </hi>
+        ) is the generic term for mankind and becomes the proper name 
+        <hi type="italic">
+            Adam
+        </hi>
+    </note>
+     in our 
+    <w lemma="strong:H6754 strong:H9003" src="054 051">
+        image
+    </w>
+    , 
+    <note n="p" osisID="Gen.1.26!crossReference.p" osisRef="Gen.1.26" type="crossReference">
+        <reference osisRef="Gen.5.1">
+            ch. 5:1
+        </reference>
+        ; 
+        <reference osisRef="Gen.9.6">
+            9:6
+        </reference>
+        ; 
+        <reference osisRef="1Cor.11.7">
+            1 Cor. 11:7
+        </reference>
+        ; 
+        <reference osisRef="Eph.4.24">
+            Eph. 4:24
+        </reference>
+        ; 
+        <reference osisRef="Col.3.10">
+            Col. 3:10
+        </reference>
+        ; 
+        <reference osisRef="Jas.3.9">
+            James 3:9
+        </reference>
+    </note>
+    after our 
+    <w lemma="strong:H1823 strong:H9025 strong:H9004" src="064 056 061">
+        likeness
+    </w>
+    . And 
+    <note n="q" osisID="Gen.1.26!crossReference.q" osisRef="Gen.1.26" type="crossReference">
+        <reference osisRef="Gen.9.2">
+            ch. 9:2
+        </reference>
+        ; 
+        <reference osisRef="Ps.8.6-Ps.8.8">
+            Ps. 8:6-8
+        </reference>
+        ; 
+        <reference osisRef="Jas.3.7">
+            James 3:7
+        </reference>
+    </note>
+    let them have 
+    <w lemma="strong:H7287!a strong:H9025" src="074 066">
+        dominion
+    </w>
+     over the 
+    <w lemma="strong:H1710 strong:H9003" src="084 081">
+        fish
+    </w>
+     of the 
+    <w lemma="strong:H3220 strong:H9009" src="094 091">
+        sea
+    </w>
+     and over the 
+    <w lemma="strong:H5775 strong:H9002 strong:H9003" src="104 100 101">
+        birds
+    </w>
+     of the 
+    <w lemma="strong:H8064 strong:H9009" src="114 111">
+        heavens
+    </w>
+     and over the 
+    <w lemma="strong:H0929 strong:H9002 strong:H9003" src="124 120 121">
+        livestock
+    </w>
+     and over 
+    <w lemma="strong:H3605 strong:H9002 strong:H9003" src="134 130 131">
+        all
+    </w>
+     the 
+    <w lemma="strong:H0776 strong:H9009" src="144 141">
+        earth
+    </w>
+     and over 
+    <w lemma="strong:H3605 strong:H9002 strong:H9003" src="154 150 151">
+        every
+    </w>
+     
+    <w lemma="strong:H7431 strong:H9009" src="164 161">
+        creeping thing
+    </w>
+     that 
+    <w lemma="strong:H7430 strong:H9009" src="174 171">
+        creeps
+    </w>
+     on the 
+    <w lemma="strong:H0776 strong:H5921!a strong:H9009" src="194 184 191">
+        earth
+    </w>
+    .
+    <q eID="01001026.1" level="1" marker="”"/>
+     
+    <div eID="gen14" type="paragraph"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv10"/>
+    <lg sID="gen15"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv10"/>
+     
+    <l level="1" sID="gen16"/>
+    So 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H1254!a" src="014">
+        created
+    </w>
+     
+    <w lemma="strong:H0120 strong:H0853 strong:H9009" src="044 034 041">
+        man
+    </w>
+     in his own 
+    <w lemma="strong:H6754 strong:H9003" src="054 051">
+        image
+    </w>
+    ,
+    <l eID="gen16" level="1"/>
+     
+    <l level="2" sID="gen17"/>
+    in the 
+    <w lemma="strong:H6754 strong:H9023 strong:H9003" src="064 056 061">
+        image
+    </w>
+     of 
+    <w lemma="strong:H0430" src="074">
+        God
+    </w>
+     he 
+    <w lemma="strong:H1254!a" src="084">
+        created
+    </w>
+     him;
+    <l eID="gen17" level="2"/>
+     
+    <l level="2" sID="gen18"/>
+    <note n="r" osisID="Gen.1.27!crossReference.r" osisRef="Gen.1.27" type="crossReference">
+        <reference osisRef="Gen.2.18">
+            ch. 2:18
+        </reference>
+        , 
+        <reference osisRef="Gen.2.21-Gen.2.23">
+            21-23
+        </reference>
+        ; 
+        <reference osisRef="Gen.5.2">
+            5:2
+        </reference>
+        ; 
+        <reference osisRef="Mal.2.15">
+            Mal. 2:15
+        </reference>
+        ; 
+        <reference osisRef="Matt.19.4">
+            Matt. 19:4
+        </reference>
+        ; 
+        <reference osisRef="Mark.10.6">
+            Mark 10:6
+        </reference>
+    </note>
+    <w lemma="strong:H2145 strong:H0853 strong:H9033" src="104 094 096">
+        male
+    </w>
+     and 
+    <w lemma="strong:H5347 strong:H9002" src="114 110">
+        female
+    </w>
+     he 
+    <w lemma="strong:H1254!a" src="124">
+        created
+    </w>
+     them.
+    <l eID="gen18" level="2"/>
+     
+    <w lemma="strong:H0853" src="134">
+         
+    </w>
+    <w lemma="strong:H9038" src="136">
+         
+    </w>
+     
+    <lg eID="gen15"/>
+</xml>
+**********************************************************
+<xml>
+    <div type="x-milestone" subType="x-preverse" sID="pv11"/>
+    <div sID="gen19" type="paragraph"/>
+     
+    <div type="x-milestone" subType="x-preverse" eID="pv11"/>
+    And 
+    <w lemma="strong:H0430 strong:H0853 strong:H9038" src="034 024 026">
+        God
+    </w>
+     
+    <w lemma="strong:H1288" src="014">
+        blessed
+    </w>
+     them. And 
+    <w lemma="strong:H0430 strong:H9005 strong:H9038" src="064 051 056">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="044">
+        said
+    </w>
+     to them, 
+    <note n="s" osisID="Gen.1.28!crossReference.s" osisRef="Gen.1.28" type="crossReference">
+        <reference osisRef="Gen.9.1">
+            ch. 9:1
+        </reference>
+        , 
+        <reference osisRef="Gen.9.7">
+            7
+        </reference>
+    </note>
+    <q level="1" marker="“" sID="01001028.1"/>
+    Be 
+    <w lemma="strong:H6509" src="074">
+        fruitful
+    </w>
+     and 
+    <w lemma="strong:H7235!a" src="084">
+        multiply
+    </w>
+     and 
+    <w lemma="strong:H4390" src="094">
+        fill
+    </w>
+     the 
+    <w lemma="strong:H0776 strong:H0853 strong:H9009" src="114 104 111">
+        earth
+    </w>
+     and 
+    <w lemma="strong:H3533" src="124">
+        subdue
+    </w>
+     it, and have 
+    <w lemma="strong:H7287!a strong:H9034" src="134 126">
+        dominion
+    </w>
+     over the 
+    <w lemma="strong:H1710 strong:H9003" src="144 141">
+        fish
+    </w>
+     of the 
+    <w lemma="strong:H3220 strong:H9009" src="154 151">
+        sea
+    </w>
+     and over the 
+    <w lemma="strong:H5775 strong:H9002 strong:H9003" src="164 160 161">
+        birds
+    </w>
+     of the 
+    <w lemma="strong:H8064 strong:H9009" src="174 171">
+        heavens
+    </w>
+     and over 
+    <w lemma="strong:H3605 strong:H9002 strong:H9003" src="184 180 181">
+        every
+    </w>
+     
+    <w lemma="strong:H2416!a" src="194">
+        living
+    </w>
+     thing that 
+    <w lemma="strong:H7430 strong:H9009" src="204 201">
+        moves
+    </w>
+     on the 
+    <w lemma="strong:H0776 strong:H5921!a strong:H9009" src="224 214 221">
+        earth
+    </w>
+    .
+    <q eID="01001028.1" level="1" marker="”"/>
+</xml>
+**********************************************************
+<xml>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H0559" src="014">
+        said
+    </w>
+    , 
+    <q level="1" marker="“" sID="01001029.1"/>
+    <w lemma="strong:H2009" src="034">
+        Behold
+    </w>
+    , I have 
+    <w lemma="strong:H5414" src="044">
+        given
+    </w>
+     
+    <w lemma="strong:H3605 strong:H9005 strong:H9036 strong:H0853" src="074 051 056 064">
+        you every
+    </w>
+     
+    <w lemma="strong:H6212" src="084">
+        plant
+    </w>
+     
+    <w lemma="strong:H2232" src="094">
+        yielding
+    </w>
+     
+    <w lemma="strong:H2233" src="104">
+        seed
+    </w>
+     that is on the 
+    <w lemma="strong:H6440 strong:H5921!a" src="134 124">
+        face
+    </w>
+     of 
+    <w lemma="strong:H3605 strong:H9002 strong:H0853" src="174 160 164">
+        all
+    </w>
+     the 
+    <w lemma="strong:H0776 strong:H9009" src="154 151">
+        earth
+    </w>
+    , and 
+    <w lemma="strong:H3605" src="144">
+        every
+    </w>
+     
+    <w lemma="strong:H6086 strong:H9009" src="184 181">
+        tree
+    </w>
+     with 
+    <w lemma="strong:H2233 strong:H6086 strong:H2232" src="244 224 234">
+        seed
+    </w>
+     
+    <w lemma="strong:H0834!a" src="114">
+        in its
+    </w>
+     
+    <w lemma="strong:H6529 strong:H0834!a strong:H9003 strong:H9033" src="214 194 201 206">
+        fruit
+    </w>
+    . 
+    <note n="t" osisID="Gen.1.29!crossReference.t" osisRef="Gen.1.29" type="crossReference">
+        <reference osisRef="Gen.9.3">
+            ch. 9:3
+        </reference>
+        ; 
+        <reference osisRef="Ps.104.14-Ps.104.15">
+            Ps. 104:14, 15
+        </reference>
+        ; 
+        <reference osisRef="Ps.145.15-Ps.145.16">
+            145:15, 16
+        </reference>
+    </note>
+    You shall 
+    <w lemma="strong:H1961 strong:H9005 strong:H9036" src="264 251 256">
+        have
+    </w>
+     them for 
+    <w lemma="strong:H0402 strong:H9005" src="274 271">
+        food
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    And 
+    <note n="u" osisID="Gen.1.30!crossReference.u" osisRef="Gen.1.30" type="crossReference">
+        <reference osisRef="Ps.147.9">
+            Ps. 147:9
+        </reference>
+    </note>
+    to 
+    <w lemma="strong:H3605 strong:H9002 strong:H9005" src="014 010 011">
+        every
+    </w>
+     
+    <w lemma="strong:H2416!c" src="024">
+        beast
+    </w>
+     of the 
+    <w lemma="strong:H0776 strong:H9009" src="034 031">
+        earth
+    </w>
+     and to every 
+    <w lemma="strong:H5775" src="054">
+        bird
+    </w>
+     of the 
+    <w lemma="strong:H8064 strong:H9009" src="064 061">
+        heavens
+    </w>
+     and to 
+    <w lemma="strong:H3605 strong:H9002 strong:H9005" src="044 040 041">
+        everything
+    </w>
+     that 
+    <w lemma="strong:H7430" src="084">
+        creeps
+    </w>
+     on the 
+    <w lemma="strong:H0776 strong:H5921!a strong:H9009" src="104 094 101">
+        earth
+    </w>
+    , 
+    <w lemma="strong:H3605 strong:H9002 strong:H9005" src="074 070 071">
+        everything
+    </w>
+     that has the 
+    <w lemma="strong:H5315 strong:H0834!a strong:H9003 strong:H9033" src="134 114 121 126">
+        breath
+    </w>
+     of 
+    <w lemma="strong:H2416!a" src="144">
+        life
+    </w>
+    , I have given every 
+    <w lemma="strong:H3418 strong:H0853 strong:H3605" src="174 154 164">
+        green
+    </w>
+     
+    <w lemma="strong:H6212" src="184">
+        plant
+    </w>
+     for 
+    <w lemma="strong:H0402 strong:H9005" src="194 191">
+        food
+    </w>
+    .
+    <q eID="01001029.1" level="1" marker="”"/>
+     And it was 
+    <w lemma="strong:H3651!c strong:H1961" src="214 204">
+        so
+    </w>
+    .
+</xml>
+**********************************************************
+<xml>
+    <note n="v" osisID="Gen.1.31!crossReference.v" osisRef="Gen.1.31" type="crossReference">
+        <reference osisRef="Eccl.7.29">
+            Eccles. 7:29
+        </reference>
+        ; 
+        <reference osisRef="1Tim.4.4">
+            1 Tim. 4:4
+        </reference>
+    </note>
+    And 
+    <w lemma="strong:H0430" src="024">
+        God
+    </w>
+     
+    <w lemma="strong:H7200" src="014">
+        saw
+    </w>
+     
+    <w lemma="strong:H3605 strong:H0853" src="044 034">
+        everything
+    </w>
+     
+    <w lemma="strong:H0834!a" src="054">
+        that
+    </w>
+     he had 
+    <w lemma="strong:H6213!a" src="064">
+        made
+    </w>
+    , and 
+    <w lemma="strong:H2009 strong:H9002" src="074 070">
+        behold
+    </w>
+    , it was 
+    <w lemma="strong:H3966" src="094">
+        very
+    </w>
+     
+    <w lemma="strong:H2896!a" src="084">
+        good
+    </w>
+    . And there was 
+    <w lemma="strong:H6153 strong:H1961" src="114 104">
+        evening
+    </w>
+     and there was 
+    <w lemma="strong:H1242 strong:H1961" src="134 124">
+        morning
+    </w>
+    , the 
+    <w lemma="strong:H8345 strong:H9009" src="154 151">
+        sixth
+    </w>
+     
+    <w lemma="strong:H3117" src="144">
+        day
+    </w>
+    . 
+    <div eID="gen19" type="paragraph"/>
+     
+    <div eID="gen5" type="section"/>
+     
+    <chapter eID="gen4" osisID="Gen.1"/>
+</xml>
+**********************************************************
+1
