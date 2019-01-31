@@ -18,7 +18,7 @@ interface State {
   isLeftMenuOpen: boolean;
   isReady: boolean;
   isRightMenuOpen: boolean;
-  content: IBibleOutputRich;
+  content: IBibleOutputRich[];
 }
 
 export default class App extends React.PureComponent<{}, State> {
@@ -28,7 +28,7 @@ export default class App extends React.PureComponent<{}, State> {
 
   state = {
     books: [],
-    content: undefined,
+    content: [],
     isLeftMenuOpen: false,
     isReady: false,
     isRightMenuOpen: false

@@ -10,7 +10,7 @@ interface State {
 }
 
 interface Props {
-  content: IBibleOutputRich;
+  content: IBibleOutputRich[];
 }
 
 export default class ReadingView extends React.PureComponent<Props, State> {
@@ -55,9 +55,11 @@ export default class ReadingView extends React.PureComponent<Props, State> {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ marginTop: 30 }}
         >
-          {this.props.content.map((element: IBibleContent) =>
-            this.renderItem(element)
-          )}
+          {this.props.content
+            ? this.props.content.map((element: IBibleContent) =>
+                this.renderItem(element)
+              )
+            : null}
         </ScrollView>
       </View>
     );
