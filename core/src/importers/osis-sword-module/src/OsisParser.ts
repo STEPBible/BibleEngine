@@ -15,7 +15,7 @@ import {
   DocumentRoot,
   IBibleContentGroupForInput,
   IBibleContentSectionForInput
-} from '../../../core/src/models';
+} from '../../../models';
 
 const sax = require('sax');
 

@@ -4,7 +4,7 @@ import {
   IBibleContentGroupForInput,
   IBibleContentSectionForInput,
   IBibleNote
-} from '../../../core/src/models';
+} from '../../../models';
 
 export interface VerseMetadata {
   book: string;

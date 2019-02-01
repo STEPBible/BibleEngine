@@ -1,8 +1,8 @@
 import { BookXML } from './types';
 import SwordModule from './SwordModule';
 import ModuleIndex from './ModuleIndex';
-import { BibleEngine } from '../../../core/src/BibleEngine.class';
-import { BibleVersion } from '../../../core/src/entities';
+import { BibleEngine } from '../../../BibleEngine.class';
+import { BibleVersion } from '../../../entities';
 import { getBibleEngineInputFromXML } from './OsisParser';
 
 const fs = require('fs');
