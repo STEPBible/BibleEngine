@@ -1,0 +1,1375 @@
+[
+  {
+    "type": "section",
+    "title": "The LORD Is My Shepherd",
+    "contents": [
+      {
+        "type": "group",
+        "groupType": "paragraph",
+        "contents": [
+          {
+            "type": "phrase",
+            "content": "A",
+            "versionChapterNum": 23,
+            "versionVerseNum": 0
+          },
+          {
+            "type": "phrase",
+            "content": "Psalm",
+            "versionChapterNum": 23,
+            "versionVerseNum": 0,
+            "strongs": ["H4210"]
+          },
+          {
+            "type": "phrase",
+            "content": "of",
+            "versionChapterNum": 23,
+            "versionVerseNum": 0
+          },
+          {
+            "type": "phrase",
+            "content": "David.",
+            "versionChapterNum": 23,
+            "versionVerseNum": 0,
+            "strongs": ["H1732"]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "groupType": "paragraph",
+        "contents": [
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "phrase",
+                "content": "The",
+                "versionChapterNum": 23,
+                "versionVerseNum": 1
+              },
+              {
+                "type": "phrase",
+                "content": "LORD",
+                "versionChapterNum": 23,
+                "versionVerseNum": 1,
+                "strongs": ["H3068"]
+              },
+              {
+                "type": "phrase",
+                "content": "is my",
+                "versionChapterNum": 23,
+                "versionVerseNum": 1
+              },
+              {
+                "type": "phrase",
+                "content": "shepherd;",
+                "versionChapterNum": 23,
+                "versionVerseNum": 1,
+                "strongs": ["H7462b"],
+                "crossReferences": [
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 78,
+                      "versionVerseNum": 52
+                    }
+                  },
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 80,
+                      "versionVerseNum": 1
+                    }
+                  },
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "Isa",
+                      "versionChapterNum": 40,
+                      "versionVerseNum": 11
+                    }
+                  },
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "Jer",
+                      "versionChapterNum": 31,
+                      "versionVerseNum": 10
+                    }
+                  },
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "Ezek",
+                      "versionChapterNum": 34,
+                      "versionVerseNum": 11
+                    }
+                  },
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "Ezek",
+                      "versionChapterNum": 34,
+                      "versionVerseNum": 23
+                    }
+                  },
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "John",
+                      "versionChapterNum": 10,
+                      "versionVerseNum": 11
+                    }
+                  },
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "Heb",
+                      "versionChapterNum": 13,
+                      "versionVerseNum": 20
+                    }
+                  },
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "1Pet",
+                      "versionChapterNum": 2,
+                      "versionVerseNum": 25
+                    }
+                  },
+                  {
+                    "key": "d",
+                    "range": {
+                      "bookOsisId": "1Pet",
+                      "versionChapterNum": 5,
+                      "versionVerseNum": 4
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "I shall",
+                "versionChapterNum": 23,
+                "versionVerseNum": 1
+              },
+              {
+                "type": "phrase",
+                "content": "not",
+                "versionChapterNum": 23,
+                "versionVerseNum": 1,
+                "strongs": ["H3808"]
+              },
+              {
+                "type": "phrase",
+                "content": "want.",
+                "versionChapterNum": 23,
+                "versionVerseNum": 1,
+                "strongs": ["H2637"],
+                "crossReferences": [
+                  {
+                    "key": "e",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 34,
+                      "versionVerseNum": 9
+                    }
+                  },
+                  {
+                    "key": "e",
+                    "range": {
+                      "bookOsisId": "Matt",
+                      "versionChapterNum": 6,
+                      "versionVerseNum": 33
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "He makes me",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 2
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "lie down",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 2,
+                    "strongs": ["H7257"]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "in",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 2
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "green",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 2,
+                    "strongs": ["H1877"]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "pastures.",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 2,
+                    "strongs": ["H4999"],
+                    "crossReferences": [
+                      {
+                        "key": "f",
+                        "range": {
+                          "bookOsisId": "Ezek",
+                          "versionChapterNum": 34,
+                          "versionVerseNum": 14
+                        }
+                      },
+                      {
+                        "key": "f",
+                        "range": {
+                          "bookOsisId": "John",
+                          "versionChapterNum": 10,
+                          "versionVerseNum": 9
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "phrase",
+                "content": "He",
+                "versionChapterNum": 23,
+                "versionVerseNum": 2
+              },
+              {
+                "type": "phrase",
+                "content": "leads",
+                "versionChapterNum": 23,
+                "versionVerseNum": 2,
+                "strongs": ["H5095"]
+              },
+              {
+                "type": "phrase",
+                "content": "me",
+                "versionChapterNum": 23,
+                "versionVerseNum": 2
+              },
+              {
+                "type": "phrase",
+                "content": "beside",
+                "versionChapterNum": 23,
+                "versionVerseNum": 2,
+                "strongs": ["H5921"]
+              },
+              {
+                "type": "phrase",
+                "content": "still",
+                "versionChapterNum": 23,
+                "versionVerseNum": 2,
+                "strongs": ["H4496"]
+              },
+              {
+                "type": "phrase",
+                "content": "waters.",
+                "versionChapterNum": 23,
+                "versionVerseNum": 2,
+                "strongs": ["H4325"],
+                "notes": [
+                  {
+                    "type": "translation",
+                    "key": "1",
+                    "content": [
+                      {
+                        "type": "phrase",
+                        "content": "Hebrew \"beside waters of rest\" "
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "He",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 3
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "restores",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 3,
+                    "strongs": ["H7725"],
+                    "crossReferences": [
+                      {
+                        "key": "g",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 19,
+                          "versionVerseNum": 7
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "my",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 3
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "soul.",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 3,
+                    "strongs": ["H5315"]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "phrase",
+                "content": "He",
+                "versionChapterNum": 23,
+                "versionVerseNum": 3
+              },
+              {
+                "type": "phrase",
+                "content": "leads",
+                "versionChapterNum": 23,
+                "versionVerseNum": 3,
+                "strongs": ["H5148"],
+                "crossReferences": [
+                  {
+                    "key": "h",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 5,
+                      "versionVerseNum": 8
+                    }
+                  },
+                  {
+                    "key": "h",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 31,
+                      "versionVerseNum": 3
+                    }
+                  },
+                  {
+                    "key": "h",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 139,
+                      "versionVerseNum": 10
+                    }
+                  },
+                  {
+                    "key": "h",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 139,
+                      "versionVerseNum": 24
+                    }
+                  },
+                  {
+                    "key": "h",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 143,
+                      "versionVerseNum": 10
+                    }
+                  },
+                  {
+                    "key": "h",
+                    "range": {
+                      "bookOsisId": "Isa",
+                      "versionChapterNum": 40,
+                      "versionVerseNum": 11
+                    }
+                  },
+                  {
+                    "key": "h",
+                    "range": {
+                      "bookOsisId": "Isa",
+                      "versionChapterNum": 49,
+                      "versionVerseNum": 10
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "me in",
+                "versionChapterNum": 23,
+                "versionVerseNum": 3
+              },
+              {
+                "type": "phrase",
+                "content": "paths",
+                "versionChapterNum": 23,
+                "versionVerseNum": 3,
+                "strongs": ["H4570"],
+                "crossReferences": [
+                  {
+                    "key": "i",
+                    "range": {
+                      "bookOsisId": "Prov",
+                      "versionChapterNum": 4,
+                      "versionVerseNum": 11
+                    }
+                  },
+                  {
+                    "key": "i",
+                    "range": {
+                      "bookOsisId": "Prov",
+                      "versionChapterNum": 8,
+                      "versionVerseNum": 20
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "of",
+                "versionChapterNum": 23,
+                "versionVerseNum": 3
+              },
+              {
+                "type": "phrase",
+                "content": "righteousness",
+                "versionChapterNum": 23,
+                "versionVerseNum": 3,
+                "strongs": ["H6664"],
+                "notes": [
+                  {
+                    "type": "alternative",
+                    "key": "1",
+                    "content": [
+                      {
+                        "type": "phrase",
+                        "content": "Or \"in right paths\" "
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "for",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 3,
+                    "strongs": ["H4616"]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "his",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 3
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "name’s",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 3,
+                    "strongs": ["H8034"],
+                    "crossReferences": [
+                      {
+                        "key": "j",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 25,
+                          "versionVerseNum": 11
+                        }
+                      },
+                      {
+                        "key": "j",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 31,
+                          "versionVerseNum": 3
+                        }
+                      },
+                      {
+                        "key": "j",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 79,
+                          "versionVerseNum": 9
+                        }
+                      },
+                      {
+                        "key": "j",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 109,
+                          "versionVerseNum": 21
+                        }
+                      },
+                      {
+                        "key": "j",
+                        "range": {
+                          "bookOsisId": "Ezek",
+                          "versionChapterNum": 20,
+                          "versionVerseNum": 9
+                        }
+                      },
+                      {
+                        "key": "j",
+                        "range": {
+                          "bookOsisId": "Ezek",
+                          "versionChapterNum": 20,
+                          "versionVerseNum": 14
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "sake.",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 3
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "groupType": "paragraph",
+        "contents": [
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "phrase",
+                "content": "Even",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4,
+                "strongs": ["H1571"]
+              },
+              {
+                "type": "phrase",
+                "content": "though I",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4
+              },
+              {
+                "type": "phrase",
+                "content": "walk",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4,
+                "strongs": ["H3212"],
+                "crossReferences": [
+                  {
+                    "key": "k",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 138,
+                      "versionVerseNum": 7
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "through the",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4
+              },
+              {
+                "type": "phrase",
+                "content": "valley",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4,
+                "strongs": ["H1516"]
+              },
+              {
+                "type": "phrase",
+                "content": "of",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4
+              },
+              {
+                "type": "phrase",
+                "content": "the",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4,
+                "crossReferences": [
+                  {
+                    "key": "l",
+                    "range": {
+                      "bookOsisId": "Job",
+                      "versionChapterNum": 3,
+                      "versionVerseNum": 5
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "shadow of death,",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4,
+                "strongs": ["H6757"],
+                "notes": [
+                  {
+                    "type": "alternative",
+                    "key": "1",
+                    "content": [
+                      {
+                        "type": "phrase",
+                        "content": "Or \"the valley of deep darkness\" "
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "I will",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "fear",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4,
+                    "strongs": ["H3372"],
+                    "crossReferences": [
+                      {
+                        "key": "m",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 3,
+                          "versionVerseNum": 6
+                        }
+                      },
+                      {
+                        "key": "m",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 27,
+                          "versionVerseNum": 1
+                        }
+                      },
+                      {
+                        "key": "m",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 27,
+                          "versionVerseNum": 3
+                        }
+                      },
+                      {
+                        "key": "m",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 118,
+                          "versionVerseNum": 6
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "no",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4,
+                    "strongs": ["H3808"]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "evil,",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4,
+                    "strongs": ["H7451"]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "phrase",
+                "content": "for",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4,
+                "strongs": ["H3588"]
+              },
+              {
+                "type": "phrase",
+                "content": "you are",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4,
+                "crossReferences": [
+                  {
+                    "key": "n",
+                    "range": {
+                      "bookOsisId": "Exod",
+                      "versionChapterNum": 3,
+                      "versionVerseNum": 12
+                    }
+                  },
+                  {
+                    "key": "n",
+                    "range": {
+                      "bookOsisId": "Isa",
+                      "versionChapterNum": 43,
+                      "versionVerseNum": 2
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "with",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4,
+                "strongs": ["H5978"]
+              },
+              {
+                "type": "phrase",
+                "content": "me;",
+                "versionChapterNum": 23,
+                "versionVerseNum": 4
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "your",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "rod",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4,
+                    "strongs": ["H7626"],
+                    "crossReferences": [
+                      {
+                        "key": "o",
+                        "range": {
+                          "bookOsisId": "Mic",
+                          "versionChapterNum": 7,
+                          "versionVerseNum": 14
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "and your",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "staff,",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4,
+                    "strongs": ["H4938"]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "they",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "comfort",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4,
+                    "strongs": ["H5162"]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "me.",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 4
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "groupType": "paragraph",
+        "contents": [
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "phrase",
+                "content": "You",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5
+              },
+              {
+                "type": "phrase",
+                "content": "prepare",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5,
+                "strongs": ["H6186"],
+                "crossReferences": [
+                  {
+                    "key": "p",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 78,
+                      "versionVerseNum": 19
+                    }
+                  },
+                  {
+                    "key": "p",
+                    "range": {
+                      "bookOsisId": "Prov",
+                      "versionChapterNum": 9,
+                      "versionVerseNum": 2
+                    }
+                  },
+                  {
+                    "key": "p",
+                    "range": {
+                      "bookOsisId": "John",
+                      "versionChapterNum": 6,
+                      "versionVerseNum": 51
+                    }
+                  },
+                  {
+                    "key": "p",
+                    "range": {
+                      "bookOsisId": "2Sam",
+                      "versionChapterNum": 17,
+                      "versionVerseNum": 27
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "a",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5
+              },
+              {
+                "type": "phrase",
+                "content": "table",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5,
+                "strongs": ["H7979"]
+              },
+              {
+                "type": "phrase",
+                "content": "before",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5,
+                "strongs": ["H6440"]
+              },
+              {
+                "type": "phrase",
+                "content": "me",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "in",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 5
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "the",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 5,
+                    "crossReferences": [
+                      {
+                        "key": "q",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 31,
+                          "versionVerseNum": 19
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "presence",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 5,
+                    "strongs": ["H5048"]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "of my",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 5
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "enemies;",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 5,
+                    "strongs": ["H6887"]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "phrase",
+                "content": "you",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5
+              },
+              {
+                "type": "phrase",
+                "content": "anoint",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5,
+                "strongs": ["H1878"],
+                "crossReferences": [
+                  {
+                    "key": "r",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 45,
+                      "versionVerseNum": 7
+                    }
+                  },
+                  {
+                    "key": "r",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 133,
+                      "versionVerseNum": 2
+                    }
+                  },
+                  {
+                    "key": "r",
+                    "range": {
+                      "bookOsisId": "Luke",
+                      "versionChapterNum": 7,
+                      "versionVerseNum": 46
+                    }
+                  },
+                  {
+                    "key": "r",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 92,
+                      "versionVerseNum": 10
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "my",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5
+              },
+              {
+                "type": "phrase",
+                "content": "head",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5,
+                "strongs": ["H7218"]
+              },
+              {
+                "type": "phrase",
+                "content": "with",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5
+              },
+              {
+                "type": "phrase",
+                "content": "oil;",
+                "versionChapterNum": 23,
+                "versionVerseNum": 5,
+                "strongs": ["H8081"]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "my",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 5
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "cup",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 5,
+                    "strongs": ["H3563"],
+                    "crossReferences": [
+                      {
+                        "key": "s",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 16,
+                          "versionVerseNum": 5
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "overflows.",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 5,
+                    "strongs": ["H7310"]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "phrase",
+                "content": "Surely",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6,
+                "strongs": ["H389"],
+                "notes": [
+                  {
+                    "type": "alternative",
+                    "key": "1",
+                    "content": [
+                      {
+                        "type": "phrase",
+                        "content": "Or \"Only\" "
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "goodness",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6,
+                "strongs": ["H2896"]
+              },
+              {
+                "type": "phrase",
+                "content": "and",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6
+              },
+              {
+                "type": "phrase",
+                "content": "mercy",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6,
+                "strongs": ["H2617"],
+                "notes": [
+                  {
+                    "type": "alternative",
+                    "key": "2",
+                    "content": [
+                      {
+                        "type": "phrase",
+                        "content": "Or \"steadfast love\" "
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "shall",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6
+              },
+              {
+                "type": "phrase",
+                "content": "follow",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6,
+                "strongs": ["H7291"]
+              },
+              {
+                "type": "phrase",
+                "content": "me",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "all",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 6,
+                    "strongs": ["H3605"]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "the",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 6
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "days",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 6,
+                    "strongs": ["H3117"]
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "of my",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 6
+                  },
+                  {
+                    "type": "phrase",
+                    "content": "life,",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 6,
+                    "strongs": ["H2416"]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "phrase",
+                "content": "and I shall",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6
+              },
+              {
+                "type": "phrase",
+                "content": "dwell",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6,
+                "strongs": ["H3427"],
+                "crossReferences": [
+                  {
+                    "key": "t",
+                    "range": {
+                      "bookOsisId": "Ps",
+                      "versionChapterNum": 27,
+                      "versionVerseNum": 4
+                    }
+                  }
+                ],
+                "notes": [
+                  {
+                    "type": "alternative",
+                    "key": "3",
+                    "content": [
+                      {
+                        "type": "phrase",
+                        "content": "Or \"shall return to dwell\" "
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "phrase",
+                "content": "in the",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6
+              },
+              {
+                "type": "phrase",
+                "content": "house",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6,
+                "strongs": ["H1004"]
+              },
+              {
+                "type": "phrase",
+                "content": "of the",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6
+              },
+              {
+                "type": "phrase",
+                "content": "LORD",
+                "versionChapterNum": 23,
+                "versionVerseNum": 6,
+                "strongs": ["H3068"]
+              }
+            ]
+          },
+          {
+            "type": "group",
+            "groupType": "indent",
+            "contents": [
+              {
+                "type": "group",
+                "groupType": "indent",
+                "contents": [
+                  {
+                    "type": "phrase",
+                    "content": "forever.",
+                    "versionChapterNum": 23,
+                    "versionVerseNum": 6,
+                    "strongs": ["H753", "H3117"],
+                    "crossReferences": [
+                      {
+                        "key": "u",
+                        "range": {
+                          "bookOsisId": "Ps",
+                          "versionChapterNum": 21,
+                          "versionVerseNum": 4
+                        }
+                      }
+                    ],
+                    "notes": [
+                      {
+                        "type": "translation",
+                        "key": "4",
+                        "content": [
+                          {
+                            "type": "phrase",
+                            "content": "Hebrew \"for length of days\" "
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

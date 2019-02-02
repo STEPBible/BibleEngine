@@ -4,6 +4,8 @@
         "module": "commonjs",
         "lib": ["dom", "es2018"],
         "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
         "sourceMap": true,
         "outDir": "lib",
         "emitDecoratorMetadata": true,

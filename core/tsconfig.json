@@ -1,6 +1,8 @@
 {
     "extends": "../tsconfig.json",
     "compilerOptions": {
-        "preserveSymlinks": true
+        "preserveSymlinks": true,
+        "target": "es2017",
+        "outDir": "./dist"
     }
 }
