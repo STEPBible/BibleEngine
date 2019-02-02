@@ -11,4 +11,4 @@ core/src/importers/NEUE/html
 lib/
 *ESV20*
 */dist/*
-*/bible.db
+*bible.db
