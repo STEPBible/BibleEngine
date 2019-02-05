@@ -11,6 +11,7 @@ _BibleEngine_ can serve as a general purpose library for powering JavaScript bib
 -   automatic versification conversion across any bible version
 -   integrated up-to-date original language text with variants for all text forms
 -   automatic morphology for any bible version with strongs
+-   automatic source text matching (verse level), even for bibles *without* strongs
 -   integrated glosses for each original word, plus lemma, transliteration and Strong/BDB entries
 
 Additional features:
