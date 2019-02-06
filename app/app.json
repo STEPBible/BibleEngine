@@ -4,7 +4,7 @@
     "description": "This project is really great.",
     "slug": "step-bible-mobile",
     "privacy": "public",
-    "sdkVersion": "27.0.0",
+    "sdkVersion": "32.0.0",
     "platforms": ["ios", "android"],
     "version": "1.0.0",
     "orientation": "portrait",
@@ -23,8 +23,7 @@
     },
     "packagerOpts": {
       "sourceExts": ["ts", "tsx"],
-      "assetExts": ["db", "mp3", "ttf", "png"],
-      "transformer": "node_modules/react-native-typescript-transformer/index.js"
-  }
+      "assetExts": ["db", "mp3", "ttf", "png"]
+    }
   }
 }

@@ -19,5 +19,6 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "downlevelIteration": true
-    }
+    },
+    "exclude": ["node_modules"]
 }
