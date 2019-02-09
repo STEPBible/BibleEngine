@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 import { BookXML } from './types';
 import SwordModule from './SwordModule';
 import ModuleIndex from './ModuleIndex';
@@ -7,9 +8,11 @@ import { getBibleEngineInputFromXML } from './OsisParser';
 
 const fs = require('fs');
 
+const dirProjectRoot = resolve(__dirname + '/../../../..');
+
 const sqlBible = new BibleEngine({
   type: 'sqlite',
-  database: `bible.db`
+  database: `${dirProjectRoot}/output/bible.db`
 });
 
 function getXmlFromModule(filename: string): BookXML[] {
