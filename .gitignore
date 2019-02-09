@@ -12,3 +12,5 @@ lib/
 *ESV20*
 */dist/*
 *bible.db
+greek_lexicon.txt
+hebrew_lexicon.txt
