@@ -456,14 +456,26 @@ function getStrongsNumbers(context: ParserContext): string[] {
   const strongsNumbersString = lemma.replace(' ', '').replace('!', '');
   const strongsNumbers = strongsNumbersString
     .split('strong:')
-    .map(strongsNum => {
-      if (strongsNum[1] === '0') {
-        return strongsNum[0] + strongsNum.substring(2);
-      }
-      return strongsNum;
-    });
-  strongsNumbers.shift();
+    .filter(element => element)
+    .map(strongsNum => normalizeStrongsNum(strongsNum));
   return strongsNumbers;
+}
+
+function normalizeStrongsNum(strongsNum: string): string {
+  const lastCharacter = strongsNum[strongsNum.length - 1];
+  const startingletter = strongsNum[0].toUpperCase();
+  const numberPortion = isNumeric(lastCharacter)
+    ? strongsNum.substring(1)
+    : strongsNum.substring(1, strongsNum.length - 1);
+  const endingLetter = isNumeric(lastCharacter)
+    ? ''
+    : lastCharacter.toLowerCase();
+  const paddedNumber = String('0000' + numberPortion).slice(-4);
+  return startingletter + paddedNumber + endingLetter;
+}
+
+function isNumeric(num) {
+  return !isNaN(num);
 }
 
 function getStringWithoutXMLTags(str: string) {
