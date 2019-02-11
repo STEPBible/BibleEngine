@@ -1,6 +1,7 @@
 require('isomorphic-fetch');
 import * as koa from 'koa';
 import * as koaRouter from 'koa-router';
+import * as KoaCors from '@koa/cors';
 import * as bodyParser from 'koa-bodyparser';
 
 import { BibleEngine } from '@bible-engine/core';
@@ -16,8 +17,16 @@ const api = new BibleEngine({
 });
 const app = new koa();
 app.use(bodyParser());
+
+app.use(
+    KoaCors({
+        allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE'],
+        origin: '*' // http://localhost:8100
+    })
+);
+
 const router = new koaRouter();
-const PORT = process.env.NODE_ENV === 'production' ? 3456 : 3456;
+const PORT = process.env.NODE_ENV === 'production' ? 3888 : 3888;
 
 router.post('/getFullDataForReferenceRange', async (ctx, _) => {
     const bibleContent = await api.getFullDataForReferenceRange(

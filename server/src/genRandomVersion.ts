@@ -21,7 +21,7 @@ const sqlBible = new BibleEngine({
 export const genDb = async () => {
     const esvVersion = await sqlBible.addVersion(
         new BibleVersion({
-            version: 'EL3',
+            uid: 'ESV',
             title: 'Elberfelder 2003',
             language: 'de-DE',
             chapterVerseSeparator: ','
@@ -46,25 +46,25 @@ export const genDb = async () => {
                             versionChapterNum: chapter,
                             versionVerseNum: verse,
                             content: wordGen({ min: 1, max: 2, join: ' ' }),
-                            notes:
-                                verse % 7 === 0 && phraseIdx === 1
-                                    ? [
-                                          {
-                                              type: 'study',
-                                              key: '1',
-                                              content: [
-                                                  {
-                                                      type: 'phrase',
-                                                      content: wordGen({
-                                                          min: 1,
-                                                          max: 30,
-                                                          join: ' '
-                                                      })
-                                                  }
-                                              ]
-                                          }
-                                      ]
-                                    : undefined,
+                            // notes:
+                            //     verse % 7 === 0 && phraseIdx === 1
+                            //         ? [
+                            //               {
+                            //                   type: 'study',
+                            //                   key: '1',
+                            //                   content: [
+                            //                       {
+                            //                           type: 'phrase',
+                            //                           content: wordGen({
+                            //                               min: 1,
+                            //                               max: 30,
+                            //                               join: ' '
+                            //                           })
+                            //                       }
+                            //                   ]
+                            //               }
+                            //           ]
+                            //         : undefined,
                             strongs: ['G' + phraseIdx * verse],
                             crossReferences:
                                 verse % 5 === 0 && phraseIdx === 1
@@ -105,7 +105,7 @@ export const genDb = async () => {
 
 export const getData = async () => {
     const output = await sqlBible.getFullDataForReferenceRange({
-        queryVersion: 'ESV',
+        versionUid: 'ESV',
         bookOsisId: 'Gen',
         versionChapterNum: 1,
         versionVerseNum: 4,

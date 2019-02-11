@@ -43,7 +43,7 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
     @Column({ nullable: true })
     linebreak?: boolean;
 
-    @Column({ nullable: true, type: 'text', length: 6 })
+    @Column({ nullable: true, type: 'text' })
     skipSpace?: IContentPhrase['skipSpace'];
 
     // everything that is not tied to one single phrase, thus forming groups in the content
