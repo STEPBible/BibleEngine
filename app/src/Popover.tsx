@@ -31,9 +31,9 @@ const flattenStyle = require('react-native/Libraries/StyleSheet/flattenStyle');
 const noop = () => {};
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const DEFAULT_ARROW_SIZE = new Size(16, 8);
-const DEFAULT_BORDER_RADIUS = 20;
+const DEFAULT_BORDER_RADIUS = 10;
 const FIX_SHIFT = SCREEN_WIDTH * 2;
-const ELEVATION = 15;
+const ELEVATION = 30;
 const majorVersionIOS = parseInt(Platform.Version, 10);
 const isIOS = Platform.OS === 'ios';
 const isLandscape = () =>

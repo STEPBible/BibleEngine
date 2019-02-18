@@ -1,24 +1,38 @@
 import React from 'react';
 import { Text, View, StyleSheet, ScrollView, Dimensions } from 'react-native';
 
-import { IBibleContent, IBibleOutputRich } from '@bible-engine/core';
-import Colors from './Colors';
+import {
+  IBibleContent,
+  IBibleOutputRich,
+  BibleEngine
+} from '@bible-engine/core';
 import StrongsWord from './StrongsWord';
+import { Margin, FontSize, FontFamily, Color } from './Constants';
 
 interface State {
   content: IBibleContent[];
 }
 
 interface Props {
+  chapterNum: number;
+  bookName: string;
   content: IBibleOutputRich[];
+  sqlBible: BibleEngine;
 }
 
 export default class ReadingView extends React.PureComponent<Props, State> {
+  componentWillReceiveProps(props: Props) {
+    console.log(JSON.stringify(props.bookName));
+  }
   renderItem = (content: IBibleContent): any => {
     if (content.type === 'phrase') {
       if (content.strongs) {
         return (
-          <StrongsWord phrase={content.content} strongs={content.strongs} />
+          <StrongsWord
+            phrase={content.content}
+            strongs={content.strongs}
+            sqlBible={this.props.sqlBible}
+          />
         );
       }
       return (
@@ -55,6 +69,9 @@ export default class ReadingView extends React.PureComponent<Props, State> {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ marginTop: 30 }}
         >
+          <Text style={styles.chapterHeader}>
+            {`${this.props.bookName} ${this.props.chapterNum}`}
+          </Text>
           {this.props.content
             ? this.props.content.map((element: IBibleContent) =>
                 this.renderItem(element)
@@ -69,32 +86,41 @@ export default class ReadingView extends React.PureComponent<Props, State> {
 const styles = StyleSheet.create({
   background: {
     backgroundColor: 'white',
-    flex: 1
+    flex: 1,
+    borderLeftColor: 'gray',
+    borderLeftWidth: 1
+  },
+  chapterHeader: {
+    fontSize: FontSize.EXTRA_LARGE,
+    fontFamily: FontFamily.OPEN_SANS_LIGHT,
+    marginTop: Margin.LARGE,
+    marginBottom: Margin.LARGE,
+    textAlign: 'center'
   },
   phrase: {
-    marginBottom: 12,
-    marginRight: 7
+    marginBottom: Margin.EXTRA_SMALL,
+    marginRight: Margin.EXTRA_SMALL
   },
   phraseText: {
-    fontFamily: 'cardo',
-    fontSize: 22
+    fontFamily: FontFamily.CARDO,
+    fontSize: FontSize.MEDIUM
   },
   section: {
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginLeft: 20,
-    marginRight: 20
+    marginLeft: Margin.LARGE,
+    marginRight: Margin.LARGE
   },
   strongsPhraseText: {
-    color: Colors.tyndaleBlue,
-    fontFamily: 'cardo',
-    fontSize: 22
+    color: Color.TYNDALE_BLUE,
+    fontFamily: FontFamily.CARDO,
+    fontSize: FontSize.MEDIUM
   },
   title: {
-    fontFamily: 'open-sans-semibold',
-    fontSize: 19,
-    marginBottom: 14,
+    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
+    fontSize: FontSize.MEDIUM * 0.8,
+    marginBottom: Margin.MEDIUM,
     width: Dimensions.get('window').width
   }
 });

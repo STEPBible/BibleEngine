@@ -15,10 +15,14 @@ const DEVICE_WIDTH = Dimensions.get('window').width;
 
 interface State {
   books: BibleBook[];
+  content: IBibleOutputRich[];
+  currentBookOsisId: string;
+  currentBookFullTitle: string;
+  currentChapterNum: number;
+  currentVersionUid: string;
   isLeftMenuOpen: boolean;
   isReady: boolean;
   isRightMenuOpen: boolean;
-  content: IBibleOutputRich[];
 }
 
 export default class App extends React.PureComponent<{}, State> {
@@ -29,6 +33,10 @@ export default class App extends React.PureComponent<{}, State> {
   state = {
     books: [],
     content: [],
+    currentBookOsisId: 'Josh',
+    currentBookFullTitle: 'Josh',
+    currentChapterNum: 1,
+    currentVersionUid: 'ESV',
     isLeftMenuOpen: false,
     isReady: false,
     isRightMenuOpen: false
@@ -47,7 +55,12 @@ export default class App extends React.PureComponent<{}, State> {
 
     return (
       <SideMenu
-        menu={<BookMenu books={this.state.books} />}
+        menu={
+          <BookMenu
+            books={this.state.books}
+            changeBookAndChapter={this.changeBookAndChapter}
+          />
+        }
         isOpen={this.state.isLeftMenuOpen}
         menuPosition="left"
         gesturesAreEnabled={this.leftMenuGesturesAreEnabled}
@@ -65,11 +78,41 @@ export default class App extends React.PureComponent<{}, State> {
           ref={ref => (this.rightMenuRef = ref)}
         >
           <StatusBar hidden={true} />
-          <ReadingView content={this.state.content} />
+          <ReadingView
+            chapterNum={this.state.currentChapterNum}
+            bookName={this.state.currentBookFullTitle}
+            content={this.state.content}
+            sqlBible={this.sqlBible}
+          />
         </SideMenu>
       </SideMenu>
     );
   }
+
+  changeBookAndChapter = async (
+    bookOsisId: string,
+    versionChapterNum: number
+  ) => {
+    const content = await this.sqlBible.getFullDataForReferenceRange(
+      {
+        bookOsisId,
+        versionUid: 'ESV',
+        versionChapterNum
+      },
+      true
+    );
+    const currentBookFullTitle = this.state.books.filter(
+      book => book.osisId === bookOsisId
+    )[0].title;
+    this.setState({
+      ...this.state,
+      currentBookFullTitle,
+      content: content.content.contents,
+      currentBookOsisId: bookOsisId,
+      currentChapterNum: versionChapterNum,
+      isLeftMenuOpen: false
+    });
+  };
 
   loadResourcesAsync = async () => {
     console.disableYellowBox = true;
@@ -81,17 +124,21 @@ export default class App extends React.PureComponent<{}, State> {
     });
     await this.sqlBible.setVersion('ESV');
     const books = await this.sqlBible.getBooksForVersion(1);
+    const currentBookFullTitle = books.filter(
+      book => book.osisId === this.state.currentBookOsisId
+    )[0].title;
     const content = await this.sqlBible.getFullDataForReferenceRange(
       {
-        bookOsisId: 'Gen',
+        bookOsisId: this.state.currentBookOsisId,
         versionUid: 'ESV',
-        versionChapterNum: 1
+        versionChapterNum: this.state.currentChapterNum
       },
       true
     );
     this.setState({
       ...this.state,
       books,
+      currentBookFullTitle,
       content: content.content.contents
     });
   };

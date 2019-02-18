@@ -46,6 +46,8 @@
     "expo": "^32.0.0",
     "react": "16.5.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
+    "react-native-collapsible": "^1.4.0",
+    "react-native-snap-carousel": "^3.7.5",
     "react-native-sqlite-storage": "^3.3.5",
     "tslib": "^1.9.1"
   }
