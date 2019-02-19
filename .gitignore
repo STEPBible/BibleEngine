@@ -13,3 +13,4 @@ lib/
 *ESV20*
 */dist/*
 *bible.db
+.DS_Store

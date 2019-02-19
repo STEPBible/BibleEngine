@@ -13,7 +13,7 @@ import {
   DictionaryEntry,
   DocumentElement
 } from '@bible-engine/core';
-import { Color, FontFamily, FontSize } from './Constants';
+import { Color, FontFamily, FontSize, Margin } from './Constants';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   strongWord: {
     marginRight: 7,
-    marginBottom: 12
+    marginBottom: Margin.EXTRA_SMALL
   },
   strongWordText: {
     color: Color.TYNDALE_BLUE,

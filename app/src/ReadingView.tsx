@@ -120,7 +120,8 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.MEDIUM * 0.8,
-    marginBottom: Margin.MEDIUM,
+    marginBottom: Margin.SMALL,
+    marginTop: Margin.SMALL,
     width: Dimensions.get('window').width
   }
 });
