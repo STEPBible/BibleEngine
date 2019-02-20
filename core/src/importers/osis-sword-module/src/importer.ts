@@ -4,12 +4,15 @@ import ModuleIndex from './ModuleIndex';
 import { BibleEngine } from '../../../BibleEngine.class';
 import { BibleVersion } from '../../../entities';
 import { getBibleEngineInputFromXML } from './OsisParser';
+import { resolve } from 'path';
 
 const fs = require('fs');
 
+const dirProjectRoot = resolve(__dirname + '/../../../..');
+
 const sqlBible = new BibleEngine({
   type: 'sqlite',
-  database: `bible.db`
+  database: `${dirProjectRoot}/output/bible.db`
 });
 
 function getXmlFromModule(filename: string): BookXML[] {

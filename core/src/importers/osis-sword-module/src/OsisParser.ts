@@ -453,16 +453,16 @@ function getStrongsNumbers(context: ParserContext): string[] {
     return [];
   }
   const lemma = context.currentNode!.attributes.lemma!;
-  const strongsNumbersString = lemma.replace(' ', '').replace('!', '');
+  const strongsNumbersString = lemma.replace(/ /g, '').replace(/!/g, '');
   const strongsNumbers = strongsNumbersString
     .split('strong:')
+    .filter(strongsNum => strongsNum.length)
     .map(strongsNum => {
-      if (strongsNum[1] === '0') {
-        return strongsNum[0] + strongsNum.substring(2);
+      if (strongsNum.replace(/\D/g, '').length !== 4) {
+        throw new Error(`Invalid strongs num: ${strongsNum}`);
       }
       return strongsNum;
     });
-  strongsNumbers.shift();
   return strongsNumbers;
 }
 
