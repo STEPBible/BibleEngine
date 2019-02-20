@@ -32,7 +32,7 @@ enum LexiconEntryType {
 function isValidContent(line: string) {
   return (
     line &&
-    line.split('=').length === 2 &&
+    line.split('=').length >= 2 &&
     line.split('=')[1].trim().length &&
     Object.values(LexiconEntryType).includes(line.split('=')[0].trim())
   );
@@ -44,7 +44,11 @@ function getStrongsContent(lines: string[]) {
     .filter((line: string) => isValidContent(line))
     .reduce((currentLexiconEntries: any, line: string) => {
       const entryType: string = line.split('=')[0].trim();
-      const entryValue: string = line.split('=')[1].trim();
+      const entryValue: string = line
+        .split('=')
+        .slice(1)
+        .join('')
+        .trim();
       if (entryType === LexiconEntryType.STRONGS_NUM) {
         currentStrongsNum = entryValue;
         currentLexiconEntries[currentStrongsNum] = {};
@@ -88,13 +92,17 @@ function getHebrewContentStructure(definitions: string[]): DocumentRoot {
   return content;
 }
 
+function getStringWithoutXMLTags(str: string) {
+  return str.replace(/<(?:.|\n)*?>/gm, '');
+}
+
 function getGreekContentStructure(definition: string): DocumentRoot {
   const contents: DocumentElement[] = [];
   definition.split('<b>').forEach((element: string) => {
     const split = element.split('</b>');
     if (split.length > 1) {
-      const boldPart = split[0];
-      const nonBoldPart = split[1];
+      const boldPart = getStringWithoutXMLTags(split[0]);
+      const nonBoldPart = getStringWithoutXMLTags(split[1]);
       const boldElement: DocumentGroup<'bold'> = {
         type: 'group',
         groupType: 'bold',
@@ -115,7 +123,7 @@ function getGreekContentStructure(definition: string): DocumentRoot {
     }
     const nonBoldElement: DocumentPhrase = {
       type: 'phrase',
-      content: element
+      content: getStringWithoutXMLTags(element)
     };
     contents.push(nonBoldElement);
   });
@@ -241,10 +249,6 @@ export const genDb = async () => {
     greekLexiconEntries,
     LexiconEntryType.GREEK_DEFINITION
   );
-
-  // console.log(
-  //   JSON.stringify(greekDictionaryEntries.slice(1000, 1010), null, 2)
-  // );
 
   for (let entry of greekDictionaryEntries) {
     sqlBible.addDictionaryEntry(entry);
