@@ -1,4 +1,4 @@
-import { DocumentRoot } from '../../../models';
+import { DocumentRoot } from '@bible-engine/core';
 
 export default <DocumentRoot>{
     type: 'root',

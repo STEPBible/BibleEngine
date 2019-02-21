@@ -1,4 +1,4 @@
-import { BibleEngine } from '../../BibleEngine.class';
+import { BibleEngine } from '@bible-engine/core';
 import { resolve } from 'path';
 
 const dirProjectRoot = resolve(__dirname + '/../../..');

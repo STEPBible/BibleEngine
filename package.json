@@ -6,6 +6,7 @@
     "workspaces": [
         "app",
         "core",
+        "importers",
         "server"
     ]
 }

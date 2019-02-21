@@ -1,5 +1,4 @@
-import { BibleReferenceParser } from '../../models/BibleReference';
-import { getReferencesFromText } from '../../functions/reference.functions';
+import { BibleReferenceParser, getReferencesFromText } from '@bible-engine/core';
 
 const bcv_parser = require('bible-passage-reference-parser/js/de_bcv_parser').bcv_parser;
 const bcv: BibleReferenceParser = new bcv_parser({});

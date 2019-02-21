@@ -1,7 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index } from '../../typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 
-@Entity()
-export class BiblePhraseOriginalWord {
+@Entity('bible_phrase_original_word')
+export class BiblePhraseOriginalWordEntity {
     @PrimaryGeneratedColumn()
     id?: number;
 
@@ -33,7 +33,7 @@ export class BiblePhraseOriginalWord {
     @Column({ nullable: true })
     aspect?: string;
 
-    constructor(initializer: BiblePhraseOriginalWord) {
+    constructor(initializer: BiblePhraseOriginalWordEntity) {
         if (initializer) Object.assign(this, initializer);
     }
 }

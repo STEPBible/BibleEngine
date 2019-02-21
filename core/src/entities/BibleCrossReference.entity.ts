@@ -7,17 +7,17 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from '../../typeorm';
+} from 'typeorm';
 import {
     generateReferenceId,
     parseReferenceId,
     isReferenceNormalized
 } from '../functions/reference.functions';
 import { IBibleReferenceRangeNormalized, IBibleCrossReference } from '../models';
-import { BiblePhrase, BibleSection } from '../entities';
+import { BiblePhraseEntity, BibleSectionEntity } from '../entities';
 
-@Entity()
-export class BibleCrossReference implements IBibleCrossReference {
+@Entity('bible_cross_reference')
+export class BibleCrossReferenceEntity implements IBibleCrossReference {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -57,15 +57,15 @@ export class BibleCrossReference implements IBibleCrossReference {
     @Column({ nullable: true })
     @Index()
     phraseId?: number;
-    @ManyToOne(() => BiblePhrase, phrase => phrase.crossReferences)
-    phrase?: BiblePhrase;
+    @ManyToOne(() => BiblePhraseEntity, phrase => phrase.crossReferences)
+    phrase?: BiblePhraseEntity;
 
     @Column({ nullable: true })
     @Index()
     sectionId?: number;
 
-    @ManyToOne(() => BibleSection, section => section.crossReferences)
-    section?: BibleSection;
+    @ManyToOne(() => BibleSectionEntity, section => section.crossReferences)
+    section?: BibleSectionEntity;
 
     constructor(crossRef: IBibleCrossReference, allowCreationWithoutNormalizedReference = false) {
         // typeorm is seemingly creating objects on startup (without passing parameters), so we

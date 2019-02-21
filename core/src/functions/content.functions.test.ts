@@ -1,6 +1,6 @@
 import { IBibleOutputRich, IBibleVersion, IBibleOutputRoot, IBibleContent } from '../models';
 import { generateBibleDocument } from './content.functions';
-import { BibleParagraph, BiblePhrase, BibleSection } from '../entities';
+import { BibleParagraphEntity, BiblePhraseEntity, BibleSectionEntity } from '../entities';
 
 describe('generateBibleDocument', () => {
     let doc: IBibleOutputRoot;
@@ -17,7 +17,7 @@ describe('generateBibleDocument', () => {
         Ps: 'Ps'
     };
 
-    const phrase1 = new BiblePhrase(
+    const phrase1 = new BiblePhraseEntity(
         {
             content: 'phrase1',
             versionChapterNum: 1,
@@ -46,7 +46,7 @@ describe('generateBibleDocument', () => {
     );
     phrase1.prepare();
 
-    const phrase2 = new BiblePhrase(
+    const phrase2 = new BiblePhraseEntity(
         { content: 'phrase2', versionChapterNum: 1, versionVerseNum: 1 },
         {
             isNormalized: true,
@@ -61,7 +61,7 @@ describe('generateBibleDocument', () => {
     );
     phrase2.prepare();
 
-    const phrase3 = new BiblePhrase(
+    const phrase3 = new BiblePhraseEntity(
         { content: 'phrase3', versionChapterNum: 1, versionVerseNum: 2 },
         {
             isNormalized: true,
@@ -76,7 +76,7 @@ describe('generateBibleDocument', () => {
     );
     phrase3.prepare();
 
-    const phrase4 = new BiblePhrase(
+    const phrase4 = new BiblePhraseEntity(
         { content: 'phrase4', versionChapterNum: 1, versionVerseNum: 2 },
         {
             isNormalized: true,
@@ -91,10 +91,10 @@ describe('generateBibleDocument', () => {
     );
     phrase4.prepare();
 
-    const paragraph1 = new BibleParagraph(1, phrase1.id, phrase3.id);
+    const paragraph1 = new BibleParagraphEntity(1, phrase1.id, phrase3.id);
     paragraph1.id = 1;
 
-    const section1 = new BibleSection({
+    const section1 = new BibleSectionEntity({
         versionId: 1,
         level: 1,
         title: 'section1',
@@ -102,7 +102,7 @@ describe('generateBibleDocument', () => {
         phraseEndId: phrase3.id
     });
     section1.id = 1;
-    const section2 = new BibleSection({
+    const section2 = new BibleSectionEntity({
         versionId: 1,
         level: 1,
         title: 'section2',
@@ -110,7 +110,7 @@ describe('generateBibleDocument', () => {
         phraseEndId: phrase4.id
     });
     section2.id = 2;
-    const section2_1 = new BibleSection({
+    const section2_1 = new BibleSectionEntity({
         versionId: 1,
         level: 2,
         title: 'section2_1',
@@ -133,8 +133,8 @@ describe('generateBibleDocument', () => {
     let item2_1: IBibleContent;
 
     beforeAll(() => {
-        const phrases: BiblePhrase[] = [phrase1, phrase2, phrase3, phrase4];
-        const paragraphs: BibleParagraph[] = [paragraph1];
+        const phrases: BiblePhraseEntity[] = [phrase1, phrase2, phrase3, phrase4];
+        const paragraphs: BibleParagraphEntity[] = [paragraph1];
         const context: IBibleOutputRich['context'] = {
             1: {
                 includedSections: [section1, section2],

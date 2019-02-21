@@ -1,5 +1,5 @@
 import { BibleEngine } from './BibleEngine.class';
-import { BibleVersion } from './entities';
+import { BibleVersionEntity } from './entities';
 
 const sqlBible = new BibleEngine({
     type: 'sqlite',
@@ -8,7 +8,7 @@ const sqlBible = new BibleEngine({
 
 beforeAll(async () => {
     await sqlBible.addVersion(
-        new BibleVersion({
+        new BibleVersionEntity({
             uid: 'ESV',
             title: 'English Standard Bible',
             language: 'en-US',

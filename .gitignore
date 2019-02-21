@@ -2,15 +2,13 @@
 node_modules/
 /core/*.db
 yarn-error.log
-*.beif
-ESV.beifz
+*.bei
+*.beiz
 core/output
 notes
 NeÜ bibel.heute.ont
-core/src/importers/NEUE/html
+importers/src/NEUE/data
 lib/
 *ESV20*
 */dist/*
 *bible.db
-greek_lexicon.txt
-hebrew_lexicon.txt

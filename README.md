@@ -11,7 +11,7 @@ _BibleEngine_ can serve as a general purpose library for powering JavaScript bib
 -   automatic versification conversion across any bible version
 -   integrated up-to-date original language text with variants for all text forms
 -   automatic morphology for any bible version with strongs
--   automatic source text matching (verse level), even for bibles *without* strongs
+-   automatic source text matching (verse level), even for bibles _without_ strongs
 -   integrated glosses for each original word, plus lemma, transliteration and Strong/BDB entries
 
 Additional features:
@@ -19,11 +19,12 @@ Additional features:
 -   offline-first design with remote fallback
 -   compatible with (almost) all relational databases (via [TypeORM](http://typeorm.io))
 -   performant and space-efficient database design, focussed on bible study use cases
--   [plugin system](https://github.com/tyndale/BibleEngine/tree/master/core/plugins) to import any kind of bible format
+-   [plugin system](https://github.com/tyndale/BibleEngine/tree/master/importers) to import any kind of bible format
 -   TypeScript - Intellisense for the win!
 
 ## Packages
 
 -   [@bible-engine/core](https://github.com/tyndale/BibleEngine/tree/master/core): the brain of _BibleEngine_
--   [@bible-engine/server](https://github.com/tyndale/BibleEngine/tree/master/server): remote fallback to serve data if not present on the client
+-   [@bible-engine/importers](https://github.com/tyndale/BibleEngine/tree/master/importers): importers for different data sources
+-   [@bible-engine/server](https://github.com/tyndale/BibleEngine/tree/master/server): implementation example for a remote fallback server
 -   [@bible-engine/app](https://github.com/tyndale/BibleEngine/tree/master/app): react-native app

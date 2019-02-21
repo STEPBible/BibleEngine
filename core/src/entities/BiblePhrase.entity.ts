@@ -7,15 +7,15 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from '../../typeorm';
-import { BibleCrossReference, BibleNote } from '.';
+} from 'typeorm';
+import { BibleCrossReferenceEntity, BibleNoteEntity } from '.';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
 import { PhraseModifiers, IBiblePhraseRef } from '../models';
 import { IBiblePhraseWithNumbers } from '../models/BiblePhrase';
 import { IContentPhrase } from '../models/ContentPhrase';
 
-@Entity()
-export class BiblePhrase implements IBiblePhraseWithNumbers {
+@Entity('bible_phrase')
+export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
     @PrimaryColumn({ type: 'bigint' })
     id: number;
 
@@ -35,7 +35,7 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
     @Column({ nullable: true })
     sourceTypeId?: number;
 
-    @Column()
+    @Column({ type: 'text' })
     content: string;
 
     // this column does not need to be indexed, however it is conceptually very different to what we
@@ -43,14 +43,14 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
     @Column({ nullable: true })
     linebreak?: boolean;
 
-    @Column({ nullable: true, type: 'text' })
+    @Column({ nullable: true, type: 'varchar' })
     skipSpace?: IContentPhrase['skipSpace'];
 
     // everything that is not tied to one single phrase, thus forming groups in the content
     // hierarchy, is saved within 'modifiers'. We don't need to index this, so it's save to group
     // those values together as one serialized JSON in the database. Thus we also keep the schema
     // and types clean and more easy to understand, plus we can easily add new modifiers
-    @Column({ nullable: true })
+    @Column({ nullable: true, type: 'text' })
     modifiersJson?: string;
     modifiers?: PhraseModifiers;
 
@@ -66,17 +66,17 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
     strongsJoined?: string;
     strongs?: string[];
 
-    @OneToMany(() => BibleCrossReference, crossReference => crossReference.phrase, {
+    @OneToMany(() => BibleCrossReferenceEntity, crossReference => crossReference.phrase, {
         cascade: true
     })
     @JoinColumn()
-    crossReferences: BibleCrossReference[];
+    crossReferences: BibleCrossReferenceEntity[];
 
-    @OneToMany(() => BibleNote, note => note.phrase, {
+    @OneToMany(() => BibleNoteEntity, note => note.phrase, {
         cascade: true
     })
     @JoinColumn()
-    notes: BibleNote[];
+    notes: BibleNoteEntity[];
 
     constructor(
         phrase: IBiblePhraseWithNumbers,
@@ -96,10 +96,10 @@ export class BiblePhrase implements IBiblePhraseWithNumbers {
             this.crossReferences = phrase.crossReferences.map(crossReference => {
                 if (!crossReference.range.versionId)
                     crossReference.range.versionId = reference.versionId;
-                return new BibleCrossReference(crossReference, true);
+                return new BibleCrossReferenceEntity(crossReference, true);
             });
         }
-        if (phrase.notes) this.notes = phrase.notes.map(note => new BibleNote(note));
+        if (phrase.notes) this.notes = phrase.notes.map(note => new BibleNoteEntity(note));
     }
 
     @AfterLoad()

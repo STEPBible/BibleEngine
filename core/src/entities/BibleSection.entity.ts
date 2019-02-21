@@ -8,11 +8,11 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from '../../typeorm';
-import { BibleCrossReference } from '.';
+} from 'typeorm';
+import { BibleCrossReferenceEntity } from '.';
 import { IBibleSectionEntity, DocumentRoot } from '../models';
 
-@Entity()
+@Entity('bible_section')
 @Index(['versionId', 'phraseStartId', 'phraseEndId'])
 // this second index is needed when we also query 'phraseEndId' on its own when selecting
 // sections for a range
@@ -20,7 +20,7 @@ import { IBibleSectionEntity, DocumentRoot } from '../models';
 // if we want to query sections across versions
 // @Index(['phraseStartId', 'phraseEndId'])
 // @Index(['phraseEndId'])
-export class BibleSection implements IBibleSectionEntity {
+export class BibleSectionEntity implements IBibleSectionEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -42,16 +42,16 @@ export class BibleSection implements IBibleSectionEntity {
     @Column({ nullable: true })
     subTitle?: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, type: 'text' })
     descriptionJson?: string;
 
     description?: DocumentRoot;
 
-    @OneToMany(() => BibleCrossReference, crossReference => crossReference.section, {
+    @OneToMany(() => BibleCrossReferenceEntity, crossReference => crossReference.section, {
         cascade: true
     })
     @JoinColumn()
-    crossReferences?: BibleCrossReference[];
+    crossReferences?: BibleCrossReferenceEntity[];
 
     constructor(section: IBibleSectionEntity) {
         // typeorm is seemingly creating objects on startup (without passing parameters), so we
@@ -61,7 +61,7 @@ export class BibleSection implements IBibleSectionEntity {
         Object.assign(this, section);
         if (section.crossReferences)
             this.crossReferences = section.crossReferences.map(
-                crossReference => new BibleCrossReference(crossReference, true)
+                crossReference => new BibleCrossReferenceEntity(crossReference, true)
             );
     }
 
