@@ -16,6 +16,7 @@ import {
 import { Color, FontFamily, FontSize, Margin } from './Constants';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
+const DEVICE_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   phrase: string;
@@ -28,7 +29,7 @@ interface State {
   definitions: DictionaryEntry[];
 }
 
-export default class TaggedWord extends React.Component<Props, State> {
+export default class StrongsWord extends React.Component<Props, State> {
   touchable: any;
   sqlBible: BibleEngine;
   state = {
@@ -47,11 +48,20 @@ export default class TaggedWord extends React.Component<Props, State> {
   async setDictionaryEntries(strongs: string[]) {
     const definitions = (await Promise.all(
       strongs.map(async (strong: string) => {
-        const definitions = await this.props.sqlBible.getDictionaryEntries(
-          strong,
-          '@BdbMedDef'
-        );
-        return definitions[0];
+        if (strong[0] === 'H') {
+          const definitions = await this.props.sqlBible.getDictionaryEntries(
+            strong,
+            '@BdbMedDef'
+          );
+          return definitions[0];
+        }
+        if (strong[0] === 'G') {
+          const definitions = await this.props.sqlBible.getDictionaryEntries(
+            strong,
+            '@MounceMedDef'
+          );
+          return definitions[0];
+        }
       })
     )).filter(definition => definition);
     this.setState({
@@ -76,20 +86,22 @@ export default class TaggedWord extends React.Component<Props, State> {
       <View>
         <View style={styles.popover__content}>
           <View style={styles.popover__content__header}>
-            <Text style={styles.popover__content__header__lemma}>
-              {item.lemma}
-            </Text>
-            <Text style={styles.popover__content__header__transliteration}>{`(${
-              item.transliteration
-            })`}</Text>
             <Text style={styles.popover__content__header__gloss}>{`'${
               item.gloss
-            }'`}</Text>
+            }' (`}</Text>
+            <Text style={styles.popover__content__header__transliteration}>{`${
+              item.transliteration
+            } - `}</Text>
+            <Text style={styles.popover__content__header__lemma}>
+              {`${item.lemma}`}
+            </Text>
+            <Text style={styles.popover__content__header__lemma}>{')'}</Text>
           </View>
-
-          <View style={styles.popover__content__definitions}>
-            <ScrollView>{this.renderDefinitionContent(item)}</ScrollView>
-          </View>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.popover__content__definitions}>
+              {this.renderDefinitionContent(item)}
+            </View>
+          </ScrollView>
         </View>
         <View style={{ flex: 2, height: 20 }} />
       </View>
@@ -166,50 +178,50 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.1)'
   },
   popover__background_container: {
-    flex: 1,
-    backgroundColor: 'white',
+    // backgroundColor: 'yellow',
     overflow: 'hidden',
-    marginBottom: 10
+    width: DEVICE_WIDTH - 20
   },
   popover__content: {
-    backgroundColor: 'white',
-    flex: 8,
-    margin: 20,
-    width: DEVICE_WIDTH - 40
+    // backgroundColor: 'cyan',
+    flex: 1,
+    maxHeight: DEVICE_HEIGHT * 0.4,
+    borderBottomColor: 'gray',
+    borderBottomWidth: 0.5,
+    margin: Margin.LARGE,
+    marginBottom: 0
   },
   popover__content__definitions: {
     flex: 1,
-    // backgroundColor: 'magenta',
-    marginLeft: 30,
-    marginRight: 30,
-    marginBottom: 30
+    marginTop: Margin.SMALL
+    // backgroundColor: 'magenta'
   },
   popover__content__header: {
-    backgroundColor: 'white',
-    flex: 1,
+    // backgroundColor: 'yellow',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    margin: 30,
-    marginBottom: 0,
-    minHeight: 60,
-    maxHeight: 80
+    minHeight: 45,
+    maxHeight: 80,
+    borderBottomColor: 'gray',
+    borderBottomWidth: 0.5
   },
   popover__content__header__lemma: {
-    // backgroundColor: 'orange',
+    //backgroundColor: 'orange',
     fontFamily: FontFamily.CARDO_BOLD,
-    fontSize: FontSize.LARGE,
-    marginRight: 10
+    fontSize: FontSize.MEDIUM,
+    maxHeight: FontSize.EXTRA_LARGE
   },
   popover__content__header__transliteration: {
     // backgroundColor: 'green',
-    fontFamily: FontFamily.CARDO_BOLD,
-    fontSize: FontSize.LARGE,
-    marginRight: 10
+    fontFamily: FontFamily.CARDO_ITALIC,
+    fontSize: FontSize.MEDIUM,
+    maxHeight: FontSize.EXTRA_LARGE
   },
   popover__content__header__gloss: {
     // backgroundColor: 'cyan',
     fontFamily: FontFamily.CARDO_BOLD,
-    fontSize: FontSize.LARGE
+    fontSize: FontSize.MEDIUM,
+    maxHeight: FontSize.EXTRA_LARGE
   },
   strongWord: {
     marginRight: 7,
