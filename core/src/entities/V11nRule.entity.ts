@@ -6,7 +6,7 @@ import {
     BeforeUpdate,
     PrimaryGeneratedColumn,
     Index
-} from '../../typeorm';
+} from 'typeorm';
 import { IV11nRule, IBibleReference, IBibleReferenceNormalized } from '../models';
 import {
     generateReferenceId,
@@ -14,8 +14,8 @@ import {
     parseReferenceId
 } from '../functions/reference.functions';
 
-@Entity()
-export class V11nRule implements IV11nRule {
+@Entity('v11n_rule')
+export class V11nRuleEntity implements IV11nRule {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -68,7 +68,7 @@ export class V11nRule implements IV11nRule {
             versionSubverseNum: _sourceRef.normalizedSubverseNum
         };
 
-        const action = V11nRule.actionTypes.get(this.actionId);
+        const action = V11nRuleEntity.actionTypes.get(this.actionId);
         if (!action) throw new Error(`invalid actionId ${this.actionId}`);
         this.action = action;
     }
@@ -83,7 +83,7 @@ export class V11nRule implements IV11nRule {
         );
         this.standardRefId = generateReferenceId(this.standardRef);
         let newActionId: number | undefined;
-        for (const [actionId, action] of V11nRule.actionTypes)
+        for (const [actionId, action] of V11nRuleEntity.actionTypes)
             if (action === this.action) newActionId = actionId;
         if (!newActionId) throw new Error(`invalid action ${this.action}`);
         this.actionId = newActionId;

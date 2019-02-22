@@ -1,34 +1,34 @@
-import { BibleVersion } from './BibleVersion.entity';
-import { BibleBook } from './BibleBook.entity';
-import { BibleSection } from './BibleSection.entity';
-import { BibleParagraph } from './BibleParagraph.entity';
-import { BiblePhrase } from './BiblePhrase.entity';
-import { BiblePhraseOriginalWord } from './BiblePhraseOriginalWord.entity';
-import { BibleCrossReference } from './BibleCrossReference.entity';
-import { BibleNote } from './BibleNote.entity';
-import { DictionaryEntry } from './DictionaryEntry.entity';
-import { V11nRule } from './V11nRule.entity';
+import { BibleVersionEntity } from './BibleVersion.entity';
+import { BibleBookEntity } from './BibleBook.entity';
+import { BibleSectionEntity } from './BibleSection.entity';
+import { BibleParagraphEntity } from './BibleParagraph.entity';
+import { BiblePhraseEntity } from './BiblePhrase.entity';
+import { BiblePhraseOriginalWordEntity } from './BiblePhraseOriginalWord.entity';
+import { BibleCrossReferenceEntity } from './BibleCrossReference.entity';
+import { BibleNoteEntity } from './BibleNote.entity';
+import { DictionaryEntryEntity } from './DictionaryEntry.entity';
+import { V11nRuleEntity } from './V11nRule.entity';
 
 export {
-    BibleVersion,
-    BibleBook,
-    BibleSection,
-    BibleParagraph,
-    BiblePhrase,
-    BiblePhraseOriginalWord,
-    BibleCrossReference,
-    BibleNote,
-    DictionaryEntry,
-    V11nRule
+    BibleVersionEntity,
+    BibleBookEntity,
+    BibleSectionEntity,
+    BibleParagraphEntity,
+    BiblePhraseEntity,
+    BiblePhraseOriginalWordEntity,
+    BibleCrossReferenceEntity,
+    BibleNoteEntity,
+    DictionaryEntryEntity,
+    V11nRuleEntity
 };
 export const ENTITIES = [
-    BibleVersion,
-    BibleBook,
-    BibleSection,
-    BibleParagraph,
-    BiblePhrase,
-    BibleCrossReference,
-    BibleNote,
-    DictionaryEntry,
-    V11nRule
+    BibleVersionEntity,
+    BibleBookEntity,
+    BibleSectionEntity,
+    BibleParagraphEntity,
+    BiblePhraseEntity,
+    BibleCrossReferenceEntity,
+    BibleNoteEntity,
+    DictionaryEntryEntity,
+    V11nRuleEntity
 ];

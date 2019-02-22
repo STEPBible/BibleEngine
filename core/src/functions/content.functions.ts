@@ -22,7 +22,13 @@ import {
     IBibleSection,
     IBibleNote
 } from '../models';
-import { BiblePhrase, BibleParagraph, BibleSection, BibleBook, BibleVersion } from '../entities';
+import {
+    BiblePhraseEntity,
+    BibleParagraphEntity,
+    BibleSectionEntity,
+    BibleBookEntity,
+    BibleVersionEntity
+} from '../entities';
 import {
     generateReferenceRangeLabel,
     slimDownCrossReference,
@@ -63,14 +69,14 @@ export const convertBibleInputToBookPlaintext = (
 
 /**
  * turns list of phrases, paragraphs and sections into a structured bible document
- * @param {BiblePhrase[]} phrases
- * @param {BibleParagraph[]} paragraphs
+ * @param {BiblePhraseEntity[]} phrases
+ * @param {BibleParagraphEntity[]} paragraphs
  * @param {IBibleOutputRich['context']} context
  * @returns {IBibleContentGeneratorRoot}
  */
 export const generateBibleDocument = (
-    phrases: BiblePhrase[],
-    paragraphs: BibleParagraph[],
+    phrases: BiblePhraseEntity[],
+    paragraphs: BibleParagraphEntity[],
     context: IBibleOutputRich['context'],
     bookAbbreviations: { [index: string]: string },
     chapterVerseSeparator: string
@@ -219,6 +225,10 @@ export const generateBibleDocument = (
                     // throw error if creating a section in the wrong level order
                     activeSections.find(activeSection => activeSection.level >= level)
                 ) {
+                    console.log(activeGroup);
+                    console.log(activeSections);
+                    console.log(level);
+                    console.log(section);
                     throw new Error(`can't create output object: corrupted structure (section)`);
                 }
 
@@ -478,7 +488,10 @@ export const generateBibleDocument = (
     return rootGroup;
 };
 
-export const generateContextSections = (phrases: BiblePhrase[], sections: BibleSection[]) => {
+export const generateContextSections = (
+    phrases: BiblePhraseEntity[],
+    sections: BibleSectionEntity[]
+) => {
     const context: IBibleOutputRich['context'] = {};
 
     if (phrases.length) {
@@ -541,10 +554,10 @@ export const generateContextSections = (phrases: BiblePhrase[], sections: BibleS
 export const generateContextRanges = (
     range: IBibleReferenceRange,
     rangeNormalized: IBibleReferenceRangeNormalized,
-    phrases: BiblePhrase[],
-    paragraphs: BibleParagraph[],
+    phrases: BiblePhraseEntity[],
+    paragraphs: BibleParagraphEntity[],
     context: IBibleOutputRich['context'],
-    book: BibleBook
+    book: BibleBookEntity
 ) => {
     const contextRanges: IBibleOutputRich['contextRanges'] = {
         paragraph: {},
@@ -769,7 +782,7 @@ export const generateContextRanges = (
     return contextRanges;
 };
 
-export const stripUnnecessaryDataFromBibleBook = (book: BibleBook) => {
+export const stripUnnecessaryDataFromBibleBook = (book: BibleBookEntity) => {
     delete book.versionId;
     delete book.chaptersMetaJson;
     delete book.introductionJson;
@@ -902,7 +915,7 @@ export const stripUnnecessaryDataFromBibleReferenceRange = (
     delete rangeNormalized.isNormalized;
 };
 
-export const stripUnnecessaryDataFromBibleVersion = (version: BibleVersion) => {
+export const stripUnnecessaryDataFromBibleVersion = (version: BibleVersionEntity) => {
     delete version.id;
     delete version.copyrightLongJson;
     delete version.descriptionJson;

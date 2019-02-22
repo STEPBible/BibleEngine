@@ -17,7 +17,8 @@ import {
     IBiblePhraseRef,
     IBibleReferenceRangeQuery,
     IBibleReferenceVersion,
-    IBibleReferenceRangeVersion
+    IBibleReferenceRangeVersion,
+    BibleReferenceParser
 } from './BibleReference';
 import { IBibleBook } from './BibleBook';
 import { IBibleSection, IBibleSectionGeneric, IBibleSectionEntity } from './BibleSection';
@@ -36,7 +37,13 @@ import {
     IBibleNumbering
 } from './BibleContent';
 import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext';
-import { DocumentRoot, DocumentElement } from './Document';
+import {
+    DocumentRoot,
+    DocumentElement,
+    DocumentGroup,
+    DocumentPhrase,
+    DocumentSection
+} from './Document';
 import { IBibleVersion } from './BibleVersion';
 import { IDictionaryEntry } from './DictionaryEntry';
 import { IContentGroup, ContentGroupType } from './ContentGroup';
@@ -56,10 +63,14 @@ export {
     BibleChapterPlaintext,
     BibleContentGenerator,
     BibleContentGeneratorContainer,
+    BibleReferenceParser,
     BookWithContentForInput,
     BooleanModifiers,
     ContentGroupType,
     DocumentRoot,
+    DocumentGroup,
+    DocumentSection,
+    DocumentPhrase,
     DocumentElement,
     IBibleBook,
     IBibleContent,

@@ -12,6 +12,7 @@ Ps 95,8: note at the wrong place
 Ps 132,6: note "132,6 <em>von ihr</em>. Gemeint ist die Bundeslade." has no related text (and is missing ":" after reference)
 Ps: section missing for "73-89: Drittes Buch"
 Jes 11,10: wrong verse seperator in note
+Jes 63,19: verse overlaps to chapter 64, which needs to be indicated by a '<span class="vers">63,19</span>' before the overlapping portion
 Kla 4,1: missing reference at beginning of note
 Dan 12,7: note in the wrong order
 Mt 13,32: note has wrong reference ("Mt 13,23")

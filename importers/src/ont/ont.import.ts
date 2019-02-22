@@ -2,7 +2,7 @@
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { createInterface } from 'readline';
-import { IBibleReference } from '../../models';
+import { IBibleReference } from '@bible-engine/core';
 
 // const dirProjectRoot = resolve(__dirname + '/../../..');
 

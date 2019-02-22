@@ -1,11 +1,14 @@
 import 'isomorphic-fetch';
-
 import { resolve } from 'path';
-import { BibleEngine } from '../../BibleEngine.class';
-import { BibleVersion } from '../../entities';
-import { getOsisIdFromBookGenericId } from '../../functions/v11n.functions';
-import { IBibleContentPhraseForInput, IBibleContentGroupForInput } from '../../models';
-import { IBibleContentSectionForInput } from '../../models/BibleInput';
+
+import {
+    BibleEngine,
+    BibleVersionEntity,
+    getOsisIdFromBookGenericId,
+    IBibleContentPhraseForInput,
+    IBibleContentGroupForInput,
+    IBibleContentSectionForInput
+} from '@bible-engine/core';
 
 const wordGen = require('random-words');
 
@@ -23,7 +26,7 @@ const sqlBible = new BibleEngine(
 
 export const genDb = async () => {
     const esvVersion = await sqlBible.addVersion(
-        new BibleVersion({
+        new BibleVersionEntity({
             uid: 'ESV',
             title: 'English Standard Bible',
             language: 'en-US',

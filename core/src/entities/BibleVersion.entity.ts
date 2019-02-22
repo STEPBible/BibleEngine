@@ -6,11 +6,11 @@ import {
     BeforeInsert,
     BeforeUpdate,
     Index
-} from '../../typeorm';
+} from 'typeorm';
 import { DocumentRoot, IBibleVersion } from '../models';
 
-@Entity()
-export class BibleVersion implements IBibleVersion {
+@Entity('bible_version')
+export class BibleVersionEntity implements IBibleVersion {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -21,7 +21,7 @@ export class BibleVersion implements IBibleVersion {
     @Column()
     title: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, type: 'text' })
     descriptionJson?: string;
     description?: DocumentRoot;
 
@@ -31,7 +31,7 @@ export class BibleVersion implements IBibleVersion {
     @Column({ nullable: true })
     copyrightShort?: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, type: 'text' })
     copyrightLongJson?: string;
     copyrightLong?: DocumentRoot;
 

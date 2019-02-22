@@ -1,15 +1,8 @@
-import {
-    Entity,
-    Column,
-    PrimaryColumn,
-    AfterLoad,
-    BeforeInsert,
-    BeforeUpdate
-} from '../../typeorm';
+import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { IBibleBook, DocumentRoot } from '../models';
 
-@Entity()
-export class BibleBook implements IBibleBook {
+@Entity('bible_book')
+export class BibleBookEntity implements IBibleBook {
     @PrimaryColumn()
     versionId: number;
 
@@ -28,7 +21,7 @@ export class BibleBook implements IBibleBook {
     @Column({ nullable: true })
     longTitle?: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, type: 'text' })
     introductionJson?: string;
 
     introduction?: DocumentRoot;
@@ -36,7 +29,7 @@ export class BibleBook implements IBibleBook {
     @Column()
     type: 'ot' | 'nt' | 'ap';
 
-    @Column()
+    @Column({ type: 'text' })
     chaptersMetaJson: string;
 
     chaptersCount: number[];

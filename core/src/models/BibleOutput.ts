@@ -1,4 +1,4 @@
-import { BiblePhrase } from '../entities';
+import { BiblePhraseEntity } from '../entities';
 import {
     IBibleReferenceRange,
     IBibleReference,
@@ -74,7 +74,7 @@ export interface IBibleOutputRich extends IBibleOutputBase {
 
 export interface IBibleVerse {
     reference: Required<IBibleReference>;
-    phrases: BiblePhrase[];
+    phrases: BiblePhraseEntity[];
 }
 
 export interface IBibleOutputRoot extends IBibleNumbering {

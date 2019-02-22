@@ -4,18 +4,17 @@ import {
     IBibleContentForInput,
     IBibleContentPhraseForInput,
     IBibleContentSectionForInput,
-    IBibleContentGroupForInput
-} from '../../models/BibleInput';
-import {
+    IBibleContentGroupForInput,
     DocumentRoot,
     DocumentSection,
     DocumentPhrase,
     DocumentGroup,
-    DocumentElement
-} from '../../models/Document';
-import { ContentGroupType } from '../../models/ContentGroup';
-import { BibleReferenceParser, IBibleReferenceRange } from '../../models/BibleReference';
-import { getReferencesFromText } from '../../functions/reference.functions';
+    DocumentElement,
+    ContentGroupType,
+    BibleReferenceParser,
+    IBibleReferenceRange,
+    getReferencesFromText
+} from '@bible-engine/core';
 
 export const getAttribute = (node: TreeElement, name: string) => {
     const attr = node.attrs.find(_attr => _attr.name === name);

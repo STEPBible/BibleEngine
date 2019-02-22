@@ -7,6 +7,7 @@
         "startDev": "pm2 startOrRestart process.json --env dev --watch"
     },
     "dependencies": {
+        "@koa/cors": "^2.2.3",
         "@types/koa-router": "^7.0.35",
         "apollo-server-koa": "^2.2.6",
         "graphql": "^14.0.2",

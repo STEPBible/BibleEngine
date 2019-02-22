@@ -1,11 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from '../../typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 import { IBibleSectionGeneric } from '../models';
 
-@Entity()
+@Entity('bible_paragraph')
 @Index(['versionId', 'phraseStartId', 'phraseEndId'])
 // RADAR: look into comment at sql.functions@getParagraphSql as to why we might enable this again
 // @Index(['versionId', 'phraseEndId'])
-export class BibleParagraph implements IBibleSectionGeneric {
+export class BibleParagraphEntity implements IBibleSectionGeneric {
     @PrimaryGeneratedColumn()
     id: number;
 

@@ -1,16 +1,15 @@
-import 'reflect-metadata';
-import { createConnection, ConnectionOptions, Raw, EntityManager } from '../typeorm';
+import { createConnection, ConnectionOptions, Raw, EntityManager } from 'typeorm';
 
 import {
     ENTITIES,
-    BibleVersion,
-    BiblePhrase,
-    BibleBook,
-    BibleSection,
-    BibleCrossReference,
-    DictionaryEntry,
-    BibleParagraph,
-    V11nRule
+    BibleVersionEntity,
+    BiblePhraseEntity,
+    BibleBookEntity,
+    BibleSectionEntity,
+    BibleCrossReferenceEntity,
+    DictionaryEntryEntity,
+    BibleParagraphEntity,
+    V11nRuleEntity
 } from './entities';
 import {
     parsePhraseId,
@@ -59,18 +58,28 @@ import {
     IBibleContentGroupForInput
 } from './models';
 
-export class BibleEngine {
-    currentVersion?: BibleVersion;
-    currentVersionMetadata?: BibleBook[];
-    pEntityManager: Promise<EntityManager>;
+class NoDbConnectionError extends Error {
+    constructor() {
+        super('calling a method that expects a DB connection to be set in BibleEngine');
+        this.name = 'NoDbConnectionError';
+    }
+}
 
-    constructor(dbConfig: ConnectionOptions, private remoteConfig?: { url: string }) {
-        this.pEntityManager = createConnection({
-            ...dbConfig,
-            entities: ENTITIES,
-            synchronize: true,
-            logging: ['error']
-        }).then(conn => conn.manager);
+export class BibleEngine {
+    currentVersion?: BibleVersionEntity;
+    currentVersionMetadata?: BibleBookEntity[];
+    pDB?: Promise<EntityManager>;
+
+    constructor(dbConfig: ConnectionOptions | null, private remoteConfig?: { url: string }) {
+        if (dbConfig) {
+            this.pDB = createConnection({
+                entities: ENTITIES,
+                synchronize: true,
+                logging: ['error'],
+                name: 'bible-engine',
+                ...dbConfig
+            }).then(conn => conn.manager);
+        }
     }
 
     async addBookWithContent(bookInput: BookWithContentForInput) {
@@ -87,28 +96,32 @@ export class BibleEngine {
     }
 
     async addDictionaryEntry(dictionaryEntry: IDictionaryEntry) {
-        const entityManager = await this.pEntityManager;
-        entityManager.save(new DictionaryEntry(dictionaryEntry));
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        db.save(new DictionaryEntryEntity(dictionaryEntry));
     }
 
-    async addV11nRules(rules: V11nRule[]) {
-        const entityManager = await this.pEntityManager;
-        return entityManager.save(rules, { chunk: rules.length / 500 });
+    async addV11nRules(rules: V11nRuleEntity[]) {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return db.save(rules, { chunk: rules.length / 500 });
     }
 
     async addVersion(version: IBibleVersion) {
-        const entityManager = await this.pEntityManager;
-        return entityManager.save(new BibleVersion(version));
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return db.save(new BibleVersionEntity(version));
     }
 
     async finalizeVersion(versionId: number) {
         this.normalizeCrossReferencesForVersion(versionId);
     }
 
-    async generateBookMetadata(book: BibleBook) {
-        const entityManager = await this.pEntityManager;
-        const metaData = await entityManager
-            .createQueryBuilder(BiblePhrase, 'phrase')
+    async generateBookMetadata(book: BibleBookEntity) {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        const metaData = await db
+            .createQueryBuilder(BiblePhraseEntity, 'phrase')
             .addSelect('COUNT(DISTINCT phrase.versionVerseNum)', 'numVerses')
             .where({
                 id: Raw(col =>
@@ -119,31 +132,39 @@ export class BibleEngine {
             .groupBy('phrase.versionChapterNum')
             .getRawMany();
         book.chaptersCount = metaData.map(chapterMetaDb => chapterMetaDb.numVerses);
-        return entityManager.save(book);
+        return db.save(book);
     }
 
     async getBooksForVersion(versionId: number) {
-        const entityManager = await this.pEntityManager;
-        return entityManager.find(BibleBook, {
+        // TODO: add remote fallback
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return db.find(BibleBookEntity, {
             where: { versionId },
             order: { number: 'ASC' }
         });
     }
 
     async getDictionaryEntries(strong: string, dictionary?: string) {
-        const entityManager = await this.pEntityManager;
-        return entityManager.find(DictionaryEntry, { where: { strong, dictionary } });
+        // TODO: add remote fallback
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return db.find(DictionaryEntryEntity, { where: { strong, dictionary } });
     }
 
     async getFullDataForReferenceRange(
         rangeQuery: IBibleReferenceRangeQuery,
         stripUnnecessaryData = false
     ): Promise<IBibleOutputRich> {
-        const entityManager = await this.pEntityManager;
+        let version: BibleVersionEntity | undefined;
+        let db: EntityManager | undefined;
+        if (this.pDB) {
+            db = await this.pDB;
+            version = await db.findOne(BibleVersionEntity, {
+                where: { uid: rangeQuery.versionUid }
+            });
+        }
 
-        const version = await entityManager.findOne(BibleVersion, {
-            where: { uid: rangeQuery.versionUid }
-        });
         if (!version) {
             if (this.remoteConfig) {
                 // TODO: refactor this out into a service
@@ -166,13 +187,15 @@ export class BibleEngine {
             throw new Error(`can't get formatted text: invalid version`);
         }
 
+        if (!db) throw new NoDbConnectionError();
+
         const range: IBibleReferenceRangeVersion = { ...rangeQuery, versionId: version.id };
 
         const book = await this.getBookForVersionReference(range);
         if (!book) throw new Error(`can't get formatted text: invalid book`);
 
-        const bookAbbreviations = await entityManager
-            .find(BibleBook, {
+        const bookAbbreviations = await db
+            .find(BibleBookEntity, {
                 select: ['osisId', 'abbreviation']
             })
             .then(books => {
@@ -188,8 +211,8 @@ export class BibleEngine {
             : await this.getNormalizedReferenceRange(range);
 
         const phrases = await this.getPhrases(rangeNormalized);
-        const paragraphs = await entityManager
-            .createQueryBuilder(BibleParagraph, 'paragraph')
+        const paragraphs = await db
+            .createQueryBuilder(BibleParagraphEntity, 'paragraph')
             .where(
                 generateParagraphSql(
                     { ...rangeNormalized, versionId: rangeNormalized.versionId! },
@@ -198,8 +221,8 @@ export class BibleEngine {
             )
             .orderBy('id')
             .getMany();
-        const sections = await entityManager
-            .createQueryBuilder(BibleSection, 'section')
+        const sections = await db
+            .createQueryBuilder(BibleSectionEntity, 'section')
             .where(generateBookSectionsSql(rangeNormalized, 'section'))
             // sections are inserted in order, so its safe to sort by generated id
             .orderBy('level')
@@ -250,8 +273,9 @@ export class BibleEngine {
     async getNextPhraseNumForNormalizedVerseNum(
         reference: IBibleReferenceNormalized
     ): Promise<number> {
-        const entityManager = await this.pEntityManager;
-        const lastPhrase = await entityManager.find(BiblePhrase, {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        const lastPhrase = await db.find(BiblePhraseEntity, {
             where: { id: Raw(col => generatePhraseIdSql(reference, col)) },
             order: { id: 'DESC' },
             take: 1,
@@ -261,25 +285,34 @@ export class BibleEngine {
     }
 
     async getPhrases(range: IBibleReferenceRangeNormalized | IBibleReferenceRangeVersion) {
-        const entityManager = await this.pEntityManager;
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
         const normalizedRange =
             range.isNormalized === true
                 ? <IBibleReferenceRangeNormalized>range
                 : await this.getNormalizedReferenceRange(range);
-        return entityManager.find(BiblePhrase, {
+        return db.find(BiblePhraseEntity, {
             where: { id: Raw(col => generatePhraseIdSql(normalizedRange, col)) },
             order: { id: 'ASC' },
             relations: ['notes', 'crossReferences']
         });
     }
 
-    async getRawVersionData(versionId: number) {
-        const entityManager = await this.pEntityManager;
-        const version: IBibleVersion = await entityManager
-            .findOne(BibleVersion, versionId)
-            .then(generateMinimizedDbObject);
-        const books: IBibleBook[] = await entityManager
-            .find(BibleBook, { where: { versionId }, order: { number: 'ASC' } })
+    async getRawVersionData(versionUid: string) {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        const versionEntity = await db.findOne(BibleVersionEntity, {
+            uid: versionUid
+        });
+        if (!versionEntity) throw new Error(`version ${versionUid} is not available`);
+
+        const version: IBibleVersion = generateMinimizedDbObject(versionEntity);
+
+        const books: IBibleBook[] = await db
+            .find(BibleBookEntity, {
+                where: { versionId: versionEntity.id },
+                order: { number: 'ASC' }
+            })
             .then(generateMinimizedDbObjects);
         const bookData: { book: IBibleBook; content: IBibleContent[] }[] = [];
         for (const book of books) {
@@ -318,11 +351,12 @@ export class BibleEngine {
 
     async getReferenceRangeWithAllVersionProperties(
         range: IBibleReferenceRange,
-        versionBook?: BibleBook
+        versionBook?: BibleBookEntity
     ): Promise<IBibleReferenceRange> {
         if (!versionBook) {
-            const entityManager = await this.pEntityManager;
-            versionBook = await entityManager.findOne(BibleBook, {
+            if (!this.pDB) throw new NoDbConnectionError();
+            const db = await this.pDB;
+            versionBook = await db.findOne(BibleBookEntity, {
                 where: { versionId: range.versionId, osisId: range.bookOsisId }
             });
         }
@@ -355,9 +389,9 @@ export class BibleEngine {
     }
 
     async setVersion(version: string) {
-        const entityManager = await this.pEntityManager;
-
-        const versionDb = await entityManager.findOne(BibleVersion, { uid: version });
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        const versionDb = await db.findOne(BibleVersionEntity, { uid: version });
         this.currentVersion = versionDb;
     }
 
@@ -366,9 +400,9 @@ export class BibleEngine {
         book: IBibleBook,
         context: BibleBookPlaintext,
         globalState: {
-            phraseStack: BiblePhrase[];
-            paragraphStack: BibleParagraph[];
-            sectionStack: BibleSection[];
+            phraseStack: BiblePhraseEntity[];
+            paragraphStack: BibleParagraphEntity[];
+            sectionStack: BibleSectionEntity[];
             usedRefIds: Set<number>;
             currentVersionChapter: number;
             currentVersionVerse: number;
@@ -399,7 +433,8 @@ export class BibleEngine {
             recursionLevel: 0
         }
     ): Promise<{ firstPhraseId: number | undefined; lastPhraseId: number | undefined }> {
-        const entityManager = await this.pEntityManager;
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
         let firstPhraseId: number | undefined, lastPhraseId: number | undefined;
         for (const content of contents) {
             if (content.type === 'phrase') {
@@ -478,7 +513,7 @@ export class BibleEngine {
                                 };
 
                                 globalState.phraseStack.push(
-                                    new BiblePhrase(emptyPhrase, emptyPhraseReference, {
+                                    new BiblePhraseEntity(emptyPhrase, emptyPhraseReference, {
                                         ...localState.modifierState
                                     })
                                 );
@@ -511,7 +546,7 @@ export class BibleEngine {
                                 };
 
                                 globalState.phraseStack.push(
-                                    new BiblePhrase(
+                                    new BiblePhraseEntity(
                                         emptyPhrase,
                                         // this is set to the standardRef of the current rule
                                         // above
@@ -594,7 +629,7 @@ export class BibleEngine {
                     content.sourceTypeId = globalState.currentSourceTypeId;
 
                 globalState.phraseStack.push(
-                    new BiblePhrase(content, phraseRef, { ...localState.modifierState })
+                    new BiblePhraseEntity(content, phraseRef, { ...localState.modifierState })
                 );
             } else if (content.type === 'group' && content.groupType !== 'paragraph') {
                 const childState = {
@@ -674,7 +709,7 @@ export class BibleEngine {
                 if (sectionFirstPhraseId && sectionLastPhraseId) {
                     if (content.type === 'group' && content.groupType === 'paragraph') {
                         globalState.paragraphStack.push(
-                            new BibleParagraph(
+                            new BibleParagraphEntity(
                                 book.versionId,
                                 sectionFirstPhraseId,
                                 sectionLastPhraseId
@@ -682,7 +717,7 @@ export class BibleEngine {
                         );
                     } else if (content.type === 'section') {
                         globalState.sectionStack.push(
-                            new BibleSection({
+                            new BibleSectionEntity({
                                 versionId: book.versionId,
                                 phraseStartId: sectionFirstPhraseId,
                                 phraseEndId: sectionLastPhraseId,
@@ -702,26 +737,28 @@ export class BibleEngine {
 
         if (localState.recursionLevel === 0) {
             // we are at the end of the root method => persist everything
-            await entityManager.save(globalState.phraseStack, {
+            await db.save(globalState.phraseStack, {
                 chunk: Math.ceil(globalState.phraseStack.length / 100)
             });
-            await entityManager.save(globalState.paragraphStack);
-            await entityManager.save(globalState.sectionStack);
+            await db.save(globalState.paragraphStack);
+            await db.save(globalState.sectionStack);
         }
 
         return { firstPhraseId, lastPhraseId };
     }
 
     private async addBook(book: IBibleBook) {
-        const entityManager = await this.pEntityManager;
-        return await entityManager.save(new BibleBook(book));
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return await db.save(new BibleBookEntity(book));
     }
 
     private async getBookForVersionReference({ versionId, bookOsisId }: IBibleReferenceVersion) {
-        const entityManager = await this.pEntityManager;
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
         const where = { osisId: bookOsisId, versionId };
 
-        return entityManager.findOne(BibleBook, { where });
+        return db.findOne(BibleBookEntity, { where });
     }
 
     private async getNormalizedReferenceRange(
@@ -767,7 +804,8 @@ export class BibleEngine {
             normalizedSubverseEndNum: standardRefEnd!.normalizedSubverseNum
         };
 
-        const entityManager = await this.pEntityManager;
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
         // const phraseStart = await entityManager.findOne(BiblePhrase, {
         //     where: {
         //         id: Raw(col => generatePhraseIdSql(pontentialNormalizedRange, col)),
@@ -777,8 +815,8 @@ export class BibleEngine {
         //     }
         // });
 
-        const { phraseIdStart } = await entityManager
-            .createQueryBuilder(BiblePhrase, 'phrase')
+        const { phraseIdStart } = await db
+            .createQueryBuilder(BiblePhraseEntity, 'phrase')
             .select('MIN(phrase.id)', 'phraseIdStart')
             .where(
                 generatePhraseIdSql(potentialNormalizedRange, 'phrase.id') +
@@ -810,8 +848,8 @@ export class BibleEngine {
             //         versionVerseNum: range.versionVerseEndNum
             //     }
             // });
-            const { phraseIdEnd } = await entityManager
-                .createQueryBuilder(BiblePhrase, 'phrase')
+            const { phraseIdEnd } = await db
+                .createQueryBuilder(BiblePhraseEntity, 'phrase')
                 .select('MAX(phrase.id)', 'phraseIdEnd')
                 .where(
                     generatePhraseIdSql(potentialNormalizedRange, 'phrase.id') +
@@ -839,8 +877,9 @@ export class BibleEngine {
     }
 
     private async getNormalisationRulesForRange(range: IBibleReferenceRangeVersion) {
-        const entityManager = await this.pEntityManager;
-        return entityManager.find(V11nRule, {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return db.find(V11nRuleEntity, {
             where: {
                 sourceRefId: Raw(col =>
                     generateReferenceIdSql(generateNormalizedReferenceFromVersionRange(range), col)
@@ -851,11 +890,12 @@ export class BibleEngine {
     }
 
     private async normalizeCrossReferencesForVersion(versionId: number) {
-        const entityManager = await this.pEntityManager;
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
         // go through each bible book seperately
-        for (const book of await entityManager.find(BibleBook)) {
+        for (const book of await db.find(BibleBookEntity)) {
             // fetch all cross reference for that version and book
-            for (const cRef of await entityManager.find(BibleCrossReference, {
+            for (const cRef of await db.find(BibleCrossReferenceEntity, {
                 where: {
                     versionId,
                     normalizedRefId: Raw(col =>
@@ -878,7 +918,7 @@ export class BibleEngine {
                 if (cRef.versionVerseEndNum)
                     cRef.range.normalizedVerseEndNum = normalizedRange.normalizedVerseEndNum;
                 // and save cross reference back to db
-                entityManager.save(cRef);
+                db.save(cRef);
             }
         }
     }

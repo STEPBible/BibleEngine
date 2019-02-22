@@ -7,12 +7,12 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from '../../typeorm';
-import { BiblePhrase } from './BiblePhrase.entity';
+} from 'typeorm';
+import { BiblePhraseEntity } from './BiblePhrase.entity';
 import { IBibleNote, DocumentRoot } from '../models';
 
-@Entity()
-export class BibleNote implements IBibleNote {
+@Entity('bible_note')
+export class BibleNoteEntity implements IBibleNote {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -22,7 +22,7 @@ export class BibleNote implements IBibleNote {
     @Column({ nullable: true })
     type?: string;
 
-    @Column()
+    @Column({ type: 'text' })
     contentJson: string;
 
     content: DocumentRoot;
@@ -31,8 +31,8 @@ export class BibleNote implements IBibleNote {
     @Index()
     phraseId: number;
 
-    @ManyToOne(() => BiblePhrase, phrase => phrase.notes)
-    phrase: BiblePhrase;
+    @ManyToOne(() => BiblePhraseEntity, phrase => phrase.notes)
+    phrase: BiblePhraseEntity;
 
     constructor(initializer: IBibleNote) {
         Object.assign(this, initializer);

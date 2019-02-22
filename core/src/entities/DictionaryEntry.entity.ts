@@ -1,15 +1,8 @@
-import {
-    Entity,
-    Column,
-    PrimaryColumn,
-    AfterLoad,
-    BeforeInsert,
-    BeforeUpdate
-} from '../../typeorm';
+import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { IDictionaryEntry, DocumentRoot } from '../models';
 
-@Entity()
-export class DictionaryEntry implements IDictionaryEntry {
+@Entity('dictionary_entry')
+export class DictionaryEntryEntity implements IDictionaryEntry {
     @PrimaryColumn()
     strong: string;
 
@@ -25,7 +18,7 @@ export class DictionaryEntry implements IDictionaryEntry {
     @Column()
     gloss: string;
 
-    @Column({ nullable: true })
+    @Column({ nullable: true, type: 'text' })
     contentJson?: string;
     content?: DocumentRoot;
 
