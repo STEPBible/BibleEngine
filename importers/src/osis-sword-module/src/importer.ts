@@ -7,11 +7,16 @@ import { getBibleEngineInputFromXML } from './OsisParser';
 
 const fs = require('fs');
 
-const dirProjectRoot = resolve(__dirname + '/../../../..');
+const dirProjectRoot = resolve(__dirname + '/../../..');
+const databaseFileName = `${dirProjectRoot}/output/bible.db`;
+
+if (fs.existsSync(databaseFileName)) {
+    fs.unlinkSync(databaseFileName);
+}
 
 const sqlBible = new BibleEngine({
     type: 'sqlite',
-    database: `${dirProjectRoot}/output/bible.db`
+    database: databaseFileName
 });
 
 function getXmlFromModule(filename: string): BookXML[] {

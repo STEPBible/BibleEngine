@@ -7,6 +7,7 @@
     "@types/jest": "^23.3.9",
     "@types/node": "^10.12.21",
     "jest": "^23.6.0",
+    "sqlite3": "^4.0.4",
     "ts-jest": "^23.10.5",
     "typescript": "^3.1.6",
     "xml-formatter": "^1.0.1"

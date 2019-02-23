@@ -22,6 +22,95 @@ Additional features:
 -   [plugin system](https://github.com/tyndale/BibleEngine/tree/master/importers) to import any kind of bible format
 -   TypeScript - Intellisense for the win!
 
+## Getting Started
+
+### Setting up the app
+
+Install some global dependences:
+
+```
+npm install -g expo-cli
+npm install -g typescript
+```
+
+Check out the repo and build all dependencies:
+
+```
+git clone https://github.com/tyndale/BibleEngine.git
+cd BibleEngine
+yarn --cwd core build
+yarn install
+```
+
+Start the app to see everything in action:
+
+```
+cd app
+expo start
+```
+
+## Upgrading
+
+Reset everything to master, and remove untracked files like node_modules:
+
+```
+git checkout master
+git pull origin master
+git clean -xdff
+```
+
+Rebuild the Typescript files:
+
+```
+yarn --cwd core build
+```
+
+Reinstall the packages:
+
+```
+yarn install
+```
+
+Start Expo to make sure everything worked:
+
+```
+cd app
+expo start
+```
+
+## Building database for app
+
+Note: you'll need access to some copyrighted material that's not checked into this repo.
+
+Copy some copyrighted material into the repo:
+
+```
+cp ~/Downloads/hebrew_lexicon.txt ~/BibleEngine/importers/src/step-lexicon/data/
+cp ~/Downloads/greek_lexicon.txt ~/BibleEngine/importers/src/step-lexicon/data/
+cp ~/Downloads/ESV2016_th.zip ~/BibleEngine/importers/src/osis-sword-module/data
+```
+
+Build the ESV from a Sword module:
+```
+cp ~/Downloads/ESV2016_th.zip ~/BibleEngine/importers/src/osis-sword-module/data
+cd ~/BibleEngine/importers/src/osis-sword-module
+npx ts-node src/importer.ts
+```
+
+Add the lexicon entries:
+
+```
+cd ~/BibleEngine/importers
+npx ts-node src/step-lexicon/importer.ts
+open ~/BibleEngine/importers/output/bible.db
+```
+
+Copy the database into the app:
+
+```
+cp ~/BibleEngine/importers/output/bible.db ~/BibleEngine/app/assets/
+```
+
 ## Packages
 
 -   [@bible-engine/core](https://github.com/tyndale/BibleEngine/tree/master/core): the brain of _BibleEngine_

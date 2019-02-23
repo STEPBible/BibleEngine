@@ -207,7 +207,7 @@ function getDictionaryEntries(lexiconEntries: any, dictionary: string): IDiction
 export const genDb = async () => {
     // Note: You'll need to remove all the comments at the top of the txt file.
     const hebrewLexiconLines = fs
-        .readFileSync('src/importers/step-lexicon/data/hebrew_lexicon.txt')
+        .readFileSync(`${dirProjectRoot}/src/step-lexicon/data/hebrew_lexicon.txt`)
         .toString()
         .split('\n');
 
@@ -221,7 +221,7 @@ export const genDb = async () => {
     }
 
     const greekLexiconLines = fs
-        .readFileSync('src/importers/step-lexicon/data/greek_lexicon.txt')
+        .readFileSync(`${dirProjectRoot}/src/step-lexicon/data/greek_lexicon.txt`)
         .toString()
         .split('\n');
 
