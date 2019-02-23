@@ -1,4 +1,4 @@
-import { createConnection, ConnectionOptions, Raw, EntityManager } from 'typeorm';
+import { createConnection, ConnectionOptions, Raw, EntityManager } from './typeorm';
 
 import {
     ENTITIES,
