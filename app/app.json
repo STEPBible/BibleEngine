@@ -24,7 +24,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tyndale.stepbible"
+    },
+    "android": {
+      "package": "com.tyndale.stepbible"
     },
     "packagerOpts": {
       "sourceExts": [
