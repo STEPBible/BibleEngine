@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from '../../typeorm';
 import { IBibleBook, DocumentRoot } from '../models';
 
 @Entity('bible_book')

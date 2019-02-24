@@ -6,7 +6,7 @@ import {
     BeforeInsert,
     BeforeUpdate,
     Index
-} from 'typeorm';
+} from '../../typeorm';
 import { DocumentRoot, IBibleVersion } from '../models';
 
 @Entity('bible_version')

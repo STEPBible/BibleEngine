@@ -7,7 +7,7 @@ import { getBibleEngineInputFromXML } from './OsisParser';
 
 const fs = require('fs');
 
-const dirProjectRoot = resolve(__dirname + '/../../../..');
+const dirProjectRoot = resolve(__dirname + '/../../..');
 
 const sqlBible = new BibleEngine({
     type: 'sqlite',
