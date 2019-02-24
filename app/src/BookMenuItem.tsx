@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 
 import { BibleBook } from '@bible-engine/core';
-import { Color } from './Constants';
+import { Color, FontSize } from './Constants';
 
 interface Props {
   book: BibleBook;
@@ -95,6 +95,7 @@ export default class BookMenuItem extends React.PureComponent<Props, State> {
 
 const styles = StyleSheet.create({
   bookName: {
+    backgroundColor: 'white',
     flex: 1,
     height: ITEM_HEIGHT,
     justifyContent: 'center',
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
   },
   bookName__text: {
     fontFamily: 'cardo',
-    fontSize: 20
+    fontSize: FontSize.MEDIUM
   },
   bookSpine: {
     backgroundColor: Color.TYNDALE_BLUE,
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
   chapters__chapterNum__text: {
     color: '#686868',
     fontFamily: 'cardo',
-    fontSize: 21
+    fontSize: FontSize.LARGE
   },
   container: {
     flex: 1,
