@@ -6,20 +6,27 @@ We're so glad you're here! Let's change the world, together!
 
 1. Enable Developer mode on your phone
 1. Download Android Studio
-1. Connect your phone to your computer using a cable
+1. If you have a Mac, download Xcode
+1. If you have an Android phone: Connect your phone to your computer using a cable
 1. Make a blank Android app
-1. Run it, verify it shows up on your phone OR on an Android emulator
+1. Run it, verify it shows up on your phone OR alternatively, an an Android emulator
 1. Close Android Studio
-1. Open expo (expo start --android)
-1. Change connection setting to "Local"
-1. Change color: try ReadingView.tsx, background: backgroundColor to 'magenta'
-1. Verify that the change takes < 5 seconds to load
-1. On your phone or simulator, close Expo and reopen if it gets stuck on 100%
-1. Celebrate 😀
 
 ### Setting up the app
 
-Welcome! We're glad you're here. Let's change the world, together!
+Check that Node.js is installed:
+
+```
+node --version
+```
+
+Check if Yarn is installed:
+
+```
+yarn --version
+```
+
+Install Yarn if needed: https://yarnpkg.com/lang/en/docs/install
 
 Install some global dependences:
 
@@ -68,6 +75,11 @@ Start the app to see everything in action:
 cd ~/BibleEngine/app
 expo start
 ```
+
+1. Change color: try ReadingView.tsx, background: backgroundColor to 'magenta'
+1. Verify that the change takes < 5 seconds to load
+1. On your phone or simulator, close Expo and reopen if it gets stuck on 100%
+1. Celebrate 😀
 
 ## Upgrading
 
