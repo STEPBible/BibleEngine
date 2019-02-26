@@ -34,8 +34,12 @@ export class BibleBookEntity implements IBibleBook {
 
     chaptersCount: number[];
 
+    @Column({ type: 'varchar' })
+    dataLocation: 'db' | 'file' | 'remote';
+
     constructor(initializer: IBibleBook) {
         Object.assign(this, initializer);
+        if (!this.dataLocation) this.dataLocation = 'db';
     }
 
     @AfterLoad()

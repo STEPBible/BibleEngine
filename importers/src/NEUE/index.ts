@@ -10,15 +10,7 @@ import { visitNode } from './helpers';
 import { bookList } from './meta/books';
 import copyrightLong from './meta/copyright';
 import { BibleEngineImporter } from '../Importer.interface';
-
-function streamToString(stream: NodeJS.ReadWriteStream): Promise<string> {
-    const chunks: Uint8Array[] = [];
-    return new Promise((_resolve, reject) => {
-        stream.on('data', chunk => chunks.push(chunk));
-        stream.on('error', reject);
-        stream.on('end', () => _resolve(Buffer.concat(chunks).toString('utf8')));
-    });
-}
+import { streamToString } from '../helpers.functions';
 
 export class NeueImporter extends BibleEngineImporter {
     async import() {

@@ -89,9 +89,17 @@ export const generateBibleDocument = (
 
     let activeGroup: BibleContentGeneratorContainer = rootGroup;
 
-    const currentNumbering = {
+    const currentNumbering: {
+        normalizedChapter: number;
+        normalizedVerse: number;
+        normalizedSubverse: number;
+        versionChapter: number;
+        versionVerse: number;
+        versionSubverse?: number;
+    } = {
         normalizedChapter: 0,
         normalizedVerse: -1, // we have zero-verses (psalms in some versions)
+        normalizedSubverse: 0,
         versionChapter: 0,
         versionVerse: -1 // we have zero-verses (psalms in some versions)
     };
@@ -436,6 +444,14 @@ export const generateBibleDocument = (
             numbering.normalizedVerseIsStarting = phrase.normalizedReference.normalizedVerseNum;
             currentNumbering.normalizedVerse = phrase.normalizedReference.normalizedVerseNum;
         }
+        if (
+            currentNumbering.normalizedSubverse !== phrase.normalizedReference.normalizedSubverseNum
+        ) {
+            numbering.normalizedSubverseIsStarting =
+                phrase.normalizedReference.normalizedSubverseNum;
+            currentNumbering.normalizedSubverse = phrase.normalizedReference.normalizedSubverseNum;
+        }
+
         if (currentNumbering.versionChapter !== phrase.versionChapterNum) {
             // psalms can have verse number zero
             if (phrase.versionVerseNum <= 1)
@@ -446,6 +462,10 @@ export const generateBibleDocument = (
         if (currentNumbering.versionVerse !== phrase.versionVerseNum) {
             numbering.versionVerseIsStarting = phrase.versionVerseNum;
             currentNumbering.versionVerse = phrase.versionVerseNum;
+        }
+        if (currentNumbering.versionSubverse !== phrase.versionSubverseNum) {
+            numbering.versionSubverseIsStarting = phrase.versionSubverseNum;
+            currentNumbering.versionSubverse = phrase.versionSubverseNum;
         }
 
         const outputPhrase: IBibleContentGeneratorPhrase = {

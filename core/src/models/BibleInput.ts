@@ -1,6 +1,5 @@
-import { IContentGroup, IBibleBook } from '.';
+import { IContentGroup, IBibleBook, IBibleContentPhrase } from '.';
 import { IBibleSectionBase } from './BibleSection';
-import { IBiblePhraseWithNumbers } from './BiblePhrase';
 import { ContentGroupType } from './ContentGroup';
 
 export type IBibleContentForInput =
@@ -11,6 +10,7 @@ export type IBibleContentForInput =
 export type BookWithContentForInput = {
     book: IBibleBook;
     contents: IBibleContentForInput[];
+    contentHasNormalizedNumbers?: boolean;
 };
 
 export interface IBibleContentSectionForInput extends IBibleSectionBase {
@@ -25,7 +25,7 @@ export interface IBibleContentGroupForInput<T extends ContentGroupType> extends 
     contents: (IBibleContentGroupForInput<ContentGroupType> | IBibleContentPhraseForInput)[];
 }
 
-export interface IBibleContentPhraseForInput extends IBiblePhraseWithNumbers {
+export interface IBibleContentPhraseForInput extends IBibleContentPhrase {
     readonly type: 'phrase';
 }
 

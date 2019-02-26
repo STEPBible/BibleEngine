@@ -67,11 +67,18 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
     @ManyToOne(() => BibleSectionEntity, section => section.crossReferences)
     section?: BibleSectionEntity;
 
-    constructor(crossRef: IBibleCrossReference, allowCreationWithoutNormalizedReference = false) {
+    constructor(
+        crossRef: IBibleCrossReference,
+        allowCreationWithoutNormalizedReference = false,
+        phraseId?: number
+    ) {
         // typeorm is seemingly creating objects on startup (without passing parameters), so we
         // need to add a guard here
         if (!crossRef) return;
 
+        // if we save this object seperately and not as part of a relation, we need to set the
+        // phraseId manually
+        if (phraseId) this.phraseId = phraseId;
         this.key = crossRef.key;
 
         if (!crossRef.range.versionId && !isReferenceNormalized(crossRef.range))

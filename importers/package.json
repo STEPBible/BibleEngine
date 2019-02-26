@@ -16,7 +16,7 @@
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
         "sqlite3": "^4.0.4",
-        "typeorm": "^0.2.13"
+        "typeorm": "0.2.14"
     },
     "devDependencies": {
         "@types/archiver": "^2.1.2",

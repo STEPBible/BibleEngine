@@ -10,4 +10,5 @@ export interface IBibleBook {
     longTitle?: string;
     chaptersCount?: number[];
     introduction?: DocumentRoot;
+    dataLocation?: 'db' | 'file' | 'remote';
 }

@@ -5766,10 +5766,10 @@ type-is@^1.6.16, type-is@~1.6.6:
     media-typer "0.3.0"
     mime-types "~2.1.18"
 
-typeorm@^0.2.13:
-  version "0.2.13"
-  resolved "https://registry.yarnpkg.com/typeorm/-/typeorm-0.2.13.tgz#d6d49cd83aba5709134b99cdaca0b0f1b5002543"
-  integrity sha512-SfRHZt6un1rCsTtHpBSgG5kh2jWznzrBex1Dfxbnji0nlrrNQ+ET4uxIhq3herk0TE0ETx3R+UjU0MGv8DB/3g==
+typeorm@0.2.14:
+  version "0.2.14"
+  resolved "https://registry.yarnpkg.com/typeorm/-/typeorm-0.2.14.tgz#5bd39de1306977e7ccdb31c3915018374415e9ff"
+  integrity sha512-kPV8nX7g7hvFpuzdLKGxqkVRHEJe9AK6csgWJJPaCFU3NrLmUG6a2Q0FxY/Z0Qy/2gqt5VG3t3FyFpw360XSvg==
   dependencies:
     app-root-path "^2.0.1"
     buffer "^5.1.0"
@@ -5785,25 +5785,6 @@ typeorm@^0.2.13:
     xml2js "^0.4.17"
     yargonaut "^1.1.2"
     yargs "^12.0.5"
-
-typeorm@^0.2.8:
-  version "0.2.9"
-  resolved "https://registry.yarnpkg.com/typeorm/-/typeorm-0.2.9.tgz#b21a55f4c7ae398c104911e298485c232bcceefc"
-  integrity sha512-guvrl5TH85N0y1AdPRuCrs2OTRQqs1wVgM+GrMfaiAGF8X+EoHDTUg2SPmcGtoAOSg7CnrCPxxwKOH4VvBr5Tw==
-  dependencies:
-    app-root-path "^2.0.1"
-    buffer "^5.1.0"
-    chalk "^2.3.2"
-    cli-highlight "^1.2.3"
-    debug "^3.1.0"
-    dotenv "^5.0.1"
-    glob "^7.1.2"
-    js-yaml "^3.11.0"
-    mkdirp "^0.5.1"
-    reflect-metadata "^0.1.12"
-    xml2js "^0.4.17"
-    yargonaut "^1.1.2"
-    yargs "^11.1.0"
 
 typescript@^3.1.6:
   version "3.1.6"
@@ -6207,7 +6188,7 @@ yargs@^10.0.3:
     y18n "^3.2.1"
     yargs-parser "^8.1.0"
 
-yargs@^11.0.0, yargs@^11.1.0:
+yargs@^11.0.0:
   version "11.1.0"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-11.1.0.tgz#90b869934ed6e871115ea2ff58b03f4724ed2d77"
   integrity sha512-NwW69J42EsCSanF8kyn5upxvjp5ds+t3+udGBeTbFnERA+lF541DDpMawzo4z6W/QrzNM18D+BPMiOBibnFV5A==

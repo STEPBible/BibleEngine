@@ -60,7 +60,7 @@ export class BeImportFileCreator {
             });
 
             zipArchive.pipe(output);
-            zipArchive.glob(`${targetDir}/*.json`);
+            zipArchive.glob('*.json', { cwd: targetDir });
             zipArchive.finalize();
         });
 

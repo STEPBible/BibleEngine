@@ -34,8 +34,11 @@ export class BibleNoteEntity implements IBibleNote {
     @ManyToOne(() => BiblePhraseEntity, phrase => phrase.notes)
     phrase: BiblePhraseEntity;
 
-    constructor(initializer: IBibleNote) {
+    constructor(initializer: IBibleNote, phraseId?: number) {
         Object.assign(this, initializer);
+        // if we save this object manually and not as part of a relation, we need to set the
+        // phraseId manually
+        if (phraseId) this.phraseId = phraseId;
     }
 
     @AfterLoad()

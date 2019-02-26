@@ -15,9 +15,11 @@ export interface IBibleNumbering {
         normalizedChapterIsStarting?: number;
         normalizedChapterIsStartingInRange?: number;
         normalizedVerseIsStarting?: number;
+        normalizedSubverseIsStarting?: number;
         versionChapterIsStarting?: number;
         versionChapterIsStartingInRange?: number;
         versionVerseIsStarting?: number;
+        versionSubverseIsStarting?: number;
     };
 }
 export interface IBibleContentSection extends IBibleSectionBase, IBibleNumbering {

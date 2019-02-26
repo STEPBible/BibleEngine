@@ -20,7 +20,7 @@
         "pm2": "^3.2.3",
         "tsconfig-paths": "^3.7.0",
         "type-graphql": "^0.15.0",
-        "typeorm": "^0.2.8"
+        "typeorm": "0.2.14"
     },
     "devDependencies": {
         "@types/jest": "^23.3.9",

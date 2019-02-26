@@ -9,7 +9,7 @@
         "bible-passage-reference-parser": "^2.0.1",
         "pako": "^1.0.7",
         "reflect-metadata": "^0.1.12",
-        "typeorm": "^0.2.13",
+        "typeorm": "0.2.14",
         "whatwg-fetch": "^3.0.0"
     },
     "devDependencies": {
