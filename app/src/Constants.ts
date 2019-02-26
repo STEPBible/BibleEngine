@@ -4,7 +4,8 @@ export enum Margin {
   EXTRA_SMALL = normalizeText(5),
   SMALL = normalizeText(10),
   MEDIUM = normalizeText(15),
-  LARGE = normalizeText(20)
+  LARGE = normalizeText(20),
+  EXTRA_LARGE = normalizeText(30)
 }
 
 export enum FontSize {

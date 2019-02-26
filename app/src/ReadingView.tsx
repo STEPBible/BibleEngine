@@ -67,7 +67,6 @@ export default class ReadingView extends React.PureComponent<Props, State> {
         <ScrollView
           bounces={true}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ marginTop: 30 }}
         >
           <Text style={styles.chapterHeader}>
             {`${this.props.bookName} ${this.props.chapterNum}`}
@@ -93,7 +92,7 @@ const styles = StyleSheet.create({
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
-    marginTop: Margin.LARGE,
+    marginTop: Margin.EXTRA_LARGE,
     marginBottom: Margin.LARGE,
     textAlign: 'center'
   },
