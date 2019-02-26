@@ -13,9 +13,14 @@ export default class Database {
     }
 
     const pathToDownloadTo = `${sqliteDirectory}/bibles.db`;
-    // console.log(pathToDownloadTo);
-    const uriToDownload = Expo.Asset.fromModule(databaseModule).uri;
-    await Expo.FileSystem.downloadAsync(uriToDownload, pathToDownloadTo);
+
+    const { exists: fileExists } = await Expo.FileSystem.getInfoAsync(
+      pathToDownloadTo
+    );
+    if (!fileExists) {
+      const uriToDownload = Expo.Asset.fromModule(databaseModule).uri;
+      await Expo.FileSystem.downloadAsync(uriToDownload, pathToDownloadTo);
+    }
 
     const expoDatabase = await Expo.SQLite.openDatabase('bibles.db');
     return expoDatabase;
