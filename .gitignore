@@ -4,6 +4,7 @@ node_modules/
 yarn-error.log
 core/output
 notes
+bible.db
 NeÜ bibel.heute.ont
 importers/src/NEUE/data
 lib/
@@ -14,3 +15,4 @@ bibles.db
 importers/scripts/NEUE
 greek_lexicon.txt
 hebrew_lexicon.txt
+.DS_Store

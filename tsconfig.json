@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "es2017",
         "module": "commonjs",
         "lib": ["dom", "es2018"],
         "moduleResolution": "node",
@@ -20,5 +20,6 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "downlevelIteration": true
-    }
+    },
+    "exclude": ["node_modules"]
 }

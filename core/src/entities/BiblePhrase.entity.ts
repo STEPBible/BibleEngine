@@ -7,7 +7,7 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from 'typeorm';
+} from '../../typeorm';
 import { BibleCrossReferenceEntity, BibleNoteEntity } from '.';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
 import { PhraseModifiers, IBiblePhraseRef } from '../models';

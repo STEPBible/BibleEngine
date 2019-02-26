@@ -1,4 +1,4 @@
-import { createConnection, ConnectionOptions, Raw, EntityManager } from 'typeorm';
+import { createConnection, ConnectionOptions, Raw, EntityManager } from '../typeorm';
 
 import {
     ENTITIES,
@@ -75,7 +75,7 @@ export class BibleEngine {
         if (dbConfig) {
             this.pDB = createConnection({
                 entities: ENTITIES,
-                synchronize: true,
+                synchronize: false,
                 logging: ['error'],
                 name: 'bible-engine',
                 ...dbConfig

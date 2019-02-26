@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "jsx": "react-native",
+    "lib": ["es2015", "es2017", "esnext.asynciterable"],
+    "module": "es2015",
+    "moduleResolution": "node",
+    "noEmitHelpers": true,
+    "emitDecoratorMetadata": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "sourceMap": false, // Something else (Babel?) is creating the necessary source maps.
+    "strict": true,
+    "target": "es5"
+  },
+  "exclude": ["node_modules"]
+}
