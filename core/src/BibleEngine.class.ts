@@ -86,6 +86,7 @@ export class BibleEngine {
     async addBookWithContent(bookInput: BookWithContentForInput, entityManager?: EntityManager) {
         if (!this.pDB) throw new NoDbConnectionError();
 
+        const contentHasNormalizedNumbers = bookInput.contentHasNormalizedNumbers || false;
         const textData = convertBibleInputToBookPlaintext(bookInput.contents);
         bookInput.book.chaptersCount = [];
         for (const verses of textData.values()) {
@@ -98,7 +99,10 @@ export class BibleEngine {
                 entityManager,
                 bookInput.contents,
                 bookInput.book,
-                textData
+                textData,
+                undefined,
+                undefined,
+                contentHasNormalizedNumbers
             ).catch(e => {
                 console.error('Aborting book import: ' + e);
             });
@@ -109,7 +113,10 @@ export class BibleEngine {
                     transactionEntityManger,
                     bookInput.contents,
                     bookInput.book,
-                    textData
+                    textData,
+                    undefined,
+                    undefined,
+                    contentHasNormalizedNumbers
                 ).catch(e => {
                     console.error('Aborting book import: ' + e);
                 });
