@@ -66,6 +66,7 @@ export default class App extends React.PureComponent<{}, State> {
         gesturesAreEnabled={this.leftMenuGesturesAreEnabled}
         bounceBackOnOverdraw={false}
         openMenuOffset={DEVICE_WIDTH * 0.76}
+        edgeHitWidth={DEVICE_WIDTH}
         ref={ref => (this.leftMenuRef = ref)}
       >
         <SideMenu
