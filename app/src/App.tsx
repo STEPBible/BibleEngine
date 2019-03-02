@@ -33,9 +33,9 @@ export default class App extends React.PureComponent<{}, State> {
   state = {
     books: [],
     content: [],
-    currentBookOsisId: 'Josh',
+    currentBookOsisId: 'Ps',
     currentBookFullTitle: 'Josh',
-    currentChapterNum: 1,
+    currentChapterNum: 119,
     currentVersionUid: 'ESV',
     isLeftMenuOpen: false,
     isReady: false,
@@ -120,7 +120,8 @@ export default class App extends React.PureComponent<{}, State> {
     await Database.load(bibleDatabaseModule);
     this.sqlBible = new BibleEngine({
       database: 'bibles.db',
-      type: 'expo'
+      type: 'expo',
+      synchronize: false
     });
     await this.sqlBible.setVersion('ESV');
     const books = await this.sqlBible.getBooksForVersion(1);
