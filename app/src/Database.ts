@@ -14,11 +14,14 @@ export default class Database {
 
     const pathToDownloadTo = `${sqliteDirectory}/bibles.db`;
 
-    const { exists: fileExists } = await Expo.FileSystem.getInfoAsync(
-      pathToDownloadTo
+    const {
+      exists: fileExists,
+      md5: incomingHash
+    } = await Expo.FileSystem.getInfoAsync(pathToDownloadTo, { md5: true });
+    const { hash: existingHash, uri: uriToDownload } = Expo.Asset.fromModule(
+      databaseModule
     );
-    if (!fileExists) {
-      const uriToDownload = Expo.Asset.fromModule(databaseModule).uri;
+    if (!fileExists || incomingHash !== existingHash) {
       await Expo.FileSystem.downloadAsync(uriToDownload, pathToDownloadTo);
     }
 
