@@ -33,9 +33,9 @@ export default class App extends React.PureComponent<{}, State> {
   state = {
     books: [],
     content: [],
-    currentBookOsisId: 'Ps',
-    currentBookFullTitle: 'Josh',
-    currentChapterNum: 119,
+    currentBookOsisId: 'Gen',
+    currentBookFullTitle: 'Gen',
+    currentChapterNum: 1,
     currentVersionUid: 'ESV',
     isLeftMenuOpen: false,
     isReady: false,
