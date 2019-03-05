@@ -166,12 +166,10 @@ export default class StrongsWord extends React.Component<Props, State> {
           ref={ref => (this.touchable = ref)}
           onPress={this.onPress}
           activeOpacity={0.5}
-          underlayColor="white"
+          underlayColor="#C5D8EA"
           style={styles.strongWord}
         >
-          <Text style={[styles.text, styles.strongWordText]}>
-            {this.props.phrase}
-          </Text>
+          <Text style={styles.strongWordText}>{this.props.phrase}</Text>
         </TouchableHighlight>
         <Popover
           isVisible={this.state.popoverIsVisible}
@@ -242,13 +240,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap'
   },
   strongWord: {
-    marginRight: 7,
-    marginBottom: Margin.EXTRA_SMALL
+    marginRight: 7
   },
   strongWordText: {
     color: Color.TYNDALE_BLUE,
     fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.MEDIUM
+    fontSize: FontSize.MEDIUM,
+    marginBottom: Margin.EXTRA_SMALL
   },
   text: {
     fontSize: FontSize.MEDIUM,

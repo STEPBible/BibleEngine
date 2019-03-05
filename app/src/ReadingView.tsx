@@ -151,12 +151,6 @@ const styles = StyleSheet.create({
     marginLeft: Margin.LARGE,
     marginRight: Margin.LARGE
   },
-  strongsPhraseText: {
-    // backgroundColor: 'yellow',
-    color: Color.TYNDALE_BLUE,
-    fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.MEDIUM
-  },
   title: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.MEDIUM * 0.8,
