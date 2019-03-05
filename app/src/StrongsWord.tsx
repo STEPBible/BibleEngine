@@ -87,13 +87,15 @@ export default class StrongsWord extends React.Component<Props, State> {
       <View>
         <View style={styles.popover__content}>
           <View style={styles.popover__content__header}>
-            <Text style={styles.popover__content__header__gloss}>{`'${
-              item.gloss
-            }' (`}</Text>
-            <Text style={styles.popover__content__header__transliteration}>{`${
-              item.transliteration
-            } - `}</Text>
-            <Text style={styles.popover__content__header__lemma}>
+            <Text
+              selectable
+              style={styles.popover__content__header__gloss}
+            >{`'${item.gloss}' (`}</Text>
+            <Text
+              selectable
+              style={styles.popover__content__header__transliteration}
+            >{`${item.transliteration} - `}</Text>
+            <Text selectable style={styles.popover__content__header__lemma}>
               {`${item.lemma}`}
             </Text>
             <Text style={styles.popover__content__header__lemma}>{')'}</Text>
