@@ -78,6 +78,7 @@ export default class App extends React.PureComponent<{}, State> {
           openMenuOffset={DEVICE_WIDTH * 0.76}
           ref={ref => (this.rightMenuRef = ref)}
         >
+          <Expo.KeepAwake />
           <StatusBar hidden={true} />
           <ReadingView
             chapterNum={this.state.currentChapterNum}
