@@ -71,7 +71,6 @@ export default class StrongsWord extends React.Component<Props, State> {
   }
 
   onPress = () => {
-    console.log(JSON.stringify(this.state.definitions, null, 2));
     this.setState({ popoverIsVisible: true });
   };
 

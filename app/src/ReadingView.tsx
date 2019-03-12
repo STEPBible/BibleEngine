@@ -21,9 +21,6 @@ interface Props {
 }
 
 export default class ReadingView extends React.PureComponent<Props, State> {
-  componentWillReceiveProps(props: Props) {
-    console.log(JSON.stringify(props.bookName));
-  }
   renderItem = (content: IBibleContent): any => {
     if (content.type === 'phrase') {
       return this.renderPhrase(content);
