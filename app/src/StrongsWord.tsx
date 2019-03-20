@@ -86,13 +86,15 @@ export default class StrongsWord extends React.Component<Props, State> {
       <View>
         <View style={styles.popover__content}>
           <View style={styles.popover__content__header}>
-            <Text style={styles.popover__content__header__gloss}>{`'${
-              item.gloss
-            }' (`}</Text>
-            <Text style={styles.popover__content__header__transliteration}>{`${
-              item.transliteration
-            } - `}</Text>
-            <Text style={styles.popover__content__header__lemma}>
+            <Text
+              selectable
+              style={styles.popover__content__header__gloss}
+            >{`'${item.gloss}' (`}</Text>
+            <Text
+              selectable
+              style={styles.popover__content__header__transliteration}
+            >{`${item.transliteration} - `}</Text>
+            <Text selectable style={styles.popover__content__header__lemma}>
               {`${item.lemma}`}
             </Text>
             <Text style={styles.popover__content__header__lemma}>{')'}</Text>
@@ -127,8 +129,12 @@ export default class StrongsWord extends React.Component<Props, State> {
     ) {
       return null;
     }
-    return element.content.contents.map((element: DocumentElement) =>
-      this.renderDocumentElement(element)
+    return (
+      <View style={styles.popover__content__definitions__entry}>
+        {element.content.contents.map((element: DocumentElement) =>
+          this.renderDocumentElement(element)
+        )}
+      </View>
     );
   };
 
@@ -136,10 +142,18 @@ export default class StrongsWord extends React.Component<Props, State> {
     if (!element) {
       return null;
     }
-    if (element.type === 'phrase') {
+    if (element.type === 'phrase' && element.content.length) {
       return <Text style={styles.documentPhrase}>{element.content}</Text>;
     }
     if (element.type === 'group') {
+      if (element.groupType === 'bold') {
+        const phrases: string[] = element.contents.map(
+          ({ content }) => content
+        );
+        return phrases.map(phrase => (
+          <Text style={styles.boldDocumentPhrase}>{phrase}</Text>
+        ));
+      }
       return element.contents.map((element: DocumentElement) =>
         this.renderDocumentElement(element)
       );
@@ -153,12 +167,10 @@ export default class StrongsWord extends React.Component<Props, State> {
           ref={ref => (this.touchable = ref)}
           onPress={this.onPress}
           activeOpacity={0.5}
-          underlayColor="white"
+          underlayColor="#C5D8EA"
           style={styles.strongWord}
         >
-          <Text style={[styles.text, styles.strongWordText]}>
-            {this.props.phrase}
-          </Text>
+          <Text style={styles.strongWordText}>{this.props.phrase}</Text>
         </TouchableHighlight>
         <Popover
           isVisible={this.state.popoverIsVisible}
@@ -223,9 +235,13 @@ const styles = StyleSheet.create({
     fontSize: FontSize.MEDIUM,
     maxHeight: FontSize.EXTRA_LARGE
   },
+  popover__content__definitions__entry: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap'
+  },
   strongWord: {
-    marginRight: 7,
-    marginBottom: Margin.EXTRA_SMALL
+    marginRight: 7
   },
   strongWordText: {
     color: Color.TYNDALE_BLUE,
@@ -237,8 +253,17 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.CARDO
   },
   documentPhrase: {
+    // backgroundColor: 'cyan',
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.SMALL,
     marginBottom: 5
+    // margin: 5
+  },
+  boldDocumentPhrase: {
+    // backgroundColor: 'yellow',
+    fontFamily: FontFamily.CARDO_BOLD,
+    fontSize: FontSize.SMALL,
+    marginBottom: 5
+    // margin: 5
   }
 });

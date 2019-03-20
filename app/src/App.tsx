@@ -33,8 +33,8 @@ export default class App extends React.PureComponent<{}, State> {
   state = {
     books: [],
     content: [],
-    currentBookOsisId: 'Josh',
-    currentBookFullTitle: 'Josh',
+    currentBookOsisId: 'Gen',
+    currentBookFullTitle: 'Gen',
     currentChapterNum: 1,
     currentVersionUid: 'ESV',
     isLeftMenuOpen: false,
@@ -66,6 +66,7 @@ export default class App extends React.PureComponent<{}, State> {
         gesturesAreEnabled={this.leftMenuGesturesAreEnabled}
         bounceBackOnOverdraw={false}
         openMenuOffset={DEVICE_WIDTH * 0.76}
+        edgeHitWidth={DEVICE_WIDTH}
         ref={ref => (this.leftMenuRef = ref)}
       >
         <SideMenu
@@ -77,6 +78,7 @@ export default class App extends React.PureComponent<{}, State> {
           openMenuOffset={DEVICE_WIDTH * 0.76}
           ref={ref => (this.rightMenuRef = ref)}
         >
+          <Expo.KeepAwake />
           <StatusBar hidden={true} />
           <ReadingView
             chapterNum={this.state.currentChapterNum}
@@ -120,7 +122,8 @@ export default class App extends React.PureComponent<{}, State> {
     await Database.load(bibleDatabaseModule);
     this.sqlBible = new BibleEngine({
       database: 'bibles.db',
-      type: 'expo'
+      type: 'expo',
+      synchronize: false
     });
     await this.sqlBible.setVersion('ESV');
     const books = await this.sqlBible.getBooksForVersion(1);

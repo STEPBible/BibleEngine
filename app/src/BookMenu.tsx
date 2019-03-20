@@ -51,41 +51,10 @@ export default class BookMenu extends React.PureComponent<Props, State> {
 }
 
 const styles = StyleSheet.create({
-  bookName: {
-    flex: 1,
-    height: ITEM_HEIGHT,
-    justifyContent: 'center',
-    marginLeft: 27,
-    width: BOOK_NAME_ITEM_WIDTH
-  },
-  bookName__text: {
-    fontFamily: 'cardo',
-    fontSize: 20
-  },
   bookSpine: {
     backgroundColor: Color.TYNDALE_BLUE,
     height: Dimensions.get('window').height,
     width: 57
-  },
-  chapters: {
-    alignItems: 'center',
-    backgroundColor: '#EBEBEB',
-    flex: 1,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start'
-  },
-  chapters__chapterNum: {
-    alignItems: 'center',
-    backgroundColor: '#EBEBEB',
-    height: ITEM_HEIGHT,
-    justifyContent: 'center',
-    width: ITEM_HEIGHT
-  },
-  chapters__chapterNum__text: {
-    color: '#686868',
-    fontFamily: FontFamily.CARDO,
-    fontSize: 21
   },
   container: {
     flex: 1,

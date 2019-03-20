@@ -1,18 +1,43 @@
-## Getting Started
+# Contributing
 
 We're so glad you're here! Let's change the world, together!
 
-### Setting up your environment
+## Setting Up Your Phone
+
+### Setting Up iPhone
 
 1. Enable Developer mode on your phone
+2. Search "Expo" on the App Store of your phone, and download the first result. This app will allow you to preview changes as you develop.
+3. Search "TestFlight" and install the first result
+
+### Setting Up Android
+
+1. Enable Developer mode on your phone
+2. Search "Expo" on the App Store of your phone, and download the first result. This app will allow you to preview changes as you develop.
+
+## Setting Up Your Computer
+
+### Setting Up Windows
+
+1. Install WSL for Windows, and choose Ubuntu as your OS
 1. Download Android Studio
-1. If you have a Mac, download Xcode
 1. If you have an Android phone: Connect your phone to your computer using a cable
 1. Make a blank Android app
 1. Run it, verify it shows up on your phone OR alternatively, an an Android emulator
 1. Close Android Studio
+1. Install Visual Studio Code- it has helpful built-in features for working with Typescript
 
-### Setting up the app
+### Setting Up Mac
+
+1. Download Xcode
+1. Download Android Studio
+1. If you have an Android phone: Connect your phone to your computer using a cable
+1. Make a blank Android app
+1. Run it, verify it shows up on your phone OR alternatively, an an Android emulator
+1. Close Android Studio
+1. Install Visual Studio Code- it has helpful built-in features for working with Typescript
+
+## Setting Up Step Bible
 
 Check that Node.js is installed:
 
@@ -46,18 +71,21 @@ cd BibleEngine
 Use the mobile-friendly version of TypeORM:
 
 ```
+git checkout expo-app
+git checkout master
 git checkout expo-app -- core/typeorm.ts
 ```
 
 Build Typescript files, and ignore any warnings or errors:
 
 ```
-yarn --cwd core build || true
+yarn --cwd core build
 ```
 
 Install dependencies:
 
 ```
+cd ~/BibleEngine
 yarn install
 ```
 
@@ -75,6 +103,10 @@ Start the app to see everything in action:
 cd ~/BibleEngine/app
 expo start
 ```
+
+Change the Connection mode to "Tunnel". This allows you to run the app on your phone, even if your phone is on a different network.
+
+For Android, scan the QR code on your phone, or for iOS, have it text a link to you.
 
 1. Change color: try ReadingView.tsx, background: backgroundColor to 'magenta'
 1. Verify that the change takes < 5 seconds to load
@@ -125,6 +157,7 @@ Want a database to run in the app? Follow these steps!
 Note: for the lexicons, you'll need access to some copyrighted material that's not checked into this repo.
 
 Build, for instance, an ESV database from a Sword module:
+
 ```
 cp ~/Downloads/ESV2016_th.zip ~/BibleEngine/importers/src/osis-sword-module/data
 cd ~/BibleEngine/importers/src/osis-sword-module

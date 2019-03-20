@@ -1,4 +1,5 @@
 import * as Expo from 'expo';
+import store from 'react-native-simple-store';
 
 export default class Database {
   public static async load(databaseModule: any) {
@@ -15,11 +16,17 @@ export default class Database {
     const pathToDownloadTo = `${sqliteDirectory}/bibles.db`;
 
     const { exists: fileExists } = await Expo.FileSystem.getInfoAsync(
-      pathToDownloadTo
+      pathToDownloadTo,
+      { md5: true }
     );
-    if (!fileExists) {
-      const uriToDownload = Expo.Asset.fromModule(databaseModule).uri;
+    const { hash: incomingHash, uri: uriToDownload } = Expo.Asset.fromModule(
+      databaseModule
+    );
+    const existingHash = await store.get('existingHash');
+    if (!fileExists || incomingHash !== existingHash) {
+      console.log('Updating database...');
       await Expo.FileSystem.downloadAsync(uriToDownload, pathToDownloadTo);
+      store.save('existingHash', incomingHash);
     }
 
     const expoDatabase = await Expo.SQLite.openDatabase('bibles.db');

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Text, View, StyleSheet, ScrollView, Dimensions } from 'react-native';
 
 import {
@@ -21,53 +21,89 @@ interface Props {
 }
 
 export default class ReadingView extends React.PureComponent<Props, State> {
-  componentWillReceiveProps(props: Props) {
-    console.log(JSON.stringify(props.bookName));
-  }
   renderItem = (content: IBibleContent): any => {
     if (content.type === 'phrase') {
-      if (content.strongs) {
-        return (
-          <StrongsWord
-            phrase={content.content}
-            strongs={content.strongs}
-            sqlBible={this.props.sqlBible}
-          />
-        );
-      }
-      return (
-        <View style={styles.phrase}>
-          <Text style={styles.phraseText}>{content.content}</Text>
-        </View>
-      );
+      return this.renderPhrase(content);
     }
     const children: IBibleContent[] = content.contents;
+
     if (content.type === 'section') {
       return (
-        <View style={styles.section}>
-          <Text style={styles.title}>{content.title}</Text>
-          {children.map(child => this.renderItem(child))}
-        </View>
+        <Fragment>
+          {this.renderVerseNumber(content)}
+          {this.renderSection(content)}
+        </Fragment>
       );
     }
     if (content.type === 'group') {
       if (content.groupType === 'paragraph') {
-        return children.map(child => this.renderItem(child));
+        return (
+          <Fragment>
+            {this.renderVerseNumber(content)}
+            {children.map(child => this.renderItem(child))}
+          </Fragment>
+        );
       }
       if (content.groupType === 'indent') {
-        return children.map(child => this.renderItem(child));
+        return (
+          <Fragment>
+            {this.renderVerseNumber(content)}
+            {children.map(child => this.renderItem(child))}
+          </Fragment>
+        );
       }
     }
     throw new Error(`Unrecognized content: ${JSON.stringify(content)}`);
   };
 
+  renderSection = (content: IBibleContent): any => {
+    const children: IBibleContent[] = content.contents;
+    return (
+      <View style={styles.section}>
+        <Text style={styles.title}>{content.title}</Text>
+        {children.map(child => this.renderItem(child))}
+      </View>
+    );
+  };
+
+  renderVerseNumber = (content: IBibleContent): any => {
+    if (content.numbering) {
+      return (
+        <Text style={styles.verseNumber}>
+          {content.numbering.versionVerseIsStarting}
+        </Text>
+      );
+    }
+    return null;
+  };
+
+  renderPhrase = (content: IBibleContent): any => {
+    if (content.strongs) {
+      return (
+        <Fragment>
+          {this.renderVerseNumber(content)}
+          <StrongsWord
+            phrase={content.content}
+            strongs={content.strongs}
+            sqlBible={this.props.sqlBible}
+          />
+        </Fragment>
+      );
+    }
+    return (
+      <Fragment>
+        {this.renderVerseNumber(content)}
+        <View style={styles.phrase}>
+          <Text style={styles.phraseText}>{content.content}</Text>
+        </View>
+      </Fragment>
+    );
+  };
+
   render() {
     return (
       <View style={styles.background}>
-        <ScrollView
-          bounces={true}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView bounces={true} showsVerticalScrollIndicator={false}>
           <Text style={styles.chapterHeader}>
             {`${this.props.bookName} ${this.props.chapterNum}`}
           </Text>
@@ -97,12 +133,12 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   phrase: {
-    marginBottom: Margin.EXTRA_SMALL,
-    marginRight: Margin.EXTRA_SMALL
+    marginBottom: Margin.EXTRA_SMALL
   },
   phraseText: {
     fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.MEDIUM
+    fontSize: FontSize.MEDIUM,
+    marginRight: 7
   },
   section: {
     flex: 1,
@@ -111,16 +147,18 @@ const styles = StyleSheet.create({
     marginLeft: Margin.LARGE,
     marginRight: Margin.LARGE
   },
-  strongsPhraseText: {
-    color: Color.TYNDALE_BLUE,
-    fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.MEDIUM
-  },
   title: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.MEDIUM * 0.8,
     marginBottom: Margin.SMALL,
     marginTop: Margin.SMALL,
     width: Dimensions.get('window').width
+  },
+  verseNumber: {
+    color: 'gray',
+    fontSize: FontSize.EXTRA_SMALL,
+    fontFamily: FontFamily.CARDO,
+    marginRight: 3,
+    marginTop: -2
   }
 });
