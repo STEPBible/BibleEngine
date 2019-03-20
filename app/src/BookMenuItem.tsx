@@ -9,6 +9,7 @@ import {
 
 import { BibleBook } from '@bible-engine/core';
 import { Color, FontSize } from './Constants';
+import normalizeText from './normalizeText';
 
 interface Props {
   book: BibleBook;
@@ -17,7 +18,7 @@ interface Props {
 
 interface State {}
 
-const ITEM_HEIGHT = 75;
+const ITEM_HEIGHT = 65;
 const BOOK_NAME_ITEM_WIDTH = 230;
 
 export default class BookMenuItem extends React.PureComponent<Props, State> {
