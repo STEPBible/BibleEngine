@@ -1,7 +1,6 @@
 import { DocumentRoot } from './Document';
 
 export interface IBibleBook {
-    versionId: number;
     type: 'ot' | 'nt' | 'ap';
     osisId: string;
     abbreviation: string;
@@ -11,4 +10,8 @@ export interface IBibleBook {
     chaptersCount?: number[];
     introduction?: DocumentRoot;
     dataLocation?: 'db' | 'file' | 'remote';
+}
+
+export interface IBibleBookEntity extends IBibleBook {
+    versionId: number;
 }

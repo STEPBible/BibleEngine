@@ -15,12 +15,13 @@ import {
     IBibleOutputRoot,
     PhraseModifiers,
     ValueModifiers,
-    IBibleContentForInput,
     IBibleNumbering,
     IBibleReferenceRange,
     IBibleReferenceRangeNormalized,
     IBibleSection,
-    IBibleNote
+    IBibleNote,
+    IBibleVersion,
+    IBibleBook
 } from '../models';
 import {
     BiblePhraseEntity,
@@ -44,19 +45,57 @@ import { getNormalizedChapterCountForOsisId, getNormalizedVerseCount } from './v
  * @returns {IBibleBookPlaintext}
  */
 export const convertBibleInputToBookPlaintext = (
-    contents: IBibleContentForInput[],
+    contents: IBibleContent[],
+    useNormalizedNumbers = false,
+    _currentNumbers: {
+        chapter?: number;
+        verse?: number;
+        subverse?: number;
+    } = {},
     _accChapters: BibleBookPlaintext = new Map()
 ) => {
     for (const content of contents) {
-        if (content.type !== 'phrase')
-            convertBibleInputToBookPlaintext(content.contents, _accChapters);
+        if (content.type !== 'section') {
+            if (content.type === 'phrase' && content.versionChapterNum && content.versionVerseNum) {
+                if (useNormalizedNumbers) {
+                    if (!content.normalizedReference) throw new Error(`missing normalized numbers`);
+                    _currentNumbers.chapter = content.normalizedReference.normalizedChapterNum;
+                    _currentNumbers.verse = content.normalizedReference.normalizedVerseNum;
+                    _currentNumbers.subverse = content.normalizedReference.normalizedSubverseNum;
+                } else {
+                    _currentNumbers.chapter = content.versionChapterNum;
+                    _currentNumbers.verse = content.versionVerseNum;
+                    _currentNumbers.subverse = content.versionSubverseNum;
+                }
+            } else if (content.numbering) {
+                if (useNormalizedNumbers) {
+                    _currentNumbers.chapter = content.numbering.normalizedChapterIsStartingInRange;
+                    _currentNumbers.verse = content.numbering.normalizedVerseIsStarting;
+                    _currentNumbers.subverse = content.numbering.normalizedSubverseIsStarting;
+                } else {
+                    _currentNumbers.chapter = content.numbering.versionChapterIsStartingInRange;
+                    _currentNumbers.verse = content.numbering.versionVerseIsStarting;
+                    _currentNumbers.subverse = content.numbering.versionSubverseIsStarting;
+                }
+            }
+        }
+        if (!_currentNumbers.chapter || !_currentNumbers.verse)
+            throw new Error(`missing numbering in input`);
+
+        if (content.type === 'group' || content.type === 'section')
+            convertBibleInputToBookPlaintext(
+                content.contents,
+                useNormalizedNumbers,
+                _currentNumbers,
+                _accChapters
+            );
         else {
-            const subverseNum = content.versionSubverseNum || 0;
-            if (!_accChapters.has(content.versionChapterNum))
-                _accChapters.set(content.versionChapterNum, new Map());
-            const chapter = _accChapters.get(content.versionChapterNum)!; // we know it's set
-            if (!chapter.has(content.versionVerseNum)) chapter.set(content.versionVerseNum, []);
-            const verse = chapter.get(content.versionVerseNum)!; // we know it's set
+            const subverseNum = _currentNumbers.subverse || 0;
+            if (!_accChapters.has(_currentNumbers.chapter))
+                _accChapters.set(_currentNumbers.chapter, new Map());
+            const chapter = _accChapters.get(_currentNumbers.chapter)!; // we know it's set
+            if (!chapter.has(_currentNumbers.verse)) chapter.set(_currentNumbers.verse, []);
+            const verse = chapter.get(_currentNumbers.verse)!; // we know it's set
             const subverse = verse[subverseNum]
                 ? verse[subverseNum] + ' ' + content.content
                 : content.content;
@@ -802,11 +841,18 @@ export const generateContextRanges = (
     return contextRanges;
 };
 
-export const stripUnnecessaryDataFromBibleBook = (book: BibleBookEntity) => {
-    delete book.versionId;
-    delete book.chaptersMetaJson;
-    delete book.introductionJson;
-    if (!book.introduction) delete book.introduction;
+export const stripUnnecessaryDataFromBibleBook = (bookEntity: BibleBookEntity): IBibleBook => {
+    const book: IBibleBook = {
+        osisId: bookEntity.osisId,
+        number: bookEntity.number,
+        abbreviation: bookEntity.abbreviation,
+        title: bookEntity.title,
+        type: bookEntity.type,
+        chaptersCount: bookEntity.chaptersCount,
+        longTitle: bookEntity.longTitle
+    };
+    if (bookEntity.introduction) book.introduction = bookEntity.introduction;
+    return book;
 };
 
 /**
@@ -819,14 +865,13 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
     for (const obj of data) {
         if (obj.type === 'phrase') {
             const phrase = obj;
-            // RADAR: we leave both the numbering object and the version*Num attributes on the
-            //        phrase. We need the latter when this is used for input, however they are very
-            //        redundant. Optimize? Maybe by optionally stripping version*Nums via parameter?
+            // we only leave the numbering object on the phrase and strip the version*Num
+            // attributes. They are redudant.
             const inputPhrase: IBibleContentPhrase = {
-                type: 'phrase',
-                content: phrase.content,
-                versionChapterNum: phrase.versionChapterNum,
-                versionVerseNum: phrase.versionVerseNum
+                // type: 'phrase',
+                content: phrase.content
+                // versionChapterNum: phrase.versionChapterNum,
+                // versionVerseNum: phrase.versionVerseNum
             };
             if (phrase.versionSubverseNum)
                 inputPhrase.versionSubverseNum = phrase.versionSubverseNum;
@@ -851,7 +896,7 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
 
             if (phrase.numbering) inputPhrase.numbering = phrase.numbering;
 
-            inputData.push({ type: 'phrase', ...inputPhrase });
+            inputData.push({ ...inputPhrase });
         } else if (obj.type === 'group') {
             const inputGroup: IBibleContentGroup<ContentGroupType> = {
                 type: 'group',
@@ -873,7 +918,6 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
             if (obj.description) inputSection.description = obj.description;
             if (obj.crossReferences && obj.crossReferences.length)
                 inputSection.crossReferences = obj.crossReferences.map(slimDownCrossReference);
-            if (obj.numbering) inputSection.numbering = obj.numbering;
             inputData.push(inputSection);
         }
     }
@@ -935,12 +979,18 @@ export const stripUnnecessaryDataFromBibleReferenceRange = (
     delete rangeNormalized.isNormalized;
 };
 
-export const stripUnnecessaryDataFromBibleVersion = (version: BibleVersionEntity) => {
-    delete version.id;
-    delete version.copyrightLongJson;
-    delete version.descriptionJson;
-    if (!version.copyrightLong) delete version.copyrightLong;
-    if (!version.description) delete version.description;
-    if (!version.copyrightShort) delete version.copyrightShort;
-    if (!version.hasStrongs) delete version.hasStrongs;
+export const stripUnnecessaryDataFromBibleVersion = (
+    versionEntity: BibleVersionEntity
+): IBibleVersion => {
+    const version: IBibleVersion = {
+        uid: versionEntity.uid,
+        title: versionEntity.title,
+        language: versionEntity.language,
+        chapterVerseSeparator: versionEntity.chapterVerseSeparator
+    };
+    if (versionEntity.copyrightLong) version.copyrightLong = versionEntity.copyrightLong;
+    if (versionEntity.description) version.description = versionEntity.description;
+    if (versionEntity.copyrightShort) version.copyrightShort = versionEntity.copyrightShort;
+    if (versionEntity.hasStrongs) version.hasStrongs = versionEntity.hasStrongs;
+    return version;
 };

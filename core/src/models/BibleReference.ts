@@ -108,14 +108,12 @@ export type BibleReferenceParsedEntity = {
 export interface BibleReferenceParser {
     parse: (text: string) => BibleReferenceParserResult;
     parse_with_context: (text: string, context: string) => BibleReferenceParserResult;
-    set_options: (
-        options: {
-            punctuation_strategy?: 'eu' | 'us';
-            invalid_passage_strategy?: 'include' | 'ignore';
-            invalid_sequence_strategy?: 'include' | 'ignore';
-            passage_existence_strategy?: 'b' | 'bc' | 'bcv' | 'bv' | 'c' | 'cv' | 'v' | 'none';
-        }
-    ) => void;
+    set_options: (options: {
+        punctuation_strategy?: 'eu' | 'us';
+        invalid_passage_strategy?: 'include' | 'ignore';
+        invalid_sequence_strategy?: 'include' | 'ignore';
+        passage_existence_strategy?: 'b' | 'bc' | 'bcv' | 'bv' | 'c' | 'cv' | 'v' | 'none';
+    }) => void;
 }
 
 export interface BibleReferenceParserResult {

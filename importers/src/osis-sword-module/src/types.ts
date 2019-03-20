@@ -1,9 +1,9 @@
 import {
-    IBibleContentPhraseForInput,
     IBibleCrossReference,
-    IBibleContentGroupForInput,
-    IBibleContentSectionForInput,
-    IBibleNote
+    IBibleNote,
+    IBibleContentPhrase,
+    IBibleContentGroup,
+    IBibleContentSection
 } from '@bible-engine/core';
 
 export interface VerseMetadata {
@@ -91,12 +91,12 @@ export type ParserContext = {
     notes: IBibleNote[];
     noteText: string;
     osisRef: string;
-    phrases: IBibleContentPhraseForInput[];
-    paragraph?: IBibleContentGroupForInput<'paragraph'>;
+    phrases: IBibleContentPhrase[];
+    paragraph?: IBibleContentGroup<'paragraph'>;
     noteCount: number;
     title?: OsisXmlNode;
-    titleSection: IBibleContentSectionForInput;
-    titleSections: IBibleContentSectionForInput[];
+    titleSection: IBibleContentSection;
+    titleSections: IBibleContentSection[];
     titleText: string;
 };
 

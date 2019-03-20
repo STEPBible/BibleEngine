@@ -20,7 +20,7 @@ import {
     IBibleReferenceRangeVersion,
     BibleReferenceParser
 } from './BibleReference';
-import { IBibleBook } from './BibleBook';
+import { IBibleBook, IBibleBookEntity } from './BibleBook';
 import { IBibleSection, IBibleSectionGeneric, IBibleSectionEntity } from './BibleSection';
 import {
     IBiblePhrase,
@@ -49,13 +49,7 @@ import { IDictionaryEntry } from './DictionaryEntry';
 import { IContentGroup, ContentGroupType } from './ContentGroup';
 import { IBibleCrossReference } from './BibleCrossReference';
 import { IBibleNote } from './BibleNote';
-import {
-    IBibleContentForInput,
-    BookWithContentForInput,
-    IBibleContentGroupForInput,
-    IBibleContentSectionForInput,
-    IBibleContentPhraseForInput
-} from './BibleInput';
+import { BookWithContentForInput } from './BibleInput';
 import { IV11nRule } from './V11nRule';
 
 export {
@@ -73,17 +67,14 @@ export {
     DocumentPhrase,
     DocumentElement,
     IBibleBook,
+    IBibleBookEntity,
     IBibleContent,
-    IBibleContentForInput,
     IBibleContentGeneratorGroup,
     IBibleContentGeneratorPhrase,
     IBibleContentGeneratorRoot,
     IBibleContentGeneratorSection,
     IBibleContentGroup,
-    IBibleContentGroupForInput,
     IBibleContentPhrase,
-    IBibleContentPhraseForInput,
-    IBibleContentSectionForInput,
     IBibleContentSection,
     IBibleCrossReference,
     IBibleNote,

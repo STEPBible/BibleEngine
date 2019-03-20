@@ -1,6 +1,6 @@
 import { ConnectionOptions } from 'typeorm';
 import * as archiver from 'archiver';
-import { BibleEngine } from '@bible-engine/core';
+import { BibleEngine, IBibleBook } from '@bible-engine/core';
 import { writeFileSync, createWriteStream } from 'fs';
 import { ensureDirSync } from 'fs-extra';
 import { sync as rmDirRecSync } from 'rimraf';
@@ -23,7 +23,7 @@ export class BeImportFileCreator {
 
             writeFileSync(`${targetDir}/version.json`, JSON.stringify(versionData.version));
 
-            const versionIndex = [];
+            const versionIndex: IBibleBook[] = [];
             for (const bookData of versionData.bookData) {
                 const filename = `${bookData.book.osisId}.json`;
 
@@ -32,7 +32,13 @@ export class BeImportFileCreator {
 
                 // add to index
                 versionIndex.push({
-                    filename
+                    osisId: bookData.book.osisId,
+                    abbreviation: bookData.book.abbreviation,
+                    number: bookData.book.number,
+                    title: bookData.book.title,
+                    type: bookData.book.type,
+                    longTitle: bookData.book.longTitle,
+                    chaptersCount: bookData.book.chaptersCount
                 });
             }
 

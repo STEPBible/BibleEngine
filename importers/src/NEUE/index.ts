@@ -83,7 +83,6 @@ export class NeueImporter extends BibleEngineImporter {
             console.log(`parsing book: ${bookMeta.title}`);
             const bookData: BookWithContentForInput = {
                 book: {
-                    versionId: version.id,
                     type: bookMeta.bookNum < 40 ? 'ot' : 'nt',
                     number: bookMeta.bookNum,
                     abbreviation: bookMeta.abbvreviation,
@@ -104,7 +103,7 @@ export class NeueImporter extends BibleEngineImporter {
 
             // console.dir((<any>bookData.contents[0]).contents[0], { depth: 8 });
 
-            await this.bibleEngine.addBookWithContent(bookData);
+            await this.bibleEngine.addBookWithContent(version.id, bookData);
         }
 
         return this.bibleEngine.finalizeVersion(version.id);

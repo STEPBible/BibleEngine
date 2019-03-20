@@ -5,9 +5,9 @@ import {
     BibleEngine,
     BibleVersionEntity,
     getOsisIdFromBookGenericId,
-    IBibleContentPhraseForInput,
-    IBibleContentGroupForInput,
-    IBibleContentSectionForInput
+    IBibleContentSection,
+    IBibleContentGroup,
+    IBibleContentPhrase
 } from '@bible-engine/core';
 
 const wordGen = require('random-words');
@@ -41,16 +41,16 @@ export const genDb = async () => {
             // ' and paragraph ' +
             // (paragraph + 1)
         );
-        const sectionsLevel1: IBibleContentSectionForInput[] = [];
+        const sectionsLevel1: IBibleContentSection[] = [];
         for (let sectionLevel1Num = 1; sectionLevel1Num <= 5; sectionLevel1Num++) {
-            const sectionsLevel2: IBibleContentSectionForInput[] = [];
+            const sectionsLevel2: IBibleContentSection[] = [];
             // three chapters in each of the 5 sectionLevel1
             for (let chapterModifier = 1; chapterModifier <= 3; chapterModifier++) {
                 const chapter = (sectionLevel1Num - 1) * 3 + chapterModifier;
                 let verse = 0;
                 // three sectionsLevel2 in each sectionLevel1
                 for (let sectionLevel2Num = 1; sectionLevel2Num <= 3; sectionLevel2Num++) {
-                    const paragraphs: IBibleContentGroupForInput<'paragraph'>[] = [];
+                    const paragraphs: IBibleContentGroup<'paragraph'>[] = [];
                     // two paragraphs in each sectionLevel2
                     for (let paragraphNum = 0; paragraphNum < 2; paragraphNum++) {
                         let phrases = [];
@@ -58,7 +58,7 @@ export const genDb = async () => {
                         for (let verseNum = 0; verseNum < 5; verseNum++) {
                             verse++;
                             for (let phraseIdx = 1; phraseIdx <= 22; phraseIdx++) {
-                                const phrase: IBibleContentPhraseForInput = {
+                                const phrase: IBibleContentPhrase = {
                                     type: 'phrase',
                                     versionChapterNum: chapter,
                                     versionVerseNum: verse,
@@ -122,9 +122,8 @@ export const genDb = async () => {
             });
         }
 
-        await sqlBible.addBookWithContent({
+        await sqlBible.addBookWithContent(esvVersion.id, {
             book: {
-                versionId: esvVersion.id,
                 number: bookNum,
                 osisId: getOsisIdFromBookGenericId(bookNum),
                 abbreviation: wordGen({ min: 1, max: 1, join: ' ' }),

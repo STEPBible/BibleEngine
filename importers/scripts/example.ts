@@ -44,6 +44,7 @@ const run = async () => {
                 );
                 // console.log(`starting import of ${bookData.book.title}`);
                 await bibleEngine.addBookWithContent(
+                    versionEntity.id,
                     {
                         book: bookData.book,
                         contents: bookData.content

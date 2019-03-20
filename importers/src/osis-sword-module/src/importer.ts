@@ -38,9 +38,8 @@ async function generateDatabase() {
     for (const book of books) {
         console.log(book.osisId);
         const bookJson = getBibleEngineInputFromXML(book.chapters);
-        await sqlBible.addBookWithContent({
+        await sqlBible.addBookWithContent(esvVersion.id, {
             book: {
-                versionId: esvVersion.id,
                 number: book.bookNum,
                 osisId: book.osisId,
                 abbreviation: book.osisId,
