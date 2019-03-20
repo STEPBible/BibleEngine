@@ -246,8 +246,7 @@ const styles = StyleSheet.create({
   strongWordText: {
     color: Color.TYNDALE_BLUE,
     fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.MEDIUM,
-    marginBottom: Margin.EXTRA_SMALL
+    fontSize: FontSize.MEDIUM
   },
   text: {
     fontSize: FontSize.MEDIUM,

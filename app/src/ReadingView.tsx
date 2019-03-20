@@ -133,13 +133,12 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   phrase: {
-    // backgroundColor: 'yellow',
-    marginBottom: Margin.EXTRA_SMALL,
-    marginRight: Margin.EXTRA_SMALL
+    marginBottom: Margin.EXTRA_SMALL
   },
   phraseText: {
     fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.MEDIUM
+    fontSize: FontSize.MEDIUM,
+    marginRight: 7
   },
   section: {
     flex: 1,
@@ -156,12 +155,10 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width
   },
   verseNumber: {
-    //backgroundColor: 'magenta',
     color: 'gray',
     fontSize: FontSize.EXTRA_SMALL,
     fontFamily: FontFamily.CARDO,
     marginRight: 3,
-    marginBottom: Margin.MEDIUM,
     marginTop: -2
   }
 });
