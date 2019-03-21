@@ -22,7 +22,7 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
     // the id encodes the following attribute:
     normalizedReference: Required<IBiblePhraseRef>;
 
-    @Column({ nullable: true })
+    @Column({ type: 'bigint', nullable: true })
     joinToRefId?: number;
 
     @Column()

@@ -12,6 +12,14 @@ export class BeImportFileCreator {
         this.bibleEngine = new BibleEngine(dbConfig);
     }
 
+    async createAllVersions(destinationPath: string) {
+        const createdFiles: string[] = [];
+        for (const versionEntity of await this.bibleEngine.getVersions()) {
+            createdFiles.push(await this.createVersionFile(versionEntity.uid, destinationPath));
+        }
+        return createdFiles;
+    }
+
     async createVersionFile(versionUid: string, destinationPath: string) {
         const versionData = await this.bibleEngine.getRawVersionData(versionUid);
         const targetDir = destinationPath + '/' + versionData.version.uid;

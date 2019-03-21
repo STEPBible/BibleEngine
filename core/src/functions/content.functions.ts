@@ -79,8 +79,6 @@ export const convertBibleInputToBookPlaintext = (
                 }
             }
         }
-        if (!_currentNumbers.chapter || !_currentNumbers.verse)
-            throw new Error(`missing numbering in input`);
 
         if (content.type === 'group' || content.type === 'section')
             convertBibleInputToBookPlaintext(
@@ -90,6 +88,9 @@ export const convertBibleInputToBookPlaintext = (
                 _accChapters
             );
         else {
+            if (!_currentNumbers.chapter || !_currentNumbers.verse)
+                throw new Error(`missing numbering in input`);
+
             const subverseNum = _currentNumbers.subverse || 0;
             if (!_accChapters.has(_currentNumbers.chapter))
                 _accChapters.set(_currentNumbers.chapter, new Map());
@@ -276,6 +277,7 @@ export const generateBibleDocument = (
                     console.log(activeSections);
                     console.log(level);
                     console.log(section);
+                    console.log(phrase);
                     throw new Error(`can't create output object: corrupted structure (section)`);
                 }
 
@@ -841,7 +843,10 @@ export const generateContextRanges = (
     return contextRanges;
 };
 
-export const stripUnnecessaryDataFromBibleBook = (bookEntity: BibleBookEntity): IBibleBook => {
+export const stripUnnecessaryDataFromBibleBook = (
+    bookEntity: BibleBookEntity,
+    stripDocuments = false
+): IBibleBook => {
     const book: IBibleBook = {
         osisId: bookEntity.osisId,
         number: bookEntity.number,
@@ -851,7 +856,7 @@ export const stripUnnecessaryDataFromBibleBook = (bookEntity: BibleBookEntity): 
         chaptersCount: bookEntity.chaptersCount,
         longTitle: bookEntity.longTitle
     };
-    if (bookEntity.introduction) book.introduction = bookEntity.introduction;
+    if (bookEntity.introduction && !stripDocuments) book.introduction = bookEntity.introduction;
     return book;
 };
 
@@ -980,16 +985,20 @@ export const stripUnnecessaryDataFromBibleReferenceRange = (
 };
 
 export const stripUnnecessaryDataFromBibleVersion = (
-    versionEntity: BibleVersionEntity
+    versionEntity: BibleVersionEntity,
+    stripDocuments = false
 ): IBibleVersion => {
     const version: IBibleVersion = {
         uid: versionEntity.uid,
         title: versionEntity.title,
         language: versionEntity.language,
-        chapterVerseSeparator: versionEntity.chapterVerseSeparator
+        chapterVerseSeparator: versionEntity.chapterVerseSeparator,
+        lastUpdate: versionEntity.lastUpdate
     };
-    if (versionEntity.copyrightLong) version.copyrightLong = versionEntity.copyrightLong;
-    if (versionEntity.description) version.description = versionEntity.description;
+    if (versionEntity.copyrightLong && !stripDocuments)
+        version.copyrightLong = versionEntity.copyrightLong;
+    if (versionEntity.description && !stripDocuments)
+        version.description = versionEntity.description;
     if (versionEntity.copyrightShort) version.copyrightShort = versionEntity.copyrightShort;
     if (versionEntity.hasStrongs) version.hasStrongs = versionEntity.hasStrongs;
     return version;

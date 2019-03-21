@@ -41,6 +41,9 @@ export class BibleVersionEntity implements IBibleVersion {
     @Column({ nullable: true })
     hasStrongs?: boolean;
 
+    @Column({ type: 'datetime' })
+    lastUpdate: Date;
+
     constructor(initializer: IBibleVersion) {
         Object.assign(this, initializer);
     }
@@ -54,6 +57,7 @@ export class BibleVersionEntity implements IBibleVersion {
     @BeforeInsert()
     @BeforeUpdate()
     async prepare() {
+        this.lastUpdate = new Date();
         if (this.description) this.descriptionJson = JSON.stringify(this.description);
         if (this.copyrightLong) this.copyrightLongJson = JSON.stringify(this.copyrightLong);
     }

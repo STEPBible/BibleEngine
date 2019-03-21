@@ -204,16 +204,16 @@ export class BibleEngine {
         rangeQuery: IBibleReferenceRangeQuery,
         stripUnnecessaryData = false
     ): Promise<IBibleOutputRich> {
-        let version: BibleVersionEntity | undefined;
+        let versionEntity: BibleVersionEntity | undefined;
         let db: EntityManager | undefined;
         if (this.pDB) {
             db = await this.pDB;
-            version = await db.findOne(BibleVersionEntity, {
+            versionEntity = await db.findOne(BibleVersionEntity, {
                 where: { uid: rangeQuery.versionUid }
             });
         }
 
-        if (!version) {
+        if (!versionEntity) {
             if (this.remoteConfig) {
                 // TODO: refactor this out into a service
                 const remoteData = await fetch(
@@ -237,16 +237,17 @@ export class BibleEngine {
 
         if (!db) throw new NoDbConnectionError();
 
-        const range: IBibleReferenceRangeVersion = { ...rangeQuery, versionId: version.id };
+        const range: IBibleReferenceRangeVersion = { ...rangeQuery, versionId: versionEntity.id };
 
-        const book = await this.getBookForVersionReference(range);
-        if (!book) throw new Error(`can't get formatted text: invalid book`);
-        if (book.dataLocation === 'file') throw new BibleBookContentNotImportedError();
+        const bookEntity = await this.getBookForVersionReference(range);
+        if (!bookEntity) throw new Error(`can't get formatted text: invalid book`);
+        if (bookEntity.dataLocation === 'file') throw new BibleBookContentNotImportedError();
         // TODO: handle (or remove) dataLocation "remote"
 
         const bookAbbreviations = await db
             .find(BibleBookEntity, {
-                select: ['osisId', 'abbreviation']
+                select: ['osisId', 'abbreviation'],
+                where: { versionId: versionEntity.id }
             })
             .then(books => {
                 const dict: { [index: string]: string } = {};
@@ -288,7 +289,7 @@ export class BibleEngine {
             phrases,
             paragraphs,
             context,
-            book
+            bookEntity
         );
 
         const bibleDocument = generateBibleDocument(
@@ -296,7 +297,7 @@ export class BibleEngine {
             paragraphs,
             context,
             bookAbbreviations,
-            version.chapterVerseSeparator
+            versionEntity.chapterVerseSeparator
         );
 
         if (stripUnnecessaryData) {
@@ -304,12 +305,13 @@ export class BibleEngine {
             // possible. also: when we transmit to a client, local ids have to be stripped
             // (versionId, sectionId)
 
+            // TODO: refactor methods to not mutate data
             stripUnnecessaryDataFromBibleReferenceRange(rangeNormalized);
             stripUnnecessaryDataFromBibleContextData(context, contextRanges);
 
             return {
-                version: stripUnnecessaryDataFromBibleVersion(version),
-                versionBook: stripUnnecessaryDataFromBibleBook(book),
+                version: stripUnnecessaryDataFromBibleVersion(versionEntity, true),
+                versionBook: stripUnnecessaryDataFromBibleBook(bookEntity, true),
                 range: rangeNormalized,
                 content: {
                     ...bibleDocument,
@@ -320,8 +322,8 @@ export class BibleEngine {
             };
         } else {
             return {
-                version,
-                versionBook: book,
+                version: versionEntity,
+                versionBook: bookEntity,
                 range: rangeNormalized,
                 content: bibleDocument,
                 context,
@@ -434,6 +436,12 @@ export class BibleEngine {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         return db.findOne(BibleVersionEntity, { uid: versionUid });
+    }
+
+    async getVersions() {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return db.find(BibleVersionEntity);
     }
 
     private async addBibleBookContent(
@@ -605,6 +613,7 @@ export class BibleEngine {
                             normalizedSubverseNum: rule.standardRef.normalizedSubverseNum || 0,
                             phraseNum: 0
                         };
+                        const emptyPhraseId = generatePhraseId(emptyPhraseReference);
 
                         if (rule.action === 'Empty verse') {
                             // since this phrase does not relate to any verse in the
@@ -620,6 +629,9 @@ export class BibleEngine {
                                     ...localState.modifierState
                                 })
                             );
+                            if (!firstPhraseId) firstPhraseId = emptyPhraseId;
+                            if (!lastPhraseId || emptyPhraseId > lastPhraseId)
+                                lastPhraseId = emptyPhraseId;
                         } else if (rule.action === 'Renumber verse') {
                             // only the first standardRef is relevant for creating the
                             // normalized reference for this phrase. Additional refs occur when
@@ -657,6 +669,9 @@ export class BibleEngine {
                                     { ...localState.modifierState }
                                 )
                             );
+                            if (!firstPhraseId) firstPhraseId = emptyPhraseId;
+                            if (!lastPhraseId || emptyPhraseId > lastPhraseId)
+                                lastPhraseId = emptyPhraseId;
 
                             // the last standardRefId in this range needs to be linked on the
                             // starting verse of the range
@@ -722,7 +737,7 @@ export class BibleEngine {
                 };
                 const phraseId = generatePhraseId(phraseRef);
                 if (!firstPhraseId) firstPhraseId = phraseId;
-                lastPhraseId = phraseId;
+                if (!lastPhraseId || phraseId > lastPhraseId) lastPhraseId = phraseId;
 
                 if (!content.quoteWho && localState.columnModifierState.quoteWho)
                     content.quoteWho = localState.columnModifierState.quoteWho;
@@ -808,7 +823,8 @@ export class BibleEngine {
                     inputHasNormalizedNumbering
                 );
                 if (groupFirstPhraseId && !firstPhraseId) firstPhraseId = groupFirstPhraseId;
-                if (groupLastPhraseId) lastPhraseId = groupLastPhraseId;
+                if (groupLastPhraseId && (!lastPhraseId || groupLastPhraseId > lastPhraseId))
+                    lastPhraseId = groupLastPhraseId;
             } else if (
                 (content.type === 'group' && content.groupType === 'paragraph') ||
                 content.type === 'section'
@@ -860,7 +876,8 @@ export class BibleEngine {
                     }
 
                     if (!firstPhraseId) firstPhraseId = sectionFirstPhraseId;
-                    lastPhraseId = sectionLastPhraseId;
+                    if (!lastPhraseId || sectionLastPhraseId > lastPhraseId)
+                        lastPhraseId = sectionLastPhraseId;
                 }
             }
         }
@@ -875,7 +892,8 @@ export class BibleEngine {
             //     // chunk: Math.ceil(globalState.phraseStack.length / 100)
             // });
             for (let index = 0; index < globalState.phraseStack.length; index += chunkSize) {
-                db.createQueryBuilder()
+                await db
+                    .createQueryBuilder()
                     .insert()
                     .into(BiblePhraseEntity)
                     .values(globalState.phraseStack.slice(index, index + chunkSize))
@@ -883,7 +901,8 @@ export class BibleEngine {
             }
 
             for (let index = 0; index < globalState.noteStack.length; index += chunkSize) {
-                db.createQueryBuilder()
+                await db
+                    .createQueryBuilder()
                     .insert()
                     .into(BibleNoteEntity)
                     .values(globalState.noteStack.slice(index, index + chunkSize))
@@ -891,7 +910,8 @@ export class BibleEngine {
             }
 
             for (let index = 0; index < globalState.crossRefStack.length; index += chunkSize) {
-                db.createQueryBuilder()
+                await db
+                    .createQueryBuilder()
                     .insert()
                     .into(BibleCrossReferenceEntity)
                     .values(globalState.crossRefStack.slice(index, index + chunkSize))
@@ -903,7 +923,8 @@ export class BibleEngine {
             //     // transaction: false
             // });
             for (let index = 0; index < globalState.paragraphStack.length; index += chunkSize) {
-                db.createQueryBuilder()
+                await db
+                    .createQueryBuilder()
                     .insert()
                     .into(BibleParagraphEntity)
                     .values(globalState.paragraphStack.slice(index, index + chunkSize))
@@ -928,9 +949,9 @@ export class BibleEngine {
     private async getBookForVersionReference({ versionId, bookOsisId }: IBibleReferenceVersion) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        const where = { osisId: bookOsisId, versionId };
-
-        return db.findOne(BibleBookEntity, { where });
+        return db.findOne(BibleBookEntity, {
+            where: { osisId: bookOsisId, versionId }
+        });
     }
 
     private async getNormalizedReferenceRange(

@@ -20,11 +20,11 @@ export class V11nRuleEntity implements IV11nRule {
     id: number;
 
     @Index()
-    @Column()
+    @Column({ type: 'bigint' })
     sourceRefId: number;
     sourceRef: IBibleReference;
 
-    @Column()
+    @Column({ type: 'bigint' })
     standardRefId: number;
     standardRef: IBibleReferenceNormalized;
 
