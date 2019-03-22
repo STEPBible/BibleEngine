@@ -54,7 +54,8 @@ import {
     IBibleReferenceRangeVersion,
     IBibleBookEntity,
     IBibleContent,
-    IBibleContentGroup
+    IBibleContentGroup,
+    BiblePlaintext
 } from './models';
 
 class NoDbConnectionError extends Error {
@@ -89,7 +90,7 @@ export class BibleEngine {
     async addBook(book: IBibleBookEntity) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        return await db.save(new BibleBookEntity(book));
+        return db.save(new BibleBookEntity(book));
     }
 
     async addBookWithContent(
@@ -126,7 +127,7 @@ export class BibleEngine {
                 console.error('Aborting book import: ' + e);
             });
 
-        return await this.pDB.then(async entityManager =>
+        return this.pDB.then(async entityManager =>
             entityManager.transaction(transactionEntityManger => {
                 return this.addBibleBookContent(
                     transactionEntityManger,
@@ -146,7 +147,7 @@ export class BibleEngine {
     async addDictionaryEntry(dictionaryEntry: IDictionaryEntry) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        db.save(new DictionaryEntryEntity(dictionaryEntry));
+        return db.save(new DictionaryEntryEntity(dictionaryEntry));
     }
 
     async addV11nRules(rules: V11nRuleEntity[]) {
@@ -360,7 +361,7 @@ export class BibleEngine {
         });
     }
 
-    async getRawVersionData(versionUid: string) {
+    async getVersionFullData(versionUid: string) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         const versionEntity = await db.findOne(BibleVersionEntity, {
@@ -384,13 +385,32 @@ export class BibleEngine {
                 true
             );
             bookData.push({
-                book: bookStrippedData.versionBook,
+                book: stripUnnecessaryDataFromBibleBook(book),
                 contents: bookStrippedData.content.contents,
                 contentHasNormalizedNumbers: true
             });
         }
 
         return { version, bookData };
+    }
+
+    async getVersionPlaintextNormalized(versionUid: string): Promise<BiblePlaintext> {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        const versionEntity = await db.findOne(BibleVersionEntity, {
+            uid: versionUid
+        });
+        if (!versionEntity) throw new Error(`version ${versionUid} is not available`);
+
+        const plaintextMap = new Map();
+        const versionData = await this.getVersionFullData(versionUid);
+        for (const bookData of versionData.bookData) {
+            plaintextMap.set(
+                bookData.book.osisId,
+                convertBibleInputToBookPlaintext(bookData.contents, true)
+            );
+        }
+        return plaintextMap;
     }
 
     async getReferenceRangeWithAllVersionProperties(

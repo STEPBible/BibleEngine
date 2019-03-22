@@ -36,7 +36,7 @@ import {
     IBibleContentSection,
     IBibleNumbering
 } from './BibleContent';
-import { BibleBookPlaintext, BibleChapterPlaintext } from './BibleBookPlaintext';
+import { BibleBookPlaintext, BibleChapterPlaintext, BiblePlaintext } from './BibleBookPlaintext';
 import {
     DocumentRoot,
     DocumentElement,
@@ -54,6 +54,7 @@ import { IV11nRule } from './V11nRule';
 
 export {
     BibleBookPlaintext,
+    BiblePlaintext,
     BibleChapterPlaintext,
     BibleContentGenerator,
     BibleContentGeneratorContainer,

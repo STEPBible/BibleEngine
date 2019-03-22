@@ -21,7 +21,7 @@ export class BeImportFileCreator {
     }
 
     async createVersionFile(versionUid: string, destinationPath: string) {
-        const versionData = await this.bibleEngine.getRawVersionData(versionUid);
+        const versionData = await this.bibleEngine.getVersionFullData(versionUid);
         const targetDir = destinationPath + '/' + versionData.version.uid;
         const targetFile = `${destinationPath}/${versionData.version.uid}.bef`;
 

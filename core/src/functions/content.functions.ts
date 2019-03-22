@@ -69,27 +69,39 @@ export const convertBibleInputToBookPlaintext = (
                 }
             } else if (content.numbering) {
                 if (useNormalizedNumbers) {
-                    _currentNumbers.chapter = content.numbering.normalizedChapterIsStartingInRange;
-                    _currentNumbers.verse = content.numbering.normalizedVerseIsStarting;
-                    _currentNumbers.subverse = content.numbering.normalizedSubverseIsStarting;
+                    if (content.numbering.normalizedChapterIsStartingInRange)
+                        _currentNumbers.chapter =
+                            content.numbering.normalizedChapterIsStartingInRange;
+                    if (content.numbering.normalizedVerseIsStarting) {
+                        _currentNumbers.verse = content.numbering.normalizedVerseIsStarting;
+                        delete _currentNumbers.subverse;
+                    }
+                    if (content.numbering.normalizedSubverseIsStarting)
+                        _currentNumbers.subverse = content.numbering.normalizedSubverseIsStarting;
                 } else {
-                    _currentNumbers.chapter = content.numbering.versionChapterIsStartingInRange;
-                    _currentNumbers.verse = content.numbering.versionVerseIsStarting;
-                    _currentNumbers.subverse = content.numbering.versionSubverseIsStarting;
+                    if (content.numbering.versionChapterIsStartingInRange)
+                        _currentNumbers.chapter = content.numbering.versionChapterIsStartingInRange;
+                    if (content.numbering.versionVerseIsStarting) {
+                        _currentNumbers.verse = content.numbering.versionVerseIsStarting;
+                        delete _currentNumbers.subverse;
+                    }
+                    if (content.numbering.versionSubverseIsStarting)
+                        _currentNumbers.subverse = content.numbering.versionSubverseIsStarting;
                 }
             }
         }
 
-        if (content.type === 'group' || content.type === 'section')
+        if (content.type === 'group' || content.type === 'section') {
             convertBibleInputToBookPlaintext(
                 content.contents,
                 useNormalizedNumbers,
                 _currentNumbers,
                 _accChapters
             );
-        else {
-            if (!_currentNumbers.chapter || !_currentNumbers.verse)
+        } else {
+            if (!_currentNumbers.chapter || !_currentNumbers.verse) {
                 throw new Error(`missing numbering in input`);
+            }
 
             const subverseNum = _currentNumbers.subverse || 0;
             if (!_accChapters.has(_currentNumbers.chapter))

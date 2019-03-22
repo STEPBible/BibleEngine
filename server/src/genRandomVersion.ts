@@ -112,7 +112,7 @@ export const getData = async () => {
     });
     console.dir(output, { depth: 8 });
 
-    // const versionData = await sqlBible.getRawVersionData(1);
+    // const versionData = await sqlBible.getVersionFullData(1);
     // console.dir(versionData.bookData[0].content, { depth: 7 });
 
     // fs.writeFile(
