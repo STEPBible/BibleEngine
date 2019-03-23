@@ -1,6 +1,6 @@
 import * as Expo from 'expo';
 import * as React from 'react';
-import { Dimensions, StatusBar, View } from 'react-native';
+import { Dimensions, StatusBar, View, Keyboard } from 'react-native';
 
 import { BibleBook, BibleEngine, IBibleOutputRich } from '@bible-engine/core';
 import Database from './Database';
@@ -8,6 +8,7 @@ import Fonts from './Fonts';
 import ReadingView from './ReadingView';
 import SideMenu from './SideMenu';
 import BookMenu from './BookMenu';
+import SearchPage from './SearchPage';
 
 const bibleDatabaseModule = require('../assets/bible.db');
 
@@ -70,13 +71,17 @@ export default class App extends React.PureComponent<{}, State> {
         ref={ref => (this.leftMenuRef = ref)}
       >
         <SideMenu
-          menu={<View style={{ flex: 1, backgroundColor: 'blue' }} />}
+          menu={
+            <SearchPage keyboardShouldBeOpen={this.state.isRightMenuOpen} />
+          }
           isOpen={this.state.isRightMenuOpen}
           menuPosition="right"
           bounceBackOnOverdraw={false}
-          gesturesAreEnabled={() => false}
-          openMenuOffset={DEVICE_WIDTH * 0.76}
+          gesturesAreEnabled={this.rightMenuGesturesAreEnabled}
+          openMenuOffset={DEVICE_WIDTH * 0.9}
+          edgeHitWidth={DEVICE_WIDTH}
           ref={ref => (this.rightMenuRef = ref)}
+          onChange={this.onSearchMenuChange}
         >
           <Expo.KeepAwake />
           <StatusBar hidden={true} />
@@ -116,6 +121,21 @@ export default class App extends React.PureComponent<{}, State> {
     });
   };
 
+  onSearchMenuChange = (menuIsNowOpen: boolean) => {
+    if (!menuIsNowOpen) {
+      Keyboard.dismiss();
+      this.setState({
+        ...this.state,
+        isRightMenuOpen: false
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        isRightMenuOpen: true
+      });
+    }
+  };
+
   loadResourcesAsync = async () => {
     console.disableYellowBox = true;
     await Fonts.load();
@@ -151,5 +171,12 @@ export default class App extends React.PureComponent<{}, State> {
       return true;
     }
     return !this.rightMenuRef.isOpen;
+  };
+
+  rightMenuGesturesAreEnabled = () => {
+    if (!this.leftMenuRef) {
+      return true;
+    }
+    return !this.leftMenuRef.isOpen;
   };
 }
