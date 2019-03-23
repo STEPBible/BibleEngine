@@ -1,4 +1,4 @@
-import { DocumentMode, ElementLocation } from 'parse5';
+import { AST, MarkupData } from 'parse5';
 
 /**
  * Element attribute.
@@ -75,7 +75,7 @@ export interface DefaultTreeDocument extends DefaultTreeParentNode {
     /**
      * [Document mode](https://dom.spec.whatwg.org/#concept-document-limited-quirks).
      */
-    mode: DocumentMode;
+    mode: AST.DocumentMode;
 }
 
 /**
@@ -115,7 +115,7 @@ export interface DefaultTreeElement extends DefaultTreeParentNode {
     /**
      * Element source code location info. Available if location info is enabled via {@link ParserOptions}.
      */
-    sourceCodeLocation?: ElementLocation;
+    sourceCodeLocation?: MarkupData.ElementLocation;
 }
 
 /**

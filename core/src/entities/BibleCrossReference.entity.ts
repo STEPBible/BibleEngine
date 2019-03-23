@@ -7,7 +7,7 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from '../../typeorm';
+} from 'typeorm';
 import {
     generateReferenceId,
     parseReferenceId,
@@ -21,13 +21,13 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ type: 'bigint' })
     normalizedRefId: number;
 
     @Column({ nullable: true })
     partIndicator?: string;
 
-    @Column({ nullable: true })
+    @Column({ type: 'bigint', nullable: true })
     normalizedRefIdEnd?: number;
 
     @Column({ nullable: true })

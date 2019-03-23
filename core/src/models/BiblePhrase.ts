@@ -23,8 +23,8 @@ export interface IBiblePhraseWithNumbers extends IBiblePhrase, IBibleReferenceVe
      */
     joinToRefId?: number;
 
-    versionChapterNum: number; // has to be set
-    versionVerseNum: number; // has to be set
+    versionChapterNum?: number; // has to be set
+    versionVerseNum?: number; // has to be set
 
     /** in case normalized numbers come pre-calculated (e.g. when downloading a version) */
     normalizedReference?: IBibleReferenceNormalizedNumbers;

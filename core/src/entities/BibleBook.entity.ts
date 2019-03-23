@@ -1,8 +1,8 @@
-import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from '../../typeorm';
-import { IBibleBook, DocumentRoot } from '../models';
+import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { IBibleBookEntity, DocumentRoot } from '../models';
 
 @Entity('bible_book')
-export class BibleBookEntity implements IBibleBook {
+export class BibleBookEntity implements IBibleBookEntity {
     @PrimaryColumn()
     versionId: number;
 
@@ -37,7 +37,7 @@ export class BibleBookEntity implements IBibleBook {
     @Column({ type: 'varchar' })
     dataLocation: 'db' | 'file' | 'remote';
 
-    constructor(initializer: IBibleBook) {
+    constructor(initializer: IBibleBookEntity) {
         Object.assign(this, initializer);
         if (!this.dataLocation) this.dataLocation = 'db';
     }

@@ -9,7 +9,9 @@ export type IBibleContent =
 
 export interface IBibleNumbering {
     /**
-     * this property has NO effect when importing bible data, its a helper in output data
+     * this property was originally only a helper in output data. however since its much more space
+     * efficient than adding the numbering to every phrase in input, this is now also supported for
+     * input data (thus enabling more space efficent bible downloads)
      */
     numbering?: {
         normalizedChapterIsStarting?: number;
@@ -22,7 +24,7 @@ export interface IBibleNumbering {
         versionSubverseIsStarting?: number;
     };
 }
-export interface IBibleContentSection extends IBibleSectionBase, IBibleNumbering {
+export interface IBibleContentSection extends IBibleSectionBase {
     readonly type: 'section';
     contents: IBibleContent[];
 }
@@ -37,5 +39,5 @@ export interface IBibleContentGroup<T extends ContentGroupType>
 }
 
 export interface IBibleContentPhrase extends IBiblePhraseWithNumbers, IBibleNumbering {
-    readonly type: 'phrase';
+    readonly type?: 'phrase';
 }

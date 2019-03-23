@@ -38,9 +38,8 @@ for (const book of books) {
      */
     const contents = myParserMethod(book.file);
 
-    await sqlBible.addBookWithContent({
+    await sqlBible.addBookWithContent(version.id, {
         book: {
-            versionId: version.id,
             number: book.num,
             osisId: getOsisIdFromBookGenericId(book.num),
             abbreviation: book.abbr,

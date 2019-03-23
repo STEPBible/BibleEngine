@@ -1,27 +1,24 @@
 {
     "name": "@bible-engine/core",
     "version": "0.1.0",
-    "main": "lib/src/index.js",
+    "main": "lib/index.js",
     "scripts": {
-        "build": "npx rimraf ./lib && tsc"
+        "build": "rimraf ./lib && tsc"
     },
     "dependencies": {
         "bible-passage-reference-parser": "^2.0.1",
-        "pako": "^1.0.7",
-        "reflect-metadata": "^0.1.12",
-        "typeorm": "^0.2.14",
+        "reflect-metadata": "^0.1.13",
+        "typeorm": "0.2.15",
         "whatwg-fetch": "^3.0.0"
     },
     "devDependencies": {
-        "@types/jest": "^23.3.9",
-        "@types/node": "^10.12.18",
-        "@types/pako": "^1.0.0",
-        "@types/parse5": "^5.0.0",
-        "jest": "^23.6.0",
+        "@types/jest": "24.0.11",
+        "@types/node": "11.11.3",
+        "jest": "24.5.0",
         "rimraf": "^2.6.3",
-        "ts-jest": "^23.10.5",
-        "ts-node": "^7.0.1",
-        "tslint": "^5.11.0",
-        "typescript": "^3.1.6"
+        "ts-jest": "24.0.0",
+        "ts-node": "8.0.3",
+        "tslint": "5.14.0",
+        "typescript": "3.3.3"
     }
 }

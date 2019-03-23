@@ -1,7 +1,7 @@
 import 'isomorphic-fetch';
 import {
     BibleEngine,
-    BibleVersion,
+    BibleVersionEntity,
     IBibleContentGroupForInput,
     IBibleContentPhraseForInput,
     getOsisIdFromBookGenericId
@@ -20,7 +20,7 @@ const sqlBible = new BibleEngine({
 
 export const genDb = async () => {
     const esvVersion = await sqlBible.addVersion(
-        new BibleVersion({
+        new BibleVersionEntity({
             uid: 'ESV',
             title: 'Elberfelder 2003',
             language: 'de-DE',
@@ -87,9 +87,8 @@ export const genDb = async () => {
                 paragraphs.push({ type: 'group', groupType: 'paragraph', contents: phrases });
             }
         }
-        await sqlBible.addBookWithContent({
+        await sqlBible.addBookWithContent(esvVersion.id, {
             book: {
-                versionId: esvVersion.id,
                 number: bookNum,
                 osisId: getOsisIdFromBookGenericId(bookNum),
                 abbreviation: wordGen({ min: 1, max: 1, join: ' ' }),
@@ -113,7 +112,7 @@ export const getData = async () => {
     });
     console.dir(output, { depth: 8 });
 
-    // const versionData = await sqlBible.getRawVersionData(1);
+    // const versionData = await sqlBible.getVersionFullData(1);
     // console.dir(versionData.bookData[0].content, { depth: 7 });
 
     // fs.writeFile(

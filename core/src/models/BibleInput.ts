@@ -1,33 +1,10 @@
-import { IContentGroup, IBibleBook, IBibleContentPhrase } from '.';
-import { IBibleSectionBase } from './BibleSection';
-import { ContentGroupType } from './ContentGroup';
-
-export type IBibleContentForInput =
-    | IBibleContentSectionForInput
-    | IBibleContentGroupForInput<ContentGroupType>
-    | IBibleContentPhraseForInput;
+import { IBibleBook, IBibleContent } from '.';
 
 export type BookWithContentForInput = {
     book: IBibleBook;
-    contents: IBibleContentForInput[];
+    contents: IBibleContent[];
     contentHasNormalizedNumbers?: boolean;
 };
-
-export interface IBibleContentSectionForInput extends IBibleSectionBase {
-    readonly type: 'section';
-    contents: IBibleContentForInput[];
-}
-
-export interface IBibleContentGroupForInput<T extends ContentGroupType> extends IContentGroup<T> {
-    readonly type: 'group';
-    readonly groupType: T;
-
-    contents: (IBibleContentGroupForInput<ContentGroupType> | IBibleContentPhraseForInput)[];
-}
-
-export interface IBibleContentPhraseForInput extends IBibleContentPhrase {
-    readonly type: 'phrase';
-}
 
 /* REFERENCE
 {

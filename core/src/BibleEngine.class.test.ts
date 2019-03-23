@@ -5,6 +5,7 @@ const sqlBible = new BibleEngine({
     type: 'sqlite',
     database: ':memory:'
 });
+let versionEntity: BibleVersionEntity;
 
 beforeAll(async () => {
     await sqlBible.addVersion(
@@ -15,11 +16,11 @@ beforeAll(async () => {
             chapterVerseSeparator: ':'
         })
     );
-    await sqlBible.setVersion('ESV');
+    versionEntity = await sqlBible.getVersion('ESV');
 });
 
 test('BibleEngine version is set correctly', async () => {
-    expect(sqlBible.currentVersion!.language).toEqual('en-US');
-    expect(sqlBible.currentVersion!.title).toEqual('English Standard Bible');
-    expect(sqlBible.currentVersion!.uid).toEqual('ESV');
+    expect(versionEntity.language).toEqual('en-US');
+    expect(versionEntity.title).toEqual('English Standard Bible');
+    expect(versionEntity.uid).toEqual('ESV');
 });

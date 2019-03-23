@@ -8,13 +8,13 @@ import {
 } from '../src/types';
 
 import {
-    IBibleContentPhraseForInput,
     IBibleCrossReference,
     IBibleReferenceRange,
     IBibleNote,
     DocumentRoot,
-    IBibleContentGroupForInput,
-    IBibleContentSectionForInput
+    IBibleContentSection,
+    IBibleContentPhrase,
+    IBibleContentGroup
 } from '@bible-engine/core';
 
 const sax = require('sax');
@@ -22,7 +22,7 @@ const sax = require('sax');
 const DEBUG_OUTPUT_ENABLED = false;
 const STRICT_MODE_ENABLED = true;
 
-export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContentSectionForInput[] {
+export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContentSection[] {
     const context: ParserContext = {
         chapterNum: 1,
         currentNode: undefined,
@@ -278,9 +278,9 @@ function parseClosingTag(tagName: string, context: ParserContext) {
     context.currentNode = undefined;
 }
 
-function getPhrase(content: string, context: ParserContext): IBibleContentPhraseForInput {
+function getPhrase(content: string, context: ParserContext): IBibleContentPhrase {
     const strongs = getStrongsNumbers(context);
-    const phrase: IBibleContentPhraseForInput = {
+    const phrase: IBibleContentPhrase = {
         type: 'phrase',
         content,
         versionChapterNum: context.chapterNum,
@@ -320,12 +320,11 @@ function getOsisReferenceEntities(osisRef: string): IBibleReferenceRange {
     const firstVerse = osisRef.split('-')[0].split('.');
     const bookOsisId = firstVerse[0];
     const versionChapterNum = Number(firstVerse[1]);
-    const versionVerseNum = Number(firstVerse[2]);
     const range: IBibleReferenceRange = {
         bookOsisId,
-        versionChapterNum,
-        versionVerseNum
+        versionChapterNum
     };
+    if (firstVerse[2]) range.versionVerseNum = +firstVerse[2];
     const hasMultipleVerses = osisRef.split('-').length === 2;
     if (hasMultipleVerses) {
         const secondVerse = osisRef.split('-')[1];
@@ -357,7 +356,7 @@ function isPunctuation(str: string): boolean {
     return str.length === 1 && !!str.match(/^[.,:;!?]/);
 }
 
-function getNewParagraph(): IBibleContentGroupForInput<'paragraph'> {
+function getNewParagraph(): IBibleContentGroup<'paragraph'> {
     return {
         type: 'group',
         groupType: 'paragraph',
@@ -365,10 +364,7 @@ function getNewParagraph(): IBibleContentGroupForInput<'paragraph'> {
     };
 }
 
-function getIndentGroup(
-    node: OsisXmlNode,
-    context: ParserContext
-): IBibleContentGroupForInput<'indent'> {
+function getIndentGroup(node: OsisXmlNode, context: ParserContext): IBibleContentGroup<'indent'> {
     if (node!.attributes.level === Indentation.SMALL) {
         return {
             type: 'group',

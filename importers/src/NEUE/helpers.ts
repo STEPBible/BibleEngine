@@ -1,10 +1,6 @@
 import { TreeElement, DefaultNode } from './models/parse5';
 import {
     BookWithContentForInput,
-    IBibleContentForInput,
-    IBibleContentPhraseForInput,
-    IBibleContentSectionForInput,
-    IBibleContentGroupForInput,
     DocumentRoot,
     DocumentSection,
     DocumentPhrase,
@@ -13,7 +9,11 @@ import {
     ContentGroupType,
     BibleReferenceParser,
     IBibleReferenceRange,
-    getReferencesFromText
+    getReferencesFromText,
+    IBibleContentSection,
+    IBibleContentPhrase,
+    IBibleContent,
+    IBibleContentGroup
 } from '@bible-engine/core';
 
 export const getAttribute = (node: TreeElement, name: string) => {
@@ -43,11 +43,11 @@ export const visitNode = (
         currentChapterNumber?: number;
         currentBackupChapterNumber?: number;
         currentVerseNumber?: number;
-        currentLevel1Section?: IBibleContentSectionForInput;
-        currentLevel2Section?: IBibleContentSectionForInput;
-        currentLevel3Section?: IBibleContentSectionForInput;
-        currentLevel4Section?: IBibleContentSectionForInput;
-        contentWithPendingNotes?: (IBibleContentPhraseForInput | IBibleContentSectionForInput)[];
+        currentLevel1Section?: IBibleContentSection;
+        currentLevel2Section?: IBibleContentSection;
+        currentLevel3Section?: IBibleContentSection;
+        currentLevel4Section?: IBibleContentSection;
+        contentWithPendingNotes?: (IBibleContentPhrase | IBibleContentSection)[];
         documentRoot?: DocumentRoot;
         currentDocumentLevel1Section?: DocumentSection;
         currentDocumentLevel2Section?: DocumentSection;
@@ -55,7 +55,7 @@ export const visitNode = (
     },
     localState: {
         currentDocument?: DocumentElement[];
-        currentContentGroup?: IBibleContentForInput[];
+        currentContentGroup?: IBibleContent[];
     }
 ) => {
     if (node.nodeName === 'h1' && globalState.bookData) {
@@ -118,7 +118,7 @@ export const visitNode = (
             // tags, in other words: a header tag indicates the start of the bible content
             // => introduction is finished and bible text is starting
             localState.currentDocument = undefined;
-            const newSection: IBibleContentSectionForInput = {
+            const newSection: IBibleContentSection = {
                 type: 'section',
                 title: sectionTitle,
                 contents: []
@@ -260,7 +260,11 @@ export const visitNode = (
         if (!firstContentWithPendingNote)
             throw new Error(`no content with pending note: ${noteText}`);
 
-        if (firstContentWithPendingNote.type === 'phrase') {
+        if (firstContentWithPendingNote.type === 'section') {
+            firstContentWithPendingNote.description = newNote;
+        } else {
+            // it's a phrase
+
             const expectedNoteReference =
                 `${firstContentWithPendingNote.versionChapterNum},` +
                 `${firstContentWithPendingNote.versionVerseNum}:`;
@@ -289,9 +293,6 @@ export const visitNode = (
                 if (!firstContentWithPendingNote.notes) firstContentWithPendingNote.notes = [];
                 firstContentWithPendingNote.notes.push({ content: newNote });
             }
-        } else {
-            // it's a section
-            firstContentWithPendingNote.description = newNote;
         }
     } else if (node.nodeName === '#text') {
         const punctuationChars = ['.', ',', ':', '?', '!', ';'];
@@ -443,7 +444,7 @@ export const visitNode = (
                     if (i === textByNotes.length - 1) {
                         const phraseText = textByNotes[i].trim();
                         if (phraseText) {
-                            const phrase: IBibleContentPhraseForInput = {
+                            const phrase: IBibleContentPhrase = {
                                 ...numbers,
                                 type: 'phrase',
                                 content: phraseText
@@ -467,7 +468,7 @@ export const visitNode = (
                         if (lastWordIndex > 0) {
                             const startingText = textByNotes[i].slice(0, lastWordIndex - 1).trim();
                             if (startingText) {
-                                const phrase: IBibleContentPhraseForInput = {
+                                const phrase: IBibleContentPhrase = {
                                     ...numbers,
                                     type: 'phrase',
                                     content: startingText
@@ -478,7 +479,7 @@ export const visitNode = (
                             }
                         }
                         const textWithNote = textByNotes[i].slice(lastWordIndex).trim();
-                        const phraseWithPendingNote: IBibleContentPhraseForInput = {
+                        const phraseWithPendingNote: IBibleContentPhrase = {
                             ...numbers,
                             type: 'phrase',
                             content: textWithNote
@@ -497,7 +498,7 @@ export const visitNode = (
                     }
                 }
             } else {
-                const newBiblePhrase: IBibleContentPhraseForInput = {
+                const newBiblePhrase: IBibleContentPhrase = {
                     ...newPhrase,
                     ...numbers
                 };
@@ -570,7 +571,7 @@ export const visitNode = (
             ...localState
         };
         let newGroup: DocumentGroup<ContentGroupType> | undefined;
-        let newBibleGroup: IBibleContentGroupForInput<ContentGroupType> | undefined;
+        let newBibleGroup: IBibleContentGroup<ContentGroupType> | undefined;
 
         // tags that we don't recognize above, have no effect - their child content will be added to
         // the local state
@@ -590,7 +591,7 @@ export const visitNode = (
                 childState.currentDocument = newGroup.contents;
             } else {
                 if (node.nodeName === 'p' && hasAttribute(node, 'class', 'einl')) {
-                    const titleBibleGroup: IBibleContentGroupForInput<'title'> = {
+                    const titleBibleGroup: IBibleContentGroup<'title'> = {
                         type: 'group',
                         groupType: 'title',
                         contents: []
@@ -598,7 +599,7 @@ export const visitNode = (
                     newBibleGroup.contents.push(titleBibleGroup);
                     childState.currentContentGroup = titleBibleGroup.contents;
                 } else if (node.nodeName === 'p' && hasAttribute(node, 'class', 'poet')) {
-                    const titlePoetryGroup: IBibleContentGroupForInput<'poetry'> = {
+                    const titlePoetryGroup: IBibleContentGroup<'poetry'> = {
                         type: 'group',
                         groupType: 'poetry',
                         contents: []

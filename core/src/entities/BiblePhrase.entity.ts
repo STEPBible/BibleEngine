@@ -7,7 +7,7 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate
-} from '../../typeorm';
+} from 'typeorm';
 import { BibleCrossReferenceEntity, BibleNoteEntity } from '.';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
 import { PhraseModifiers, IBiblePhraseRef } from '../models';
@@ -22,7 +22,7 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
     // the id encodes the following attribute:
     normalizedReference: Required<IBiblePhraseRef>;
 
-    @Column({ nullable: true })
+    @Column({ type: 'bigint', nullable: true })
     joinToRefId?: number;
 
     @Column()
@@ -118,6 +118,8 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
 
         if (this.strongsJoined) this.strongs = this.strongsJoined.split(',');
         if (this.modifiersJson) this.modifiers = JSON.parse(this.modifiersJson);
+
+        if (!this.versionSubverseNum) delete this.versionSubverseNum;
     }
 
     @BeforeInsert()

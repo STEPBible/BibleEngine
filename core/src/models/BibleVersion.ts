@@ -9,4 +9,5 @@ export interface IBibleVersion {
     copyrightLong?: DocumentRoot;
     chapterVerseSeparator: string;
     hasStrongs?: boolean;
+    lastUpdate?: Date;
 }
