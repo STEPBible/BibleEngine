@@ -123,7 +123,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flex: 1,
     borderLeftColor: 'gray',
-    borderLeftWidth: 1
+    borderLeftWidth: 1,
+    borderRightColor: 'gray',
+    borderRightWidth: 0.5,
   },
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,

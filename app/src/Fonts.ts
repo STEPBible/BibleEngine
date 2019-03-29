@@ -7,6 +7,8 @@ const openSansLight = require('../assets/fonts/OpenSans-Light.ttf');
 const cardo = require('../assets/fonts/Cardo-Regular.ttf');
 const cardoBold = require('../assets/fonts/Cardo-Bold.ttf');
 const cardoItalic = require('../assets/fonts/Cardo-Italic.ttf');
+const materialIcons = require('@expo/vector-icons/fonts/MaterialIcons.ttf');
+const Ionicons = require('@expo/vector-icons/fonts/Ionicons.ttf');
 
 export default class Fonts {
   static async load() {
@@ -17,7 +19,10 @@ export default class Fonts {
       'open-sans-light': openSansLight,
       'cardo-bold': cardoBold,
       'cardo-italic': cardoItalic,
+      'Material Icons': materialIcons,
+      MaterialIcons: materialIcons,
       cardo,
+      Ionicons
     });
   }
 }
