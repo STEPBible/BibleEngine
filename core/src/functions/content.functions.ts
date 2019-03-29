@@ -227,14 +227,20 @@ export const generateBibleDocument = (
                 if (_group.groupType === 'paragraph') {
                     activeParagraph = (<IBibleContentGeneratorGroup<'paragraph'>>_group).meta;
                 } else if (_group.groupType === 'indent') {
-                    // => this group has a level (numeric) modifier
-                    activeModifiers['indentLevel'] = (<IBibleContentGeneratorGroup<'indent'>>(
-                        _group
-                    )).meta.level;
+                    // => this group has a level (numeric) modifier - the highest level is active
+                    const indentLevel = (<IBibleContentGeneratorGroup<'indent'>>_group).meta.level;
+                    if (
+                        !activeModifiers['indentLevel'] ||
+                        indentLevel > activeModifiers['indentLevel']
+                    )
+                        activeModifiers['indentLevel'] = indentLevel;
                 } else if (_group.groupType === 'quote') {
-                    activeModifiers['quoteLevel'] = (<IBibleContentGeneratorGroup<'quote'>>(
-                        _group
-                    )).meta.level;
+                    const quoteLevel = (<IBibleContentGeneratorGroup<'quote'>>_group).meta.level;
+                    if (
+                        !activeModifiers['quoteLevel'] ||
+                        quoteLevel > activeModifiers['quoteLevel']
+                    )
+                        activeModifiers['quoteLevel'] = quoteLevel;
                     activeModifiers['quoteWho'] = _group.modifier;
                 } else if (
                     _group.groupType === 'orderedListItem' ||
@@ -302,6 +308,7 @@ export const generateBibleDocument = (
                     ...section,
                     type: 'section',
                     meta: newSectionMeta,
+                    level,
                     contents: [],
                     parent: activeGroup
                 };
@@ -364,12 +371,11 @@ export const generateBibleDocument = (
             let newGroup = null;
             if (modifier === 'indentLevel') {
                 if (
-                    phrase.getModifierValue('indentLevel') &&
-                    (!activeModifiers['indentLevel'] ||
+                    phrase.getModifierValue('indentLevel') !== undefined &&
+                    (activeModifiers['indentLevel'] === undefined ||
                         phrase.getModifierValue('indentLevel')! > activeModifiers['indentLevel']!)
                 ) {
                     // => this phrase starts a new indent group
-
                     newGroup = <IBibleContentGeneratorGroup<'indent'>>{
                         type: 'group',
                         groupType: 'indent',
@@ -457,7 +463,8 @@ export const generateBibleDocument = (
         let numberingGroup: BibleContentGeneratorContainer | null = null;
         let _numberingGroupTmp: BibleContentGeneratorContainer | undefined = activeGroup;
         do {
-            if (_numberingGroupTmp.type !== 'group') continue;
+            if (_numberingGroupTmp.type !== 'group' || _numberingGroupTmp.groupType === 'paragraph')
+                continue;
             else if (_numberingGroupTmp === activeGroup) {
                 if (_numberingGroupTmp.contents.length === 0) numberingGroup = _numberingGroupTmp;
                 else break;
@@ -930,6 +937,7 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
                 type: 'section',
                 contents: stripUnnecessaryDataFromBibleContent(obj.contents)
             };
+            if (obj.level !== undefined) inputSection.level = obj.level;
             if (obj.title) inputSection.title = obj.title;
             if (obj.subTitle) inputSection.subTitle = obj.subTitle;
             if (obj.description) inputSection.description = obj.description;

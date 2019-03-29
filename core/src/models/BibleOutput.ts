@@ -13,7 +13,11 @@ import {
 import { IBibleNumbering } from './BibleContent';
 import { ContentGroupType } from './ContentGroup';
 
-export interface IBibleOutputBase {
+export interface IBibleEngineOutput {
+    source?: 'local' | 'remote';
+}
+
+export interface IBibleOutputBase extends IBibleEngineOutput {
     version: IBibleVersion;
     versionBook: IBibleBook;
     range: IBibleReferenceRange;

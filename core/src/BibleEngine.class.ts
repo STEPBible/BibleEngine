@@ -57,6 +57,7 @@ import {
     IBibleContentGroup,
     BiblePlaintext
 } from './models';
+import { IBibleEngineOutput } from './models/BibleOutput';
 
 class NoDbConnectionError extends Error {
     constructor() {
@@ -69,6 +70,13 @@ export class BibleBookContentNotImportedError extends Error {
     constructor() {
         super('accessing content of a bible book that has not been imported yet');
         this.name = 'BibleBookContentNotImportedError';
+    }
+}
+
+export class BibleEngineRemoteError extends Error {
+    constructor(message: string) {
+        super(`Error from BibleEngine server: ${message}`);
+        this.name = 'BibleEngineRemoteError';
     }
 }
 
@@ -203,47 +211,40 @@ export class BibleEngine {
 
     async getFullDataForReferenceRange(
         rangeQuery: IBibleReferenceRangeQuery,
-        stripUnnecessaryData = false
+        stripUnnecessaryData = false,
+        forceRemote = false
     ): Promise<IBibleOutputRich> {
         let versionEntity: BibleVersionEntity | undefined;
+        let bookEntity: BibleBookEntity | undefined;
+        let range: IBibleReferenceRangeVersion | undefined;
         let db: EntityManager | undefined;
-        if (this.pDB) {
+        if (this.pDB && !forceRemote) {
             db = await this.pDB;
             versionEntity = await db.findOne(BibleVersionEntity, {
                 where: { uid: rangeQuery.versionUid }
             });
+            if (versionEntity && versionEntity.dataLocation === 'remote') forceRemote = true;
         }
 
-        if (!versionEntity) {
-            if (this.remoteConfig) {
-                // TODO: refactor this out into a service
-                const remoteData = await fetch(
-                    this.remoteConfig.url + '/getFullDataForReferenceRange',
-                    {
-                        body: JSON.stringify(rangeQuery),
-                        method: 'post',
-                        headers: {
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                ).then(response => {
-                    return response.json();
-                });
-                // TODO: properly handle error
-                return remoteData;
-            }
+        if (versionEntity && !forceRemote) {
+            range = { ...rangeQuery, versionId: versionEntity.id };
+            bookEntity = await this.getBookForVersionReference(range);
+            if (!bookEntity) throw new Error(`can't get formatted text: invalid book`);
+            if (bookEntity.dataLocation === 'file') throw new BibleBookContentNotImportedError();
+        }
+
+        if (
+            forceRemote ||
+            !versionEntity ||
+            !range ||
+            !bookEntity ||
+            bookEntity.dataLocation !== 'db'
+        ) {
+            if (this.remoteConfig) return this.fetch<IBibleOutputRich>('ref', rangeQuery);
             throw new Error(`can't get formatted text: invalid version`);
         }
 
         if (!db) throw new NoDbConnectionError();
-
-        const range: IBibleReferenceRangeVersion = { ...rangeQuery, versionId: versionEntity.id };
-
-        const bookEntity = await this.getBookForVersionReference(range);
-        if (!bookEntity) throw new Error(`can't get formatted text: invalid book`);
-        if (bookEntity.dataLocation === 'file') throw new BibleBookContentNotImportedError();
-        // TODO: handle (or remove) dataLocation "remote"
 
         const bookAbbreviations = await db
             .find(BibleBookEntity, {
@@ -458,10 +459,14 @@ export class BibleEngine {
         return db.findOne(BibleVersionEntity, { uid: versionUid });
     }
 
-    async getVersions() {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return db.find(BibleVersionEntity);
+    async getVersions(forceRemote = false): Promise<IBibleVersion[] & IBibleEngineOutput> {
+        if (!this.pDB || forceRemote) {
+            // TODO: persist updates if local database exists
+            return this.fetch<IBibleVersion[]>('versions');
+        } else {
+            const db = await this.pDB;
+            return db.find(BibleVersionEntity);
+        }
     }
 
     private async addBibleBookContent(
@@ -845,6 +850,9 @@ export class BibleEngine {
                 if (groupFirstPhraseId && !firstPhraseId) firstPhraseId = groupFirstPhraseId;
                 if (groupLastPhraseId && (!lastPhraseId || groupLastPhraseId > lastPhraseId))
                     lastPhraseId = groupLastPhraseId;
+
+                if (content.groupType === 'indent' || content.groupType === 'poetry')
+                    globalState.phraseStack[globalState.phraseStack.length - 1].linebreak = true;
             } else if (
                 (content.type === 'group' && content.groupType === 'paragraph') ||
                 content.type === 'section'
@@ -964,6 +972,34 @@ export class BibleEngine {
         }
 
         return { firstPhraseId, lastPhraseId };
+    }
+
+    private fetch<T>(path: string, data?: any) {
+        if (!this.remoteConfig) throw new Error(`no remote server configured`);
+        const config: RequestInit = {
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json'
+            }
+        };
+        if (data) {
+            config.method = 'post';
+            config.body = JSON.stringify(data);
+        } else {
+            config.method = 'get';
+        }
+
+        return fetch(this.remoteConfig.url + '/' + path, config).then(async response => {
+            if (response.status === 200)
+                return response.json().then((data: T & IBibleEngineOutput) => {
+                    data.source = 'remote';
+                    return data;
+                });
+            else {
+                const error = await response.json();
+                throw new BibleEngineRemoteError(error.message);
+            }
+        });
     }
 
     private async getBookForVersionReference({ versionId, bookOsisId }: IBibleReferenceVersion) {

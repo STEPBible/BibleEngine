@@ -1,6 +1,6 @@
 import { ConnectionOptions } from 'typeorm';
 import * as archiver from 'archiver';
-import { BibleEngine, IBibleBook } from '@bible-engine/core';
+import { BibleEngine, IBibleBook, IBibleVersion } from '@bible-engine/core';
 import { writeFileSync, createWriteStream } from 'fs';
 import { ensureDirSync } from 'fs-extra';
 import { sync as rmDirRecSync } from 'rimraf';
@@ -13,11 +13,23 @@ export class BeImportFileCreator {
     }
 
     async createAllVersions(destinationPath: string) {
-        const createdFiles: string[] = [];
+        const createdVersions: { file: string; version: IBibleVersion }[] = [];
         for (const versionEntity of await this.bibleEngine.getVersions()) {
-            createdFiles.push(await this.createVersionFile(versionEntity.uid, destinationPath));
+            createdVersions.push({
+                version: {
+                    uid: versionEntity.uid,
+                    title: versionEntity.title,
+                    copyrightShort: versionEntity.copyrightShort,
+                    language: versionEntity.language,
+                    chapterVerseSeparator: versionEntity.chapterVerseSeparator,
+                    hasStrongs: versionEntity.hasStrongs,
+                    lastUpdate: versionEntity.lastUpdate
+                },
+                file: await this.createVersionFile(versionEntity.uid, destinationPath)
+            });
         }
-        return createdFiles;
+        writeFileSync(`${destinationPath}/versions.json`, JSON.stringify(createdVersions));
+        return createdVersions;
     }
 
     async createVersionFile(versionUid: string, destinationPath: string) {

@@ -10,4 +10,5 @@ export interface IBibleVersion {
     chapterVerseSeparator: string;
     hasStrongs?: boolean;
     lastUpdate?: Date;
+    dataLocation?: 'db' | 'file' | 'remote';
 }
