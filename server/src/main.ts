@@ -1,45 +1,65 @@
-require('isomorphic-fetch');
-import * as koa from 'koa';
-import * as koaRouter from 'koa-router';
+import 'reflect-metadata';
+import * as Koa from 'koa';
+import * as KoaBody from 'koa-bodyparser';
 import * as KoaCors from '@koa/cors';
-import * as bodyParser from 'koa-bodyparser';
+import { Container } from 'typedi';
+import { useContainer as useContainerForRouting, useKoaServer } from 'routing-controllers';
+import { useContainer as useContainerForTypeORM } from 'typeorm';
 
 import { BibleEngine } from '@bible-engine/core';
-import { IBibleReferenceRangeQuery } from '@bible-engine/core/src/models';
+import { BibleController } from './Bible.controller';
 
-const api = new BibleEngine({
-    type: 'mysql',
-    host: 'localhost',
-    port: 3306,
-    username: 'bibleengine',
-    password: 'bibleengine',
-    database: 'bibleengine'
-});
-const app = new koa();
-app.use(bodyParser());
+const apiVersion = 1;
+const routePrefix = `/rest/v${apiVersion}`;
 
-app.use(
-    KoaCors({
-        allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE'],
-        origin: '*' // http://localhost:8100
-    })
-);
+// register 3rd party IOC container
+useContainerForRouting(Container);
+useContainerForTypeORM(Container);
 
-const router = new koaRouter();
-const PORT = process.env.NODE_ENV === 'production' ? 3888 : 3888;
+async function bootstrap() {
+    try {
+        const bibleEngine = new BibleEngine({
+            type: 'mysql',
+            host: 'localhost',
+            port: 3306,
+            username: 'bibleengine',
+            password: 'bibleengine',
+            database: 'bibleengine'
+            // logger: 'advanced-console',
+            // logging: 'all'
+        });
+        Container.set('bibleEngine', bibleEngine);
 
-router.post('/getFullDataForReferenceRange', async (ctx, _) => {
-    const bibleContent = await api.getFullDataForReferenceRange(
-        <IBibleReferenceRangeQuery>ctx.request.body,
-        true
-    );
+        const app = new Koa();
+        const PORT = process.env.NODE_ENV === 'production' ? 3456 : 3456;
 
-    ctx.body = bibleContent;
-});
+        app.use(
+            KoaCors({
+                allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE'],
+                origin: '*' // http://localhost:8100
+            })
+        );
 
-app.use(router.routes());
-app.use(router.allowedMethods());
+        app.use(
+            KoaBody({
+                jsonLimit: '10mb'
+            })
+        );
 
-app.listen(PORT, () => {
-    console.log(`BibleEngine Server is now running on http://localhost:${PORT}`);
-});
+        // register created koa server in routing-controllers
+        useKoaServer(app, {
+            controllers: [BibleController],
+            routePrefix
+        });
+
+        app.listen(PORT, () => {
+            console.log(
+                `BibleEngine Server is now running on http://localhost:${PORT}${routePrefix}`
+            );
+        });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+bootstrap();
