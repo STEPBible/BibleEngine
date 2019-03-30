@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.MEDIUM * 0.8,
     marginBottom: Margin.SMALL,
     marginTop: Margin.SMALL,
-    width: Dimensions.get('window').width
+    width: Dimensions.get('window').width - Margin.LARGE * 2
   },
   verseNumber: {
     color: 'gray',
