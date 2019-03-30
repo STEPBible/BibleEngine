@@ -241,7 +241,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap'
   },
   strongWord: {
-    marginRight: 7
   },
   strongWordText: {
     color: Color.TYNDALE_BLUE,

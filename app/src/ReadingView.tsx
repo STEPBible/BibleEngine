@@ -1,13 +1,22 @@
 import React, { Fragment } from 'react';
-import { Text, View, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  TouchableHighlight
+} from 'react-native';
 
 import {
   IBibleContent,
   IBibleOutputRich,
-  BibleEngine
+  BibleEngine,
+  IBiblePhrase
 } from '@bible-engine/core';
 import StrongsWord from './StrongsWord';
 import { Margin, FontSize, FontFamily, Color } from './Constants';
+import CrossReference from './CrossReference';
 
 interface State {
   content: IBibleContent[];
@@ -77,10 +86,23 @@ export default class ReadingView extends React.PureComponent<Props, State> {
     return null;
   };
 
+  renderCrossReference = (content: IBiblePhrase): any => {
+    if (!content.crossReferences || !content.crossReferences.length) {
+      return <View style={{ width: 7 }} />;
+    }
+    return (
+      <CrossReference
+        crossReferences={content.crossReferences}
+        sqlBible={this.props.sqlBible}
+      />
+    );
+  };
+
   renderPhrase = (content: IBibleContent): any => {
     if (content.strongs) {
       return (
         <Fragment>
+          {this.renderCrossReference(content)}
           {this.renderVerseNumber(content)}
           <StrongsWord
             phrase={content.content}
@@ -92,6 +114,7 @@ export default class ReadingView extends React.PureComponent<Props, State> {
     }
     return (
       <Fragment>
+        {this.renderCrossReference(content)}
         {this.renderVerseNumber(content)}
         <View style={styles.phrase}>
           <Text style={styles.phraseText}>{content.content}</Text>
@@ -125,7 +148,7 @@ const styles = StyleSheet.create({
     borderLeftColor: 'gray',
     borderLeftWidth: 1,
     borderRightColor: 'gray',
-    borderRightWidth: 0.5,
+    borderRightWidth: 0.5
   },
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,
@@ -134,13 +157,11 @@ const styles = StyleSheet.create({
     marginBottom: Margin.LARGE,
     textAlign: 'center'
   },
-  phrase: {
-    marginBottom: Margin.EXTRA_SMALL
-  },
+  phrase: {},
   phraseText: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.MEDIUM,
-    marginRight: 7
+    marginBottom: Margin.EXTRA_SMALL
   },
   section: {
     flex: 1,
