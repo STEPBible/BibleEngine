@@ -1,6 +1,13 @@
 import * as Expo from 'expo';
 import * as React from 'react';
-import { Dimensions, StatusBar, View, Keyboard } from 'react-native';
+import {
+  Dimensions,
+  StatusBar,
+  View,
+  Keyboard,
+  AsyncStorage
+} from 'react-native';
+import store from 'react-native-simple-store';
 
 import { BibleBook, BibleEngine, IBibleOutputRich } from '@bible-engine/core';
 import Database from './Database';
@@ -9,6 +16,7 @@ import ReadingView from './ReadingView';
 import SideMenu from './SideMenu';
 import BookMenu from './BookMenu';
 import SearchPage from './SearchPage';
+import { AsyncStorageKey } from './Constants';
 
 const bibleDatabaseModule = require('../assets/bible.db');
 
@@ -111,6 +119,9 @@ export default class App extends React.PureComponent<{}, State> {
     const currentBookFullTitle = this.state.books.filter(
       book => book.osisId === bookOsisId
     )[0].title;
+    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, content);
+    store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, bookOsisId);
+    store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, versionChapterNum);
     this.setState({
       ...this.state,
       currentBookFullTitle,
@@ -147,22 +158,39 @@ export default class App extends React.PureComponent<{}, State> {
     });
     await this.sqlBible.setVersion('ESV');
     const books = await this.sqlBible.getBooksForVersion(1);
+
+    let [chapterOutput, chapterNum, osisBookName] = await store.get([
+      AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
+      AsyncStorageKey.CACHED_CHAPTER_NUM,
+      AsyncStorageKey.CACHED_OSIS_BOOK_NAME
+    ]);
+    if (!osisBookName) {
+      osisBookName = 'Gen';
+      store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, osisBookName);
+    }
+    if (!chapterNum) {
+      chapterNum = 1;
+      store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum);
+    }
+    if (!chapterOutput) {
+      chapterOutput = await this.sqlBible.getFullDataForReferenceRange(
+        {
+          bookOsisId: osisBookName,
+          versionUid: 'ESV',
+          versionChapterNum: chapterNum
+        },
+        true
+      );
+      store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterOutput);
+    }
     const currentBookFullTitle = books.filter(
-      book => book.osisId === this.state.currentBookOsisId
+      book => book.osisId === osisBookName
     )[0].title;
-    const content = await this.sqlBible.getFullDataForReferenceRange(
-      {
-        bookOsisId: this.state.currentBookOsisId,
-        versionUid: 'ESV',
-        versionChapterNum: this.state.currentChapterNum
-      },
-      true
-    );
     this.setState({
       ...this.state,
       books,
       currentBookFullTitle,
-      content: content.content.contents
+      content: chapterOutput.content.contents
     });
   };
 
