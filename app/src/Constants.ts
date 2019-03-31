@@ -1,5 +1,7 @@
 import normalizeText from './normalizeText';
 
+export const DEBUG = false;
+
 export enum Margin {
   EXTRA_SMALL = normalizeText(5),
   SMALL = normalizeText(10),
@@ -29,4 +31,21 @@ export enum FontFamily {
   CARDO_BOLD = 'cardo-bold',
   CARDO_ITALIC = 'cardo-italic',
   CARDO = 'cardo'
+}
+
+export function getDebugStyles() {
+  if (DEBUG) {
+    return {
+      borderColor: randomColor(),
+      borderWidth: 1
+    };
+  }
+  return {};
+}
+
+const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green'];
+
+export function randomColor() {
+  const index = Math.floor(Math.random() * 4);
+  return testingColors[index];
 }
