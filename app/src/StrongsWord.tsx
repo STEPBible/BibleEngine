@@ -250,6 +250,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: FontSize.MEDIUM,
     fontFamily: FontFamily.CARDO
+    marginBottom: Margin.EXTRA_SMALL,
   },
   documentPhrase: {
     // backgroundColor: 'cyan',
