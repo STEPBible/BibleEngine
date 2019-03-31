@@ -104,8 +104,8 @@ export default class ReadingView extends React.PureComponent<Props, State> {
       return (
         <Fragment>
           {this.renderFootnote(content)}
-          {this.renderCrossReference(content)}
           {this.renderVerseNumber(content)}
+          {this.renderCrossReference(content)}
           <StrongsWord
             phrase={content.content}
             strongs={content.strongs}
@@ -117,8 +117,8 @@ export default class ReadingView extends React.PureComponent<Props, State> {
     return (
       <Fragment>
         {this.renderFootnote(content)}
-        {this.renderCrossReference(content)}
         {this.renderVerseNumber(content)}
+        {this.renderCrossReference(content)}
         <View style={styles.phrase}>
           <Text style={styles.phraseText}>{content.content}</Text>
         </View>
