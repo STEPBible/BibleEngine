@@ -16,6 +16,7 @@ Jes 63,19: verse overlaps to chapter 64, which needs to be indicated by a '<span
 Kla 4,1: missing reference at beginning of note
 Dan 12,7: note in the wrong order
 Mt 13,32: note has wrong reference ("Mt 13,23")
+Lk 7,29-30: closing paragraph tag "</p>" needs to be removed before from "<p></p>" before verse 29
 1Tim 5,22: reference to 2. Timotheus 1,6 misses anchor tag #1
 3Jo: duplicate "<p>" at beginning of bible text
 3Jo: spelling error in title
@@ -24,6 +25,11 @@ NORMALIZATIONS
 ==============
 Mt 20,6.9: to have this attached at both verses, note has to be duplicated to Mt 20,9 (with an added "*") and each note should only reference the single verse)
 Lk 22,43: since the note marker is at verse 44, the reference in the note needs to point to that
+
+OPTIMIZATIONS
+=============
+Lk 2,14: should be paragraph class "poet"
+
 
 MANUAL PREPARATIONS BEFORE PARSING
 ==================================

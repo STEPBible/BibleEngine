@@ -304,13 +304,13 @@ export const visitNode = (
             .replace('[SELA]', '♪');
         if (!text) return;
 
-        const newPhrase: DocumentPhrase = {
-            type: 'phrase',
-            content: text
-        };
-        if (punctuationChars.indexOf(text.slice(0, 1)) !== -1) newPhrase.skipSpace = 'before';
-
         if (localState.currentDocument) {
+            const newPhrase: DocumentPhrase = {
+                type: 'phrase',
+                content: text
+            };
+            if (punctuationChars.indexOf(text.slice(0, 1)) !== -1) newPhrase.skipSpace = 'before';
+
             // if this is a bible-note:
             if (
                 globalState.bookData &&
@@ -499,9 +499,13 @@ export const visitNode = (
                 }
             } else {
                 const newBiblePhrase: IBibleContentPhrase = {
-                    ...newPhrase,
+                    type: 'phrase',
+                    content: text,
                     ...numbers
                 };
+                if (punctuationChars.indexOf(text.slice(0, 1)) !== -1)
+                    newBiblePhrase.skipSpace = 'before';
+
                 localState.currentContentGroup.push(newBiblePhrase);
             }
         } else throw new Error(`can't find container for text node`);
@@ -524,6 +528,13 @@ export const visitNode = (
 
             if (lastElement && lastElement.type === 'phrase') {
                 lastElement.linebreak = true;
+            } else if (
+                lastElement.type === 'group' &&
+                lastElement.contents.length === 1 &&
+                lastElement.contents[0].type === 'phrase'
+            ) {
+                const lastPhrase = lastElement.contents[0] as IBibleContentPhrase;
+                lastPhrase.linebreak = true;
             } else {
                 // we put this here to check if this case exist in the source files - in case
                 // not, we can safe the effort to implement it
@@ -599,13 +610,13 @@ export const visitNode = (
                     newBibleGroup.contents.push(titleBibleGroup);
                     childState.currentContentGroup = titleBibleGroup.contents;
                 } else if (node.nodeName === 'p' && hasAttribute(node, 'class', 'poet')) {
-                    const titlePoetryGroup: IBibleContentGroup<'poetry'> = {
+                    const poetryBibleGroup: IBibleContentGroup<'poetry'> = {
                         type: 'group',
                         groupType: 'poetry',
                         contents: []
                     };
-                    newBibleGroup.contents.push(titlePoetryGroup);
-                    childState.currentContentGroup = titlePoetryGroup.contents;
+                    newBibleGroup.contents.push(poetryBibleGroup);
+                    childState.currentContentGroup = poetryBibleGroup.contents;
                 } else {
                     childState.currentContentGroup = newBibleGroup.contents;
                 }
