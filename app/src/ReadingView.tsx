@@ -4,10 +4,13 @@ import { Text, View, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import {
   IBibleContent,
   IBibleOutputRich,
-  BibleEngine
+  BibleEngine,
+  IBiblePhrase
 } from '@bible-engine/core';
 import StrongsWord from './StrongsWord';
-import { Margin, FontSize, FontFamily, Color } from './Constants';
+import { Margin, FontSize, FontFamily, getDebugStyles } from './Constants';
+import CrossReference from './CrossReference';
+import Footnote from './Footnote';
 
 interface State {
   content: IBibleContent[];
@@ -77,10 +80,31 @@ export default class ReadingView extends React.PureComponent<Props, State> {
     return null;
   };
 
+  renderCrossReference = (content: IBiblePhrase): any => {
+    if (!content.crossReferences || !content.crossReferences.length) {
+      return null;
+    }
+    return (
+      <CrossReference
+        crossReferences={content.crossReferences}
+        sqlBible={this.props.sqlBible}
+      />
+    );
+  };
+
+  renderFootnote = (content: IBiblePhrase): any => {
+    if (!content.notes || !content.notes.length) {
+      return null;
+    }
+    return <Footnote notes={content.notes} />;
+  };
+
   renderPhrase = (content: IBibleContent): any => {
     if (content.strongs) {
       return (
         <Fragment>
+          {this.renderFootnote(content)}
+          {this.renderCrossReference(content)}
           {this.renderVerseNumber(content)}
           <StrongsWord
             phrase={content.content}
@@ -92,6 +116,8 @@ export default class ReadingView extends React.PureComponent<Props, State> {
     }
     return (
       <Fragment>
+        {this.renderFootnote(content)}
+        {this.renderCrossReference(content)}
         {this.renderVerseNumber(content)}
         <View style={styles.phrase}>
           <Text style={styles.phraseText}>{content.content}</Text>
@@ -125,21 +151,21 @@ const styles = StyleSheet.create({
     borderLeftColor: 'gray',
     borderLeftWidth: 1,
     borderRightColor: 'gray',
-    borderRightWidth: 0.5,
+    borderRightWidth: 0.5
   },
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
     marginTop: Margin.EXTRA_LARGE,
     marginBottom: Margin.LARGE,
-    textAlign: 'center'
+    textAlign: 'center',
+    ...getDebugStyles()
   },
-  phrase: {
-    marginBottom: Margin.EXTRA_SMALL
-  },
+  phrase: { ...getDebugStyles() },
   phraseText: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.MEDIUM,
+    marginBottom: Margin.EXTRA_SMALL,
     marginRight: 7
   },
   section: {
@@ -147,20 +173,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginLeft: Margin.LARGE,
-    marginRight: Margin.LARGE
+    marginRight: Margin.LARGE,
+    ...getDebugStyles()
   },
   title: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.MEDIUM * 0.8,
     marginBottom: Margin.SMALL,
     marginTop: Margin.SMALL,
-    width: Dimensions.get('window').width
+    width: Dimensions.get('window').width - Margin.LARGE * 2,
+    ...getDebugStyles()
   },
   verseNumber: {
-    color: 'gray',
+    color: 'black',
     fontSize: FontSize.EXTRA_SMALL,
-    fontFamily: FontFamily.CARDO,
+    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     marginRight: 3,
-    marginTop: -2
+    marginTop: -2,
+    ...getDebugStyles()
   }
 });

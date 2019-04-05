@@ -13,7 +13,13 @@ import {
   DictionaryEntry,
   DocumentElement
 } from '@bible-engine/core';
-import { Color, FontFamily, FontSize, Margin } from './Constants';
+import {
+  Color,
+  FontFamily,
+  FontSize,
+  Margin,
+  getDebugStyles
+} from './Constants';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
@@ -184,6 +190,7 @@ export default class StrongsWord extends React.Component<Props, State> {
     );
   }
 }
+
 const styles = StyleSheet.create({
   popover__arrow: {},
   popover__backdrop: {
@@ -241,16 +248,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap'
   },
   strongWord: {
-    marginRight: 7
+    ...getDebugStyles()
   },
   strongWordText: {
     color: Color.TYNDALE_BLUE,
     fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.MEDIUM
-  },
-  text: {
     fontSize: FontSize.MEDIUM,
-    fontFamily: FontFamily.CARDO
+    marginBottom: Margin.EXTRA_SMALL,
+    marginRight: 7
   },
   documentPhrase: {
     // backgroundColor: 'cyan',
