@@ -7,7 +7,7 @@ import {
   Keyboard,
   AsyncStorage
 } from 'react-native';
-import store from 'react-native-simple-store';
+import * as store from 'react-native-simple-store';
 
 import { BibleBook, BibleEngine, IBibleOutputRich } from '@bible-engine/core';
 import Database from './Database';
@@ -18,7 +18,7 @@ import BookMenu from './BookMenu';
 import SearchPage from './SearchPage';
 import { AsyncStorageKey } from './Constants';
 
-const bibleDatabaseModule = require('../assets/bible.db');
+const bibleDatabaseModule = require('../assets/bibles.db');
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
@@ -156,7 +156,6 @@ export default class App extends React.PureComponent<{}, State> {
       type: 'expo',
       synchronize: false
     });
-    await this.sqlBible.setVersion('ESV');
     const books = await this.sqlBible.getBooksForVersion(1);
 
     let [chapterOutput, chapterNum, osisBookName] = await store.get([
