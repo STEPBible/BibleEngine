@@ -25,7 +25,7 @@ interface Props {
 
 export default class ReadingView extends React.PureComponent<Props, State> {
   renderItem = (content: IBibleContent): any => {
-    if (!('type' in content)) {
+    if (!('type' in content) || content.type === 'phrase') {
       return this.renderPhrase(content);
     }
     const children: IBibleContent[] = content.contents;
