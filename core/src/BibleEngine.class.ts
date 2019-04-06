@@ -654,7 +654,8 @@ export class BibleEngine {
                                     ...localState.modifierState
                                 })
                             );
-                            if (!firstPhraseId) firstPhraseId = emptyPhraseId;
+                            if (!firstPhraseId || emptyPhraseId < firstPhraseId)
+                                firstPhraseId = emptyPhraseId;
                             if (!lastPhraseId || emptyPhraseId > lastPhraseId)
                                 lastPhraseId = emptyPhraseId;
                         } else if (rule.action === 'Renumber verse') {
@@ -694,7 +695,8 @@ export class BibleEngine {
                                     { ...localState.modifierState }
                                 )
                             );
-                            if (!firstPhraseId) firstPhraseId = emptyPhraseId;
+                            if (!firstPhraseId || emptyPhraseId < firstPhraseId)
+                                firstPhraseId = emptyPhraseId;
                             if (!lastPhraseId || emptyPhraseId > lastPhraseId)
                                 lastPhraseId = emptyPhraseId;
 
@@ -761,7 +763,7 @@ export class BibleEngine {
                     phraseNum: globalState.currentPhraseNum
                 };
                 const phraseId = generatePhraseId(phraseRef);
-                if (!firstPhraseId) firstPhraseId = phraseId;
+                if (!firstPhraseId || phraseId < firstPhraseId) firstPhraseId = phraseId;
                 if (!lastPhraseId || phraseId > lastPhraseId) lastPhraseId = phraseId;
 
                 if (!content.quoteWho && localState.columnModifierState.quoteWho)
@@ -847,10 +849,18 @@ export class BibleEngine {
                     childState,
                     inputHasNormalizedNumbering
                 );
-                if (groupFirstPhraseId && !firstPhraseId) firstPhraseId = groupFirstPhraseId;
+                if (groupFirstPhraseId && (!firstPhraseId || groupFirstPhraseId < firstPhraseId))
+                    firstPhraseId = groupFirstPhraseId;
                 if (groupLastPhraseId && (!lastPhraseId || groupLastPhraseId > lastPhraseId))
                     lastPhraseId = groupLastPhraseId;
 
+                // if we have multiple groups of the same level after each other, we won't be able
+                // to persist this information (due to the way the schema works). In this case we
+                // add a linebreak to the last phrase, which is equivalent in effect.
+                // RADAR: we add the linebreak to every indent group - this shouldn't be a problem,
+                //        since an indent is a block group and a linebreak at the end of a block,
+                //        shouldn't have an effect. If this causes a problem, we will need to
+                //        implement some forward or backward looking magic, which is complex.
                 if (content.groupType === 'indent' || content.groupType === 'poetry')
                     globalState.phraseStack[globalState.phraseStack.length - 1].linebreak = true;
             } else if (
@@ -903,7 +913,8 @@ export class BibleEngine {
                         );
                     }
 
-                    if (!firstPhraseId) firstPhraseId = sectionFirstPhraseId;
+                    if (!firstPhraseId || sectionFirstPhraseId < firstPhraseId)
+                        firstPhraseId = sectionFirstPhraseId;
                     if (!lastPhraseId || sectionLastPhraseId > lastPhraseId)
                         lastPhraseId = sectionLastPhraseId;
                 }

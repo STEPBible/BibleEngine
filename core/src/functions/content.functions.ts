@@ -167,6 +167,7 @@ export const generateBibleDocument = (
         // go backwards through all groups and check if the current phrase is still within that
         // group. if not, "go out" of that group by setting the activeGroup to its parent
         let _group = <BibleContentGeneratorContainer>activeGroup;
+        let isIndentDowngrade = false;
         while (_group.parent) {
             let isPhraseInGroup = true;
             if (_group.type === 'section') {
@@ -181,9 +182,17 @@ export const generateBibleDocument = (
                     // => this group has a level (numeric) modifier
                     // check if the current phrase has the same or higher level
                     isPhraseInGroup =
+                        !isIndentDowngrade &&
                         !!phrase.getModifierValue('indentLevel') &&
                         phrase.getModifierValue('indentLevel')! >=
                             (<IBibleContentGeneratorGroup<'indent'>>_group).meta.level;
+
+                    // if an indent group ends we want to set up new indent groups from root level
+                    // (we need this for UI-rendering, especially related to showing verse numbers
+                    //  on a consistent line and not indented)
+                    if (!isPhraseInGroup && phrase.getModifierValue('indentLevel') !== undefined) {
+                        isIndentDowngrade = true;
+                    }
                 } else if (_group.groupType === 'quote') {
                     isPhraseInGroup =
                         phrase.quoteWho === _group.modifier &&

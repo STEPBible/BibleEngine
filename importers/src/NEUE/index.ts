@@ -68,16 +68,20 @@ export class NeueImporter extends BibleEngineImporter {
             // if (bookMeta.bookNum !== 2) continue;
 
             // Convert encoding streaming example
-            const bookHtml = await streamToString(
+            let bookHtml = await streamToString(
                 createReadStream(sourceDir + '/' + bookFile)
                     .pipe(decodeStream('windows1252'))
                     .pipe(encodeStream('utf8'))
             );
 
+            // strip beginning and end of the html doc (we only need the content itself)
+            bookHtml = bookHtml.substring(bookHtml.indexOf('<h1'), bookHtml.indexOf('<hr'));
+
+            // replace poetry line breaks by actual html ones
+            bookHtml = bookHtml.replace(/ \/ /g, '<br />');
+
             // const bookHtmlLatin1 = readFileSync(resolve(__dirname) + '/html/' + bookFile, 'latin1');
-            const bibleNodes = <TreeDocumentFragment>(
-                parseFragment(bookHtml.substring(bookHtml.indexOf('<h1'), bookHtml.indexOf('<hr')))
-            );
+            const bibleNodes = <TreeDocumentFragment>parseFragment(bookHtml);
             if (!bibleNodes) throw new Error(`can't parse file ${bookFile}`);
 
             console.log(`parsing book: ${bookMeta.title}`);
