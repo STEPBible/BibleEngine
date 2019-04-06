@@ -3,11 +3,11 @@ import * as React from 'react';
 import {
   Dimensions,
   StatusBar,
-  View,
   Keyboard,
-  AsyncStorage
 } from 'react-native';
 import * as store from 'react-native-simple-store';
+import Sentry from 'sentry-expo';
+Sentry.config('https://a0758a0dd01040728b6b7b0a3747d7f8@sentry.io/1427804').install();
 
 import { BibleBook, BibleEngine, IBibleOutputRich } from '@bible-engine/core';
 import Database from './Database';
