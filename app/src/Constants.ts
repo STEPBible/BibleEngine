@@ -34,6 +34,7 @@ export enum FontFamily {
 }
 
 export enum AsyncStorageKey {
+  CACHED_BOOK_LIST = 'cachedBookList',
   CACHED_CHAPTER_OUTPUT = 'cachedChapterOutput',
   CACHED_CHAPTER_NUM = 'cachedChapterNum',
   CACHED_OSIS_BOOK_NAME = 'cachedBookName'
