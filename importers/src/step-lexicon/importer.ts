@@ -15,7 +15,7 @@ const dirProjectRoot = resolve(__dirname + '/../..');
 
 const sqlBible = new BibleEngine({
     type: 'sqlite',
-    database: `${dirProjectRoot}/output/bible.db`
+    database: `${dirProjectRoot}/output/bibles.db`
 });
 
 enum LexiconEntryType {
