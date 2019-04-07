@@ -1,6 +1,7 @@
 import normalizeText from './normalizeText';
 
 export const DEBUG = false;
+export const USE_CACHE = true;
 
 export enum Margin {
   EXTRA_SMALL = normalizeText(5),

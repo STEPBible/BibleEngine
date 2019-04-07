@@ -9,7 +9,7 @@ import ReadingView from './ReadingView';
 import SideMenu from './SideMenu';
 import BookMenu from './BookMenu';
 import SearchPage from './SearchPage';
-import { AsyncStorageKey } from './Constants';
+import { AsyncStorageKey, USE_CACHE } from './Constants';
 import LoadingScreen from './LoadingScreen';
 
 const bibleDatabaseModule = require('../assets/bible.db');
@@ -163,33 +163,35 @@ export default class App extends React.PureComponent<Props, State> {
       synchronize: false
     });
     this.updateLoadingMessage('Finding your place...');
-    let [
-      cachedBookList,
-      chapterOutput,
-      chapterNum,
-      osisBookName
-    ] = await store.get([
-      AsyncStorageKey.CACHED_BOOK_LIST,
-      AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
-      AsyncStorageKey.CACHED_CHAPTER_NUM,
-      AsyncStorageKey.CACHED_OSIS_BOOK_NAME
-    ]);
-    if (!cachedBookList) {
+    let bookList = null;
+    let chapterOutput = null;
+    let chapterNum = '';
+    let osisBookName = '';
+    const start = new Date();
+    if (USE_CACHE) {
+      [bookList, chapterOutput, chapterNum, osisBookName] = await store.get([
+        AsyncStorageKey.CACHED_BOOK_LIST,
+        AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
+        AsyncStorageKey.CACHED_CHAPTER_NUM,
+        AsyncStorageKey.CACHED_OSIS_BOOK_NAME
+      ]);
+    }
+    if (!bookList) {
       this.updateLoadingMessage('Loading books...');
-      cachedBookList = await this.sqlBible.getBooksForVersion(1);
-      cachedBookList = cachedBookList.map((book: BibleBook) => ({
+      bookList = await this.sqlBible.getBooksForVersion(1);
+      bookList = bookList.map((book: BibleBook) => ({
         numChapters: book.chaptersCount.length,
         osisId: book.osisId,
         title: book.title
       }));
-      store.save(AsyncStorageKey.CACHED_BOOK_LIST, cachedBookList);
+      store.save(AsyncStorageKey.CACHED_BOOK_LIST, bookList);
     }
     if (!osisBookName) {
       osisBookName = 'Gen';
       store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, osisBookName);
     }
     if (!chapterNum) {
-      chapterNum = 1;
+      chapterNum = '1';
       store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum);
     }
     if (!chapterOutput) {
@@ -198,21 +200,23 @@ export default class App extends React.PureComponent<Props, State> {
         {
           bookOsisId: osisBookName,
           versionUid: 'ESV',
-          versionChapterNum: chapterNum
+          versionChapterNum: Number(chapterNum)
         },
         true
       );
       store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterOutput);
     }
     this.updateLoadingMessage('Finding book title...');
-    const currentBookFullTitle = cachedBookList.filter(
+    const currentBookFullTitle = bookList.filter(
       book => book.osisId === osisBookName
     )[0].title;
     this.updateLoadingMessage('Setting final state...');
+    const end = new Date() - start;
+    console.log('Execution time: ', end, 'ms');
     this.setState({
       ...this.state,
       currentBookFullTitle,
-      books: cachedBookList,
+      books: bookList,
       content: chapterOutput.content.contents,
       loadingMessage: 'done!',
       isLeftMenuOpen: true,
