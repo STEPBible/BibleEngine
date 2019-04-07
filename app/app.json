@@ -24,23 +24,17 @@
       "buildNumber": "2"
     },
     "android": {
-      "package": "com.tyndale.stepbible"
+      "package": "com.tyndale.stepbible",
+      "config": {
+        "fabric": {
+          "apiKey": "4177638a1668874c4bff059ca4d1a6b72d2b7129",
+          "buildSecret": "eb2a96a85da5e453cff3bd9bfb901b476eeb1c7781ceeee9147ba38639fce0c0"
+        }
+      }
     },
     "packagerOpts": {
       "sourceExts": ["ts", "tsx"],
       "assetExts": ["db", "mp3", "ttf", "png"]
-    },
-    "hooks": {
-      "postPublish": [
-        {
-          "file": "sentry-expo/upload-sourcemaps",
-          "config": {
-            "organization": "tyndale-house-uk",
-            "project": "step-bible",
-            "authToken": "af85f774dc0541708fb2fc1ef188fdaeb93305d255284b48a97bd99635b1fd52"
-          }
-        }
-      ]
     },
     "githubUrl": "https://github.com/tyndale/BibleEngine"
   }
