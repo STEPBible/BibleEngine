@@ -205,11 +205,9 @@ export default class App extends React.PureComponent<Props, State> {
       );
       store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterOutput);
     }
-    this.updateLoadingMessage('Finding book title...');
     const currentBookFullTitle = bookList.filter(
       book => book.osisId === osisBookName
     )[0].title;
-    this.updateLoadingMessage('Setting final state...');
     const end = new Date() - start;
     console.log('Execution time: ', end, 'ms');
     this.setState({
