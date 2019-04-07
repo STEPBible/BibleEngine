@@ -147,6 +147,7 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
           data={[this.bookAndChapterTitle(), ...this.props.content]}
           showsVerticalScrollIndicator={false}
           renderItem={this.renderFlatlistItem}
+          ListFooterComponent={<View style={{ height: Margin.LARGE }} />}
           keyExtractor={(item, index) => index.toString()}
         />
       </View>
