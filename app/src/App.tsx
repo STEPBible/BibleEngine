@@ -49,8 +49,7 @@ export default class App extends React.PureComponent<Props, State> {
     loadingMessage: ''
   };
 
-  constructor(props: Props) {
-    super(props);
+  componentWillMount() {
     this.loadResourcesAsync();
   }
 
