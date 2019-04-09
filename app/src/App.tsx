@@ -217,6 +217,7 @@ export default class App extends React.PureComponent<Props, State> {
       content: chapterOutput.content.contents,
       loadingMessage: 'done!',
       isLeftMenuOpen: true,
+      currentChapterNum: chapterNum,
       isReady: true
     });
   };
