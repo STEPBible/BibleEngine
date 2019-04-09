@@ -80,7 +80,7 @@ export default class App extends React.PureComponent<Props, State> {
           isOpen={this.state.isRightMenuOpen}
           menuPosition="right"
           bounceBackOnOverdraw={false}
-          gesturesAreEnabled={this.rightMenuGesturesAreEnabled}
+          gesturesAreEnabled={() => false}
           openMenuOffset={DEVICE_WIDTH * 0.9}
           edgeHitWidth={DEVICE_WIDTH}
           ref={ref => (this.rightMenuRef = ref)}
