@@ -1,5 +1,12 @@
 import React, { Fragment } from 'react';
-import { Text, View, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import {
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  FlatList
+} from 'react-native';
 
 import {
   IBibleContent,
@@ -12,20 +19,16 @@ import { Margin, FontSize, FontFamily, getDebugStyles } from './Constants';
 import CrossReference from './CrossReference';
 import Footnote from './Footnote';
 
-interface State {
-  content: IBibleContent[];
-}
-
 interface Props {
   chapterNum: number;
   bookName: string;
-  content: IBibleOutputRich[];
+  content: IBibleContent[];
   sqlBible: BibleEngine;
 }
 
-export default class ReadingView extends React.PureComponent<Props, State> {
+export default class ReadingView extends React.PureComponent<Props, {}> {
   renderItem = (content: IBibleContent): any => {
-    if (content.type === 'phrase') {
+    if (!('type' in content) || content.type === 'phrase') {
       return this.renderPhrase(content);
     }
     const children: IBibleContent[] = content.contents;
@@ -104,8 +107,8 @@ export default class ReadingView extends React.PureComponent<Props, State> {
       return (
         <Fragment>
           {this.renderFootnote(content)}
-          {this.renderCrossReference(content)}
           {this.renderVerseNumber(content)}
+          {this.renderCrossReference(content)}
           <StrongsWord
             phrase={content.content}
             strongs={content.strongs}
@@ -117,8 +120,8 @@ export default class ReadingView extends React.PureComponent<Props, State> {
     return (
       <Fragment>
         {this.renderFootnote(content)}
-        {this.renderCrossReference(content)}
         {this.renderVerseNumber(content)}
+        {this.renderCrossReference(content)}
         <View style={styles.phrase}>
           <Text style={styles.phraseText}>{content.content}</Text>
         </View>
@@ -126,19 +129,27 @@ export default class ReadingView extends React.PureComponent<Props, State> {
     );
   };
 
+  renderFlatlistItem = ({ item: content }: { item: IBibleContent }) => {
+    if ('overallTitle' in content) {
+      return <Text style={styles.chapterHeader}>{content.overallTitle}</Text>;
+    }
+    return this.renderItem(content);
+  };
+
+  bookAndChapterTitle = () => ({
+    overallTitle: `${this.props.bookName} ${this.props.chapterNum}`
+  });
+
   render() {
     return (
       <View style={styles.background}>
-        <ScrollView bounces={true} showsVerticalScrollIndicator={false}>
-          <Text style={styles.chapterHeader}>
-            {`${this.props.bookName} ${this.props.chapterNum}`}
-          </Text>
-          {this.props.content
-            ? this.props.content.map((element: IBibleContent) =>
-                this.renderItem(element)
-              )
-            : null}
-        </ScrollView>
+        <FlatList
+          data={[this.bookAndChapterTitle(), ...this.props.content]}
+          showsVerticalScrollIndicator={false}
+          renderItem={this.renderFlatlistItem}
+          ListFooterComponent={<View style={{ height: Margin.LARGE }} />}
+          keyExtractor={(item, index) => index.toString()}
+        />
       </View>
     );
   }

@@ -9217,6 +9217,20 @@ react-native-gesture-handler@~1.0.14:
     invariant "^2.2.2"
     prop-types "^15.5.10"
 
+react-native-indicators@^0.13.0:
+  version "0.13.0"
+  resolved "https://registry.yarnpkg.com/react-native-indicators/-/react-native-indicators-0.13.0.tgz#001824bba194b1ca6e654d903beaf0168d4e6ac8"
+  integrity sha1-ABgku6GUscpuZU2QO+rwFo1Oasg=
+  dependencies:
+    prop-types "^15.5.10"
+
+react-native-loading-placeholder@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/react-native-loading-placeholder/-/react-native-loading-placeholder-0.0.6.tgz#d187c3f88376ce3f2151b97feb9d5fb615250ebe"
+  integrity sha512-GPPqnZjyZ8lKfL+QqxcjN/paNsVc7bxAy5WLGVU0YESRCR4SISz8gQkkNtHOCWuMNaEfLrJokVtaL2vDkRGbrQ==
+  dependencies:
+    prop-types "^15.5.10"
+
 react-native-maps@expo/react-native-maps#v0.22.1-exp.0:
   version "0.22.1"
   resolved "https://codeload.github.com/expo/react-native-maps/tar.gz/e6f98ff7272e5d0a7fe974a41f28593af2d77bb2"

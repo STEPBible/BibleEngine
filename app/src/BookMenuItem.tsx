@@ -69,7 +69,7 @@ export default class BookMenuItem extends React.PureComponent<Props, State> {
   });
 
   render() {
-    const numChapters = this.props.book.chaptersCount.length + 1;
+    const numChapters = this.props.book.numChapters;
     const chapterNums = Array.apply(null, { length: numChapters })
       .map(Number.call, Number)
       .slice(1);

@@ -1,21 +1,23 @@
 import * as Expo from 'expo';
 import * as React from 'react';
-import { Dimensions, StatusBar, View, Keyboard } from 'react-native';
-
-import { BibleBook, BibleEngine, IBibleOutputRich } from '@bible-engine/core';
+import { Dimensions, StatusBar, Keyboard } from 'react-native';
+import * as store from 'react-native-simple-store';
+import { IBibleBook, BibleEngine, IBibleOutputRich } from '@bible-engine/core';
 import Database from './Database';
 import Fonts from './Fonts';
 import ReadingView from './ReadingView';
 import SideMenu from './SideMenu';
 import BookMenu from './BookMenu';
 import SearchPage from './SearchPage';
+import { AsyncStorageKey, USE_CACHE } from './Constants';
+import LoadingScreen from './LoadingScreen';
 
 const bibleDatabaseModule = require('../assets/bible.db');
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
 interface State {
-  books: BibleBook[];
+  books: IBibleBook[];
   content: IBibleOutputRich[];
   currentBookOsisId: string;
   currentBookFullTitle: string;
@@ -24,9 +26,12 @@ interface State {
   isLeftMenuOpen: boolean;
   isReady: boolean;
   isRightMenuOpen: boolean;
+  loadingMessage: string;
 }
 
-export default class App extends React.PureComponent<{}, State> {
+interface Props {}
+
+export default class App extends React.PureComponent<Props, State> {
   leftMenuRef: any;
   rightMenuRef: any;
   sqlBible: BibleEngine;
@@ -40,20 +45,18 @@ export default class App extends React.PureComponent<{}, State> {
     currentVersionUid: 'ESV',
     isLeftMenuOpen: false,
     isReady: false,
-    isRightMenuOpen: false
+    isRightMenuOpen: false,
+    loadingMessage: ''
   };
+
+  componentWillMount() {
+    this.loadResourcesAsync();
+  }
 
   render() {
     if (!this.state.isReady) {
-      return (
-        <Expo.AppLoading
-          startAsync={this.loadResourcesAsync}
-          onFinish={() => this.setState({ isReady: true })}
-          onError={console.warn}
-        />
-      );
+      return <LoadingScreen loadingText={this.state.loadingMessage} />;
     }
-
     return (
       <SideMenu
         menu={
@@ -111,6 +114,9 @@ export default class App extends React.PureComponent<{}, State> {
     const currentBookFullTitle = this.state.books.filter(
       book => book.osisId === bookOsisId
     )[0].title;
+    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, content);
+    store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, bookOsisId);
+    store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, versionChapterNum);
     this.setState({
       ...this.state,
       currentBookFullTitle,
@@ -136,33 +142,82 @@ export default class App extends React.PureComponent<{}, State> {
     }
   };
 
+  updateLoadingMessage = (newMessage: string) => {
+    console.log(newMessage);
+    this.setState({
+      ...this.state,
+      loadingMessage: newMessage
+    });
+  };
+
   loadResourcesAsync = async () => {
     console.disableYellowBox = true;
+    this.updateLoadingMessage('Loading fonts...');
     await Fonts.load();
+    this.updateLoadingMessage('Loading database...');
     await Database.load(bibleDatabaseModule);
     this.sqlBible = new BibleEngine({
       database: 'bibles.db',
       type: 'expo',
       synchronize: false
     });
-    await this.sqlBible.setVersion('ESV');
-    const books = await this.sqlBible.getBooksForVersion(1);
-    const currentBookFullTitle = books.filter(
-      book => book.osisId === this.state.currentBookOsisId
+    this.updateLoadingMessage('Finding your place...');
+    let bookList = null;
+    let chapterOutput = null;
+    let chapterNum = '';
+    let osisBookName = '';
+    const start = new Date();
+    if (USE_CACHE) {
+      [bookList, chapterOutput, chapterNum, osisBookName] = await store.get([
+        AsyncStorageKey.CACHED_BOOK_LIST,
+        AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
+        AsyncStorageKey.CACHED_CHAPTER_NUM,
+        AsyncStorageKey.CACHED_OSIS_BOOK_NAME
+      ]);
+    }
+    if (!bookList) {
+      this.updateLoadingMessage('Loading books...');
+      bookList = await this.sqlBible.getBooksForVersion(1);
+      bookList = bookList.map((book: BibleBook) => ({
+        numChapters: book.chaptersCount.length,
+        osisId: book.osisId,
+        title: book.title
+      }));
+      store.save(AsyncStorageKey.CACHED_BOOK_LIST, bookList);
+    }
+    if (!osisBookName) {
+      osisBookName = 'Gen';
+      store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, osisBookName);
+    }
+    if (!chapterNum) {
+      chapterNum = '1';
+      store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum);
+    }
+    if (!chapterOutput) {
+      this.updateLoadingMessage('Loading chapter...');
+      chapterOutput = await this.sqlBible.getFullDataForReferenceRange(
+        {
+          bookOsisId: osisBookName,
+          versionUid: 'ESV',
+          versionChapterNum: Number(chapterNum)
+        },
+        true
+      );
+      store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterOutput);
+    }
+    const currentBookFullTitle = bookList.filter(
+      book => book.osisId === osisBookName
     )[0].title;
-    const content = await this.sqlBible.getFullDataForReferenceRange(
-      {
-        bookOsisId: this.state.currentBookOsisId,
-        versionUid: 'ESV',
-        versionChapterNum: this.state.currentChapterNum
-      },
-      true
-    );
+    const end = new Date() - start;
+    console.log('Execution time: ', end, 'ms');
     this.setState({
       ...this.state,
-      books,
       currentBookFullTitle,
-      content: content.content.contents
+      books: bookList,
+      content: chapterOutput.content.contents,
+      loadingMessage: 'done!',
+      isLeftMenuOpen: true,
+      isReady: true
     });
   };
 

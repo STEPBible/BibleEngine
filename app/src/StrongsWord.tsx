@@ -10,7 +10,7 @@ import {
 import Popover from './Popover';
 import {
   BibleEngine,
-  DictionaryEntry,
+  IDictionaryEntry,
   DocumentElement
 } from '@bible-engine/core';
 import {
@@ -32,12 +32,11 @@ interface Props {
 
 interface State {
   popoverIsVisible: boolean;
-  definitions: DictionaryEntry[];
+  definitions: IDictionaryEntry[];
 }
 
 export default class StrongsWord extends React.Component<Props, State> {
   touchable: any;
-  sqlBible: BibleEngine;
   state = {
     popoverIsVisible: false,
     definitions: []
@@ -258,11 +257,10 @@ const styles = StyleSheet.create({
     marginRight: 7
   },
   documentPhrase: {
-    // backgroundColor: 'cyan',
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.SMALL,
-    marginBottom: 5
-    // margin: 5
+    marginBottom: 5,
+    marginRight: 5
   },
   boldDocumentPhrase: {
     // backgroundColor: 'yellow',
