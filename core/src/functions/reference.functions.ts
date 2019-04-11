@@ -68,6 +68,11 @@ export const generateEndReferenceFromRange = (
             : range.normalizedVerseNum && !range.normalizedChapterEndNum
             ? range.normalizedVerseNum
             : 999,
+        normalizedSubverseNum: range.normalizedSubverseEndNum
+            ? range.normalizedSubverseEndNum
+            : range.normalizedSubverseNum && !range.normalizedVerseEndNum
+            ? range.normalizedSubverseNum
+            : 99,
         versionId: range.versionId || 999,
         phraseNum: 99
     };
@@ -81,7 +86,7 @@ export const generateEndReferenceFromRange = (
  * @param {IBibleReference} range
  * @returns {IBibleReferenceNormalized}
  */
-export const generateNormalizedReferenceFromVersionRange = (
+export const generateNormalizedRangeFromVersionRange = (
     range: IBibleReferenceRange
 ): IBibleReferenceRangeNormalized => {
     return {

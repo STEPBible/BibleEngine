@@ -3,9 +3,11 @@ import { IBibleReference } from '.';
 export interface IV11nRule {
     sourceRef: IBibleReference;
     standardRef: IBibleReference;
-    action: 'Keep verse' | 'Merged above' | 'Renumber verse' | 'Empty verse';
+    action: 'Keep verse' | 'Merged with' | 'Renumber verse' | 'Empty verse';
     noteMarker: string;
     note: string;
-    sourceTypeId: number;
-    tests: string;
+    noteSecondary?: string;
+    noteAncientVersions?: string;
+    sourceTypeId?: number;
+    tests?: string;
 }
