@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     backgroundColor: 'gray',
     borderRadius: BORDER_RADIUS,
-    height: 45,
+    height: ifAndroid(40, 45),
     marginTop: ifIphoneX(20, -10),
     marginLeft: 10,
     marginRight: 10
