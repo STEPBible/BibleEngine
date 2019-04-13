@@ -1,12 +1,7 @@
 import React, { Fragment } from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-  FlatList
-} from 'react-native';
+import { Text, View, StyleSheet, Dimensions } from 'react-native';
+import FlatList from './FlatList';
+import { ifAndroid } from './utils';
 
 import {
   IBibleContent,
@@ -167,7 +162,7 @@ const styles = StyleSheet.create({
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
-    marginTop: Margin.EXTRA_LARGE,
+    marginTop: ifAndroid(-55, -30),
     marginBottom: Margin.LARGE,
     textAlign: 'center',
     ...getDebugStyles()

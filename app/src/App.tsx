@@ -11,6 +11,8 @@ import BookMenu from './BookMenu';
 import SearchPage from './SearchPage';
 import { AsyncStorageKey, USE_CACHE } from './Constants';
 import LoadingScreen from './LoadingScreen';
+import SearchBarProvider from './SearchBarProvider';
+import SearchBar from './SearchBar';
 
 const bibleDatabaseModule = require('../assets/bible.db');
 
@@ -73,28 +75,21 @@ export default class App extends React.PureComponent<Props, State> {
         edgeHitWidth={DEVICE_WIDTH}
         ref={ref => (this.leftMenuRef = ref)}
       >
-        <SideMenu
-          menu={
-            <SearchPage keyboardShouldBeOpen={this.state.isRightMenuOpen} />
-          }
-          isOpen={this.state.isRightMenuOpen}
-          menuPosition="right"
-          bounceBackOnOverdraw={false}
-          gesturesAreEnabled={() => false}
-          openMenuOffset={DEVICE_WIDTH * 0.9}
-          edgeHitWidth={DEVICE_WIDTH}
-          ref={ref => (this.rightMenuRef = ref)}
-          onChange={this.onSearchMenuChange}
-        >
-          <Expo.KeepAwake />
-          <StatusBar hidden={true} />
-          <ReadingView
-            chapterNum={this.state.currentChapterNum}
-            bookName={this.state.currentBookFullTitle}
-            content={this.state.content}
-            sqlBible={this.sqlBible}
-          />
-        </SideMenu>
+        <Expo.KeepAwake />
+        <StatusBar hidden={true} />
+        <SearchBarProvider>
+          {(animation: any) => (
+            <React.Fragment>
+              {<SearchBar animation={animation} />}
+              <ReadingView
+                chapterNum={this.state.currentChapterNum}
+                bookName={this.state.currentBookFullTitle}
+                content={this.state.content}
+                sqlBible={this.sqlBible}
+              />
+            </React.Fragment>
+          )}
+        </SearchBarProvider>
       </SideMenu>
     );
   }
@@ -216,7 +211,7 @@ export default class App extends React.PureComponent<Props, State> {
       books: bookList,
       content: chapterOutput.content.contents,
       loadingMessage: 'done!',
-      isLeftMenuOpen: true,
+      isLeftMenuOpen: false,
       currentChapterNum: chapterNum,
       isReady: true
     });

@@ -15,6 +15,7 @@ import * as elasticlunr from 'elasticlunr';
 import { Margin, FontSize, FontFamily } from './Constants';
 
 const DEVICE_HEIGHT = Dimensions.get('window').height;
+const DEVICE_WIDTH = Dimensions.get('window').width;
 
 interface State {
   inputText: string;
@@ -70,77 +71,83 @@ export default class SearchPage extends React.PureComponent<Props, State> {
   render() {
     return (
       <View style={styles.background}>
-        <SafeAreaView style={{ backgroundColor: 'transparent' }}>
-          <View style={styles.search__container}>
-            <SearchBar
-              placeholder="Search..."
-              onChangeText={this.updateSearch}
-              value={this.state.inputText}
-              platform={Platform.OS}
-              containerStyle={styles.search__container__input}
-              leftIconContainerStyle={styles.search__container__icon}
-              ref={search => (this.searchRef = search)}
-            />
-          </View>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {this.verseResults.map(result => (
-              <View style={styles.result}>
-                <MaterialIcons
-                  style={styles.result__icon}
-                  name="search"
-                  size={25}
-                  color="#9b9b9b"
-                />
-                <View style={styles.result__content}>
-                  <Text numberOfLines={2} style={styles.result__content__text}>
-                    {result.verseContent}
-                  </Text>
-                  <Text style={styles.result__content__reference}>
-                    {result.reference}
-                  </Text>
-                </View>
+        <View style={styles.search__container}>
+          <SearchBar
+            placeholder="Search..."
+            onChangeText={this.updateSearch}
+            value={this.state.inputText}
+            platform={'android'}
+            placeholderTextColor="#949495"
+            containerStyle={styles.search__container__input}
+            leftIconContainerStyle={styles.search__container__left_icon}
+            rightIconContainerStyle={styles.search__container__right_icon}
+            ref={search => (this.searchRef = search)}
+          />
+        </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {this.verseResults.map(result => (
+            <View style={styles.result}>
+              <MaterialIcons
+                style={styles.result__icon}
+                name="search"
+                size={25}
+                color="#9b9b9b"
+              />
+              <View style={styles.result__content}>
+                <Text numberOfLines={2} style={styles.result__content__text}>
+                  {result.verseContent}
+                </Text>
+                <Text style={styles.result__content__reference}>
+                  {result.reference}
+                </Text>
               </View>
-            ))}
-            <View style={styles.scrollViewBottomBuffer} />
-          </ScrollView>
-        </SafeAreaView>
+            </View>
+          ))}
+          <View style={styles.scrollViewBottomBuffer} />
+        </ScrollView>
       </View>
     );
   }
 }
 
 const elevation = 2;
+const BORDER_RADIUS = 8;
 
 const styles = StyleSheet.create({
   background: {
-    flex: 1,
-    backgroundColor: 'white'
+    zIndex: 1000,
+    position: 'absolute',
+    top: -95,
+    height: 58,
+    width: DEVICE_WIDTH - Margin.LARGE * 2,
+    backgroundColor: 'white',
+    marginLeft: Margin.LARGE,
+    marginRight: Margin.LARGE,
+    marginTop: Margin.EXTRA_LARGE,
+    borderRadius: BORDER_RADIUS
   },
   search__container: {
-    backgroundColor: 'transparent',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    ...Platform.select({
-      ios: {
-        shadowOpacity: 0.0015 * elevation + 0.18,
-        shadowRadius: 0.54 * elevation,
-        shadowOffset: {
-          height: 0.6 * elevation,
-          width: 0
-        }
-      },
-      android: {}
-    })
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: BORDER_RADIUS,
+    elevation,
+    shadowOpacity: 0.0015 * elevation + 0.18,
+    shadowRadius: 0.8 * elevation,
+    shadowOffset: {
+      height: 0.6 * elevation,
+      width: 0
+    }
   },
   search__container__input: {
-    backgroundColor: 'transparent'
+    borderRadius: BORDER_RADIUS,
+    backgroundColor: 'white'
   },
-  search__container__icon: {
-    ...Platform.select({
-      android: {
-        marginLeft: Margin.MEDIUM
-      }
-    })
+  search__container__left_icon: {
+    marginLeft: Margin.MEDIUM
+  },
+  search__container__right_icon: {
+    marginRight: Margin.MEDIUM
   },
   scrollViewBottomBuffer: {
     height: DEVICE_HEIGHT / 1.5
