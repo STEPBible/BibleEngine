@@ -8,8 +8,7 @@ import Fonts from './Fonts';
 import ReadingView from './ReadingView';
 import SideMenu from './SideMenu';
 import BookMenu from './BookMenu';
-import SearchPage from './SearchPage';
-import { AsyncStorageKey, USE_CACHE } from './Constants';
+import { AsyncStorageKey, Flags } from './Constants';
 import LoadingScreen from './LoadingScreen';
 import SearchBarProvider from './SearchBarProvider';
 import SearchBar from './SearchBar';
@@ -80,7 +79,13 @@ export default class App extends React.PureComponent<Props, State> {
         <SearchBarProvider>
           {(animation: any) => (
             <React.Fragment>
-              {<SearchBar toggleMenu={this.toggleMenu} animation={animation} />}
+              {Flags.SEARCH_ENABLED && (
+                <SearchBar
+                  sqlBible={this.sqlBible}
+                  toggleMenu={this.toggleMenu}
+                  animation={animation}
+                />
+              )}
               <ReadingView
                 chapterNum={this.state.currentChapterNum}
                 bookName={this.state.currentBookFullTitle}
@@ -171,7 +176,7 @@ export default class App extends React.PureComponent<Props, State> {
     let chapterNum = '';
     let osisBookName = '';
     const start = new Date();
-    if (USE_CACHE) {
+    if (Flags.USE_CACHE) {
       [bookList, chapterOutput, chapterNum, osisBookName] = await store.get([
         AsyncStorageKey.CACHED_BOOK_LIST,
         AsyncStorageKey.CACHED_CHAPTER_OUTPUT,

@@ -25,6 +25,7 @@ import {
 } from './Constants';
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
+import 'react-native-console-time-polyfill';
 
 interface VerseResult {
   reference: string;
@@ -34,6 +35,7 @@ interface VerseResult {
 interface Props {
   toggleMenu: Function;
   animation: any;
+  sqlBible: any;
 }
 interface State {
   inputText: string;
@@ -120,10 +122,7 @@ export default class SearchPage extends React.PureComponent<Props, State> {
         <ScrollView showsVerticalScrollIndicator={false}>
           {this.verseResults.map(result => (
             <TouchableHighlight
-              onPress={() => {
-                console.log(result.reference);
-                console.log(bcv.parse(result.reference));
-              }}
+              onPress={() => {}}
               underlayColor="#d4d4d4"
               style={styles.result}
             >

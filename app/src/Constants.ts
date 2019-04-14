@@ -1,7 +1,10 @@
 import normalizeText from './normalizeText';
 
-export const DEBUG = false;
-export const USE_CACHE = true;
+export const Flags = {
+  DEBUG: false,
+  USE_CACHE: true,
+  SEARCH_ENABLED: false
+};
 
 export enum Margin {
   EXTRA_SMALL = normalizeText(5),
@@ -42,7 +45,7 @@ export enum AsyncStorageKey {
 }
 
 export function getDebugStyles() {
-  if (DEBUG) {
+  if (Flags.DEBUG) {
     return {
       borderColor: randomColor(),
       borderWidth: 1

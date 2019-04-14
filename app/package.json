@@ -47,6 +47,7 @@
     "react": "16.5.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
     "react-native-collapsible": "^1.4.0",
+    "react-native-console-time-polyfill": "^1.2.1",
     "react-native-elements": "^1.1.0",
     "react-native-indicators": "^0.13.0",
     "react-native-loading-placeholder": "^0.0.6",

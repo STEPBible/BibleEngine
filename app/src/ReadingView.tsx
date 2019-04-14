@@ -10,7 +10,13 @@ import {
   IBiblePhrase
 } from '@bible-engine/core';
 import StrongsWord from './StrongsWord';
-import { Margin, FontSize, FontFamily, getDebugStyles } from './Constants';
+import {
+  Margin,
+  FontSize,
+  FontFamily,
+  getDebugStyles,
+  Flags
+} from './Constants';
 import CrossReference from './CrossReference';
 import Footnote from './Footnote';
 
@@ -162,8 +168,8 @@ const styles = StyleSheet.create({
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
-    marginTop: ifAndroid(-55, -30),
-    marginBottom: Margin.LARGE,
+    marginTop: Flags.SEARCH_ENABLED ? ifAndroid(-55, -30) : ifAndroid(-95, -70),
+    marginBottom: Flags.SEARCH_ENABLED ? Margin.LARGE : Margin.SMALL,
     textAlign: 'center',
     ...getDebugStyles()
   },
