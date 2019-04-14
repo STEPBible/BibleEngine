@@ -15,9 +15,10 @@ import {
 import {
     parsePhraseId,
     generatePhraseId,
-    generateNormalizedReferenceFromVersionRange,
+    generateNormalizedRangeFromVersionRange,
     isReferenceNormalized,
-    generateReferenceId
+    generateReferenceId,
+    generateEndReferenceFromRange
 } from './functions/reference.functions';
 import {
     generatePhraseIdSql,
@@ -672,7 +673,7 @@ export class BibleEngine {
 
                             nRef = rule.standardRef;
                             firstStandardRefId = rule.standardRefId;
-                        } else if (rule.action === 'Merged above') {
+                        } else if (rule.action === 'Merged with') {
                             if (!firstStandardRefId)
                                 throw new Error(
                                     `v11n: trying to continue a range that wasn't started`
@@ -707,11 +708,13 @@ export class BibleEngine {
                                 globalState.currentJoinToRefId < rule.standardRefId
                             )
                                 globalState.currentJoinToRefId = rule.standardRefId;
+                        } else if (rule.action === 'Keep verse') {
+                            firstStandardRefId = rule.standardRefId;
                         }
                     }
 
                     // no rule updpated the numbering
-                    if (!nRef) nRef = generateNormalizedReferenceFromVersionRange(reference);
+                    if (!nRef) nRef = generateNormalizedRangeFromVersionRange(reference);
                 }
 
                 if (
@@ -1029,25 +1032,29 @@ export class BibleEngine {
         // if reference has no data that can cause normalisation changes, return the reference
         // (-range) right away
         if (!range.versionId || !range.versionChapterNum || !range.versionVerseNum)
-            return generateNormalizedReferenceFromVersionRange(range);
+            return generateNormalizedRangeFromVersionRange(range);
 
         const rules = await this.getNormalisationRulesForRange(range);
 
         // there are no rules for this reference(-range) than can cause normalisation changes
-        if (!rules.length) return generateNormalizedReferenceFromVersionRange(range);
+        if (!rules.length) return generateNormalizedRangeFromVersionRange(range);
 
         // now we need to determine the normalized range that the given version range could
         // potentially end up in - thus we can narrow down the phrases we need to look at
-        let standardRefIdStart: number | undefined;
-        let standardRefStart: IBibleReferenceNormalized | undefined;
-        let standardRefIdEnd: number | undefined;
-        let standardRefEnd: IBibleReferenceNormalized | undefined;
+        let standardRefStart: IBibleReferenceNormalized = generateNormalizedRangeFromVersionRange(
+            range
+        );
+        let standardRefEnd: IBibleReferenceNormalized = generateEndReferenceFromRange(
+            generateNormalizedRangeFromVersionRange(range)
+        );
+        let standardRefIdStart: number = generateReferenceId(standardRefStart);
+        let standardRefIdEnd: number = generateReferenceId(standardRefEnd);
         for (const rule of rules) {
-            if (!standardRefIdStart || standardRefIdStart > rule.standardRefId) {
+            if (standardRefIdStart > rule.standardRefId) {
                 standardRefIdStart = rule.standardRefId;
                 standardRefStart = rule.standardRef;
             }
-            if (!standardRefIdEnd || standardRefIdEnd < rule.standardRefId) {
+            if (standardRefIdEnd < rule.standardRefId) {
                 standardRefIdEnd = rule.standardRefId;
                 standardRefEnd = rule.standardRef;
             }
@@ -1056,12 +1063,12 @@ export class BibleEngine {
             isNormalized: true,
             versionId: range.versionId,
             bookOsisId: range.bookOsisId,
-            normalizedChapterNum: standardRefStart!.normalizedChapterNum,
-            normalizedVerseNum: standardRefStart!.normalizedVerseNum,
-            normalizedSubverseNum: standardRefStart!.normalizedSubverseNum,
-            normalizedChapterEndNum: standardRefEnd!.normalizedChapterNum,
-            normalizedVerseEndNum: standardRefEnd!.normalizedVerseNum,
-            normalizedSubverseEndNum: standardRefEnd!.normalizedSubverseNum
+            normalizedChapterNum: standardRefStart.normalizedChapterNum,
+            normalizedVerseNum: standardRefStart.normalizedVerseNum,
+            normalizedSubverseNum: standardRefStart.normalizedSubverseNum,
+            normalizedChapterEndNum: standardRefEnd.normalizedChapterNum,
+            normalizedVerseEndNum: standardRefEnd.normalizedVerseNum,
+            normalizedSubverseEndNum: standardRefEnd.normalizedSubverseNum
         };
 
         if (!this.pDB) throw new NoDbConnectionError();
@@ -1142,7 +1149,7 @@ export class BibleEngine {
         return db.find(V11nRuleEntity, {
             where: {
                 sourceRefId: Raw(col =>
-                    generateReferenceIdSql(generateNormalizedReferenceFromVersionRange(range), col)
+                    generateReferenceIdSql(generateNormalizedRangeFromVersionRange(range), col)
                 )
             },
             order: { id: 'ASC' }

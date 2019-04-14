@@ -140,6 +140,7 @@ export const generateBibleDocument = (
     };
 
     let activeGroup: BibleContentGeneratorContainer = rootGroup;
+    let lastPhrase: IBibleContentGeneratorPhrase | undefined;
 
     const currentNumbering: {
         normalizedChapter: number;
@@ -570,8 +571,16 @@ export const generateBibleDocument = (
             }
         }
 
+        if (outputPhrase.skipSpace === 'before') {
+            delete outputPhrase.skipSpace;
+            if (lastPhrase) {
+                lastPhrase.skipSpace = 'after';
+            }
+        }
+
         // finally we can add our phrase to the data structure
         activeGroup.contents[activeGroup.contents.length] = outputPhrase;
+        lastPhrase = outputPhrase;
     }
 
     return rootGroup;
