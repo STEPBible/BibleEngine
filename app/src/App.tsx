@@ -80,7 +80,7 @@ export default class App extends React.PureComponent<Props, State> {
         <SearchBarProvider>
           {(animation: any) => (
             <React.Fragment>
-              {<SearchBar animation={animation} />}
+              {<SearchBar toggleMenu={this.toggleMenu} animation={animation} />}
               <ReadingView
                 chapterNum={this.state.currentChapterNum}
                 bookName={this.state.currentBookFullTitle}
@@ -142,6 +142,15 @@ export default class App extends React.PureComponent<Props, State> {
     this.setState({
       ...this.state,
       loadingMessage: newMessage
+    });
+  };
+
+  toggleMenu = () => {
+    console.log('openMenu');
+    this.leftMenuRef.openMenu(!this.state.isLeftMenuOpen);
+    this.setState({
+      ...this.state,
+      isLeftMenuOpen: !this.state.isLeftMenuOpen
     });
   };
 
@@ -222,12 +231,5 @@ export default class App extends React.PureComponent<Props, State> {
       return true;
     }
     return !this.rightMenuRef.isOpen;
-  };
-
-  rightMenuGesturesAreEnabled = () => {
-    if (!this.leftMenuRef) {
-      return true;
-    }
-    return !this.leftMenuRef.isOpen;
   };
 }
