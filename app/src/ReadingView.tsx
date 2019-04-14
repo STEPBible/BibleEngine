@@ -2,13 +2,13 @@ import React, { Fragment } from 'react';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';
 import FlatList from './FlatList';
 import { ifAndroid } from './utils';
+import Sentry from 'sentry-expo';
+Sentry.enableInExpoDevelopment = true;
+Sentry.config(
+  'https://a0758a0dd01040728b6b7b0a3747d7f8@sentry.io/1427804'
+).install();
 
-import {
-  IBibleContent,
-  IBibleOutputRich,
-  BibleEngine,
-  IBiblePhrase
-} from '@bible-engine/core';
+import { IBibleContent, BibleEngine, IBiblePhrase } from '@bible-engine/core';
 import StrongsWord from './StrongsWord';
 import {
   Margin,
