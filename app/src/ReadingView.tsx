@@ -1,21 +1,22 @@
 import React, { Fragment } from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-  FlatList
-} from 'react-native';
+import { Text, View, StyleSheet, Dimensions } from 'react-native';
+import FlatList from './FlatList';
+import { ifAndroid } from './utils';
+import Sentry from 'sentry-expo';
+Sentry.enableInExpoDevelopment = true;
+Sentry.config(
+  'https://a0758a0dd01040728b6b7b0a3747d7f8@sentry.io/1427804'
+).install();
 
-import {
-  IBibleContent,
-  IBibleOutputRich,
-  BibleEngine,
-  IBiblePhrase
-} from '@bible-engine/core';
+import { IBibleContent, BibleEngine, IBiblePhrase } from '@bible-engine/core';
 import StrongsWord from './StrongsWord';
-import { Margin, FontSize, FontFamily, getDebugStyles } from './Constants';
+import {
+  Margin,
+  FontSize,
+  FontFamily,
+  getDebugStyles,
+  Flags
+} from './Constants';
 import CrossReference from './CrossReference';
 import Footnote from './Footnote';
 
@@ -167,8 +168,8 @@ const styles = StyleSheet.create({
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
-    marginTop: Margin.EXTRA_LARGE,
-    marginBottom: Margin.LARGE,
+    marginTop: Flags.SEARCH_ENABLED ? ifAndroid(-55, -30) : ifAndroid(-95, -70),
+    marginBottom: Flags.SEARCH_ENABLED ? Margin.LARGE : Margin.SMALL,
     textAlign: 'center',
     ...getDebugStyles()
   },
