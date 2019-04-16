@@ -60,7 +60,7 @@ import {
 } from './models';
 import { IBibleEngineOutput } from './models/BibleOutput';
 
-class NoDbConnectionError extends Error {
+export class NoDbConnectionError extends Error {
     constructor() {
         super('calling a method that expects a DB connection to be set in BibleEngine');
         this.name = 'NoDbConnectionError';
@@ -109,6 +109,13 @@ export class BibleEngine {
     ) {
         if (!this.pDB) throw new NoDbConnectionError();
 
+        // mark the book as importing (and save missing book meta-data)
+        const bookEntity = await this.addBook({
+            ...bookInput.book,
+            versionId,
+            dataLocation: 'importing'
+        });
+
         const contentHasNormalizedNumbers = bookInput.contentHasNormalizedNumbers || false;
 
         // if we have pre-generated normalized numbers as well as chapter counts we don't need to
@@ -121,10 +128,11 @@ export class BibleEngine {
                 bookInput.book.chaptersCount.push(verses.size);
             }
         }
-        const bookEntity = await this.addBook({ ...bookInput.book, versionId, dataLocation: 'db' });
+
+        let pBookImport: ReturnType<typeof BibleEngine.prototype.addBibleBookContent>;
 
         if (entityManager)
-            return this.addBibleBookContent(
+            pBookImport = this.addBibleBookContent(
                 entityManager,
                 bookInput.contents,
                 bookEntity,
@@ -132,25 +140,29 @@ export class BibleEngine {
                 undefined,
                 undefined,
                 contentHasNormalizedNumbers
-            ).catch(e => {
-                console.error('Aborting book import: ' + e);
-            });
+            );
+        else
+            pBookImport = this.pDB.then(async entityManager =>
+                entityManager.transaction(transactionEntityManger => {
+                    return this.addBibleBookContent(
+                        transactionEntityManger,
+                        bookInput.contents,
+                        bookEntity,
+                        textData,
+                        undefined,
+                        undefined,
+                        contentHasNormalizedNumbers
+                    );
+                })
+            );
 
-        return this.pDB.then(async entityManager =>
-            entityManager.transaction(transactionEntityManger => {
-                return this.addBibleBookContent(
-                    transactionEntityManger,
-                    bookInput.contents,
-                    bookEntity,
-                    textData,
-                    undefined,
-                    undefined,
-                    contentHasNormalizedNumbers
-                ).catch(e => {
-                    console.error('Aborting book import: ' + e);
-                });
-            })
-        );
+        // wait for all data to be saved
+        const bookPhraseRange = await pBookImport;
+
+        // mark the book as completely imported
+        await this.addBook({ ...bookEntity, dataLocation: 'db' });
+
+        return bookPhraseRange;
     }
 
     async addDictionaryEntry(dictionaryEntry: IDictionaryEntry) {
@@ -191,6 +203,14 @@ export class BibleEngine {
             .getRawMany();
         book.chaptersCount = metaData.map(chapterMetaDb => chapterMetaDb.numVerses);
         return db.save(book);
+    }
+
+    async getBookForVersionReference({ versionId, bookOsisId }: IBibleReferenceVersion) {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return db.findOne(BibleBookEntity, {
+            where: { osisId: bookOsisId, versionId }
+        });
     }
 
     async getBooksForVersion(versionId: number) {
@@ -926,6 +946,8 @@ export class BibleEngine {
 
         if (localState.recursionLevel === 0) {
             // we are at the end of the root method => persist everything
+
+            // RADAR: check performance of higher chunkSize
             const chunkSize = 100;
 
             // await db.save(globalState.phraseStack, {
@@ -975,7 +997,9 @@ export class BibleEngine {
 
             // since there are not that many sections, we use the save method here, taking advantage
             // of the automatic relations handling (since sections can have notes)
-            await db.save(globalState.sectionStack);
+            await db.save(globalState.sectionStack, {
+                chunk: Math.ceil(globalState.sectionStack.length / chunkSize)
+            });
             // for (let index = 0; index < globalState.sectionStack.length; index += chunkSize) {
             //     db.createQueryBuilder()
             //         .insert()
@@ -1013,14 +1037,6 @@ export class BibleEngine {
                 const error = await response.json();
                 throw new BibleEngineRemoteError(error.message);
             }
-        });
-    }
-
-    private async getBookForVersionReference({ versionId, bookOsisId }: IBibleReferenceVersion) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return db.findOne(BibleBookEntity, {
-            where: { osisId: bookOsisId, versionId }
         });
     }
 

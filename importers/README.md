@@ -32,16 +32,19 @@ creator.createDatabase();
 ```typescript
 import { BeImportFileCreator } from '@bible-engine/importers';
 
-const creator = new BeImportFileCreator({
-    type: 'mysql',
-    host: 'localhost',
-    port: 3306,
-    username: 'bibleengine',
-    password: 'bibleengine',
-    database: 'bibleengine'
-});
+const creator = new BeImportFileCreator(
+    {
+        type: 'mysql',
+        host: 'localhost',
+        port: 3306,
+        username: 'bibleengine',
+        password: 'bibleengine',
+        database: 'bibleengine'
+    },
+    './preload/bibles'
+);
 
-await creator.createAllVersions('./preload/bibles');
+await creator.createAllVersions();
 ```
 
 ## Import a BibleEngine file

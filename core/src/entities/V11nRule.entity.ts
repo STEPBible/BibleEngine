@@ -114,14 +114,18 @@ export class V11nRuleEntity implements IV11nRule {
     async prepare() {
         // we think of reference ids to always be normalized. in this special case we encode version
         // numbers in it, so we need to do some manual object conversion
-        this.sourceRefId = generateReferenceId(
-            generateNormalizedRangeFromVersionRange(this.sourceRef)
-        );
-        this.standardRefId = generateReferenceId(this.standardRef);
-        let newActionId: number | undefined;
-        for (const [actionId, action] of V11nRuleEntity.actionTypes)
-            if (action === this.action) newActionId = actionId;
-        if (!newActionId) throw new Error(`invalid action ${this.action}`);
-        this.actionId = newActionId;
+        if (this.sourceRef)
+            this.sourceRefId = generateReferenceId(
+                generateNormalizedRangeFromVersionRange(this.sourceRef)
+            );
+        if (this.standardRef) this.standardRefId = generateReferenceId(this.standardRef);
+
+        if (this.action) {
+            let newActionId: number | undefined;
+            for (const [actionId, action] of V11nRuleEntity.actionTypes)
+                if (action === this.action) newActionId = actionId;
+            if (!newActionId) throw new Error(`invalid action ${this.action}`);
+            this.actionId = newActionId;
+        }
     }
 }

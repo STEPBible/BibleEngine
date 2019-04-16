@@ -1,6 +1,13 @@
 import { ConnectionOptions } from 'typeorm';
 import * as archiver from 'archiver';
-import { BibleEngine, IBibleBook, IBibleVersion } from '@bible-engine/core';
+import {
+    BibleEngine,
+    IBibleBook,
+    IBibleVersion,
+    NoDbConnectionError,
+    V11nRuleEntity,
+    IV11nRule
+} from '@bible-engine/core';
 import { writeFileSync, createWriteStream } from 'fs';
 import { ensureDirSync } from 'fs-extra';
 import { sync as rmDirRecSync } from 'rimraf';
@@ -8,12 +15,13 @@ import { sync as rmDirRecSync } from 'rimraf';
 export class BeImportFileCreator {
     private bibleEngine: BibleEngine;
 
-    constructor(dbConfig: ConnectionOptions) {
+    constructor(dbConfig: ConnectionOptions, private destinationPath: string) {
         this.bibleEngine = new BibleEngine(dbConfig);
     }
 
-    async createAllVersions(destinationPath: string) {
+    async createAllVersions() {
         const createdVersions: { file: string; version: IBibleVersion }[] = [];
+
         for (const versionEntity of await this.bibleEngine.getVersions()) {
             createdVersions.push({
                 version: {
@@ -25,17 +33,59 @@ export class BeImportFileCreator {
                     hasStrongs: versionEntity.hasStrongs,
                     lastUpdate: versionEntity.lastUpdate
                 },
-                file: await this.createVersionFile(versionEntity.uid, destinationPath)
+                file: await this.createVersionFile(versionEntity.uid)
             });
         }
-        writeFileSync(`${destinationPath}/versions.json`, JSON.stringify(createdVersions));
+
+        writeFileSync(`${this.destinationPath}/versions.json`, JSON.stringify(createdVersions));
+        await this.createV11nFile();
+
         return createdVersions;
     }
 
-    async createVersionFile(versionUid: string, destinationPath: string) {
+    async createV11nFile() {
+        if (!this.bibleEngine.pDB) throw new NoDbConnectionError();
+        const db = await this.bibleEngine.pDB;
+
+        const v11nRules = await db
+            .createQueryBuilder(V11nRuleEntity, 'v11n')
+            .select('v11n.*')
+            .getRawMany()
+            .then((_v11nRules: IV11nRule[]) =>
+                _v11nRules.map(v11nRule => {
+                    const v11nRuleStripped: IV11nRule = {
+                        sourceRefId: v11nRule.sourceRefId,
+                        standardRefId: v11nRule.standardRefId,
+                        actionId: v11nRule.actionId,
+                        note: v11nRule.note,
+                        noteMarker: v11nRule.noteMarker
+                    };
+                    if (v11nRule.sourceTypeId)
+                        v11nRuleStripped.sourceTypeId = v11nRule.sourceTypeId;
+                    if (v11nRule.noteAncientVersions)
+                        v11nRuleStripped.noteAncientVersions = v11nRule.noteAncientVersions;
+                    if (v11nRule.noteSecondary)
+                        v11nRuleStripped.noteSecondary = v11nRule.noteSecondary;
+                    if (v11nRule.tests) v11nRuleStripped.tests = v11nRule.tests;
+                    return v11nRuleStripped;
+                })
+            );
+        const filename = `${this.destinationPath}/v11n-rules.json`;
+
+        writeFileSync(
+            filename,
+            // deflate(
+            JSON.stringify(v11nRules)
+            // , { to: 'string' })
+        );
+
+        return filename;
+    }
+
+    async createVersionFile(versionUid: string) {
         const versionData = await this.bibleEngine.getVersionFullData(versionUid);
-        const targetDir = destinationPath + '/' + versionData.version.uid;
-        const targetFile = `${destinationPath}/${versionData.version.uid}.bef`;
+        const targetDir = this.destinationPath + '/' + versionData.version.uid;
+        const targetFile = `${this.destinationPath}/${versionData.version.uid}.bef`;
 
         const p = new Promise<string>((pResolve, pReject) => {
             // create version directory

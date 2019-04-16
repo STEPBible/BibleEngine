@@ -26,8 +26,8 @@ export class BibleBookEntity implements IBibleBookEntity {
 
     introduction?: DocumentRoot;
 
-    @Column()
-    type: 'ot' | 'nt' | 'ap';
+    @Column({ type: 'varchar' })
+    type: IBibleBookEntity['type'];
 
     @Column({ type: 'text' })
     chaptersMetaJson: string;
@@ -35,7 +35,7 @@ export class BibleBookEntity implements IBibleBookEntity {
     chaptersCount: number[];
 
     @Column({ type: 'varchar' })
-    dataLocation: 'db' | 'file' | 'remote';
+    dataLocation: IBibleBookEntity['dataLocation'];
 
     constructor(initializer: IBibleBookEntity) {
         Object.assign(this, initializer);

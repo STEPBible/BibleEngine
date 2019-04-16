@@ -9,7 +9,7 @@ export interface IBibleBook {
     longTitle?: string;
     chaptersCount?: number[];
     introduction?: DocumentRoot;
-    dataLocation?: 'db' | 'file' | 'remote';
+    dataLocation?: 'db' | 'importing' | 'file' | 'remote';
 }
 
 export interface IBibleBookEntity extends IBibleBook {

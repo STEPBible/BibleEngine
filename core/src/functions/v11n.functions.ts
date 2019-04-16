@@ -877,7 +877,7 @@ export const getOsisIdFromBookGenericId = (bookGenericId: number) => {
     let osisId: string;
     if (bookGenericId <= 39) osisId = OT_BOOKS[bookGenericId - 1];
     else if (bookGenericId <= 66) osisId = NT_BOOKS[bookGenericId - OT_BOOKS.length - 1];
-    else osisId = AP_BOOKS[bookGenericId - 1];
+    else osisId = AP_BOOKS[bookGenericId - 70];
 
     // safeguard in case this file becomes inconsistent / corrupted
     if (bookGenericId !== getBookGenericIdFromOsisId(osisId))

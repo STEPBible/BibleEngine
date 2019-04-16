@@ -6,9 +6,16 @@ import { BibleEngineImporter } from '../Importer.interface';
 
 const replaceNoteVars = (note: string) => {
     if (!note) return undefined;
-    return note.replace(/%(.*)% (.*)/, (_, text: string, ref: string) => {
+    return note.replace(/%(.*)%(.*)/, (_, text: string, ref: string) => {
         for (const phraseEntry of V11nRuleEntity.notePhrases.entries()) {
-            if (phraseEntry[1].replace(' REF', '') === text) return `%${phraseEntry[0]}% <${ref}>`;
+            if (phraseEntry[1].indexOf(text) === 0) {
+                if (!ref || ref === '.') return `%${phraseEntry[0]}%`;
+                else {
+                    const refNorm =
+                        ref.slice(-1) === '.' ? ref.slice(0, -1).trimLeft() : ref.trim();
+                    return `%${phraseEntry[0]}% <${refNorm}>`;
+                }
+            }
         }
         throw new Error(`unknown v11n note phrase ${note}`);
     });
