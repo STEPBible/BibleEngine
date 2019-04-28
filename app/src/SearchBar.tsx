@@ -67,7 +67,10 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     const refs = results.map(result => result.ref);
     this.verseResults = refs.map((ref: any) => ({
       reference: ref,
-      verseContent: this.searchIndex.documentStore.docs[ref].body
+      verseContent: this.searchIndex.documentStore.docs[ref].vc,
+      verseNum: this.searchIndex.documentStore.docs[ref].v,
+      chapterNum: this.searchIndex.documentStore.docs[ref].c,
+      bookName: this.searchIndex.documentStore.docs[ref].b
     }));
     this.setState({ inputText });
   };
