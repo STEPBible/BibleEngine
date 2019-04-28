@@ -2,7 +2,7 @@ import * as Expo from 'expo';
 import * as React from 'react';
 import { Dimensions, StatusBar, Keyboard } from 'react-native';
 import * as store from 'react-native-simple-store';
-import { IBibleBook, BibleEngine, IBibleOutputRich } from '@bible-engine/core';
+import { IBibleBook, BibleEngine, IBibleContent } from '@bible-engine/core';
 import Database from './Database';
 import Fonts from './Fonts';
 import ReadingView from './ReadingView';
@@ -19,7 +19,7 @@ const DEVICE_WIDTH = Dimensions.get('window').width;
 
 interface State {
   books: IBibleBook[];
-  content: IBibleOutputRich[];
+  content: IBibleContent[];
   currentBookOsisId: string;
   currentBookFullTitle: string;
   currentChapterNum: number;
