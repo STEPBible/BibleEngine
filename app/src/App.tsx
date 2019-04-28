@@ -13,7 +13,7 @@ import LoadingScreen from './LoadingScreen';
 import SearchBarProvider from './SearchBarProvider';
 import SearchBar from './SearchBar';
 
-const bibleDatabaseModule = require('../assets/bible.db');
+const bibleDatabaseModule = require('../assets/bibles.db');
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 
