@@ -63,7 +63,7 @@ export default class SearchPage extends React.PureComponent<Props, State> {
   }
 
   updateSearch = (inputText: string) => {
-    const results = this.lunrSearchEngine.search(inputText, {}).slice(0, 20);
+    const results = this.lunrSearchEngine.search(inputText, {});
     const refs = results.map(result => result.ref);
     this.verseResults = refs.map((ref: any) => ({
       reference: ref,
