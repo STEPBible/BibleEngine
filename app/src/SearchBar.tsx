@@ -126,9 +126,9 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     <TouchableHighlight
       onPress={() => {}}
       underlayColor="#d4d4d4"
-      style={styles.result}
     >
       {this.renderSearchResultContent(item)}
+      <View style={styles.result}>{this.renderSearchResultContent(item)}</View>
     </TouchableHighlight>
   );
 
@@ -136,7 +136,6 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     <TouchableNativeFeedback
       onPress={() => {}}
       background={TouchableNativeFeedback.SelectableBackground()}
-      style={styles.result}
     >
       <View style={styles.result}>{this.renderSearchResultContent(item)}</View>
     </TouchableNativeFeedback>
@@ -229,10 +228,6 @@ const styles = StyleSheet.create({
     marginTop: ifIphoneX(20, ifAndroid(-10, 12)),
     marginLeft: 10,
     marginRight: 10,
-    // position: 'absolute',
-    // top: 40,
-    // left: 0,
-    // right: 0,
     elevation,
     shadowOpacity: 0.0015 * elevation + 0.18,
     shadowRadius: 0.8 * elevation,
@@ -286,7 +281,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: Margin.MEDIUM,
-    marginTop: Margin.MEDIUM,
+    marginBottom: Margin.MEDIUM / 2,
+    marginTop: Margin.MEDIUM / 2,
     marginLeft: Margin.MEDIUM,
     borderRadius: 2,
     ...getDebugStyles()
