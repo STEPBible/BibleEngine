@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import {
   Text,
   View,
+  FlatList,
   StyleSheet,
   Dimensions,
   TouchableHighlight,
@@ -51,19 +52,20 @@ export default class CrossReference extends React.Component<Props, State> {
     return `${note.key}) ${noteText}`;
   };
 
+  renderFootnote = ({ item }) => (
+    <Text style={styles.popover__content__verse}>{this.getNoteText(item)}</Text>
+  );
+
   renderPopoverContent = () => {
     return (
       <View>
         <View style={styles.popover__content}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={styles.popover__content__verse}>
-              {this.props.notes.map(note => (
-                <Fragment>
-                  <Text>{this.getNoteText(note)}</Text>
-                </Fragment>
-              ))}
-            </Text>
-          </ScrollView>
+          <FlatList
+            data={this.props.notes}
+            showsVerticalScrollIndicator={false}
+            renderItem={this.renderFootnote}
+            keyExtractor={(item, index) => index.toString()}
+          />
         </View>
         <View style={{ flex: 2, height: 20 }} />
       </View>

@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import {
   Text,
   View,
+  FlatList,
   StyleSheet,
   Dimensions,
   TouchableHighlight,
@@ -63,31 +64,34 @@ export default class CrossReference extends React.Component<Props, State> {
     const verseContents = verses.map(phrases =>
       phrases.map(phrase => phrase.content).join(' ')
     );
-    this.setState({
-      ...this.state,
-      verseContents
-    });
+    this.state = {
+      verseContents,
+      popoverIsVisible: false
+    };
   }
+
+  renderCrossReference = ({ item, index }) => (
+    <Fragment>
+      <Text style={styles.popover__content__reference}>{item.label}</Text>
+      <Text style={styles.popover__content__verse}>
+        {this.state.verseContents.length > index
+          ? JSON.stringify(this.state.verseContents[index])
+          : ''}
+      </Text>
+    </Fragment>
+  );
 
   renderPopoverContent = () => {
     return (
       <View>
         <View style={styles.popover__content}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={styles.popover__content__header}>Related Verses</Text>
-            {this.props.crossReferences.map((crossRef, index) => (
-              <Fragment>
-                <Text style={styles.popover__content__reference}>
-                  {crossRef.label}
-                </Text>
-                <Text style={styles.popover__content__verse}>
-                  {this.state.verseContents.length > index
-                    ? JSON.stringify(this.state.verseContents[index])
-                    : ''}
-                </Text>
-              </Fragment>
-            ))}
-          </ScrollView>
+          <Text style={styles.popover__content__header}>Related Verses</Text>
+          <FlatList
+            data={this.props.crossReferences}
+            showsVerticalScrollIndicator={false}
+            renderItem={this.renderCrossReference}
+            keyExtractor={(item, index) => index.toString()}
+          />
         </View>
         <View style={{ flex: 2, height: 20 }} />
       </View>
