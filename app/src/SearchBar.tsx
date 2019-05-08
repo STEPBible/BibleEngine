@@ -13,7 +13,9 @@ import {
   Dimensions,
   ScrollView,
   Keyboard,
-  TouchableHighlight
+  TouchableHighlight,
+  FlatList,
+  TouchableNativeFeedback
 } from 'react-native';
 import * as elasticlunr from 'elasticlunr';
 import {
@@ -105,50 +107,57 @@ export default class SearchPage extends React.PureComponent<Props, State> {
       return null;
     }
     return (
-      <View
-        underlayColor="#d4d4d4"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          paddingTop: 100,
-          width: DEVICE_WIDTH,
-          height: DEVICE_HEIGHT,
-          backgroundColor: 'white',
-          zIndex: 1
-        }}
-      >
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {this.verseResults.map(result => (
-            <TouchableHighlight
-              onPress={() => {}}
-              underlayColor="#d4d4d4"
-              style={styles.result}
-            >
-              <React.Fragment>
-                <MaterialIcons
-                  style={styles.result__icon}
-                  name="search"
-                  size={25}
-                  color="#9b9b9b"
-                />
-                <View style={styles.result__content}>
-                  <Text numberOfLines={2} style={styles.result__content__text}>
-                    {result.verseContent}
-                  </Text>
-                  <Text style={styles.result__content__reference}>
-                    {result.reference}
-                  </Text>
-                </View>
-              </React.Fragment>
-            </TouchableHighlight>
-          ))}
-          <View style={styles.scrollViewBottomBuffer} />
-        </ScrollView>
+      <View underlayColor="#d4d4d4" style={styles.results}>
+        <FlatList
+          data={this.verseResults}
+          showsVerticalScrollIndicator={false}
+          renderItem={ifAndroid(
+            this.renderSearchResultAndroid,
+            this.renderSearchResultiOS
+          )}
+          ListFooterComponent={<View style={styles.scrollViewBottomBuffer} />}
+          keyExtractor={(item, index) => index.toString()}
+        />
       </View>
     );
   };
+
+  renderSearchResultiOS = ({ item }) => (
+    <TouchableHighlight
+      onPress={() => {}}
+      underlayColor="#d4d4d4"
+      style={styles.result}
+    >
+      {this.renderSearchResultContent(item)}
+    </TouchableHighlight>
+  );
+
+  renderSearchResultAndroid = ({ item }) => (
+    <TouchableNativeFeedback
+      onPress={() => {}}
+      background={TouchableNativeFeedback.SelectableBackground()}
+      style={styles.result}
+    >
+      <View style={styles.result}>{this.renderSearchResultContent(item)}</View>
+    </TouchableNativeFeedback>
+  );
+
+  renderSearchResultContent = item => (
+    <React.Fragment>
+      <MaterialIcons
+        style={styles.result__icon}
+        name="search"
+        size={25}
+        color="#9b9b9b"
+      />
+      <View style={styles.result__content}>
+        <Text numberOfLines={2} style={styles.result__content__text}>
+          {item.verseContent}
+        </Text>
+        <Text style={styles.result__content__reference}>{item.reference}</Text>
+      </View>
+    </React.Fragment>
+  );
 
   inputStyles = () => {
     const { animation } = this.props;
@@ -200,8 +209,8 @@ const BORDER_RADIUS = 8;
 
 const styles = StyleSheet.create({
   search: {
-    height: 0,
     left: 0,
+    height: 100,
     position: 'absolute',
     right: 0,
     top: 20,
@@ -212,14 +221,18 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+    height: ifAndroid(56, 60),
     backgroundColor: 'white',
-    height: ifAndroid(54, 60),
     borderRadius: BORDER_RADIUS,
     borderWidth: 1,
     borderColor: '#ddd',
     marginTop: ifIphoneX(20, ifAndroid(-10, 12)),
     marginLeft: 10,
     marginRight: 10,
+    // position: 'absolute',
+    // top: 40,
+    // left: 0,
+    // right: 0,
     elevation,
     shadowOpacity: 0.0015 * elevation + 0.18,
     shadowRadius: 0.8 * elevation,
@@ -257,6 +270,17 @@ const styles = StyleSheet.create({
   scrollViewBottomBuffer: {
     height: DEVICE_HEIGHT / 1.5,
     ...getDebugStyles()
+  },
+  results: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingTop: ifAndroid(67, ifIphoneX(100, 67)),
+    width: DEVICE_WIDTH,
+    height: DEVICE_HEIGHT,
+    backgroundColor: 'white',
+    zIndex: 1
   },
   result: {
     flexDirection: 'row',

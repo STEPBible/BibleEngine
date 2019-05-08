@@ -3,7 +3,7 @@ import normalizeText from './normalizeText';
 export const Flags = {
   DEBUG: false,
   USE_CACHE: true,
-  SEARCH_ENABLED: false
+  SEARCH_ENABLED: true
 };
 
 export enum Margin {

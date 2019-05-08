@@ -4,9 +4,6 @@ set -e
 
 cd ~/BibleEngine
 
-# Use the mobile-friendly version of TypeORM
-git checkout expo-app -- core/typeorm.ts
-
 # Build Typescript files
 yarn --cwd core build || true
 
