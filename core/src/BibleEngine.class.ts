@@ -1,4 +1,11 @@
-import { createConnection, ConnectionOptions, Raw, EntityManager } from 'typeorm';
+import {
+    createConnection,
+    ConnectionOptions,
+    Raw,
+    EntityManager,
+    Between,
+    FindConditions
+} from 'typeorm';
 
 import {
     ENTITIES,
@@ -103,18 +110,14 @@ export class BibleEngine {
     }
 
     async addBookWithContent(
-        versionId: number,
+        version: BibleVersionEntity,
         bookInput: BookWithContentForInput,
-        entityManager?: EntityManager
+        options: {
+            entityManager?: EntityManager;
+            skipStrongs?: boolean;
+        } = {}
     ) {
         if (!this.pDB) throw new NoDbConnectionError();
-
-        // mark the book as importing (and save missing book meta-data)
-        const bookEntity = await this.addBook({
-            ...bookInput.book,
-            versionId,
-            dataLocation: 'importing'
-        });
 
         const contentHasNormalizedNumbers = bookInput.contentHasNormalizedNumbers || false;
 
@@ -129,17 +132,25 @@ export class BibleEngine {
             }
         }
 
+        // mark the book as importing (and save missing book meta-data)
+        const bookEntity = await this.addBook({
+            ...bookInput.book,
+            versionId: version.id,
+            dataLocation: 'importing'
+        });
+
         let pBookImport: ReturnType<typeof BibleEngine.prototype.addBibleBookContent>;
 
-        if (entityManager)
+        if (options.entityManager)
             pBookImport = this.addBibleBookContent(
-                entityManager,
+                options.entityManager,
                 bookInput.contents,
                 bookEntity,
                 textData,
                 undefined,
                 undefined,
-                contentHasNormalizedNumbers
+                contentHasNormalizedNumbers,
+                version.hasStrongs
             );
         else
             pBookImport = this.pDB.then(async entityManager =>
@@ -151,7 +162,8 @@ export class BibleEngine {
                         textData,
                         undefined,
                         undefined,
-                        contentHasNormalizedNumbers
+                        contentHasNormalizedNumbers,
+                        version.hasStrongs
                     );
                 })
             );
@@ -194,8 +206,8 @@ export class BibleEngine {
             .createQueryBuilder(BiblePhraseEntity, 'phrase')
             .addSelect('COUNT(DISTINCT phrase.versionVerseNum)', 'numVerses')
             .where({
-                id: Raw(col =>
-                    generatePhraseIdSql({ isNormalized: true, bookOsisId: book.osisId }, col)
+                id: Raw(() =>
+                    generatePhraseIdSql({ isNormalized: true, bookOsisId: book.osisId }, 'phrase')
                 )
             })
             .orderBy('phrase.versionChapterNum')
@@ -361,7 +373,13 @@ export class BibleEngine {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         const lastPhrase = await db.find(BiblePhraseEntity, {
-            where: { id: Raw(col => generatePhraseIdSql(reference, col)) },
+            where: {
+                id: Between(
+                    generatePhraseId(reference),
+                    generatePhraseId(generateEndReferenceFromRange(reference))
+                ),
+                versionId: reference.versionId
+            },
             order: { id: 'DESC' },
             take: 1,
             select: ['id']
@@ -376,8 +394,15 @@ export class BibleEngine {
             range.isNormalized === true
                 ? <IBibleReferenceRangeNormalized>range
                 : await this.getNormalizedReferenceRange(range);
+        const where: FindConditions<BiblePhraseEntity> = {
+            id: Between(
+                generatePhraseId(normalizedRange),
+                generatePhraseId(generateEndReferenceFromRange(normalizedRange))
+            )
+        };
+        if (normalizedRange.versionId) where.versionId = normalizedRange.versionId;
         return db.find(BiblePhraseEntity, {
-            where: { id: Raw(col => generatePhraseIdSql(normalizedRange, col)) },
+            where,
             order: { id: 'ASC' },
             relations: ['notes', 'crossReferences']
         });
@@ -532,13 +557,17 @@ export class BibleEngine {
             sectionLevel: 0,
             recursionLevel: 0
         },
-        inputHasNormalizedNumbering = false
+        inputHasNormalizedNumbering = false,
+        importStrongs = true
     ): Promise<{ firstPhraseId: number | undefined; lastPhraseId: number | undefined }> {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = entityManger;
         let firstPhraseId: number | undefined, lastPhraseId: number | undefined;
+        let lastContent: IBibleContent | undefined;
         for (const content of contents) {
             let versionNumberingChange = false;
+            let phraseMergedWithLast = false;
+
             if (content.type !== 'section' && content.numbering) {
                 versionNumberingChange = true;
                 // input uses numbering objects on number change
@@ -762,10 +791,33 @@ export class BibleEngine {
                 }
                 // end new version verse handling
             } else {
-                globalState.currentPhraseNum++;
+                // check if the last and this content item are both phrases that are only
+                // distinguished by strongs - in case we don't want strongs, we merge them
+                if (
+                    !importStrongs &&
+                    lastContent &&
+                    (lastContent.type === 'phrase' || !lastContent.type) &&
+                    !lastContent.crossReferences &&
+                    !lastContent.linebreak &&
+                    !lastContent.notes &&
+                    !lastContent.person &&
+                    !lastContent.quoteWho &&
+                    !lastContent.skipSpace &&
+                    (content.type === 'phrase' || !content.type) &&
+                    !content.crossReferences &&
+                    !content.linebreak &&
+                    !content.notes &&
+                    !content.person &&
+                    !content.quoteWho &&
+                    !content.skipSpace
+                ) {
+                    globalState.phraseStack[globalState.phraseStack.length - 1].content +=
+                        ' ' + content.content;
+                    phraseMergedWithLast = true;
+                } else globalState.currentPhraseNum++;
             }
 
-            if (content.type === 'phrase' || !content.type) {
+            if ((content.type === 'phrase' || !content.type) && !phraseMergedWithLast) {
                 if (
                     !globalState.currentNormalizedReference ||
                     !globalState.currentNormalizedReference.normalizedChapterNum ||
@@ -818,6 +870,7 @@ export class BibleEngine {
                         );
                     }
                 }
+                if (content.strongs && !importStrongs) delete content.strongs;
 
                 globalState.phraseStack.push(
                     new BiblePhraseEntity(content, phraseRef, { ...localState.modifierState })
@@ -870,7 +923,8 @@ export class BibleEngine {
                     context,
                     globalState,
                     childState,
-                    inputHasNormalizedNumbering
+                    inputHasNormalizedNumbering,
+                    importStrongs
                 );
                 if (groupFirstPhraseId && (!firstPhraseId || groupFirstPhraseId < firstPhraseId))
                     firstPhraseId = groupFirstPhraseId;
@@ -910,7 +964,8 @@ export class BibleEngine {
                     context,
                     globalState,
                     childState,
-                    inputHasNormalizedNumbering
+                    inputHasNormalizedNumbering,
+                    importStrongs
                 );
 
                 if (sectionFirstPhraseId && sectionLastPhraseId) {
@@ -942,6 +997,8 @@ export class BibleEngine {
                         lastPhraseId = sectionLastPhraseId;
                 }
             }
+
+            lastContent = content;
         }
 
         if (localState.recursionLevel === 0) {
@@ -1102,7 +1159,7 @@ export class BibleEngine {
             .createQueryBuilder(BiblePhraseEntity, 'phrase')
             .select('MIN(phrase.id)', 'phraseIdStart')
             .where(
-                generatePhraseIdSql(potentialNormalizedRange, 'phrase.id') +
+                generatePhraseIdSql(potentialNormalizedRange, 'phrase') +
                     ' AND phrase.versionChapterNum = :cNum AND phrase.versionVerseNum = :vNum',
                 { cNum: range.versionChapterNum, vNum: range.versionVerseNum }
             )
@@ -1135,7 +1192,7 @@ export class BibleEngine {
                 .createQueryBuilder(BiblePhraseEntity, 'phrase')
                 .select('MAX(phrase.id)', 'phraseIdEnd')
                 .where(
-                    generatePhraseIdSql(potentialNormalizedRange, 'phrase.id') +
+                    generatePhraseIdSql(potentialNormalizedRange, 'phrase') +
                         ' AND phrase.versionChapterNum = :cNum AND phrase.versionVerseNum = :vNum',
                     {
                         cNum: range.versionChapterEndNum

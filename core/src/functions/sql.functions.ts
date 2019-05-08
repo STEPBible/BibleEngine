@@ -104,24 +104,15 @@ export const generateParagraphSql = (
  * @param {string} [col='id']
  * @returns {string} SQL
  */
-export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, col = 'id') => {
+export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, tableAlias: string) => {
     const refEnd = generateEndReferenceFromRange(range);
-    let sql = `${col} BETWEEN '${generatePhraseId(range)}' AND '${generatePhraseId(refEnd)}'`;
+    let sql = `${tableAlias}.id BETWEEN '${generatePhraseId(range)}' AND '${generatePhraseId(
+        refEnd
+    )}'`;
 
-    // if we query for more than just one verse in a specific version we need to filter out the
+    // if we query for a specific version we need to filter out the
     // version with a little math (due to the nature of our encoded reference integers)
-    if (
-        range.versionId &&
-        !// condition for a query for a single verse
-        (
-            !!range.normalizedChapterNum &&
-            !!range.normalizedVerseNum &&
-            ((range.normalizedChapterNum === range.normalizedChapterEndNum &&
-                range.normalizedVerseNum === range.normalizedVerseEndNum) ||
-                (!range.normalizedChapterEndNum && !range.normalizedVerseEndNum))
-        )
-    )
-        sql += 'AND ' + generatePhraseIdVersionSql(range.versionId, col);
+    if (range.versionId) sql += 'AND ' + generatePhraseIdVersionSql(range.versionId, tableAlias); //, col);
 
     return sql;
 };
@@ -132,8 +123,9 @@ export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, col =
  * @param {number} versionId
  * @param {string} [col='id']
  */
-export const generatePhraseIdVersionSql = (versionId: number, col = 'id') =>
-    `cast(${col} % 100000 / 100 as UNSIGNED) = ${versionId}`;
+export const generatePhraseIdVersionSql = (versionId: number, tableAlias: string) =>
+    // `cast(${col} % 100000 / 100 as UNSIGNED) = ${versionId}`;
+    `${tableAlias}.versionId = ${versionId}`;
 
 /**
  * generates SQL for a range-query for reference ids

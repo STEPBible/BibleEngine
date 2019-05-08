@@ -1,5 +1,5 @@
 import { ConnectionOptions } from 'typeorm';
-import { BibleEngineImporter, IBibleEngineImporter } from './Importer.interface';
+import { BibleEngineImporter, IBibleEngineImporter, IImporterOptions } from './Importer.interface';
 import { BibleEngine } from '@bible-engine/core';
 
 export class BeDatabaseCreator {
@@ -10,8 +10,8 @@ export class BeDatabaseCreator {
         this.bibleEngine = new BibleEngine(dbConfig);
     }
 
-    addImporter(Importer: IBibleEngineImporter, sourcePath?: string) {
-        this.importers.push(new Importer(this.bibleEngine, sourcePath));
+    addImporter(Importer: IBibleEngineImporter, options: IImporterOptions = {}) {
+        this.importers.push(new Importer(this.bibleEngine, options));
     }
 
     async createDatabase() {

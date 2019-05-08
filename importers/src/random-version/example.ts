@@ -122,7 +122,7 @@ export const genDb = async () => {
             });
         }
 
-        await sqlBible.addBookWithContent(esvVersion.id, {
+        await sqlBible.addBookWithContent(esvVersion, {
             book: {
                 number: bookNum,
                 osisId: getOsisIdFromBookGenericId(bookNum),

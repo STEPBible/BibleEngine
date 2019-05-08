@@ -30,7 +30,7 @@ export class NeueImporter extends BibleEngineImporter {
             contents: []
         };
 
-        const sourceDir = this.sourcePath || resolve(__dirname) + '/data';
+        const sourceDir = this.options.sourcePath || resolve(__dirname) + '/data';
 
         const descriptionHtml = await streamToString(
             createReadStream(sourceDir + '/index.htm')
@@ -107,7 +107,7 @@ export class NeueImporter extends BibleEngineImporter {
 
             // console.dir((<any>bookData.contents[0]).contents[0], { depth: 8 });
 
-            await this.bibleEngine.addBookWithContent(version.id, bookData);
+            await this.bibleEngine.addBookWithContent(version, bookData);
         }
 
         return this.bibleEngine.finalizeVersion(version.id);

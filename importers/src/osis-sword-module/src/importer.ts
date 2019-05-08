@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 
-import { BibleVersionEntity } from '@bible-engine/core';
+import { BibleVersionEntity, IBibleVersion } from '@bible-engine/core';
 import { BibleEngineImporter } from '../../Importer.interface';
 
 import { BookXML } from './types';
@@ -18,26 +18,30 @@ function getXmlFromModule(filename: string): BookXML[] {
 
 export class SwordImporter extends BibleEngineImporter {
     async import() {
-        if (!this.sourcePath)
+        if (!this.options.sourcePath)
             throw new Error(
                 `you need to set a sourcePath (2nd paramemter when using BeDatabaseCreator.addImporter)`
             );
 
+        const versionMeta: Partial<IBibleVersion> = this.options.versionMeta || {};
         const esvVersion = await this.bibleEngine.addVersion(
             new BibleVersionEntity({
                 uid: 'ESV',
                 title: 'English Standard Bible',
+                copyrightShort: '2001 by Crossway Bibles',
                 language: 'en-US',
-                chapterVerseSeparator: ':'
+                chapterVerseSeparator: ':',
+                hasStrongs: true,
+                ...versionMeta
             })
         );
 
-        const books = getXmlFromModule(this.sourcePath);
+        const books = getXmlFromModule(this.options.sourcePath);
 
         for (const book of books) {
             console.log(book.osisId);
             const bookJson = getBibleEngineInputFromXML(book.chapters);
-            await this.bibleEngine.addBookWithContent(esvVersion.id, {
+            await this.bibleEngine.addBookWithContent(esvVersion, {
                 book: {
                     number: book.bookNum,
                     osisId: book.osisId,

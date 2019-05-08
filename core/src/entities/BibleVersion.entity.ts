@@ -1,12 +1,4 @@
-import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    AfterLoad,
-    BeforeInsert,
-    BeforeUpdate,
-    Index
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, Index } from 'typeorm';
 import { DocumentRoot, IBibleVersion } from '../models';
 
 @Entity('bible_version')
@@ -21,8 +13,7 @@ export class BibleVersionEntity implements IBibleVersion {
     @Column()
     title: string;
 
-    @Column({ nullable: true, type: 'text' })
-    descriptionJson?: string;
+    @Column({ nullable: true, type: 'simple-json' })
     description?: DocumentRoot;
 
     @Column({ length: 5 })
@@ -31,8 +22,7 @@ export class BibleVersionEntity implements IBibleVersion {
     @Column({ nullable: true })
     copyrightShort?: string;
 
-    @Column({ nullable: true, type: 'text' })
-    copyrightLongJson?: string;
+    @Column({ nullable: true, type: 'simple-json' })
     copyrightLong?: DocumentRoot;
 
     @Column()
@@ -52,17 +42,17 @@ export class BibleVersionEntity implements IBibleVersion {
         if (!this.dataLocation) this.dataLocation = 'db';
     }
 
-    @AfterLoad()
-    parse() {
-        if (this.descriptionJson) this.description = JSON.parse(this.descriptionJson);
-        if (this.copyrightLongJson) this.copyrightLong = JSON.parse(this.copyrightLongJson);
-    }
+    // @AfterLoad()
+    // parse() {
+    //     if (this.descriptionJson) this.description = JSON.parse(this.descriptionJson);
+    //     if (this.copyrightLongJson) this.copyrightLong = JSON.parse(this.copyrightLongJson);
+    // }
 
     @BeforeInsert()
     @BeforeUpdate()
     async prepare() {
         this.lastUpdate = new Date();
-        if (this.description) this.descriptionJson = JSON.stringify(this.description);
-        if (this.copyrightLong) this.copyrightLongJson = JSON.stringify(this.copyrightLong);
+        // if (this.description) this.descriptionJson = JSON.stringify(this.description);
+        // if (this.copyrightLong) this.copyrightLongJson = JSON.stringify(this.copyrightLong);
     }
 }

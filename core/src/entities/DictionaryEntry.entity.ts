@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { IDictionaryEntry, DocumentRoot } from '../models';
 
 @Entity('dictionary_entry')
@@ -18,22 +18,21 @@ export class DictionaryEntryEntity implements IDictionaryEntry {
     @Column()
     gloss: string;
 
-    @Column({ nullable: true, type: 'text' })
-    contentJson?: string;
+    @Column({ nullable: true, type: 'simple-json' })
     content?: DocumentRoot;
 
     constructor(dict: IDictionaryEntry) {
         Object.assign(this, dict);
     }
 
-    @AfterLoad()
-    parse() {
-        if (this.contentJson) this.content = JSON.parse(this.contentJson);
-    }
+    // @AfterLoad()
+    // parse() {
+    //     if (this.contentJson) this.content = JSON.parse(this.contentJson);
+    // }
 
-    @BeforeInsert()
-    @BeforeUpdate()
-    async prepare() {
-        if (this.content) this.contentJson = JSON.stringify(this.content);
-    }
+    // @BeforeInsert()
+    // @BeforeUpdate()
+    // async prepare() {
+    //     if (this.content) this.contentJson = JSON.stringify(this.content);
+    // }
 }
