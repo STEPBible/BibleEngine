@@ -1,14 +1,4 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    OneToMany,
-    JoinColumn,
-    Index,
-    AfterLoad,
-    BeforeInsert,
-    BeforeUpdate
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, Index } from 'typeorm';
 import { BibleCrossReferenceEntity } from '.';
 import { IBibleSectionEntity, DocumentRoot } from '../models';
 
@@ -42,9 +32,7 @@ export class BibleSectionEntity implements IBibleSectionEntity {
     @Column({ nullable: true })
     subTitle?: string;
 
-    @Column({ nullable: true, type: 'text' })
-    descriptionJson?: string;
-
+    @Column({ nullable: true, type: 'simple-json' })
     description?: DocumentRoot;
 
     @OneToMany(() => BibleCrossReferenceEntity, crossReference => crossReference.section, {
@@ -65,14 +53,14 @@ export class BibleSectionEntity implements IBibleSectionEntity {
             );
     }
 
-    @AfterLoad()
-    parse() {
-        if (this.descriptionJson) this.description = JSON.parse(this.descriptionJson);
-    }
+    // @AfterLoad()
+    // parse() {
+    //     if (this.descriptionJson) this.description = JSON.parse(this.descriptionJson);
+    // }
 
-    @BeforeInsert()
-    @BeforeUpdate()
-    async prepare() {
-        if (this.description) this.descriptionJson = JSON.stringify(this.description);
-    }
+    // @BeforeInsert()
+    // @BeforeUpdate()
+    // async prepare() {
+    //     if (this.description) this.descriptionJson = JSON.stringify(this.description);
+    // }
 }

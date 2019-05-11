@@ -6,17 +6,19 @@ import {
     PrimaryColumn,
     AfterLoad,
     BeforeInsert,
-    BeforeUpdate
+    BeforeUpdate,
+    Index
 } from 'typeorm';
 import { BibleCrossReferenceEntity, BibleNoteEntity } from '.';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
 import { PhraseModifiers, IBiblePhraseRef } from '../models';
 import { IBiblePhraseWithNumbers } from '../models/BiblePhrase';
 import { IContentPhrase } from '../models/ContentPhrase';
+import { isNode } from '../functions/utils.functions';
 
 @Entity('bible_phrase')
 export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
-    @PrimaryColumn({ type: 'bigint' })
+    @PrimaryColumn({ type: isNode && process.argv.indexOf('sqlite') === -1 ? 'bigint' : 'integer' })
     id: number;
 
     // the id encodes the following attribute:
@@ -24,6 +26,10 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
 
     @Column({ type: 'bigint', nullable: true })
     joinToRefId?: number;
+
+    @Column()
+    @Index()
+    versionId: number;
 
     @Column()
     versionChapterNum: number;
@@ -50,8 +56,7 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
     // hierarchy, is saved within 'modifiers'. We don't need to index this, so it's save to group
     // those values together as one serialized JSON in the database. Thus we also keep the schema
     // and types clean and more easy to understand, plus we can easily add new modifiers
-    @Column({ nullable: true, type: 'text' })
-    modifiersJson?: string;
+    @Column({ nullable: true, type: 'simple-json' })
     modifiers?: PhraseModifiers;
 
     // this is a seperate column so that we can index it
@@ -62,8 +67,7 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
     @Column({ nullable: true })
     person?: string;
 
-    @Column({ nullable: true })
-    strongsJoined?: string;
+    @Column({ nullable: true, type: 'simple-array' })
     strongs?: string[];
 
     @OneToMany(() => BibleCrossReferenceEntity, crossReference => crossReference.phrase, {
@@ -116,8 +120,8 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
             phraseNum: phraseRef.phraseNum!
         };
 
-        if (this.strongsJoined) this.strongs = this.strongsJoined.split(',');
-        if (this.modifiersJson) this.modifiers = JSON.parse(this.modifiersJson);
+        // if (this.strongsJoined) this.strongs = this.strongsJoined.split(',');
+        // if (this.modifiersJson) this.modifiers = JSON.parse(this.modifiersJson);
 
         if (!this.versionSubverseNum) delete this.versionSubverseNum;
     }
@@ -126,7 +130,9 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
     @BeforeUpdate()
     async prepare() {
         this.id = generatePhraseId(this.normalizedReference);
-        if (this.strongs) this.strongsJoined = this.strongs.join(',');
+        this.versionId = this.normalizedReference.versionId;
+
+        // if (this.strongs) this.strongsJoined = this.strongs.join(',');
         if (this.modifiers) {
             // we only save active modifiers to save space
             const modifiers: any = {};
@@ -135,8 +141,7 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
                     modifiers[key] = val;
             }
 
-            this.modifiersJson =
-                Object.values(modifiers).length > 0 ? JSON.stringify(modifiers) : undefined;
+            this.modifiers = Object.values(modifiers).length === 0 ? undefined : modifiers;
         }
     }
 

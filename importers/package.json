@@ -16,7 +16,7 @@
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
         "sqlite3": "^4.0.4",
-        "typeorm": "0.2.16",
+        "typeorm": "0.2.17",
         "base64-js": "^1.3.0",
         "jszip": "~2.4.0"
     },

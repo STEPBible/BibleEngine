@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, AfterLoad, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 import { IBibleBookEntity, DocumentRoot } from '../models';
 
 @Entity('bible_book')
@@ -21,17 +21,13 @@ export class BibleBookEntity implements IBibleBookEntity {
     @Column({ nullable: true })
     longTitle?: string;
 
-    @Column({ nullable: true, type: 'text' })
-    introductionJson?: string;
-
+    @Column({ nullable: true, type: 'simple-json' })
     introduction?: DocumentRoot;
 
     @Column({ type: 'varchar' })
     type: IBibleBookEntity['type'];
 
-    @Column({ type: 'text' })
-    chaptersMetaJson: string;
-
+    @Column({ type: 'simple-array' })
     chaptersCount: number[];
 
     @Column({ type: 'varchar' })
@@ -42,18 +38,18 @@ export class BibleBookEntity implements IBibleBookEntity {
         if (!this.dataLocation) this.dataLocation = 'db';
     }
 
-    @AfterLoad()
-    parse() {
-        if (this.chaptersMetaJson) this.chaptersCount = JSON.parse(this.chaptersMetaJson);
-        if (this.introductionJson) this.introduction = JSON.parse(this.introductionJson);
-    }
+    // @AfterLoad()
+    // parse() {
+    //     if (this.chaptersMetaJson) this.chaptersCount = JSON.parse(this.chaptersMetaJson);
+    //     if (this.introductionJson) this.introduction = JSON.parse(this.introductionJson);
+    // }
 
-    @BeforeInsert()
-    @BeforeUpdate()
-    async prepare() {
-        if (this.chaptersCount) this.chaptersMetaJson = JSON.stringify(this.chaptersCount);
-        if (this.introduction) this.introductionJson = JSON.stringify(this.introduction);
-    }
+    // @BeforeInsert()
+    // @BeforeUpdate()
+    // async prepare() {
+    //     if (this.chaptersCount) this.chaptersMetaJson = JSON.stringify(this.chaptersCount);
+    //     if (this.introduction) this.introductionJson = JSON.stringify(this.introduction);
+    // }
 
     getChapterVerseCount(chapterNumber: number) {
         return this.chaptersCount[chapterNumber - 1];

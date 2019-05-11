@@ -37,6 +37,12 @@ export const generateRandomChar = (): string => {
     return possible.charAt(Math.floor(Math.random() * possible.length));
 };
 
+export const isNode =
+    typeof window === 'undefined' &&
+    typeof document === 'undefined' &&
+    typeof navigator === 'undefined' &&
+    typeof process !== 'undefined';
+
 /**
  * checks if the given variable is an object
  * @param {*} variable

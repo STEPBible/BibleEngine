@@ -1,13 +1,4 @@
-import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    ManyToOne,
-    Index,
-    AfterLoad,
-    BeforeInsert,
-    BeforeUpdate
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, Index } from 'typeorm';
 import { BiblePhraseEntity } from './BiblePhrase.entity';
 import { IBibleNote, DocumentRoot } from '../models';
 
@@ -22,9 +13,7 @@ export class BibleNoteEntity implements IBibleNote {
     @Column({ nullable: true })
     type?: string;
 
-    @Column({ type: 'text' })
-    contentJson: string;
-
+    @Column({ type: 'simple-json' })
     content: DocumentRoot;
 
     @Column({ nullable: true })
@@ -41,14 +30,14 @@ export class BibleNoteEntity implements IBibleNote {
         if (phraseId) this.phraseId = phraseId;
     }
 
-    @AfterLoad()
-    parseNoteJson() {
-        this.content = JSON.parse(this.contentJson);
-    }
+    // @AfterLoad()
+    // parseNoteJson() {
+    //     this.content = JSON.parse(this.contentJson);
+    // }
 
-    @BeforeInsert()
-    @BeforeUpdate()
-    async stringifyNoteJson() {
-        this.contentJson = JSON.stringify(this.content);
-    }
+    // @BeforeInsert()
+    // @BeforeUpdate()
+    // async stringifyNoteJson() {
+    //     this.contentJson = JSON.stringify(this.content);
+    // }
 }
