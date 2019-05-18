@@ -12,7 +12,7 @@ import { AsyncStorageKey, Flags } from './Constants';
 import LoadingScreen from './LoadingScreen';
 import SearchBarProvider from './SearchBarProvider';
 import SearchBar from './SearchBar';
-
+import 'react-native-console-time-polyfill';
 const bibleDatabaseModule = require('../assets/bibles.db');
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
@@ -176,7 +176,7 @@ export default class App extends React.PureComponent<Props, State> {
     let chapterOutput = null;
     let chapterNum = '';
     let osisBookName = '';
-    const start = new Date();
+
     if (Flags.USE_CACHE) {
       [bookList, chapterOutput, chapterNum, osisBookName] = await store.get([
         AsyncStorageKey.CACHED_BOOK_LIST,
@@ -218,8 +218,6 @@ export default class App extends React.PureComponent<Props, State> {
     const currentBookFullTitle = bookList.filter(
       book => book.osisId === osisBookName
     )[0].title;
-    const end = new Date() - start;
-    console.log('Execution time: ', end, 'ms');
     this.setState({
       ...this.state,
       currentBookFullTitle,
