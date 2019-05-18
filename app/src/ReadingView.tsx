@@ -15,7 +15,8 @@ import {
   FontSize,
   FontFamily,
   getDebugStyles,
-  Flags
+  Flags,
+  Settings
 } from './Constants';
 import CrossReference from './CrossReference';
 import Footnote from './Footnote';
@@ -28,34 +29,26 @@ interface Props {
 }
 
 export default class ReadingView extends React.PureComponent<Props, {}> {
-  renderItem = (content: IBibleContent): any => {
+  renderItem = (content: IBibleContent, index: number): any => {
     if (!('type' in content) || content.type === 'phrase') {
-      return this.renderPhrase(content);
+      return this.renderPhrase(content, index);
     }
     const children: IBibleContent[] = content.contents;
 
     if (content.type === 'section') {
       return (
-        <Fragment>
+        <Fragment key={`section-${index}`}>
           {this.renderVerseNumber(content)}
           {this.renderSection(content)}
         </Fragment>
       );
     }
     if (content.type === 'group') {
-      if (content.groupType === 'paragraph') {
+      if (content.groupType === 'paragraph' || content.groupType === 'indent') {
         return (
-          <Fragment>
+          <Fragment key={`group-${index}`}>
             {this.renderVerseNumber(content)}
-            {children.map(child => this.renderItem(child))}
-          </Fragment>
-        );
-      }
-      if (content.groupType === 'indent') {
-        return (
-          <Fragment>
-            {this.renderVerseNumber(content)}
-            {children.map(child => this.renderItem(child))}
+            {children.map((child, index) => this.renderItem(child, index))}
           </Fragment>
         );
       }
@@ -85,7 +78,11 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
   };
 
   renderCrossReference = (content: IBiblePhrase): any => {
-    if (!content.crossReferences || !content.crossReferences.length) {
+    if (
+      !Settings.CROSS_REFERENCES_ENABLED ||
+      !content.crossReferences ||
+      !content.crossReferences.length
+    ) {
       return null;
     }
     return (
@@ -97,20 +94,25 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
   };
 
   renderFootnote = (content: IBiblePhrase): any => {
-    if (!content.notes || !content.notes.length) {
+    if (
+      !Settings.FOOTNOTES_ENABLED ||
+      !content.notes ||
+      !content.notes.length
+    ) {
       return null;
     }
     return <Footnote notes={content.notes} />;
   };
 
-  renderPhrase = (content: IBibleContent): any => {
+  renderPhrase = (content: IBibleContent, index): any => {
     if (content.strongs) {
       return (
-        <Fragment>
+        <Fragment key={`strong-phrase-${index}`}>
           {this.renderFootnote(content)}
           {this.renderVerseNumber(content)}
           {this.renderCrossReference(content)}
           <StrongsWord
+            key={`${content.content}-${content.strongs}`}
             phrase={content.content}
             strongs={content.strongs}
             sqlBible={this.props.sqlBible}
@@ -119,7 +121,7 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
       );
     }
     return (
-      <Fragment>
+      <Fragment key={`phrase-${index}`}>
         {this.renderFootnote(content)}
         {this.renderVerseNumber(content)}
         {this.renderCrossReference(content)}
@@ -149,7 +151,7 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
           showsVerticalScrollIndicator={false}
           renderItem={this.renderFlatlistItem}
           ListFooterComponent={<View style={{ height: Margin.LARGE }} />}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item: any, index: number) => `flatlist-item-${index}`}
         />
       </View>
     );
