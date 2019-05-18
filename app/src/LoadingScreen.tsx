@@ -7,7 +7,7 @@ interface Props {
   loadingText: string;
 }
 
-export default class LoadingScreen extends React.Component<Props, {}> {
+export default class LoadingScreen extends React.PureComponent<Props, {}> {
   render() {
     return (
       <View style={styles.page}>

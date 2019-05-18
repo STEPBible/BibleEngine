@@ -60,7 +60,7 @@ function shouldOpenMenu(dx: number): boolean {
   return dx > barrierForward;
 }
 
-export default class SideMenu extends React.Component {
+export default class SideMenu extends React.PureComponent {
   public readonly onLayoutChange: Function;
   public readonly onStartShouldSetResponderCapture: Function;
   public readonly onMoveShouldSetPanResponder: Function;

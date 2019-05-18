@@ -6,6 +6,11 @@ export const Flags = {
   SEARCH_ENABLED: true
 };
 
+export const Settings = {
+  CROSS_REFERENCES_ENABLED: true,
+  FOOTNOTES_ENABLED: true
+};
+
 export enum Margin {
   EXTRA_SMALL = normalizeText(5),
   SMALL = normalizeText(10),

@@ -35,7 +35,7 @@ interface State {
   definitions: IDictionaryEntry[];
 }
 
-export default class StrongsWord extends React.Component<Props, State> {
+export default class StrongsWord extends React.PureComponent<Props, State> {
   touchable: any;
   state = {
     popoverIsVisible: false,

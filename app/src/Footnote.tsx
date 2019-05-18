@@ -31,7 +31,7 @@ interface State {
   popoverIsVisible: boolean;
 }
 
-export default class CrossReference extends React.Component<Props, State> {
+export default class CrossReference extends React.PureComponent<Props, State> {
   touchable: any;
   state = {
     popoverIsVisible: false

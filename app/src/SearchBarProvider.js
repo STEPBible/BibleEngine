@@ -2,7 +2,7 @@ import React from 'react';
 import SearchBarAnimation from './SearchBarAnimation';
 import { SearchBarContext } from './SearchBarContext';
 
-export default class SearchBarProvider extends React.Component {
+export default class SearchBarProvider extends React.PureComponent {
   constructor(props) {
     super(props);
 
