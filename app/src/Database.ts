@@ -15,15 +15,11 @@ export default class Database {
 
     const pathToDownloadTo = `${sqliteDirectory}/bibles.db`;
 
-    const { exists: fileExists } = await Expo.FileSystem.getInfoAsync(
-      pathToDownloadTo,
-      { md5: true }
-    );
     const { hash: incomingHash, uri: uriToDownload } = Expo.Asset.fromModule(
       databaseModule
     );
     const existingHash = await store.get('existingHash');
-    if (!fileExists || incomingHash !== existingHash) {
+    if (incomingHash !== existingHash) {
       console.log('Updating database...');
       await Expo.FileSystem.downloadAsync(uriToDownload, pathToDownloadTo);
       store.save('existingHash', incomingHash);
