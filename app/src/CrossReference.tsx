@@ -36,7 +36,7 @@ interface State {
   verseContents: any[];
 }
 
-export default class CrossReference extends React.Component<Props, State> {
+export default class CrossReference extends React.PureComponent<Props, State> {
   touchable: any;
   state = {
     popoverIsVisible: false,
@@ -51,9 +51,10 @@ export default class CrossReference extends React.Component<Props, State> {
     this.setState({ popoverIsVisible: false });
   };
 
-  constructor(props: Props) {
-    super(props);
-    this.getVerseContents(props.crossReferences);
+  componentDidMount() {
+    setTimeout(() => {
+      this.getVerseContents(this.props.crossReferences);
+    }, 100);
   }
 
   async getVerseContents(refs: IBibleCrossReference[]) {
@@ -64,10 +65,11 @@ export default class CrossReference extends React.Component<Props, State> {
     const verseContents = verses.map(phrases =>
       phrases.map(phrase => phrase.content).join(' ')
     );
-    this.state = {
+    this.setState({
+      ...this.state,
       verseContents,
       popoverIsVisible: false
-    };
+    });
   }
 
   renderCrossReference = ({ item, index }) => (
