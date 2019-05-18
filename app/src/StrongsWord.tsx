@@ -140,33 +140,44 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
     }
     return (
       <View style={styles.popover__content__definitions__entry}>
-        {element.content.contents.map((element: DocumentElement) =>
-          this.renderDocumentElement(element)
+        {element.content.contents.map(
+          (element: DocumentElement, index: number) =>
+            this.renderDocumentElement(element, index)
         )}
       </View>
     );
   };
 
-  renderDocumentElement = (element: DocumentElement) => {
+  renderDocumentElement = (element: DocumentElement, index: number) => {
     if (!element) {
       return null;
     }
     if (element.type === 'phrase' && element.content.length) {
-      return <Text style={styles.documentPhrase}>{element.content}</Text>;
+      return (
+        <Text key={`doc-phrase-${index}`} style={styles.documentPhrase}>
+          {element.content}
+        </Text>
+      );
     }
     if (element.type === 'group') {
       if (element.groupType === 'bold') {
         const phrases: string[] = element.contents.map(
           ({ content }) => content
         );
-        return phrases.map(phrase => (
-          <Text style={styles.boldDocumentPhrase}>{phrase}</Text>
+        return phrases.map((phrase, phraseIndex) => (
+          <Text
+            key={`bold-${phrase}-${phraseIndex}-${index}`}
+            style={styles.boldDocumentPhrase}
+          >
+            {phrase}
+          </Text>
         ));
       }
       return element.contents.map((element: DocumentElement) =>
         this.renderDocumentElement(element)
       );
     }
+    return null;
   };
 
   render() {

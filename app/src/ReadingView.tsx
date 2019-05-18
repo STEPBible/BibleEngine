@@ -61,7 +61,7 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
     return (
       <View style={styles.section}>
         <Text style={styles.title}>{content.title}</Text>
-        {children.map(child => this.renderItem(child))}
+        {children.map((child, index) => this.renderItem(child, index))}
       </View>
     );
   };
@@ -107,7 +107,7 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
   renderPhrase = (content: IBibleContent, index): any => {
     if (content.strongs) {
       return (
-        <Fragment key={`strong-phrase-${index}`}>
+        <Fragment key={`strong-${content}-${index}`}>
           {this.renderFootnote(content)}
           {this.renderVerseNumber(content)}
           {this.renderCrossReference(content)}
@@ -132,11 +132,11 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
     );
   };
 
-  renderFlatlistItem = ({ item: content }: { item: IBibleContent }) => {
-    if ('overallTitle' in content) {
-      return <Text style={styles.chapterHeader}>{content.overallTitle}</Text>;
+  renderFlatlistItem = ({ item, index }) => {
+    if ('overallTitle' in item) {
+      return <Text style={styles.chapterHeader}>{item.overallTitle}</Text>;
     }
-    return this.renderItem(content);
+    return this.renderItem(item, index);
   };
 
   bookAndChapterTitle = () => ({
