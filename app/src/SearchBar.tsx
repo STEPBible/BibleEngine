@@ -27,7 +27,6 @@ import {
 } from './Constants';
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
-import 'react-native-console-time-polyfill';
 
 interface VerseResult {
   reference: string;
@@ -57,8 +56,6 @@ export default class SearchPage extends React.PureComponent<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.searchIndex = require('../assets/esvSearchIndex.json');
-    this.lunrSearchEngine = elasticlunr.Index.load(this.searchIndex);
     this.verseResults = [];
   }
 
@@ -126,11 +123,7 @@ export default class SearchPage extends React.PureComponent<Props, State> {
   };
 
   renderSearchResultiOS = ({ item }) => (
-    <TouchableHighlight
-      onPress={() => {}}
-      underlayColor="#d4d4d4"
-    >
-      {this.renderSearchResultContent(item)}
+    <TouchableHighlight onPress={() => {}} underlayColor="#d4d4d4">
       <View style={styles.result}>{this.renderSearchResultContent(item)}</View>
     </TouchableHighlight>
   );
@@ -171,6 +164,15 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     }
   };
 
+  onFocus = () => {
+    this.setState({
+      ...this.state,
+      isFocused: true
+    });
+    this.searchIndex = require('../assets/esvSearchIndex.json');
+    this.lunrSearchEngine = elasticlunr.Index.load(this.searchIndex);
+  };
+
   render() {
     const { animation } = this.props;
     const transformWrapper = animation.getTransformWrapper();
@@ -186,12 +188,7 @@ export default class SearchPage extends React.PureComponent<Props, State> {
               underlineColorAndroid={'#fff'}
               selectionColor={Color.TYNDALE_BLUE}
               autoCorrect={false}
-              onFocus={() => {
-                this.setState({
-                  ...this.state,
-                  isFocused: true
-                });
-              }}
+              onFocus={this.onFocus}
               onChangeText={this.updateSearch}
               value={this.state.inputText}
               ref={inputSearch => {
