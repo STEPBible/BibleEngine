@@ -43,11 +43,15 @@ export default class StrongsWord extends React.Component<Props, State> {
   };
 
   async componentDidMount() {
-    await this.setDictionaryEntries(this.props.strongs);
+    setTimeout(() => {
+      this.setDictionaryEntries(this.props.strongs);
+    }, 100);
   }
 
   async componentWillReceiveProps(nextProps: Props) {
-    await this.setDictionaryEntries(nextProps.strongs);
+    setTimeout(() => {
+      this.setDictionaryEntries(nextProps.strongs);
+    }, 100);
   }
 
   async setDictionaryEntries(strongs: string[]) {
