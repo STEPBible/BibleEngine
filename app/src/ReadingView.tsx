@@ -3,7 +3,7 @@ import { Text, View, StyleSheet, Dimensions } from 'react-native';
 import FlatList from './FlatList';
 import { ifAndroid } from './utils';
 import Sentry from 'sentry-expo';
-Sentry.enableInExpoDevelopment = true;
+Sentry.enableInExpoDevelopment = false;
 Sentry.config(
   'https://a0758a0dd01040728b6b7b0a3747d7f8@sentry.io/1427804'
 ).install();
