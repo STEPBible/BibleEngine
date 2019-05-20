@@ -59,6 +59,13 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     this.verseResults = [];
   }
 
+  componentDidMount() {
+    setTimeout(() => {
+      this.searchIndex = require('../assets/esvSearchIndex.json');
+      this.lunrSearchEngine = elasticlunr.Index.load(this.searchIndex);
+    }, 100);
+  }
+
   updateSearch = (inputText: string) => {
     const results = this.lunrSearchEngine.search(inputText, {});
     const refs = results.map(result => result.ref);
@@ -169,8 +176,6 @@ export default class SearchPage extends React.PureComponent<Props, State> {
       ...this.state,
       isFocused: true
     });
-    this.searchIndex = require('../assets/esvSearchIndex.json');
-    this.lunrSearchEngine = elasticlunr.Index.load(this.searchIndex);
   };
 
   render() {
