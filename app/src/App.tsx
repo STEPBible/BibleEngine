@@ -330,12 +330,12 @@ const styles = StyleSheet.create({
   header__title: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.LARGE,
-    marginLeft: 16
+    marginLeft: 30
   },
   header__subtitle: {
     color: '#676767',
     fontFamily: FontFamily.OPEN_SANS,
     fontSize: FontSize.EXTRA_SMALL,
-    marginLeft: 16
+    marginLeft: 30
   }
 });
