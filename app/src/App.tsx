@@ -1,21 +1,39 @@
 import * as Expo from 'expo';
 import * as React from 'react';
-import { Dimensions, StatusBar, Keyboard } from 'react-native';
+import {
+  Dimensions,
+  FlatList,
+  StatusBar,
+  Keyboard,
+  UIManager,
+  View,
+  Text,
+  StyleSheet
+} from 'react-native';
 import * as store from 'react-native-simple-store';
 import { IBibleBook, BibleEngine, IBibleContent } from '@bible-engine/core';
 import Database from './Database';
 import Fonts from './Fonts';
 import ReadingView from './ReadingView';
-import SideMenu from './SideMenu';
-import BookMenu from './BookMenu';
-import { AsyncStorageKey, Flags } from './Constants';
+import {
+  AsyncStorageKey,
+  Flags,
+  getDebugStyles,
+  FontFamily,
+  FontSize
+} from './Constants';
+import { ifIphoneX, isAndroid } from './utils';
 import LoadingScreen from './LoadingScreen';
 import SearchBarProvider from './SearchBarProvider';
 import SearchBar from './SearchBar';
 import 'react-native-console-time-polyfill';
 const bibleDatabaseModule = require('../assets/bibles.db');
+import ExpandableDrawer from './ExpandableDrawer';
+import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
+const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
+const DRAWER_HEIGHT = 48;
 
 interface State {
   books: IBibleBook[];
@@ -34,7 +52,7 @@ interface Props {}
 
 export default class App extends React.PureComponent<Props, State> {
   leftMenuRef: any;
-  rightMenuRef: any;
+  bookListRef: any;
   sqlBible: BibleEngine;
 
   state = {
@@ -55,48 +73,101 @@ export default class App extends React.PureComponent<Props, State> {
     this.loadResourcesAsync();
   }
 
+  componentDidMount() {
+    setTimeout(() => {
+      this.openDrawer();
+    }, 200);
+  }
+
+  getItemLayout = (data, index) => ({
+    length: DRAWER_HEIGHT,
+    offset: DRAWER_HEIGHT * index,
+    index
+  });
+
+  scrollToBook = index => {
+    this.bookListRef.scrollToIndex({ index });
+  };
+
+  openDrawer = () => {
+    if (this.leftMenuRef) {
+      this.leftMenuRef.openDrawer();
+    }
+  };
+
+  closeDrawer = () => {
+    if (this.leftMenuRef) {
+      this.leftMenuRef.closeDrawer();
+    }
+  };
+
+  renderHeader = () => (
+    <View style={styles.header}>
+      <View>
+        <Text style={styles.header__title}>ESV</Text>
+        <Text style={styles.header__subtitle}>English Standard Version</Text>
+      </View>
+    </View>
+  );
+
+  renderDrawer = () => (
+    <FlatList
+      data={this.state.books}
+      keyExtractor={(item, index) => index.toString()}
+      getItemLayout={this.getItemLayout}
+      ref={ref => (this.bookListRef = ref)}
+      renderItem={({ item, index }) => (
+        <ExpandableDrawer
+          closeDrawer={this.closeDrawer}
+          item={item}
+          scrollToBook={this.scrollToBook}
+          changeBookAndChapter={this.changeBookAndChapter}
+          index={index}
+        />
+      )}
+      ListHeaderComponent={this.renderHeader}
+      ListFooterComponent={<View style={styles.footer} />}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+
   render() {
     if (!this.state.isReady) {
       return <LoadingScreen loadingText={this.state.loadingMessage} />;
     }
     return (
-      <SideMenu
-        menu={
-          <BookMenu
-            books={this.state.books}
-            changeBookAndChapter={this.changeBookAndChapter}
-          />
-        }
-        isOpen={this.state.isLeftMenuOpen}
-        menuPosition="left"
-        gesturesAreEnabled={this.leftMenuGesturesAreEnabled}
-        bounceBackOnOverdraw={false}
-        openMenuOffset={DEVICE_WIDTH * 0.76}
-        edgeHitWidth={DEVICE_WIDTH}
+      <DrawerLayout
+        drawerWidth={DRAWER_WIDTH}
+        drawerPosition={DrawerLayout.positions.Left}
+        drawerType="front"
+        drawerBackgroundColor="white"
         ref={ref => (this.leftMenuRef = ref)}
+        renderNavigationView={this.renderDrawer}
       >
-        <Expo.KeepAwake />
-        <StatusBar hidden={true} />
-        <SearchBarProvider>
-          {(animation: any) => (
-            <React.Fragment>
-              {Flags.SEARCH_ENABLED && (
-                <SearchBar
+        <React.Fragment>
+          <Expo.KeepAwake />
+          <StatusBar hidden={true} />
+          <SearchBarProvider>
+            {(animation: any) => (
+              <React.Fragment>
+                {Flags.SEARCH_ENABLED && (
+                  <SearchBar
+                    sqlBible={this.sqlBible}
+                    toggleMenu={this.toggleMenu}
+                    animation={animation}
+                  />
+                )}
+                <ReadingView
+                  chapterNum={this.state.currentChapterNum}
+                  bookName={this.state.currentBookFullTitle}
+                  content={this.state.content}
                   sqlBible={this.sqlBible}
-                  toggleMenu={this.toggleMenu}
-                  animation={animation}
                 />
-              )}
-              <ReadingView
-                chapterNum={this.state.currentChapterNum}
-                bookName={this.state.currentBookFullTitle}
-                content={this.state.content}
-                sqlBible={this.sqlBible}
-              />
-            </React.Fragment>
-          )}
-        </SearchBarProvider>
-      </SideMenu>
+              </React.Fragment>
+            )}
+          </SearchBarProvider>
+        </React.Fragment>
+      </DrawerLayout>
     );
   }
 
@@ -152,8 +223,7 @@ export default class App extends React.PureComponent<Props, State> {
   };
 
   toggleMenu = () => {
-    console.log('openMenu');
-    this.leftMenuRef.openMenu(!this.state.isLeftMenuOpen);
+    this.leftMenuRef.openDrawer();
     this.setState({
       ...this.state,
       isLeftMenuOpen: !this.state.isLeftMenuOpen
@@ -161,6 +231,8 @@ export default class App extends React.PureComponent<Props, State> {
   };
 
   loadResourcesAsync = async () => {
+    UIManager.setLayoutAnimationEnabledExperimental &&
+      UIManager.setLayoutAnimationEnabledExperimental(true);
     console.disableYellowBox = true;
     this.updateLoadingMessage('Loading fonts...');
     await Fonts.load();
@@ -237,3 +309,33 @@ export default class App extends React.PureComponent<Props, State> {
     return !this.rightMenuRef.isOpen;
   };
 }
+
+const styles = StyleSheet.create({
+  footer: {
+    height: 100
+  },
+  header: {
+    ...getDebugStyles(),
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderBottomColor: '#E6E6E6',
+    borderBottomWidth: 1,
+    flex: 1,
+    flexDirection: 'row',
+    height: 120,
+    marginBottom: 15,
+    marginTop: ifIphoneX(30, 0),
+    width: DRAWER_WIDTH
+  },
+  header__title: {
+    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
+    fontSize: FontSize.LARGE,
+    marginLeft: 16
+  },
+  header__subtitle: {
+    color: '#676767',
+    fontFamily: FontFamily.OPEN_SANS,
+    fontSize: FontSize.EXTRA_SMALL,
+    marginLeft: 16
+  }
+});
