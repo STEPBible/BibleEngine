@@ -3,6 +3,7 @@
 import React, { Component } from 'react';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { ifIphoneX, ifAndroid } from './utils';
+import { IconButton } from 'react-native-paper';
 import {
   BackHandler,
   StyleSheet,
@@ -16,7 +17,9 @@ import {
   Keyboard,
   TouchableHighlight,
   FlatList,
-  TouchableNativeFeedback
+  TouchableNativeFeedback,
+  StatusBar,
+  LayoutAnimation
 } from 'react-native';
 import * as elasticlunr from 'elasticlunr';
 import {
@@ -95,6 +98,8 @@ export default class SearchPage extends React.PureComponent<Props, State> {
 
   endSearch = () => {
     Keyboard.dismiss();
+    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
+    LayoutAnimation.configureNext(animation);
     this.setState({
       ...this.state,
       inputText: '',
@@ -105,21 +110,23 @@ export default class SearchPage extends React.PureComponent<Props, State> {
   renderIcon = () => {
     if (this.state.isFocused) {
       return (
-        <TouchableOpacity
+        <IconButton
+          icon="arrow-back"
+          color="#888889"
+          size={30}
           style={styles.search__input__icon}
           onPress={this.endSearch}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={30} color="#888889" />
-        </TouchableOpacity>
+        />
       );
     }
     return (
-      <TouchableOpacity
+      <IconButton
+        icon="menu"
+        color="#888889"
+        size={30}
         style={styles.search__input__icon}
         onPress={this.props.toggleMenu}
-      >
-        <MaterialIcons name="menu" size={30} color="#888889" />
-      </TouchableOpacity>
+      />
     );
   };
 
@@ -186,6 +193,8 @@ export default class SearchPage extends React.PureComponent<Props, State> {
   };
 
   onFocus = () => {
+    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
+    LayoutAnimation.configureNext(animation);
     this.setState({
       ...this.state,
       isFocused: true
@@ -231,7 +240,7 @@ const styles = StyleSheet.create({
     height: 100,
     position: 'absolute',
     right: 0,
-    top: 20,
+    top: ifAndroid(StatusBar.currentHeight, 20),
     zIndex: 2,
     ...getDebugStyles()
   },
