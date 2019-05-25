@@ -77,6 +77,7 @@ export default class ExpandableDrawer extends React.PureComponent<
     return (
       <React.Fragment>
         <TouchableRipple
+          borderless
           key={this.props.index}
           underlayColor="#e8eaed"
           style={this.state.open ? styles['drawer--open'] : styles.drawer}
