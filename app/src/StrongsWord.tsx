@@ -38,6 +38,7 @@ interface State {
 
 export default class StrongsWord extends React.PureComponent<Props, State> {
   touchable: any;
+  mounted: boolean = false;
 
   state = {
     popoverIsVisible: false,
@@ -47,9 +48,14 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
   };
 
   async componentDidMount() {
+    this.mounted = true;
     setTimeout(() => {
       this.setDictionaryEntries(this.props.strongs);
     }, 100);
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
   }
 
   async componentWillReceiveProps(nextProps: Props) {
@@ -78,11 +84,13 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
           }
         })
       )).filter(definition => definition);
-      this.setState({
-        ...this.state,
-        loading: false,
-        definitions
-      });
+      if (this.mounted) {
+        this.setState({
+          ...this.state,
+          loading: false,
+          definitions
+        });
+      }
     } catch (e) {
       console.log('Couldnt fetch strongs num: ', strongs.join(', '));
     }

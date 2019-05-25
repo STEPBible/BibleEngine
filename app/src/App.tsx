@@ -45,6 +45,7 @@ interface State {
   isLeftMenuOpen: boolean;
   isReady: boolean;
   isRightMenuOpen: boolean;
+  loading: boolean;
   loadingMessage: string;
 }
 
@@ -65,6 +66,7 @@ export default class App extends React.PureComponent<Props, State> {
     isLeftMenuOpen: false,
     isReady: false,
     isRightMenuOpen: false,
+    loading: false,
     loadingMessage: ''
   };
 
@@ -157,12 +159,16 @@ export default class App extends React.PureComponent<Props, State> {
                     animation={animation}
                   />
                 )}
-                <ReadingView
-                  chapterNum={this.state.currentChapterNum}
-                  bookName={this.state.currentBookFullTitle}
-                  content={this.state.content}
-                  sqlBible={this.sqlBible}
-                />
+                {this.state.loading ? (
+                  <LoadingScreen loadingText="" />
+                ) : (
+                  <ReadingView
+                    chapterNum={this.state.currentChapterNum}
+                    bookName={this.state.currentBookFullTitle}
+                    content={this.state.content}
+                    sqlBible={this.sqlBible}
+                  />
+                )}
               </React.Fragment>
             )}
           </SearchBarProvider>
@@ -175,6 +181,11 @@ export default class App extends React.PureComponent<Props, State> {
     bookOsisId: string,
     versionChapterNum: number
   ) => {
+    console.time('changeBookAndChapter');
+    this.setState({
+      ...this.state,
+      loading: true
+    });
     const content = await this.sqlBible.getFullDataForReferenceRange(
       {
         bookOsisId,
@@ -195,8 +206,10 @@ export default class App extends React.PureComponent<Props, State> {
       content: content.content.contents,
       currentBookOsisId: bookOsisId,
       currentChapterNum: versionChapterNum,
-      isLeftMenuOpen: false
+      isLeftMenuOpen: false,
+      loading: false
     });
+    console.time('changeBookAndChapter');
   };
 
   onSearchMenuChange = (menuIsNowOpen: boolean) => {
@@ -216,10 +229,10 @@ export default class App extends React.PureComponent<Props, State> {
 
   updateLoadingMessage = (newMessage: string) => {
     console.log(newMessage);
-    this.setState({
+    this.state = {
       ...this.state,
       loadingMessage: newMessage
-    });
+    };
   };
 
   toggleMenu = () => {
