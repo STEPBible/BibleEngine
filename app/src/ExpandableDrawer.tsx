@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { FontFamily, FontSize, getDebugStyles } from './Constants';
 import { IBibleBookEntity } from '@bible-engine/core';
+import { TouchableRipple } from 'react-native-paper';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
@@ -62,27 +63,27 @@ export default class ExpandableDrawer extends React.PureComponent<
   );
 
   renderChapterNum = (num, index) => (
-    <TouchableHighlight
+    <TouchableRipple
       onPress={() => this.onChapterPress(num)}
       key={`child-${index}`}
       underlayColor="#e8eaed"
       style={styles.verses__cell}
     >
       <Text style={styles.verses__cell__text}>{num}</Text>
-    </TouchableHighlight>
+    </TouchableRipple>
   );
 
   render() {
     return (
       <React.Fragment>
-        <TouchableHighlight
+        <TouchableRipple
           key={this.props.index}
           underlayColor="#e8eaed"
           style={this.state.open ? styles['drawer--open'] : styles.drawer}
           onPress={this.onBookPress}
         >
           <Text style={styles.drawer__text}>{this.props.item.title}</Text>
-        </TouchableHighlight>
+        </TouchableRipple>
         {this.state.open ? this.renderChapterNums() : null}
       </React.Fragment>
     );
@@ -92,15 +93,15 @@ export default class ExpandableDrawer extends React.PureComponent<
 const styles = StyleSheet.create({
   drawer: {
     ...getDebugStyles(),
-    borderTopRightRadius: 24,
-    borderBottomRightRadius: 24,
+    borderTopRightRadius: DRAWER_HEIGHT / 2,
+    borderBottomRightRadius: DRAWER_HEIGHT / 2,
     justifyContent: 'center',
     height: DRAWER_HEIGHT,
     marginRight: 16
   },
   'drawer--open': {
-    borderTopRightRadius: 24,
-    borderBottomRightRadius: 24,
+    borderTopRightRadius: DRAWER_HEIGHT / 2,
+    borderBottomRightRadius: DRAWER_HEIGHT / 2,
     backgroundColor: '#e8eaed',
     justifyContent: 'center',
     height: DRAWER_HEIGHT,
