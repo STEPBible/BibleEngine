@@ -75,64 +75,6 @@ export default class App extends React.PureComponent<Props, State> {
     this.loadResourcesAsync();
   }
 
-  componentDidMount() {
-    setTimeout(() => {
-      this.openDrawer();
-    }, 200);
-  }
-
-  getItemLayout = (data, index) => ({
-    length: DRAWER_HEIGHT,
-    offset: DRAWER_HEIGHT * index,
-    index
-  });
-
-  scrollToBook = index => {
-    this.bookListRef.scrollToIndex({ index });
-  };
-
-  openDrawer = () => {
-    if (this.leftMenuRef) {
-      this.leftMenuRef.openDrawer();
-    }
-  };
-
-  closeDrawer = () => {
-    if (this.leftMenuRef) {
-      this.leftMenuRef.closeDrawer();
-    }
-  };
-
-  renderHeader = () => (
-    <View style={styles.header}>
-      <View>
-        <Text style={styles.header__title}>ESV</Text>
-        <Text style={styles.header__subtitle}>English Standard Version</Text>
-      </View>
-    </View>
-  );
-
-  renderDrawer = () => (
-    <FlatList
-      data={this.state.books}
-      keyExtractor={(item, index) => index.toString()}
-      getItemLayout={this.getItemLayout}
-      ref={ref => (this.bookListRef = ref)}
-      renderItem={({ item, index }) => (
-        <ExpandableDrawer
-          closeDrawer={this.closeDrawer}
-          item={item}
-          scrollToBook={this.scrollToBook}
-          changeBookAndChapter={this.changeBookAndChapter}
-          index={index}
-        />
-      )}
-      ListHeaderComponent={this.renderHeader}
-      ListFooterComponent={<View style={styles.footer} />}
-      showsVerticalScrollIndicator={false}
-    />
-  );
-
   render() {
     if (!this.state.isReady) {
       return <LoadingScreen loadingText={this.state.loadingMessage} />;
@@ -176,6 +118,58 @@ export default class App extends React.PureComponent<Props, State> {
       </DrawerLayout>
     );
   }
+
+  renderHeader = () => (
+    <View style={styles.header}>
+      <View>
+        <Text style={styles.header__title}>ESV</Text>
+        <Text style={styles.header__subtitle}>English Standard Version</Text>
+      </View>
+    </View>
+  );
+
+  renderDrawer = () => (
+    <FlatList
+      data={this.state.books}
+      keyExtractor={(item, index) => index.toString()}
+      getItemLayout={this.getItemLayout}
+      ref={ref => (this.bookListRef = ref)}
+      renderItem={({ item, index }) => (
+        <ExpandableDrawer
+          closeDrawer={this.closeDrawer}
+          item={item}
+          scrollToBook={this.scrollToBook}
+          changeBookAndChapter={this.changeBookAndChapter}
+          index={index}
+        />
+      )}
+      ListHeaderComponent={this.renderHeader}
+      ListFooterComponent={<View style={styles.footer} />}
+      showsVerticalScrollIndicator={false}
+    />
+  );
+
+  getItemLayout = (data, index) => ({
+    length: DRAWER_HEIGHT,
+    offset: DRAWER_HEIGHT * index,
+    index
+  });
+
+  scrollToBook = index => {
+    this.bookListRef.scrollToIndex({ index });
+  };
+
+  openDrawer = () => {
+    if (this.leftMenuRef) {
+      this.leftMenuRef.openDrawer();
+    }
+  };
+
+  closeDrawer = () => {
+    if (this.leftMenuRef) {
+      this.leftMenuRef.closeDrawer();
+    }
+  };
 
   changeBookAndChapter = async (
     bookOsisId: string,
@@ -271,14 +265,7 @@ export default class App extends React.PureComponent<Props, State> {
       ]);
     }
     if (!bookList) {
-      this.updateLoadingMessage('Loading books...');
-      bookList = await this.sqlBible.getBooksForVersion(1);
-      bookList = bookList.map((book: BibleBook) => ({
-        numChapters: book.chaptersCount.length,
-        osisId: book.osisId,
-        title: book.title
-      }));
-      store.save(AsyncStorageKey.CACHED_BOOK_LIST, bookList);
+      bookList = await this.loadBooks();
     }
     if (!osisBookName) {
       osisBookName = 'Gen';
@@ -289,20 +276,12 @@ export default class App extends React.PureComponent<Props, State> {
       store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum);
     }
     if (!chapterOutput) {
-      this.updateLoadingMessage('Loading chapter...');
-      chapterOutput = await this.sqlBible.getFullDataForReferenceRange(
-        {
-          bookOsisId: osisBookName,
-          versionUid: 'ESV',
-          versionChapterNum: Number(chapterNum)
-        },
-        true
-      );
-      store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterOutput);
+      await this.loadChapter(osisBookName, chapterNum);
     }
     const currentBookFullTitle = bookList.filter(
       book => book.osisId === osisBookName
     )[0].title;
+    this.updateLoadingMessage('Tidying up...');
     this.setState({
       ...this.state,
       currentBookFullTitle,
@@ -315,11 +294,30 @@ export default class App extends React.PureComponent<Props, State> {
     });
   };
 
-  leftMenuGesturesAreEnabled = () => {
-    if (!this.rightMenuRef) {
-      return true;
-    }
-    return !this.rightMenuRef.isOpen;
+  loadChapter = async (osisBookName: string, chapterNum: string) => {
+    this.updateLoadingMessage('Loading chapter...');
+    const chapterOutput = await this.sqlBible.getFullDataForReferenceRange(
+      {
+        bookOsisId: osisBookName,
+        versionUid: 'ESV',
+        versionChapterNum: Number(chapterNum)
+      },
+      true
+    );
+    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterOutput);
+    return chapterOutput;
+  };
+
+  loadBooks = async () => {
+    this.updateLoadingMessage('Loading books...');
+    let bookList = await this.sqlBible.getBooksForVersion(1);
+    bookList = bookList.map((book: IBibleBook) => ({
+      numChapters: book.chaptersCount.length,
+      osisId: book.osisId,
+      title: book.title
+    }));
+    store.save(AsyncStorageKey.CACHED_BOOK_LIST, bookList);
+    return bookList;
   };
 }
 
