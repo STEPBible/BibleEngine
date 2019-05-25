@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { ifIphoneX, ifAndroid } from './utils';
 import {
+  BackHandler,
   StyleSheet,
   TextInput,
   Animated,
@@ -64,7 +65,20 @@ export default class SearchPage extends React.PureComponent<Props, State> {
       this.searchIndex = require('../assets/esvSearchIndex.json');
       this.lunrSearchEngine = elasticlunr.Index.load(this.searchIndex);
     }, 100);
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
   }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress);
+  }
+
+  handleBackPress = () => {
+    if (this.state.isFocused) {
+      this.endSearch();
+      return true;
+    }
+    return false;
+  };
 
   updateSearch = (inputText: string) => {
     const results = this.lunrSearchEngine.search(inputText, {});
