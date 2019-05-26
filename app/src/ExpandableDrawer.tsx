@@ -23,27 +23,19 @@ interface Props {
   closeDrawer: Function;
   drawerStyle: any;
   index: number;
+  open: boolean;
   scrollToBook: Function;
 }
-interface State {
-  open: boolean;
-}
+interface State {}
 
 export default class ExpandableDrawer extends React.PureComponent<
   Props,
   State
 > {
-  state = {
-    open: false
-  };
-
   onBookPress = () => {
     const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
     LayoutAnimation.configureNext(animation);
     this.props.scrollToBook(this.props.index);
-    this.setState({
-      open: !this.state.open
-    });
   };
 
   onChapterPress = (num: number) => {
@@ -80,12 +72,12 @@ export default class ExpandableDrawer extends React.PureComponent<
           borderless
           key={this.props.index}
           underlayColor="#e8eaed"
-          style={this.state.open ? styles['drawer--open'] : styles.drawer}
+          style={this.props.open ? styles['drawer--open'] : styles.drawer}
           onPress={this.onBookPress}
         >
           <Text style={styles.drawer__text}>{this.props.item.title}</Text>
         </TouchableRipple>
-        {this.state.open ? this.renderChapterNums() : null}
+        {this.props.open ? this.renderChapterNums() : null}
       </React.Fragment>
     );
   }

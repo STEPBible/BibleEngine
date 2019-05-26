@@ -8,7 +8,8 @@ import {
   UIManager,
   View,
   Text,
-  StyleSheet
+  StyleSheet,
+  LayoutAnimation
 } from 'react-native';
 import * as store from 'react-native-simple-store';
 import { IBibleBook, BibleEngine, IBibleContent } from '@bible-engine/core';
@@ -33,9 +34,10 @@ import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
-const DRAWER_HEIGHT = 48;
+const DRAWER_HEIGHT = 52;
 
 interface State {
+  activeBookIndex?: number;
   books: IBibleBook[];
   content: IBibleContent[];
   currentBookOsisId: string;
@@ -56,6 +58,7 @@ export default class App extends React.PureComponent<Props, State> {
   sqlBible: BibleEngine;
 
   state = {
+    activeBookIndex: undefined,
     books: [],
     content: [],
     currentBookOsisId: 'Gen',
@@ -136,6 +139,7 @@ export default class App extends React.PureComponent<Props, State> {
         <ExpandableDrawer
           closeDrawer={this.closeDrawer}
           item={item}
+          open={index === this.state.activeBookIndex}
           scrollToBook={this.scrollToBook}
           changeBookAndChapter={this.changeBookAndChapter}
           index={index}
@@ -153,7 +157,18 @@ export default class App extends React.PureComponent<Props, State> {
     index
   });
 
-  scrollToBook = index => {
+  scrollToBook = (index: number) => {
+    if (index === this.state.activeBookIndex) {
+      this.setState({
+        ...this.state,
+        activeBookIndex: undefined
+      });
+      return;
+    }
+    this.setState({
+      ...this.state,
+      activeBookIndex: index
+    });
     this.bookListRef.scrollToIndex({ index });
   };
 
@@ -263,6 +278,8 @@ export default class App extends React.PureComponent<Props, State> {
       book => book.osisId === osisBookName
     )[0].title;
     this.updateLoadingMessage('Tidying up...');
+    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
+    LayoutAnimation.configureNext(animation);
     this.setState({
       ...this.state,
       currentBookFullTitle,
