@@ -14,7 +14,7 @@ import { TouchableRipple } from 'react-native-paper';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
-const DRAWER_HEIGHT = 56;
+const DRAWER_HEIGHT = 52;
 const CELL_WIDTH = DRAWER_WIDTH / 5 - 4;
 
 interface Props {

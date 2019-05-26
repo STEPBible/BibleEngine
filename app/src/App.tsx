@@ -44,7 +44,6 @@ interface State {
   currentVersionUid: string;
   isLeftMenuOpen: boolean;
   isReady: boolean;
-  isRightMenuOpen: boolean;
   loading: boolean;
   loadingMessage: string;
 }
@@ -65,7 +64,6 @@ export default class App extends React.PureComponent<Props, State> {
     currentVersionUid: 'ESV',
     isLeftMenuOpen: false,
     isReady: false,
-    isRightMenuOpen: false,
     loading: false,
     loadingMessage: ''
   };
@@ -206,21 +204,6 @@ export default class App extends React.PureComponent<Props, State> {
     console.time('changeBookAndChapter');
   };
 
-  onSearchMenuChange = (menuIsNowOpen: boolean) => {
-    if (!menuIsNowOpen) {
-      Keyboard.dismiss();
-      this.setState({
-        ...this.state,
-        isRightMenuOpen: false
-      });
-    } else {
-      this.setState({
-        ...this.state,
-        isRightMenuOpen: true
-      });
-    }
-  };
-
   updateLoadingMessage = (newMessage: string) => {
     console.log(newMessage);
     this.state = {
@@ -333,7 +316,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flex: 1,
     flexDirection: 'row',
-    height: 120,
+    height: 100,
     marginBottom: 15,
     marginTop: ifIphoneX(30, 0),
     width: DRAWER_WIDTH
