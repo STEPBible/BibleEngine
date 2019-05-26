@@ -100,7 +100,7 @@ export default class App extends React.PureComponent<Props, State> {
                   />
                 )}
                 {this.state.loading ? (
-                  <LoadingScreen loadingText="" />
+                  <LoadingScreen loadingText="Rummaging around..." />
                 ) : (
                   <ReadingView
                     chapterNum={this.state.currentChapterNum}

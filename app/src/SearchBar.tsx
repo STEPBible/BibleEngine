@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: FontSize.SMALL,
     height: '100%',
-    marginLeft: Margin.MEDIUM,
+    marginLeft: Margin.SMALL,
     zIndex: 3,
     ...getDebugStyles()
   },

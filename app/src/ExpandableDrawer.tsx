@@ -96,6 +96,7 @@ const styles = StyleSheet.create({
     ...getDebugStyles(),
     borderTopRightRadius: DRAWER_HEIGHT / 2,
     borderBottomRightRadius: DRAWER_HEIGHT / 2,
+    borderColor: 'white',
     justifyContent: 'center',
     height: DRAWER_HEIGHT,
     marginRight: 16
@@ -103,6 +104,7 @@ const styles = StyleSheet.create({
   'drawer--open': {
     borderTopRightRadius: DRAWER_HEIGHT / 2,
     borderBottomRightRadius: DRAWER_HEIGHT / 2,
+    borderColor: 'white',
     backgroundColor: '#e8eaed',
     justifyContent: 'center',
     height: DRAWER_HEIGHT,
