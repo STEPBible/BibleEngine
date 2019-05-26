@@ -100,7 +100,7 @@ export default class App extends React.PureComponent<Props, State> {
                   />
                 )}
                 {this.state.loading ? (
-                  <LoadingScreen loadingText="Rummaging around..." />
+                  <LoadingScreen loadingText="Loading..." />
                 ) : (
                   <ReadingView
                     chapterNum={this.state.currentChapterNum}
@@ -206,10 +206,10 @@ export default class App extends React.PureComponent<Props, State> {
 
   updateLoadingMessage = (newMessage: string) => {
     console.log(newMessage);
-    this.state = {
+    this.setState({
       ...this.state,
       loadingMessage: newMessage
-    };
+    });
   };
 
   toggleMenu = () => {
@@ -224,10 +224,8 @@ export default class App extends React.PureComponent<Props, State> {
     UIManager.setLayoutAnimationEnabledExperimental &&
       UIManager.setLayoutAnimationEnabledExperimental(true);
     console.disableYellowBox = true;
-    this.updateLoadingMessage('Loading fonts...');
-    await Fonts.load();
     this.updateLoadingMessage('Loading database...');
-    await Database.load(bibleDatabaseModule);
+    await Promise.all([Fonts.load(), await Database.load(bibleDatabaseModule)]);
     this.sqlBible = new BibleEngine({
       database: 'bibles.db',
       type: 'expo',
