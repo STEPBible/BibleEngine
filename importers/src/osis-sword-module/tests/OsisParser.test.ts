@@ -1,15 +1,17 @@
 import * as types from '../src/types';
 import { getBibleEngineInputFromXML } from '../src/OsisParser';
 
-test('BibleEngine database is loaded correctly', async () => {
+describe('OsisParser', () => {
   const psalmsXML: types.ChapterXML = require('./Psa23EsvXmlResult.json');
-  const shortBookXML: types.ChapterXML[] = [
-    {
-      intro: '',
-      verses: psalmsXML.verses
-    }
-  ];
-  const bookJson = getBibleEngineInputFromXML(shortBookXML);
-  const expectedBookJson = require('./psalm23EsvExpected.json');
-  expect(bookJson).toEqual(expectedBookJson);
+
+  test('footnote associated with phrase that comes before, not after', async () => {
+    const psalm23verse2 = [psalmsXML.verses[1]];
+    const bookJson = getBibleEngineInputFromXML([
+      { intro: '', verses: psalm23verse2 }
+    ]);
+    const footnoteText = 'waters of rest';
+    expect(JSON.stringify(bookJson)).toEqual(
+      expect.stringContaining(footnoteText)
+    );
+  });
 });

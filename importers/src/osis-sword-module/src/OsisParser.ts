@@ -241,7 +241,12 @@ function parseClosingTag(tagName: string, context: ParserContext) {
         case OsisXmlTag.NOTE: {
             if (context.noteText.trim()) {
                 const footnote = getFootnote(context);
-                context.notes.push(footnote);
+                if (context.phrases.length) {
+                    if (!context.phrases[context.phrases.length - 1].notes) {
+                        context.phrases[context.phrases.length - 1].notes = [];
+                    }
+                    context.phrases[context.phrases.length - 1].notes.push(footnote)
+                }
                 context.noteCount += 1;
             }
             context.noteText = '';
@@ -292,10 +297,6 @@ function getPhrase(content: string, context: ParserContext): IBibleContentPhrase
     if (context.crossRefs.length) {
         phrase['crossReferences'] = context.crossRefs;
         context.crossRefs = [];
-    }
-    if (context.notes.length) {
-        phrase['notes'] = context.notes;
-        context.notes = [];
     }
     return phrase;
 }
