@@ -14,4 +14,38 @@ describe('OsisParser', () => {
       expect.stringContaining(footnoteText)
     );
   });
+
+  test('section header is included in psalms', () => {
+    const bookJson = getBibleEngineInputFromXML([
+      { intro: '', verses: psalmsXML.verses }
+    ]);
+    const sectionHeader = 'The LORD Is My Shepherd';
+    expect(true).toBe(true)
+    expect(JSON.stringify(bookJson)).toEqual(
+      expect.stringContaining(sectionHeader)
+    )
+  })
+
+  test('psalm title is included', () => {
+    const bookJson = getBibleEngineInputFromXML([
+      { intro: '', verses: psalmsXML.verses }
+    ]);
+    let titleGroupExists = false;
+    const queue = [bookJson[0]];
+    while (queue.length) {
+      const top: any = queue.pop();
+      if (top['groupType'] === 'title') {
+        titleGroupExists = true;
+        return;
+      }
+      if ('contents' in top) {
+        queue.push(...top['contents'])
+      }
+    }
+    const partOfPsalmTitle = 'David'
+    expect(titleGroupExists).toBe(true)
+    expect(JSON.stringify(bookJson)).toEqual(
+      expect.stringContaining(partOfPsalmTitle)
+    );
+  })
 });

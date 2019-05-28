@@ -37,6 +37,8 @@ export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContent
         osisRef: '',
         notes: [],
         noteCount: 0,
+        psalmTitle: undefined,
+        psalmTitleContents: [],
         titleSections: [],
         phrases: [],
         titleSection: { type: 'section', contents: [] },
@@ -100,6 +102,10 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
             break;
         }
         case OsisXmlTag.TITLE: {
+            if (node.attributes.type === OsisXmlNodeType.PSALM) {
+                context.psalmTitle = node;
+                break;
+            }
             context.title = node;
             if (context.titleSection.contents.length) {
                 context.titleSections.push(context.titleSection);
@@ -174,6 +180,11 @@ function parseTextNode(text: string, context: ParserContext) {
     if (context.divineNameNode) {
         formattedText = formattedText.toUpperCase();
     }
+    if (context.psalmTitle) {
+        const titlePhrase = getPhrase(formattedText, context);
+        context.psalmTitleContents.push(titlePhrase);
+        return;
+    }
     if (context.title) {
         if (node && node.name === OsisXmlTag.DIVINE_NAME) {
             context.titleText += text.toUpperCase();
@@ -206,7 +217,6 @@ function parseTextNode(text: string, context: ParserContext) {
                 break;
             default:
                 const phrase = getPhrase(formattedText, context);
-
                 context.phrases.push(phrase);
                 break;
         }
@@ -220,12 +230,20 @@ function parseClosingTag(tagName: string, context: ParserContext) {
     const { currentNode: node } = context;
     switch (tagName) {
         case OsisXmlTag.TITLE: {
+            if (context.psalmTitle) {
+                const psalmTitle = getPsalmTitle(context)
+                context.phrases.push(psalmTitle)
+                context.psalmTitle = undefined;
+                context.psalmTitleContents = [];
+            }
             if (!context.title) {
-                context.paragraph!.contents = context.phrases;
-                context.titleSection!.contents.push(context.paragraph!);
-                context.paragraph = undefined;
-                context.phrases = [];
-                context.verseNum += 1;
+                if (context.paragraph) {
+                    context.paragraph!.contents = context.phrases;
+                    context.titleSection!.contents.push(context.paragraph!);
+                    context.paragraph = undefined;
+                    context.phrases = [];
+                    context.verseNum += 1;
+                }
                 break;
             }
             const title = getStringWithoutXMLTags(context.titleText);
@@ -413,6 +431,16 @@ function parseQuote(text: string, context: ParserContext) {
         // push(strongsNumbers);
     }
 }
+
+function getPsalmTitle(context: ParserContext) {
+    const psalmTitle: IBibleContentGroup<'title'> = {
+        type: 'group',
+        groupType: 'title',
+        contents: context.psalmTitleContents
+    }
+    return psalmTitle
+}
+
 function isFootnote(node: OsisXmlNode | undefined) {
     return (
         node &&

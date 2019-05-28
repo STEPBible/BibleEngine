@@ -91,7 +91,9 @@ export type ParserContext = {
     notes: IBibleNote[];
     noteText: string;
     osisRef: string;
-    phrases: IBibleContentPhrase[];
+    psalmTitle?: OsisXmlNode;
+    psalmTitleContents?: IBibleContentPhrase[];
+    phrases: any;
     paragraph?: IBibleContentGroup<'paragraph'>;
     noteCount: number;
     title?: OsisXmlNode;
