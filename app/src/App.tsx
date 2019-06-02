@@ -9,7 +9,8 @@ import {
   View,
   Text,
   StyleSheet,
-  LayoutAnimation
+  LayoutAnimation,
+  AsyncStorage
 } from 'react-native';
 import * as store from 'react-native-simple-store';
 import { IBibleBook, BibleEngine, IBibleContent } from '@bible-engine/core';
@@ -312,6 +313,7 @@ export default class App extends React.PureComponent<Props, State> {
         this.updateLoadingMessage(
           'Updating database... \n\n(can take up to 30 seconds) \n\n Speed improvements coming soon! 🚀'
         );
+        await AsyncStorage.multiRemove(Object.keys(AsyncStorageKey));
         await Expo.FileSystem.deleteAsync(pathToDownloadTo, {
           idempotent: true
         });
