@@ -31,6 +31,7 @@ import 'react-native-console-time-polyfill';
 const bibleDatabaseModule = require('../assets/bibles.db');
 import ExpandableDrawer from './ExpandableDrawer';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
+import Sentry from 'react-native-sentry';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
@@ -68,7 +69,7 @@ export default class App extends React.PureComponent<Props, State> {
     isLeftMenuOpen: false,
     isReady: false,
     loading: false,
-    loadingMessage: ''
+    loadingMessage: 'Loading fonts...'
   };
 
   constructor(props: Props) {
@@ -219,14 +220,6 @@ export default class App extends React.PureComponent<Props, State> {
     console.time('changeBookAndChapter');
   };
 
-  updateLoadingMessage = (newMessage: string) => {
-    console.log(newMessage);
-    this.setState({
-      ...this.state,
-      loadingMessage: newMessage
-    });
-  };
-
   toggleMenu = () => {
     this.leftMenuRef.openDrawer();
     this.setState({
@@ -235,31 +228,139 @@ export default class App extends React.PureComponent<Props, State> {
     });
   };
 
+  updateLoadingMessage = (newMessage: string, error?: any) => {
+    console.log(newMessage);
+    if (error) {
+      this.setState({
+        ...this.state,
+        loadingMessage: newMessage + this.safelyStringify(error)
+      });
+      return;
+    }
+    this.setState({
+      ...this.state,
+      loadingMessage: newMessage
+    });
+  };
+
+  safelyStringify = (json: any): string => {
+    const getCircularReplacer = () => {
+      const seen = new WeakSet();
+      return (key: any, value: any) => {
+        if (typeof value === 'object' && value !== null) {
+          if (seen.has(value)) {
+            return;
+          }
+          seen.add(value);
+        }
+        return value;
+      };
+    };
+    return JSON.stringify(json, getCircularReplacer());
+  };
+
   loadResourcesAsync = async () => {
     UIManager.setLayoutAnimationEnabledExperimental &&
       UIManager.setLayoutAnimationEnabledExperimental(true);
     console.disableYellowBox = true;
-    this.updateLoadingMessage('Loading database...');
-    await Promise.all([Fonts.load(), await Database.load(bibleDatabaseModule)]);
-    this.sqlBible = new BibleEngine({
-      database: 'bibles.db',
-      type: 'expo',
-      synchronize: false
-    });
-    this.updateLoadingMessage('Finding your place...');
+
+    try {
+      await Fonts.load();
+    } catch (error) {
+      this.updateLoadingMessage('Error loading fonts: ', error);
+      Sentry.captureException(error);
+    }
+
+    const sqliteDirectory = `${Expo.FileSystem.documentDirectory}SQLite`;
+    const pathToDownloadTo = `${sqliteDirectory}/bibles.db`;
+    try {
+      this.updateLoadingMessage('Creating sqlite directory...');
+      const { exists } = await Expo.FileSystem.getInfoAsync(sqliteDirectory);
+      if (!exists) {
+        await Expo.FileSystem.makeDirectoryAsync(sqliteDirectory);
+      }
+    } catch (error) {
+      this.updateLoadingMessage('Error creating sqlite directory: ', error);
+      Sentry.captureException(error);
+    }
+
+    let incomingHash;
+    let uriToDownload;
+    try {
+      this.updateLoadingMessage('Getting hash from module...');
+      const asset = Expo.Asset.fromModule(bibleDatabaseModule);
+      incomingHash = asset.hash;
+      uriToDownload = asset.uri;
+    } catch (error) {
+      this.updateLoadingMessage('Error getting hash from module: ', error);
+      Sentry.captureException(error);
+    }
+
+    let fileExists;
+    try {
+      this.updateLoadingMessage('Checking the database...');
+      const { exists } = await Expo.FileSystem.getInfoAsync(pathToDownloadTo);
+      fileExists = exists;
+    } catch (error) {
+      this.updateLoadingMessage('Error checking the database: ', error);
+      Sentry.captureException(error);
+    }
+
+    const existingHash = await store.get('existingHash');
+    if (!fileExists || incomingHash !== existingHash) {
+      try {
+        this.updateLoadingMessage('Downloading database...');
+        await Expo.FileSystem.deleteAsync(pathToDownloadTo, {
+          idempotent: true
+        });
+        await Expo.FileSystem.downloadAsync(uriToDownload, pathToDownloadTo);
+      } catch (error) {
+        this.updateLoadingMessage('Error downloading database: ', error);
+        Sentry.captureException(error);
+      }
+      store.save('existingHash', incomingHash);
+    }
+
+    try {
+      this.updateLoadingMessage('opening database...');
+      await Expo.SQLite.openDatabase('bibles.db');
+    } catch (error) {
+      this.updateLoadingMessage('Error opening database: ', error);
+      Sentry.captureException(error);
+    }
+
+    try {
+      this.updateLoadingMessage('Loading BibleEngine...');
+      this.sqlBible = new BibleEngine({
+        database: 'bibles.db',
+        type: 'expo',
+        synchronize: false
+      });
+    } catch (error) {
+      this.updateLoadingMessage('Error loading BibleEngine: ', error);
+      Sentry.captureException(error);
+    }
+
     let bookList = null;
     let chapterOutput = null;
     let chapterNum = '';
     let osisBookName = '';
 
     if (Flags.USE_CACHE) {
-      [bookList, chapterOutput, chapterNum, osisBookName] = await store.get([
-        AsyncStorageKey.CACHED_BOOK_LIST,
-        AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
-        AsyncStorageKey.CACHED_CHAPTER_NUM,
-        AsyncStorageKey.CACHED_OSIS_BOOK_NAME
-      ]);
+      try {
+        this.updateLoadingMessage('Finding your place...');
+        [bookList, chapterOutput, chapterNum, osisBookName] = await store.get([
+          AsyncStorageKey.CACHED_BOOK_LIST,
+          AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
+          AsyncStorageKey.CACHED_CHAPTER_NUM,
+          AsyncStorageKey.CACHED_OSIS_BOOK_NAME
+        ]);
+      } catch (error) {
+        this.updateLoadingMessage('Error finding your place: ', error);
+        Sentry.captureException(error);
+      }
     }
+
     if (!bookList) {
       bookList = await this.loadBooks();
     }
@@ -294,28 +395,40 @@ export default class App extends React.PureComponent<Props, State> {
 
   loadChapter = async (osisBookName: string, chapterNum: string) => {
     this.updateLoadingMessage('Loading chapter...');
-    const chapterOutput = await this.sqlBible.getFullDataForReferenceRange(
-      {
-        bookOsisId: osisBookName,
-        versionUid: 'ESV',
-        versionChapterNum: Number(chapterNum)
-      },
-      true
-    );
-    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterOutput);
-    return chapterOutput;
+    try {
+      const chapterOutput = await this.sqlBible.getFullDataForReferenceRange(
+        {
+          bookOsisId: osisBookName,
+          versionUid: 'ESV',
+          versionChapterNum: Number(chapterNum)
+        },
+        true
+      );
+      store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterOutput);
+      return chapterOutput;
+    } catch (error) {
+      this.updateLoadingMessage('Error loading chapter: ', error);
+      Sentry.captureException(error);
+      return {};
+    }
   };
 
   loadBooks = async () => {
     this.updateLoadingMessage('Loading books...');
-    let bookList = await this.sqlBible.getBooksForVersion(1);
-    bookList = bookList.map((book: IBibleBook) => ({
-      numChapters: book.chaptersCount.length,
-      osisId: book.osisId,
-      title: book.title
-    }));
-    store.save(AsyncStorageKey.CACHED_BOOK_LIST, bookList);
-    return bookList;
+    try {
+      let bookList = await this.sqlBible.getBooksForVersion(1);
+      bookList = bookList.map((book: IBibleBook) => ({
+        numChapters: book.chaptersCount.length,
+        osisId: book.osisId,
+        title: book.title
+      }));
+      store.save(AsyncStorageKey.CACHED_BOOK_LIST, bookList);
+      return bookList;
+    } catch (error) {
+      this.updateLoadingMessage('Error loading books: ', error);
+      Sentry.captureException(error);
+      return [];
+    }
   };
 }
 

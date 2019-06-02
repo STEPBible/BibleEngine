@@ -21,6 +21,7 @@ export default class Database {
     const existingHash = await store.get('existingHash');
     if (!fileExists || incomingHash !== existingHash) {
       console.log('Updating database...');
+      await Expo.FileSystem.deleteAsync(pathToDownloadTo, { idempotent: true });
       await Expo.FileSystem.downloadAsync(uriToDownload, pathToDownloadTo);
       store.save('existingHash', incomingHash);
     }
