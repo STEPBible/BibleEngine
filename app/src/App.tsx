@@ -309,13 +309,15 @@ export default class App extends React.PureComponent<Props, State> {
     const existingHash = await store.get('existingHash');
     if (!fileExists || incomingHash !== existingHash) {
       try {
-        this.updateLoadingMessage('Downloading database...');
+        this.updateLoadingMessage(
+          'Updating database... \n\n(can take up to 30 seconds) \n\n Speed improvements coming soon! 🚀'
+        );
         await Expo.FileSystem.deleteAsync(pathToDownloadTo, {
           idempotent: true
         });
         await Expo.FileSystem.downloadAsync(uriToDownload, pathToDownloadTo);
       } catch (error) {
-        this.updateLoadingMessage('Error downloading database: ', error);
+        this.updateLoadingMessage('Error updating database: ', error);
         Sentry.captureException(error);
       }
       store.save('existingHash', incomingHash);
