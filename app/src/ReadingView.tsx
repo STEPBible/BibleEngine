@@ -48,7 +48,9 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
         return (
           <Fragment key={`group-${index}`}>
             {this.renderVerseNumber(content)}
-            {children.map((child, index) => this.renderItem(child, index))}
+            <View style={styles.section}>
+              {children.map((child, index) => this.renderItem(child, index))}
+            </View>
           </Fragment>
         );
       }
