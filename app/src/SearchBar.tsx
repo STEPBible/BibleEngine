@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { ifIphoneX, ifAndroid } from './utils';
-import { IconButton } from 'react-native-paper';
+import { IconButton, TouchableRipple } from 'react-native-paper';
 import {
   BackHandler,
   StyleSheet,
@@ -139,10 +139,7 @@ export default class SearchPage extends React.PureComponent<Props, State> {
         <FlatList
           data={this.verseResults}
           showsVerticalScrollIndicator={false}
-          renderItem={ifAndroid(
-            this.renderSearchResultAndroid,
-            this.renderSearchResultiOS
-          )}
+          renderItem={this.renderSearchResult}
           ListFooterComponent={<View style={styles.scrollViewBottomBuffer} />}
           keyExtractor={(item, index) => index.toString()}
         />
@@ -150,19 +147,10 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     );
   };
 
-  renderSearchResultiOS = ({ item }) => (
-    <TouchableHighlight onPress={() => {}} underlayColor="#d4d4d4">
+  renderSearchResult = ({ item }) => (
+    <TouchableRipple onPress={() => {}} underlayColor="#d4d4d4">
       <View style={styles.result}>{this.renderSearchResultContent(item)}</View>
-    </TouchableHighlight>
-  );
-
-  renderSearchResultAndroid = ({ item }) => (
-    <TouchableNativeFeedback
-      onPress={() => {}}
-      background={TouchableNativeFeedback.SelectableBackground()}
-    >
-      <View style={styles.result}>{this.renderSearchResultContent(item)}</View>
-    </TouchableNativeFeedback>
+    </TouchableRipple>
   );
 
   renderSearchResultContent = item => (
