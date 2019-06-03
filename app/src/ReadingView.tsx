@@ -16,10 +16,12 @@ import {
   FontFamily,
   getDebugStyles,
   Flags,
-  Settings
+  Settings,
+  googleAnalytics
 } from './Constants';
 import CrossReference from './CrossReference';
 import Footnote from './Footnote';
+import { PageHit } from 'expo-analytics';
 
 interface Props {
   chapterNum: number;
@@ -144,6 +146,14 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
   bookAndChapterTitle = () => ({
     overallTitle: `${this.props.bookName} ${this.props.chapterNum}`
   });
+
+  componentDidMount() {
+    if (!__DEV__) {
+      googleAnalytics
+        .hit(new PageHit(this.bookAndChapterTitle().overallTitle))
+        .catch(() => {});
+    }
+  }
 
   render() {
     return (

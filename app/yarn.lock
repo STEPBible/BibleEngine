@@ -3345,6 +3345,11 @@ expo-analytics-segment@~2.0.0:
   dependencies:
     expo-core "~2.0.0"
 
+expo-analytics@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/expo-analytics/-/expo-analytics-1.0.8.tgz#0400523dd38b416183d15c638814e129a9f823ef"
+  integrity sha512-8sqAYK1OvuHTJ3cmPPSMC7dV00MoN7LjLWTZM3Dty8fgXzr7i0G8PoQlF/S2DiU/eFdEcswbD/cpX6aQ4uZjOw==
+
 expo-app-auth@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/expo-app-auth/-/expo-app-auth-2.0.0.tgz#434d1a16f62a298b9ed1eff6cc6a464d1d29440f"
