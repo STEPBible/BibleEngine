@@ -50,7 +50,7 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
         return (
           <Fragment key={`group-${index}`}>
             {this.renderVerseNumber(content)}
-            <View style={styles.section}>
+            <View style={styles.paragraph}>
               {children.map((child, index) => this.renderItem(child, index))}
             </View>
           </Fragment>
@@ -193,6 +193,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.EXTRA_SMALL,
     marginRight: 7
+  },
+  paragraph: {
+    flexDirection: 'row',
+    flexWrap: 'wrap'
   },
   section: {
     flex: 1,
