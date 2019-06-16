@@ -129,9 +129,11 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
         {this.renderFootnote(content)}
         {this.renderVerseNumber(content)}
         {this.renderCrossReference(content)}
-        <View style={styles.phrase}>
-          <Text style={styles.phraseText}>{content.content}</Text>
-        </View>
+        {content.content.split(' ').map(phrase => (
+          <View style={styles.phrase}>
+            <Text style={styles.phraseText}>{phrase}</Text>
+          </View>
+        ))}
       </Fragment>
     );
   };
