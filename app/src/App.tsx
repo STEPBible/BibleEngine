@@ -377,7 +377,7 @@ export default class App extends React.PureComponent<Props, State> {
       store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum);
     }
     if (!chapterOutput) {
-      await this.loadChapter(osisBookName, chapterNum);
+      chapterOutput = await this.loadChapter(osisBookName, chapterNum);
     }
     const currentBookFullTitle = bookList.filter(
       book => book.osisId === osisBookName
