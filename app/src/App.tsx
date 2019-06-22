@@ -218,7 +218,7 @@ export default class App extends React.PureComponent<Props, State> {
       isLeftMenuOpen: false,
       loading: false
     });
-    console.time('changeBookAndChapter');
+    console.timeEnd('changeBookAndChapter');
   };
 
   toggleMenu = () => {
