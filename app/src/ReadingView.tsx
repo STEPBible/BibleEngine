@@ -49,8 +49,8 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
       if (content.groupType === 'paragraph' || content.groupType === 'indent') {
         return (
           <Fragment key={`group-${index}`}>
-            {this.renderVerseNumber(content)}
             <View style={styles.paragraph}>
+              {this.renderVerseNumber(content)}
               {children.map((child, index) => this.renderItem(child, index))}
             </View>
           </Fragment>
