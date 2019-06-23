@@ -223,6 +223,7 @@ export default class ReadingView extends React.PureComponent<Props, State> {
 
 const styles = StyleSheet.create({
   background: {
+    backgroundColor: 'white',
     flex: 1
   },
   chapterHeader: {
