@@ -48,7 +48,8 @@ export enum AsyncStorageKey {
   CACHED_BOOK_LIST = 'cachedBookList',
   CACHED_CHAPTER_OUTPUT = 'cachedChapterOutput',
   CACHED_CHAPTER_NUM = 'cachedChapterNum',
-  CACHED_OSIS_BOOK_NAME = 'cachedBookName'
+  CACHED_OSIS_BOOK_NAME = 'cachedBookName',
+  CACHED_NEXT_CHAPTER = 'cachedNextChapter'
 }
 
 export function getDebugStyles() {

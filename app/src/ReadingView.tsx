@@ -8,7 +8,13 @@ Sentry.config(
   'https://a0758a0dd01040728b6b7b0a3747d7f8@sentry.io/1427804'
 ).install();
 
-import { IBibleContent, BibleEngine, IBiblePhrase } from '@bible-engine/core';
+import {
+  IBibleContent,
+  BibleEngine,
+  IBiblePhrase,
+  IBibleReference,
+  IBibleBook
+} from '@bible-engine/core';
 import StrongsWord from './StrongsWord';
 import {
   Margin,
@@ -22,15 +28,28 @@ import {
 import CrossReference from './CrossReference';
 import Footnote from './Footnote';
 import { PageHit } from 'expo-analytics';
+import { Button } from 'react-native-paper';
 
 interface Props {
   chapterNum: number;
   bookName: string;
   content: IBibleContent[];
+  books: IBibleBook[];
+  bookOsisId: string;
+  nextChapter?: IBibleReference;
   sqlBible: BibleEngine;
 }
 
-export default class ReadingView extends React.PureComponent<Props, {}> {
+interface State {
+  bookOsisId: string;
+  chapterNum: number;
+  content: (IBibleContent | string)[];
+  loading: boolean;
+  nextChapter?: IBibleReference;
+}
+
+export default class ReadingView extends React.PureComponent<Props, State> {
+  itemNum = 0;
   renderItem = (content: IBibleContent, index: number): any => {
     this.itemNum += 1;
     if (!('type' in content) || content.type === 'phrase') {
@@ -165,22 +184,37 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
           data={[this.bookAndChapterTitle(), ...this.props.content]}
           showsVerticalScrollIndicator={false}
           renderItem={this.renderFlatlistItem}
-          ListFooterComponent={<View style={{ height: Margin.LARGE }} />}
+          ListFooterComponent={this.renderListFooter}
           keyExtractor={(item: any, index: number) => `flatlist-item-${index}`}
         />
       </View>
     );
   }
+
+  renderListFooter = () => {
+    if (this.state.nextChapter) {
+      const bookFullTitle = this.props.books.filter(
+        book => book.osisId === this.state.nextChapter.bookOsisId
+      )[0].title;
+      Button;
+      return (
+        <Button
+          onPress={() => {}}
+          mode="outlined"
+          color="black"
+          style={styles.footer}
+        >
+          {`${bookFullTitle} ${this.state.nextChapter.normalizedChapterNum}`}
+        </Button>
+      );
+    }
+    return null;
+  };
 }
 
 const styles = StyleSheet.create({
   background: {
-    backgroundColor: 'white',
-    flex: 1,
-    borderLeftColor: 'gray',
-    borderLeftWidth: 1,
-    borderRightColor: 'gray',
-    borderRightWidth: 0.5
+    flex: 1
   },
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,
@@ -224,5 +258,9 @@ const styles = StyleSheet.create({
     marginRight: 3,
     marginTop: -2,
     ...getDebugStyles()
+  },
+  footer: {
+    flex: 1,
+    margin: Margin.LARGE
   }
 });

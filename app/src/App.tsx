@@ -4,7 +4,6 @@ import {
   Dimensions,
   FlatList,
   StatusBar,
-  Keyboard,
   UIManager,
   View,
   Text,
@@ -13,7 +12,12 @@ import {
   AsyncStorage
 } from 'react-native';
 import * as store from 'react-native-simple-store';
-import { IBibleBook, BibleEngine, IBibleContent } from '@bible-engine/core';
+import {
+  IBibleBook,
+  BibleEngine,
+  IBibleContent,
+  IBibleReference
+} from '@bible-engine/core';
 import Database from './Database';
 import Fonts from './Fonts';
 import ReadingView from './ReadingView';
@@ -33,6 +37,7 @@ const bibleDatabaseModule = require('../assets/bibles.db');
 import ExpandableDrawer from './ExpandableDrawer';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
 import Sentry from 'react-native-sentry';
+import { ChapterResult } from './types';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
@@ -50,6 +55,7 @@ interface State {
   isReady: boolean;
   loading: boolean;
   loadingMessage: string;
+  nextChapter?: IBibleReference;
 }
 
 interface Props {}
@@ -109,8 +115,11 @@ export default class App extends React.PureComponent<Props, State> {
                 ) : (
                   <ReadingView
                     chapterNum={this.state.currentChapterNum}
+                    books={this.state.books}
                     bookName={this.state.currentBookFullTitle}
+                    bookOsisId={this.state.currentBookOsisId}
                     content={this.state.content}
+                    nextChapter={this.state.nextChapter}
                     sqlBible={this.sqlBible}
                   />
                 )}
@@ -195,28 +204,27 @@ export default class App extends React.PureComponent<Props, State> {
       ...this.state,
       loading: true
     });
-    const content = await this.sqlBible.getFullDataForReferenceRange(
-      {
-        bookOsisId,
-        versionUid: 'ESV',
-        versionChapterNum
-      },
-      true
+    const { contents, nextChapter } = await Database.getChapter(
+      this.sqlBible,
+      bookOsisId,
+      versionChapterNum
     );
     const currentBookFullTitle = this.state.books.filter(
       book => book.osisId === bookOsisId
     )[0].title;
-    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, content);
+    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, contents);
     store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, bookOsisId);
     store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, versionChapterNum);
+    store.save(AsyncStorageKey.CACHED_NEXT_CHAPTER, nextChapter || null);
     this.setState({
       ...this.state,
       currentBookFullTitle,
-      content: content.content.contents,
+      content: contents,
       currentBookOsisId: bookOsisId,
       currentChapterNum: versionChapterNum,
       isLeftMenuOpen: false,
-      loading: false
+      loading: false,
+      nextChapter: nextChapter
     });
     console.timeEnd('changeBookAndChapter');
   };
@@ -347,17 +355,25 @@ export default class App extends React.PureComponent<Props, State> {
 
     let bookList = null;
     let chapterOutput = null;
-    let chapterNum = '';
+    let chapterNum = 0;
     let osisBookName = '';
+    let nextChapter = null;
 
     if (Flags.USE_CACHE) {
       try {
         this.updateLoadingMessage('Finding your place...');
-        [bookList, chapterOutput, chapterNum, osisBookName] = await store.get([
+        [
+          bookList,
+          chapterOutput,
+          chapterNum,
+          osisBookName,
+          nextChapter
+        ] = await store.get([
           AsyncStorageKey.CACHED_BOOK_LIST,
           AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
           AsyncStorageKey.CACHED_CHAPTER_NUM,
-          AsyncStorageKey.CACHED_OSIS_BOOK_NAME
+          AsyncStorageKey.CACHED_OSIS_BOOK_NAME,
+          AsyncStorageKey.CACHED_NEXT_CHAPTER
         ]);
       } catch (error) {
         this.updateLoadingMessage('Error finding your place: ', error);
@@ -373,11 +389,13 @@ export default class App extends React.PureComponent<Props, State> {
       store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, osisBookName);
     }
     if (!chapterNum) {
-      chapterNum = '1';
+      chapterNum = 1;
       store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum);
     }
-    if (!chapterOutput) {
-      chapterOutput = await this.loadChapter(osisBookName, chapterNum);
+    if (!chapterOutput || !nextChapter) {
+      const result = await this.getChapter(osisBookName, chapterNum);
+      nextChapter = result.nextChapter;
+      chapterOutput = result.contents;
     }
     const currentBookFullTitle = bookList.filter(
       book => book.osisId === osisBookName
@@ -388,8 +406,10 @@ export default class App extends React.PureComponent<Props, State> {
     this.setState({
       ...this.state,
       currentBookFullTitle,
+      nextChapter,
+      currentBookOsisId: osisBookName,
       books: bookList,
-      content: chapterOutput.content.contents,
+      content: chapterOutput,
       loadingMessage: 'done!',
       isLeftMenuOpen: false,
       currentChapterNum: chapterNum,
@@ -397,23 +417,24 @@ export default class App extends React.PureComponent<Props, State> {
     });
   };
 
-  loadChapter = async (osisBookName: string, chapterNum: string) => {
+  getChapter = async (bookOsisId: string, versionChapterNum: number) => {
     this.updateLoadingMessage('Loading chapter...');
     try {
-      const chapterOutput = await this.sqlBible.getFullDataForReferenceRange(
-        {
-          bookOsisId: osisBookName,
-          versionUid: 'ESV',
-          versionChapterNum: Number(chapterNum)
-        },
-        true
+      const result = await Database.getChapter(
+        this.sqlBible,
+        bookOsisId,
+        versionChapterNum
       );
-      store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterOutput);
-      return chapterOutput;
+      store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, result.contents);
+      store.save(
+        AsyncStorageKey.CACHED_NEXT_CHAPTER,
+        result.nextChapter || null
+      );
+      return result;
     } catch (error) {
       this.updateLoadingMessage('Error loading chapter: ', error);
       Sentry.captureException(error);
-      return {};
+      throw error;
     }
   };
 
