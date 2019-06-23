@@ -118,6 +118,7 @@ export default class App extends React.PureComponent<Props, State> {
                     books={this.state.books}
                     bookName={this.state.currentBookFullTitle}
                     bookOsisId={this.state.currentBookOsisId}
+                    changeBookAndChapter={this.changeBookAndChapter}
                     content={this.state.content}
                     nextChapter={this.state.nextChapter}
                     sqlBible={this.sqlBible}

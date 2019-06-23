@@ -33,6 +33,7 @@ import { Button } from 'react-native-paper';
 interface Props {
   chapterNum: number;
   bookName: string;
+  changeBookAndChapter: Function;
   content: IBibleContent[];
   books: IBibleBook[];
   bookOsisId: string;
@@ -50,6 +51,12 @@ interface State {
 
 export default class ReadingView extends React.PureComponent<Props, State> {
   itemNum = 0;
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      ...this.props
+    };
+  }
   renderItem = (content: IBibleContent, index: number): any => {
     this.itemNum += 1;
     if (!('type' in content) || content.type === 'phrase') {
@@ -193,13 +200,15 @@ export default class ReadingView extends React.PureComponent<Props, State> {
 
   renderListFooter = () => {
     if (this.state.nextChapter) {
+      const { bookOsisId, normalizedChapterNum } = this.state.nextChapter;
       const bookFullTitle = this.props.books.filter(
-        book => book.osisId === this.state.nextChapter.bookOsisId
+        book => book.osisId === bookOsisId
       )[0].title;
-      Button;
       return (
         <Button
-          onPress={() => {}}
+          onPress={() =>
+            this.props.changeBookAndChapter(bookOsisId, normalizedChapterNum)
+          }
           mode="outlined"
           color="black"
           style={styles.footer}
@@ -261,6 +270,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     flex: 1,
-    margin: Margin.LARGE
+    margin: Margin.LARGE,
+    marginBottom: Margin.LARGE * 2
   }
 });
