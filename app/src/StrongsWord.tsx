@@ -145,7 +145,7 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
   renderPopoverContent = () => {
     if (this.state.loading) {
       return (
-        <View style={styles}>
+        <View style={styles.popover__loading}>
           <View style={{ height: 30, width: 30 }}>
             <BarIndicator
               animationDuration={600}
@@ -153,7 +153,6 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
               color={Color.TYNDALE_BLUE}
             />
           </View>
-
           <Text style={styles.popover__loading__text}>
             {this.state.loadingMessage}
           </Text>
