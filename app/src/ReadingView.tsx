@@ -32,6 +32,7 @@ interface Props {
 
 export default class ReadingView extends React.PureComponent<Props, {}> {
   renderItem = (content: IBibleContent, index: number): any => {
+    this.itemNum += 1;
     if (!('type' in content) || content.type === 'phrase') {
       return this.renderPhrase(content, index);
     }
@@ -111,7 +112,7 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
   renderPhrase = (content: IBibleContent, index): any => {
     if (content.strongs) {
       return (
-        <Fragment key={`strong-${content}-${index}`}>
+        <Fragment key={`strong-${this.itemNum}`}>
           {this.renderFootnote(content)}
           {this.renderVerseNumber(content)}
           {this.renderCrossReference(content)}
@@ -125,12 +126,12 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
       );
     }
     return (
-      <Fragment key={`phrase-${index}`}>
+      <Fragment key={`phrase-${this.itemNum}`}>
         {this.renderFootnote(content)}
         {this.renderVerseNumber(content)}
         {this.renderCrossReference(content)}
-        {content.content.split(' ').map(phrase => (
-          <View style={styles.phrase}>
+        {content.content.split(' ').map((phrase, index) => (
+          <View key={`phrase-${this.itemNum}-${index}`} style={styles.phrase}>
             <Text style={styles.phraseText}>{phrase}</Text>
           </View>
         ))}
