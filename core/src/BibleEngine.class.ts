@@ -225,8 +225,12 @@ export class BibleEngine {
         });
     }
 
-    async getBooksForVersion(versionId: number) {
-        // TODO: add remote fallback
+    async getBooksForVersion(versionId: number, forceRemote = false) {
+        if (forceRemote) {
+            const url = `versions/${versionId}/books`
+            if (this.remoteConfig) return this.fetch<IBibleBookEntity>(url);
+            throw new Error(`can't get books: invalid version`);
+        }
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         return db.find(BibleBookEntity, {
@@ -235,8 +239,12 @@ export class BibleEngine {
         });
     }
 
-    async getDictionaryEntries(strong: string, dictionary?: string) {
-        // TODO: add remote fallback
+    async getDictionaryEntries(strong: string, dictionary?: string, forceRemote = false) {
+        if (forceRemote && dictionary) {
+            const url = `dictionaries/${dictionary}/${strong}`
+            if (this.remoteConfig) return this.fetch<DictionaryEntryEntity[]>(url);
+            throw new Error(`can't get books: invalid version`);
+        }
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         return db.find(DictionaryEntryEntity, { where: { strong, dictionary } });
