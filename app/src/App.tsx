@@ -8,16 +8,8 @@ import {
   View,
   Text,
   StyleSheet,
-  LayoutAnimation,
-  AsyncStorage
 } from 'react-native';
 import * as store from 'react-native-simple-store';
-import {
-  IBibleBook,
-  BibleEngine,
-  IBibleContent,
-  IBibleReference
-} from '@bible-engine/core';
 import Database from './Database';
 import Fonts from './Fonts';
 import ReadingView from './ReadingView';
@@ -28,7 +20,7 @@ import {
   FontFamily,
   FontSize
 } from './Constants';
-import { ifIphoneX, isAndroid } from './utils';
+import { ifIphoneX } from './utils';
 import LoadingScreen from './LoadingScreen';
 import SearchBarProvider from './SearchBarProvider';
 import SearchBar from './SearchBar';
@@ -36,8 +28,6 @@ import 'react-native-console-time-polyfill';
 const bibleDatabaseModule = require('../assets/bibles.db');
 import ExpandableDrawer from './ExpandableDrawer';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
-import Sentry from 'react-native-sentry';
-import { ChapterResult } from './types';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
