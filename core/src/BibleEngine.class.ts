@@ -229,7 +229,7 @@ export class BibleEngine {
         if (forceRemote) {
             const url = `versions/${versionId}/books`
             if (this.remoteConfig) return this.fetch<IBibleBookEntity>(url);
-            throw new Error(`can't get books: invalid version`);
+            throw new Error(`No remote config provided`);
         }
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
@@ -243,7 +243,7 @@ export class BibleEngine {
         if (forceRemote && dictionary) {
             const url = `dictionaries/${dictionary}/${strong}`
             if (this.remoteConfig) return this.fetch<DictionaryEntryEntity[]>(url);
-            throw new Error(`can't get books: invalid version`);
+            throw new Error(`No remote config provided`);
         }
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
