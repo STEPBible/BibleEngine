@@ -44,6 +44,8 @@ export default class Database {
       const asset = Expo.Asset.fromModule(this.databaseModule);
       const uriToDownload = asset.uri;
       await Expo.FileSystem.downloadAsync(uriToDownload, PATH_TO_DOWNLOAD_TO);
+      const incomingHash = asset.hash;
+      store.save('existingHash', incomingHash);
       await this.setLocalBibleEngine();
       await Expo.SQLite.openDatabase('bibles.db');
     } catch (e) {
@@ -78,6 +80,8 @@ export default class Database {
       this.localDbIsReady = available;
       return available;
     } catch (e) {
+      console.log('databaseAvailable check failed');
+      console.error(e);
       this.forceRemote = true;
       this.localDbIsReady = false;
       return false;

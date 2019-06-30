@@ -21,6 +21,7 @@ import {
   getDebugStyles
 } from './Constants';
 import { BarIndicator } from 'react-native-indicators';
+import Database from './Database';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
@@ -28,12 +29,13 @@ const DEVICE_HEIGHT = Dimensions.get('window').height;
 interface Props {
   phrase: string;
   strongs: string[];
-  sqlBible: BibleEngine;
+  database: Database;
 }
 
 interface State {
   popoverIsVisible: boolean;
   definitions: IDictionaryEntry[];
+  loading: boolean;
 }
 
 export default class StrongsWord extends React.PureComponent<Props, State> {
@@ -66,24 +68,9 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
 
   async setDictionaryEntries(strongs: string[]) {
     try {
-      const definitions = (await Promise.all(
-        strongs.map(async (strong: string) => {
-          if (strong[0] === 'H') {
-            const definitions = await this.props.sqlBible.getDictionaryEntries(
-              strong,
-              '@BdbMedDef'
-            );
-            return definitions[0];
-          }
-          if (strong[0] === 'G') {
-            const definitions = await this.props.sqlBible.getDictionaryEntries(
-              strong,
-              '@MounceMedDef'
-            );
-            return definitions[0];
-          }
-        })
-      )).filter(definition => definition);
+      const definitions = await this.props.database.getDictionaryEntries(
+        strongs
+      );
       if (this.mounted) {
         this.setState({
           ...this.state,
@@ -93,6 +80,8 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
       }
     } catch (e) {
       console.log('Couldnt fetch strongs num: ', strongs.join(', '));
+      console.error(e);
+      throw e;
     }
   }
 

@@ -29,6 +29,7 @@ import CrossReference from './CrossReference';
 import Footnote from './Footnote';
 import { PageHit } from 'expo-analytics';
 import { Button } from 'react-native-paper';
+import Database from './Database';
 
 interface Props {
   chapterNum: number;
@@ -38,7 +39,7 @@ interface Props {
   books: IBibleBook[];
   bookOsisId: string;
   nextChapter?: IBibleReference;
-  sqlBible: BibleEngine;
+  database: Database;
 }
 
 interface State {
@@ -119,7 +120,7 @@ export default class ReadingView extends React.PureComponent<Props, State> {
     return (
       <CrossReference
         crossReferences={content.crossReferences}
-        sqlBible={this.props.sqlBible}
+        database={this.props.database}
       />
     );
   };
@@ -146,7 +147,7 @@ export default class ReadingView extends React.PureComponent<Props, State> {
             key={`${content.content}-${content.strongs}`}
             phrase={content.content}
             strongs={content.strongs}
-            sqlBible={this.props.sqlBible}
+            database={this.props.database}
           />
         </Fragment>
       );

@@ -13,7 +13,8 @@ import {
   BibleEngine,
   DictionaryEntry,
   DocumentElement,
-  IBibleCrossReference
+  IBibleCrossReference,
+  IBibleReferenceRange
 } from '@bible-engine/core';
 import {
   Color,
@@ -22,13 +23,14 @@ import {
   Margin,
   getDebugStyles
 } from './Constants';
+import Database from './Database';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   crossReferences: IBibleCrossReference[];
-  sqlBible: BibleEngine;
+  database: Database;
 }
 
 interface State {
@@ -64,13 +66,7 @@ export default class CrossReference extends React.PureComponent<Props, State> {
   }
 
   async getVerseContents(refs: IBibleCrossReference[]) {
-    const referenceRanges = refs.map(ref => ref.range);
-    const verses = await Promise.all(
-      referenceRanges.map(range => this.props.sqlBible.getPhrases(range))
-    );
-    const verseContents = verses.map(phrases =>
-      phrases.map(phrase => phrase.content).join(' ')
-    );
+    const verseContents = refs.map(ref => ref.range).map(range => '');
     if (this.mounted) {
       this.setState({
         ...this.state,
