@@ -39,5 +39,9 @@
         "ts-node": "8.0.3",
         "tslint": "5.14.0",
         "typescript": "3.3.3"
+    },
+    "engines": {
+        "yarn": "1.16.0",
+        "node": "10.13.0"
     }
 }

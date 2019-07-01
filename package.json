@@ -12,5 +12,9 @@
         "nohoist": [
             "app"
         ]
+    },
+    "engines": {
+        "yarn": "1.16.0",
+        "node": "10.13.0"
     }
 }
