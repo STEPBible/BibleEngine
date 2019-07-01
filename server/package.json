@@ -5,7 +5,7 @@
     "scripts": {
         "start": "pm2 startOrRestart process.json --env production",
         "startDev": "pm2 startOrRestart process.json --env dev --watch",
-        "build": "npx tsc -p server",
+        "build": "npx tsc",
         "postinstall": "yarn build"
     },
     "dependencies": {
