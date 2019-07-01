@@ -1,12 +1,10 @@
 {
     "name": "@bible-engine/server",
     "version": "0.1.0",
-    "main": "lib/main.js",
+    "main": "src/main.ts",
     "scripts": {
         "start": "pm2 startOrRestart process.json --env production",
-        "startDev": "pm2 startOrRestart process.json --env dev --watch",
-        "build": "rimraf ./lib && npx tsc",
-        "postinstall": "yarn build"
+        "startDev": "pm2 startOrRestart process.json --env dev --watch"
     },
     "dependencies": {
         "@koa/cors": "^2.2.3",
