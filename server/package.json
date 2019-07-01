@@ -19,7 +19,6 @@
         "pako": "^1.0.7",
         "pm2": "^3.2.3",
         "routing-controllers": "^0.7.7",
-        "sqlite3": "^4.0.9",
         "tsconfig-paths": "^3.7.0",
         "typedi": "^0.8.0",
         "typeorm": "0.2.17",
