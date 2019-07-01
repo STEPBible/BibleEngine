@@ -6,7 +6,7 @@
         "start": "pm2 startOrRestart process.json --env production",
         "startDev": "pm2 startOrRestart process.json --env dev --watch",
         "build": "npx tsc",
-        "postinstall": "npx yarn build"
+        "postinstall": "yarn build"
     },
     "dependencies": {
         "@koa/cors": "^2.2.3",
@@ -23,8 +23,7 @@
         "tsconfig-paths": "^3.7.0",
         "typedi": "^0.8.0",
         "typeorm": "0.2.17",
-        "typeorm-typedi-extensions": "^0.2.3",
-        "yarn": "^1.16.0"
+        "typeorm-typedi-extensions": "^0.2.3"
     },
     "devDependencies": {
         "@types/jest": "24.0.11",
