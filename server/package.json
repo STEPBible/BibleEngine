@@ -5,7 +5,7 @@
     "scripts": {
         "start": "pm2 startOrRestart process.json --env production",
         "startDev": "pm2 startOrRestart process.json --env dev --watch",
-        "build": "rimraf ./lib && npx tsc",
+        "build": "npx tsc -p server",
         "postinstall": "yarn build"
     },
     "dependencies": {
