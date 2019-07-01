@@ -41,7 +41,7 @@
         "typescript": "3.3.3"
     },
     "engines": {
-        "yarn": "1.16.0",
+        "yarn": "1.x.x",
         "node": "10.13.0"
     }
 }
