@@ -103,10 +103,20 @@ export class BibleEngine {
         }
     }
 
-    async addBook(book: IBibleBookEntity) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return db.save(new BibleBookEntity(book));
+    async addBook(book: IBibleBookEntity, entityManager?: EntityManager) {
+        if (!entityManager) {
+            if (!this.pDB) throw new NoDbConnectionError();
+            entityManager = await this.pDB;
+        }
+
+        await entityManager
+            .createQueryBuilder()
+            .insert()
+            .into(BibleBookEntity)
+            .values(book)
+            .execute();
+
+        return book;
     }
 
     async addBookWithContent(
@@ -118,6 +128,11 @@ export class BibleEngine {
         } = {}
     ) {
         if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+
+        let bookEntity: IBibleBookEntity | undefined = await db.findOne(BibleBookEntity, {
+            where: { versionId: version.id, osisId: bookInput.book.osisId }
+        });
 
         const contentHasNormalizedNumbers = bookInput.contentHasNormalizedNumbers || false;
 
@@ -132,17 +147,29 @@ export class BibleEngine {
             }
         }
 
-        // mark the book as importing (and save missing book meta-data)
-        const bookEntity = await this.addBook({
-            ...bookInput.book,
-            versionId: version.id,
-            dataLocation: 'importing'
-        });
+        let bookImportPhraseRange: { firstPhraseId?: number; lastPhraseId?: number } | undefined;
 
-        let pBookImport: ReturnType<typeof BibleEngine.prototype.addBibleBookContent>;
+        if (options.entityManager) {
+            // mark the book as importing (and save missing book meta-data)
 
-        if (options.entityManager)
-            pBookImport = this.addBibleBookContent(
+            if (!bookEntity) {
+                bookEntity = await this.addBook(
+                    {
+                        ...bookInput.book,
+                        versionId: version.id,
+                        dataLocation: 'importing'
+                    },
+                    options.entityManager
+                );
+            } else {
+                bookEntity = await this.updateBook(
+                    bookEntity,
+                    { dataLocation: 'importing' },
+                    options.entityManager
+                );
+            }
+
+            bookImportPhraseRange = await this.addBibleBookContent(
                 options.entityManager,
                 bookInput.contents,
                 bookEntity,
@@ -152,29 +179,54 @@ export class BibleEngine {
                 contentHasNormalizedNumbers,
                 version.hasStrongs
             );
-        else
-            pBookImport = this.pDB.then(async entityManager =>
-                entityManager.transaction(transactionEntityManger => {
-                    return this.addBibleBookContent(
-                        transactionEntityManger,
-                        bookInput.contents,
-                        bookEntity,
-                        textData,
-                        undefined,
-                        undefined,
-                        contentHasNormalizedNumbers,
-                        version.hasStrongs
-                    );
-                })
+
+            bookEntity = await this.updateBook(
+                bookEntity,
+                { dataLocation: 'db' },
+                options.entityManager
             );
+        } else {
+            await db.transaction(async transactionEntityManger => {
+                // mark the book as importing (and save missing book meta-data)
 
-        // wait for all data to be saved
-        const bookPhraseRange = await pBookImport;
+                if (!bookEntity) {
+                    bookEntity = await this.addBook(
+                        {
+                            ...bookInput.book,
+                            versionId: version.id,
+                            dataLocation: 'importing'
+                        },
+                        transactionEntityManger
+                    );
+                } else {
+                    bookEntity = await this.updateBook(
+                        bookEntity,
+                        { dataLocation: 'importing' },
+                        transactionEntityManger
+                    );
+                }
 
-        // mark the book as completely imported
-        await this.addBook({ ...bookEntity, dataLocation: 'db' });
+                bookImportPhraseRange = await this.addBibleBookContent(
+                    transactionEntityManger,
+                    // entityManager,
+                    bookInput.contents,
+                    bookEntity,
+                    textData,
+                    undefined,
+                    undefined,
+                    contentHasNormalizedNumbers,
+                    version.hasStrongs
+                );
 
-        return bookPhraseRange;
+                bookEntity = await this.updateBook(
+                    bookEntity,
+                    { dataLocation: 'db' },
+                    transactionEntityManger
+                );
+            });
+        }
+
+        return bookImportPhraseRange;
     }
 
     async addDictionaryEntry(dictionaryEntry: IDictionaryEntry) {
@@ -513,6 +565,25 @@ export class BibleEngine {
             const db = await this.pDB;
             return db.find(BibleVersionEntity);
         }
+    }
+
+    async updateBook(
+        book: IBibleBookEntity,
+        updates: Partial<IBibleBookEntity>,
+        entityManager?: EntityManager
+    ) {
+        if (!entityManager) {
+            if (!this.pDB) throw new NoDbConnectionError();
+            entityManager = await this.pDB;
+        }
+
+        await entityManager
+            .createQueryBuilder()
+            .update(BibleBookEntity)
+            .set(updates)
+            .where({ versionId: book.versionId, osisId: book.osisId })
+            .execute();
+        return { ...book, ...updates };
     }
 
     private async addBibleBookContent(
@@ -1052,18 +1123,19 @@ export class BibleEngine {
                     .execute();
             }
 
-            // since there are not that many sections, we use the save method here, taking advantage
-            // of the automatic relations handling (since sections can have notes)
-            await db.save(globalState.sectionStack, {
-                chunk: Math.ceil(globalState.sectionStack.length / chunkSize)
-            });
-            // for (let index = 0; index < globalState.sectionStack.length; index += chunkSize) {
-            //     db.createQueryBuilder()
-            //         .insert()
-            //         .into(BibleSectionEntity)
-            //         .values(globalState.sectionStack.slice(index, index + chunkSize))
-            //         .execute();
-            // }
+            // // since there are not that many sections, we use the save method here, taking advantage
+            // // of the automatic relations handling (since sections can have notes)
+            // await db.save(globalState.sectionStack, {
+            //     // transaction: false,
+            //     // chunk: Math.ceil(globalState.sectionStack.length / chunkSize)
+            // });
+            for (let index = 0; index < globalState.sectionStack.length; index += chunkSize) {
+                db.createQueryBuilder()
+                    .insert()
+                    .into(BibleSectionEntity)
+                    .values(globalState.sectionStack.slice(index, index + chunkSize))
+                    .execute();
+            }
         }
 
         return { firstPhraseId, lastPhraseId };
