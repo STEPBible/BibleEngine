@@ -20,6 +20,8 @@ import {
   Margin,
   getDebugStyles
 } from './Constants';
+import { BarIndicator } from 'react-native-indicators';
+import Database from './Database';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
@@ -27,60 +29,74 @@ const DEVICE_HEIGHT = Dimensions.get('window').height;
 interface Props {
   phrase: string;
   strongs: string[];
-  sqlBible: BibleEngine;
+  database: Database;
 }
 
 interface State {
   popoverIsVisible: boolean;
   definitions: IDictionaryEntry[];
+  loading: boolean;
 }
 
-export default class StrongsWord extends React.Component<Props, State> {
+export default class StrongsWord extends React.PureComponent<Props, State> {
   touchable: any;
+  mounted: boolean = false;
+
   state = {
     popoverIsVisible: false,
-    definitions: []
+    definitions: [],
+    loading: true,
+    loadingMessage: 'Rummaging around...'
   };
 
   async componentDidMount() {
-    await this.setDictionaryEntries(this.props.strongs);
+    this.mounted = true;
+    setTimeout(() => {
+      this.setDictionaryEntries(this.props.strongs);
+    }, 100);
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
   }
 
   async componentWillReceiveProps(nextProps: Props) {
-    await this.setDictionaryEntries(nextProps.strongs);
+    setTimeout(() => {
+      this.setDictionaryEntries(nextProps.strongs);
+    }, 100);
   }
 
   async setDictionaryEntries(strongs: string[]) {
-    const definitions = (await Promise.all(
-      strongs.map(async (strong: string) => {
-        if (strong[0] === 'H') {
-          const definitions = await this.props.sqlBible.getDictionaryEntries(
-            strong,
-            '@BdbMedDef'
-          );
-          return definitions[0];
-        }
-        if (strong[0] === 'G') {
-          const definitions = await this.props.sqlBible.getDictionaryEntries(
-            strong,
-            '@MounceMedDef'
-          );
-          return definitions[0];
-        }
-      })
-    )).filter(definition => definition);
-    this.setState({
-      ...this.state,
-      definitions
-    });
+    try {
+      const definitions = await this.props.database.getDictionaryEntries(
+        strongs
+      );
+      if (this.mounted) {
+        this.setState({
+          ...this.state,
+          loading: false,
+          definitions
+        });
+      }
+    } catch (e) {
+      console.log('Couldnt fetch strongs num: ', strongs.join(', '));
+      console.error(e);
+      throw e;
+    }
   }
 
   onPress = () => {
-    this.setState({ popoverIsVisible: true });
+    this.setState({ ...this.state, popoverIsVisible: true });
+    setTimeout(() => {
+      this.setState({
+        ...this.state,
+        loadingMessage: 'Sorry, this is taking longer than usual...'
+      });
+    }, 4000);
   };
 
   closePopover = () => {
-    this.setState({ popoverIsVisible: false });
+    this.setState({ ...this.state, popoverIsVisible: false });
   };
 
   _renderItem = item => {
@@ -116,10 +132,30 @@ export default class StrongsWord extends React.Component<Props, State> {
   };
 
   renderPopoverContent = () => {
+    if (this.state.loading) {
+      return (
+        <View style={styles.popover__loading}>
+          <View style={{ height: 30, width: 30 }}>
+            <BarIndicator
+              animationDuration={600}
+              size={30}
+              color={Color.TYNDALE_BLUE}
+            />
+          </View>
+          <Text style={styles.popover__loading__text}>
+            {this.state.loadingMessage}
+          </Text>
+        </View>
+      );
+    }
     if (!this.state.definitions.length) {
       return (
-        <View style={styles.popover__content}>
-          <Text>Sorry, no content</Text>
+        <View style={styles.popover__loading}>
+          <Text style={styles.popover__loading__text}>
+            {`Sorry, no definition for Strongs reference: ${this.props.strongs.join(
+              ', '
+            )}`}
+          </Text>
         </View>
       );
     }
@@ -136,33 +172,44 @@ export default class StrongsWord extends React.Component<Props, State> {
     }
     return (
       <View style={styles.popover__content__definitions__entry}>
-        {element.content.contents.map((element: DocumentElement) =>
-          this.renderDocumentElement(element)
+        {element.content.contents.map(
+          (element: DocumentElement, index: number) =>
+            this.renderDocumentElement(element, index)
         )}
       </View>
     );
   };
 
-  renderDocumentElement = (element: DocumentElement) => {
+  renderDocumentElement = (element: DocumentElement, index: number) => {
     if (!element) {
       return null;
     }
     if (element.type === 'phrase' && element.content.length) {
-      return <Text style={styles.documentPhrase}>{element.content}</Text>;
+      return (
+        <Text key={`doc-phrase-${index}`} style={styles.documentPhrase}>
+          {element.content}
+        </Text>
+      );
     }
     if (element.type === 'group') {
       if (element.groupType === 'bold') {
         const phrases: string[] = element.contents.map(
           ({ content }) => content
         );
-        return phrases.map(phrase => (
-          <Text style={styles.boldDocumentPhrase}>{phrase}</Text>
+        return phrases.map((phrase, phraseIndex) => (
+          <Text
+            key={`bold-${phrase}-${phraseIndex}-${index}`}
+            style={styles.boldDocumentPhrase}
+          >
+            {phrase}
+          </Text>
         ));
       }
       return element.contents.map((element: DocumentElement) =>
         this.renderDocumentElement(element)
       );
     }
+    return null;
   };
 
   render() {
@@ -199,6 +246,20 @@ const styles = StyleSheet.create({
     // backgroundColor: 'yellow',
     overflow: 'hidden',
     width: DEVICE_WIDTH - 20
+  },
+  popover__loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    minHeight: 130
+  },
+  popover__loading__text: {
+    color: 'gray',
+    marginTop: 10,
+    textAlign: 'center',
+    fontFamily: FontFamily.OPEN_SANS,
+    fontSize: FontSize.SMALL
   },
   popover__content: {
     // backgroundColor: 'cyan',

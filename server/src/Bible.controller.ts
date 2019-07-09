@@ -7,9 +7,22 @@ export class BibleController {
     @Inject('bibleEngine')
     private bibleEngine: BibleEngine;
 
+    @Get('/dictionaries/:dictionaryId/:strongNum')
+    getDefinition(
+        @Param('dictionaryId') dictionaryId: string,
+        @Param('strongNum') strongNum: string
+    ) {
+        return this.bibleEngine.getDictionaryEntries(strongNum, dictionaryId)
+    }
+
     @Get('/versions/:versionUid')
     getVersion(@Param('versionUid') versionUid: string) {
         return this.bibleEngine.getVersion(versionUid);
+    }
+
+    @Get('/versions/:versionId/books')
+    getBooks(@Param('versionId') versionId: number) {
+        return this.bibleEngine.getBooksForVersion(versionId);
     }
 
     @Get('/versions')

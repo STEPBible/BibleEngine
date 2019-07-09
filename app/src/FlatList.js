@@ -50,10 +50,8 @@ class FlatListHelper extends React.PureComponent {
   }
 }
 
-const withSearchBarContext = Comp => props => (
+export default React.forwardRef((props, ref) => (
   <SearchBarContext.Consumer>
-    {context => <Comp {...context} {...props} />}
+    {context => <FlatListHelper ref={ref} {...context} {...props} />}
   </SearchBarContext.Consumer>
-);
-
-export default withSearchBarContext(FlatListHelper);
+));

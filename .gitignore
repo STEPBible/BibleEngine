@@ -20,3 +20,6 @@ tmp.ts
 v11n-rules-old.tsv
 bibles_big.db
 bibles_default.db
+.expo
+esvSearchIndex.json
+secrets.json

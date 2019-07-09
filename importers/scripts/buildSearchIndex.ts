@@ -25,7 +25,7 @@ const run = async () => {
 
   const searchIndex = elasticlunr(function(this: any) {
     this.setRef('t');
-    this.addField('b');
+    this.addField('vc');
   });
 
   const books = await sqlBible.getVersionPlaintextNormalized('ESV');

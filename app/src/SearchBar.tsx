@@ -3,7 +3,9 @@
 import React, { Component } from 'react';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { ifIphoneX, ifAndroid } from './utils';
+import { IconButton, TouchableRipple } from 'react-native-paper';
 import {
+  BackHandler,
   StyleSheet,
   TextInput,
   Animated,
@@ -15,7 +17,9 @@ import {
   Keyboard,
   TouchableHighlight,
   FlatList,
-  TouchableNativeFeedback
+  TouchableNativeFeedback,
+  StatusBar,
+  LayoutAnimation
 } from 'react-native';
 import * as elasticlunr from 'elasticlunr';
 import {
@@ -25,9 +29,9 @@ import {
   Color,
   getDebugStyles
 } from './Constants';
+import Database from './Database';
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
-import 'react-native-console-time-polyfill';
 
 interface VerseResult {
   reference: string;
@@ -37,7 +41,7 @@ interface VerseResult {
 interface Props {
   toggleMenu: Function;
   animation: any;
-  sqlBible: any;
+  database: Database;
 }
 interface State {
   inputText: string;
@@ -57,23 +61,46 @@ export default class SearchPage extends React.PureComponent<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    this.searchIndex = require('../assets/esvSearchIndex.json');
-    this.lunrSearchEngine = elasticlunr.Index.load(this.searchIndex);
     this.verseResults = [];
   }
 
+  componentDidMount() {
+    setTimeout(() => {
+      this.searchIndex = require('../assets/esvSearchIndex.json');
+      this.lunrSearchEngine = elasticlunr.Index.load(this.searchIndex);
+    }, 100);
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
+  }
+
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress);
+  }
+
+  handleBackPress = () => {
+    if (this.state.isFocused) {
+      this.endSearch();
+      return true;
+    }
+    return false;
+  };
+
   updateSearch = (inputText: string) => {
-    const results = this.lunrSearchEngine.search(inputText, {}).slice(0, 20);
+    const results = this.lunrSearchEngine.search(inputText, {});
     const refs = results.map(result => result.ref);
     this.verseResults = refs.map((ref: any) => ({
       reference: ref,
-      verseContent: this.searchIndex.documentStore.docs[ref].body
+      verseContent: this.searchIndex.documentStore.docs[ref].vc,
+      verseNum: this.searchIndex.documentStore.docs[ref].v,
+      chapterNum: this.searchIndex.documentStore.docs[ref].c,
+      bookName: this.searchIndex.documentStore.docs[ref].b
     }));
     this.setState({ inputText });
   };
 
   endSearch = () => {
     Keyboard.dismiss();
+    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
+    LayoutAnimation.configureNext(animation);
     this.setState({
       ...this.state,
       inputText: '',
@@ -84,21 +111,23 @@ export default class SearchPage extends React.PureComponent<Props, State> {
   renderIcon = () => {
     if (this.state.isFocused) {
       return (
-        <TouchableOpacity
+        <IconButton
+          icon="arrow-back"
+          color="#888889"
+          size={30}
           style={styles.search__input__icon}
           onPress={this.endSearch}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={30} color="#888889" />
-        </TouchableOpacity>
+        />
       );
     }
     return (
-      <TouchableOpacity
+      <IconButton
+        icon="menu"
+        color="#888889"
+        size={30}
         style={styles.search__input__icon}
         onPress={this.props.toggleMenu}
-      >
-        <MaterialIcons name="menu" size={30} color="#888889" />
-      </TouchableOpacity>
+      />
     );
   };
 
@@ -111,10 +140,7 @@ export default class SearchPage extends React.PureComponent<Props, State> {
         <FlatList
           data={this.verseResults}
           showsVerticalScrollIndicator={false}
-          renderItem={ifAndroid(
-            this.renderSearchResultAndroid,
-            this.renderSearchResultiOS
-          )}
+          renderItem={this.renderSearchResult}
           ListFooterComponent={<View style={styles.scrollViewBottomBuffer} />}
           keyExtractor={(item, index) => index.toString()}
         />
@@ -122,24 +148,10 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     );
   };
 
-  renderSearchResultiOS = ({ item }) => (
-    <TouchableHighlight
-      onPress={() => {}}
-      underlayColor="#d4d4d4"
-      style={styles.result}
-    >
-      {this.renderSearchResultContent(item)}
-    </TouchableHighlight>
-  );
-
-  renderSearchResultAndroid = ({ item }) => (
-    <TouchableNativeFeedback
-      onPress={() => {}}
-      background={TouchableNativeFeedback.SelectableBackground()}
-      style={styles.result}
-    >
+  renderSearchResult = ({ item }) => (
+    <TouchableRipple onPress={() => {}} underlayColor="#d4d4d4">
       <View style={styles.result}>{this.renderSearchResultContent(item)}</View>
-    </TouchableNativeFeedback>
+    </TouchableRipple>
   );
 
   renderSearchResultContent = item => (
@@ -169,6 +181,15 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     }
   };
 
+  onFocus = () => {
+    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
+    LayoutAnimation.configureNext(animation);
+    this.setState({
+      ...this.state,
+      isFocused: true
+    });
+  };
+
   render() {
     const { animation } = this.props;
     const transformWrapper = animation.getTransformWrapper();
@@ -184,12 +205,7 @@ export default class SearchPage extends React.PureComponent<Props, State> {
               underlineColorAndroid={'#fff'}
               selectionColor={Color.TYNDALE_BLUE}
               autoCorrect={false}
-              onFocus={() => {
-                this.setState({
-                  ...this.state,
-                  isFocused: true
-                });
-              }}
+              onFocus={this.onFocus}
               onChangeText={this.updateSearch}
               value={this.state.inputText}
               ref={inputSearch => {
@@ -213,7 +229,7 @@ const styles = StyleSheet.create({
     height: 100,
     position: 'absolute',
     right: 0,
-    top: 20,
+    top: ifAndroid(StatusBar.currentHeight, 20),
     zIndex: 2,
     ...getDebugStyles()
   },
@@ -229,10 +245,6 @@ const styles = StyleSheet.create({
     marginTop: ifIphoneX(20, ifAndroid(-10, 12)),
     marginLeft: 10,
     marginRight: 10,
-    // position: 'absolute',
-    // top: 40,
-    // left: 0,
-    // right: 0,
     elevation,
     shadowOpacity: 0.0015 * elevation + 0.18,
     shadowRadius: 0.8 * elevation,
@@ -263,7 +275,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: FontSize.SMALL,
     height: '100%',
-    marginLeft: Margin.MEDIUM,
+    marginLeft: Margin.SMALL,
     zIndex: 3,
     ...getDebugStyles()
   },
@@ -286,7 +298,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: Margin.MEDIUM,
-    marginTop: Margin.MEDIUM,
+    marginBottom: Margin.MEDIUM / 2,
+    marginTop: Margin.MEDIUM / 2,
     marginLeft: Margin.MEDIUM,
     borderRadius: 2,
     ...getDebugStyles()

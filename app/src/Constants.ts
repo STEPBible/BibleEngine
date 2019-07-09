@@ -1,9 +1,16 @@
 import normalizeText from './normalizeText';
+import { Analytics } from 'expo-analytics';
+const SECRETS = require('./secrets.json');
 
 export const Flags = {
   DEBUG: false,
   USE_CACHE: true,
   SEARCH_ENABLED: true
+};
+
+export const Settings = {
+  CROSS_REFERENCES_ENABLED: true,
+  FOOTNOTES_ENABLED: true
 };
 
 export enum Margin {
@@ -41,7 +48,8 @@ export enum AsyncStorageKey {
   CACHED_BOOK_LIST = 'cachedBookList',
   CACHED_CHAPTER_OUTPUT = 'cachedChapterOutput',
   CACHED_CHAPTER_NUM = 'cachedChapterNum',
-  CACHED_OSIS_BOOK_NAME = 'cachedBookName'
+  CACHED_OSIS_BOOK_NAME = 'cachedBookName',
+  CACHED_NEXT_CHAPTER = 'cachedNextChapter'
 }
 
 export function getDebugStyles() {
@@ -60,3 +68,7 @@ export function randomColor() {
   const index = Math.floor(Math.random() * 4);
   return testingColors[index];
 }
+
+export const googleAnalytics = new Analytics(
+  SECRETS.GOOGLE_ANALYTICS_TRACKING_ID
+);

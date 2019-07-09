@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import {
   Text,
   View,
+  FlatList,
   StyleSheet,
   Dimensions,
   TouchableHighlight,
@@ -12,7 +13,8 @@ import {
   BibleEngine,
   DictionaryEntry,
   DocumentElement,
-  IBibleCrossReference
+  IBibleCrossReference,
+  IBibleReferenceRange
 } from '@bible-engine/core';
 import {
   Color,
@@ -21,13 +23,14 @@ import {
   Margin,
   getDebugStyles
 } from './Constants';
+import Database from './Database';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   crossReferences: IBibleCrossReference[];
-  sqlBible: BibleEngine;
+  database: Database;
 }
 
 interface State {
@@ -35,8 +38,9 @@ interface State {
   verseContents: any[];
 }
 
-export default class CrossReference extends React.Component<Props, State> {
+export default class CrossReference extends React.PureComponent<Props, State> {
   touchable: any;
+  mounted: boolean;
   state = {
     popoverIsVisible: false,
     verseContents: []
@@ -50,44 +54,50 @@ export default class CrossReference extends React.Component<Props, State> {
     this.setState({ popoverIsVisible: false });
   };
 
-  constructor(props: Props) {
-    super(props);
-    this.getVerseContents(props.crossReferences);
+  componentDidMount() {
+    this.mounted = true;
+    setTimeout(() => {
+      this.getVerseContents(this.props.crossReferences);
+    }, 100);
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
   }
 
   async getVerseContents(refs: IBibleCrossReference[]) {
-    const referenceRanges = refs.map(ref => ref.range);
-    const verses = await Promise.all(
-      referenceRanges.map(range => this.props.sqlBible.getPhrases(range))
-    );
-    const verseContents = verses.map(phrases =>
-      phrases.map(phrase => phrase.content).join(' ')
-    );
-    this.setState({
-      ...this.state,
-      verseContents
-    });
+    const verseContents = refs.map(ref => ref.range).map(range => '');
+    if (this.mounted) {
+      this.setState({
+        ...this.state,
+        verseContents,
+        popoverIsVisible: false
+      });
+    }
   }
+
+  renderCrossReference = ({ item, index }) => (
+    <Fragment>
+      <Text style={styles.popover__content__reference}>{item.label}</Text>
+      <Text style={styles.popover__content__verse}>
+        {this.state.verseContents.length > index
+          ? JSON.stringify(this.state.verseContents[index])
+          : ''}
+      </Text>
+    </Fragment>
+  );
 
   renderPopoverContent = () => {
     return (
       <View>
         <View style={styles.popover__content}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={styles.popover__content__header}>Related Verses</Text>
-            {this.props.crossReferences.map((crossRef, index) => (
-              <Fragment>
-                <Text style={styles.popover__content__reference}>
-                  {crossRef.label}
-                </Text>
-                <Text style={styles.popover__content__verse}>
-                  {this.state.verseContents.length > index
-                    ? JSON.stringify(this.state.verseContents[index])
-                    : ''}
-                </Text>
-              </Fragment>
-            ))}
-          </ScrollView>
+          <Text style={styles.popover__content__header}>Related Verses</Text>
+          <FlatList
+            data={this.props.crossReferences}
+            showsVerticalScrollIndicator={false}
+            renderItem={this.renderCrossReference}
+            keyExtractor={(item, index) => index.toString()}
+          />
         </View>
         <View style={{ flex: 2, height: 20 }} />
       </View>

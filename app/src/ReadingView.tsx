@@ -3,59 +3,84 @@ import { Text, View, StyleSheet, Dimensions } from 'react-native';
 import FlatList from './FlatList';
 import { ifAndroid } from './utils';
 import Sentry from 'sentry-expo';
-Sentry.enableInExpoDevelopment = true;
+Sentry.enableInExpoDevelopment = false;
 Sentry.config(
   'https://a0758a0dd01040728b6b7b0a3747d7f8@sentry.io/1427804'
 ).install();
 
-import { IBibleContent, BibleEngine, IBiblePhrase } from '@bible-engine/core';
+import {
+  IBibleContent,
+  BibleEngine,
+  IBiblePhrase,
+  IBibleReference,
+  IBibleBook
+} from '@bible-engine/core';
 import StrongsWord from './StrongsWord';
 import {
   Margin,
   FontSize,
   FontFamily,
   getDebugStyles,
-  Flags
+  Flags,
+  Settings,
+  googleAnalytics
 } from './Constants';
 import CrossReference from './CrossReference';
 import Footnote from './Footnote';
+import { PageHit } from 'expo-analytics';
+import { Button } from 'react-native-paper';
+import Database from './Database';
 
 interface Props {
   chapterNum: number;
   bookName: string;
+  changeBookAndChapter: Function;
   content: IBibleContent[];
-  sqlBible: BibleEngine;
+  books: IBibleBook[];
+  bookOsisId: string;
+  nextChapter?: IBibleReference;
+  database: Database;
 }
 
-export default class ReadingView extends React.PureComponent<Props, {}> {
-  renderItem = (content: IBibleContent): any => {
+interface State {
+  bookOsisId: string;
+  chapterNum: number;
+  content: (IBibleContent | string)[];
+  loading: boolean;
+  nextChapter?: IBibleReference;
+}
+
+export default class ReadingView extends React.PureComponent<Props, State> {
+  itemNum = 0;
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      ...this.props
+    };
+  }
+  renderItem = (content: IBibleContent, index: number): any => {
+    this.itemNum += 1;
     if (!('type' in content) || content.type === 'phrase') {
-      return this.renderPhrase(content);
+      return this.renderPhrase(content, index);
     }
     const children: IBibleContent[] = content.contents;
 
     if (content.type === 'section') {
       return (
-        <Fragment>
+        <Fragment key={`section-${index}`}>
           {this.renderVerseNumber(content)}
           {this.renderSection(content)}
         </Fragment>
       );
     }
     if (content.type === 'group') {
-      if (content.groupType === 'paragraph') {
+      if (content.groupType === 'paragraph' || content.groupType === 'indent') {
         return (
-          <Fragment>
-            {this.renderVerseNumber(content)}
-            {children.map(child => this.renderItem(child))}
-          </Fragment>
-        );
-      }
-      if (content.groupType === 'indent') {
-        return (
-          <Fragment>
-            {this.renderVerseNumber(content)}
-            {children.map(child => this.renderItem(child))}
+          <Fragment key={`group-${index}`}>
+            <View style={styles.paragraph}>
+              {this.renderVerseNumber(content)}
+              {children.map((child, index) => this.renderItem(child, index))}
+            </View>
           </Fragment>
         );
       }
@@ -68,7 +93,7 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
     return (
       <View style={styles.section}>
         <Text style={styles.title}>{content.title}</Text>
-        {children.map(child => this.renderItem(child))}
+        {children.map((child, index) => this.renderItem(child, index))}
       </View>
     );
   };
@@ -85,61 +110,80 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
   };
 
   renderCrossReference = (content: IBiblePhrase): any => {
-    if (!content.crossReferences || !content.crossReferences.length) {
+    if (
+      !Settings.CROSS_REFERENCES_ENABLED ||
+      !content.crossReferences ||
+      !content.crossReferences.length
+    ) {
       return null;
     }
     return (
       <CrossReference
         crossReferences={content.crossReferences}
-        sqlBible={this.props.sqlBible}
+        database={this.props.database}
       />
     );
   };
 
   renderFootnote = (content: IBiblePhrase): any => {
-    if (!content.notes || !content.notes.length) {
+    if (
+      !Settings.FOOTNOTES_ENABLED ||
+      !content.notes ||
+      !content.notes.length
+    ) {
       return null;
     }
     return <Footnote notes={content.notes} />;
   };
 
-  renderPhrase = (content: IBibleContent): any => {
+  renderPhrase = (content: IBibleContent, index): any => {
     if (content.strongs) {
       return (
-        <Fragment>
+        <Fragment key={`strong-${this.itemNum}`}>
           {this.renderFootnote(content)}
           {this.renderVerseNumber(content)}
           {this.renderCrossReference(content)}
           <StrongsWord
+            key={`${content.content}-${content.strongs}`}
             phrase={content.content}
             strongs={content.strongs}
-            sqlBible={this.props.sqlBible}
+            database={this.props.database}
           />
         </Fragment>
       );
     }
     return (
-      <Fragment>
+      <Fragment key={`phrase-${this.itemNum}`}>
         {this.renderFootnote(content)}
         {this.renderVerseNumber(content)}
         {this.renderCrossReference(content)}
-        <View style={styles.phrase}>
-          <Text style={styles.phraseText}>{content.content}</Text>
-        </View>
+        {content.content.split(' ').map((phrase, index) => (
+          <View key={`phrase-${this.itemNum}-${index}`} style={styles.phrase}>
+            <Text style={styles.phraseText}>{phrase}</Text>
+          </View>
+        ))}
       </Fragment>
     );
   };
 
-  renderFlatlistItem = ({ item: content }: { item: IBibleContent }) => {
-    if ('overallTitle' in content) {
-      return <Text style={styles.chapterHeader}>{content.overallTitle}</Text>;
+  renderFlatlistItem = ({ item, index }) => {
+    if ('overallTitle' in item) {
+      return <Text style={styles.chapterHeader}>{item.overallTitle}</Text>;
     }
-    return this.renderItem(content);
+    return this.renderItem(item, index);
   };
 
   bookAndChapterTitle = () => ({
     overallTitle: `${this.props.bookName} ${this.props.chapterNum}`
   });
+
+  componentDidMount() {
+    if (!__DEV__) {
+      googleAnalytics
+        .hit(new PageHit(this.bookAndChapterTitle().overallTitle))
+        .catch(() => {});
+    }
+  }
 
   render() {
     return (
@@ -148,22 +192,40 @@ export default class ReadingView extends React.PureComponent<Props, {}> {
           data={[this.bookAndChapterTitle(), ...this.props.content]}
           showsVerticalScrollIndicator={false}
           renderItem={this.renderFlatlistItem}
-          ListFooterComponent={<View style={{ height: Margin.LARGE }} />}
-          keyExtractor={(item, index) => index.toString()}
+          ListFooterComponent={this.renderListFooter}
+          keyExtractor={(item: any, index: number) => `flatlist-item-${index}`}
         />
       </View>
     );
   }
+
+  renderListFooter = () => {
+    if (this.state.nextChapter) {
+      const { bookOsisId, normalizedChapterNum } = this.state.nextChapter;
+      const bookFullTitle = this.props.books.filter(
+        book => book.osisId === bookOsisId
+      )[0].title;
+      return (
+        <Button
+          onPress={() =>
+            this.props.changeBookAndChapter(bookOsisId, normalizedChapterNum)
+          }
+          mode="outlined"
+          color="black"
+          style={styles.footer}
+        >
+          {`${bookFullTitle} ${this.state.nextChapter.normalizedChapterNum}`}
+        </Button>
+      );
+    }
+    return null;
+  };
 }
 
 const styles = StyleSheet.create({
   background: {
     backgroundColor: 'white',
-    flex: 1,
-    borderLeftColor: 'gray',
-    borderLeftWidth: 1,
-    borderRightColor: 'gray',
-    borderRightWidth: 0.5
+    flex: 1
   },
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,
@@ -179,6 +241,10 @@ const styles = StyleSheet.create({
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.EXTRA_SMALL,
     marginRight: 7
+  },
+  paragraph: {
+    flexDirection: 'row',
+    flexWrap: 'wrap'
   },
   section: {
     flex: 1,
@@ -203,5 +269,10 @@ const styles = StyleSheet.create({
     marginRight: 3,
     marginTop: -2,
     ...getDebugStyles()
+  },
+  footer: {
+    flex: 1,
+    margin: Margin.LARGE,
+    marginBottom: Margin.LARGE * 2
   }
 });

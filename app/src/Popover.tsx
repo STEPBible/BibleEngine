@@ -95,7 +95,7 @@ type PopoverState = { fromRect: any } & { defaultDisplayArea: any } & {
       translateArrow: ValueXY;
     };
   };
-class Popover extends React.Component<PopoverProps, PopoverState> {
+class Popover extends React.PureComponent<PopoverProps, PopoverState> {
   constructor(props) {
     super(props);
     this.state = {
