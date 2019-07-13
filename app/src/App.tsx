@@ -312,7 +312,7 @@ export default class App extends React.PureComponent<Props, State> {
         'Updating database... \n\n(can take up to 30 seconds) \n\n Speed improvements coming soon! 🚀'
       );
       await this.database.setLocalDatabase();
-    } else if (internetIsAvailable && !dbIsAvailable) {
+    } else if (Flags.REMOTE_ENABLED && internetIsAvailable && !dbIsAvailable) {
       this.database.forceRemote = true;
       this.database.setLocalDatabase();
       this.pollForLocalDatabaseProgress();

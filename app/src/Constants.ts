@@ -5,7 +5,8 @@ const SECRETS = require('./secrets.json');
 export const Flags = {
   DEBUG: false,
   USE_CACHE: true,
-  SEARCH_ENABLED: true
+  SEARCH_ENABLED: true,
+  REMOTE_ENABLED: false
 };
 
 export const Settings = {
