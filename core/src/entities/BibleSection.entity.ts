@@ -44,13 +44,15 @@ export class BibleSectionEntity implements IBibleSectionEntity {
     constructor(section: IBibleSectionEntity) {
         // typeorm is seemingly creating objects on startup (without passing parameters), so we
         // need to add a guard here
-        if (!section) return;
+        // if (!section) return;
 
-        Object.assign(this, section);
-        if (section.crossReferences)
-            this.crossReferences = section.crossReferences.map(
-                crossReference => new BibleCrossReferenceEntity(crossReference, true)
-            );
+        if (section) {
+            Object.assign(this, section);
+            if (section.crossReferences)
+                this.crossReferences = section.crossReferences.map(
+                    crossReference => new BibleCrossReferenceEntity(crossReference, true)
+                );
+        }
     }
 
     // @AfterLoad()

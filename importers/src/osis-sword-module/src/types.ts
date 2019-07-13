@@ -92,7 +92,7 @@ export type ParserContext = {
     noteText: string;
     osisRef: string;
     psalmTitle?: OsisXmlNode;
-    psalmTitleContents?: IBibleContentPhrase[];
+    psalmTitleContents: IBibleContentPhrase[];
     phrases: any;
     paragraph?: IBibleContentGroup<'paragraph'>;
     noteCount: number;

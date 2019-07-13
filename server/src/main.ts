@@ -26,8 +26,8 @@ async function bootstrap() {
         Container.set('bibleEngine', bibleEngine);
 
         const app = new Koa();
-        const PORT = process.env.NODE_ENV === 'production' ? 3456 : 3456;
-
+        const PORT = process.env.PORT; // process.env.NODE_ENV === 'production' ? 3456 : 3456;
+        console.log('Found this port: ', PORT)
         app.use(
             KoaCors({
                 allowMethods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE'],

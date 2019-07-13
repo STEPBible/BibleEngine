@@ -89,12 +89,12 @@ export const generateParagraphSql = (
                 ( ${colSectionStart} >= ${rangePhraseIdStart} AND
                     ${colSectionStart} <= ${rangePhraseIdEnd} )
             )
-        )
-        /* [DISABLED] OR (
-            ${colVersion} = ${range.versionId} AND
-            ${colSectionEnd} >= ${rangePhraseIdStart} AND
-            ${colSectionEnd} <= ${rangePhraseIdEnd}
-        ) */`;
+        )`;
+    // /* [DISABLED] OR (
+    //     ${colVersion} = ${range.versionId} AND
+    //     ${colSectionEnd} >= ${rangePhraseIdStart} AND
+    //     ${colSectionEnd} <= ${rangePhraseIdEnd}
+    // ) */`;
 };
 
 /**
