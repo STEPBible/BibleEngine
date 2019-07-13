@@ -3,6 +3,12 @@
     "version": "0.0.1",
     "description": "BibleEngine mono-repo root package.json, used mainly to execute build scripts. This package is not published to npm.",
     "private": true,
+    "engines": {
+        "yarn": "1.x"
+    },
+    "scripts": {
+        "heroku:start": "node server/lib/main.js"
+    },
     "workspaces": {
         "packages": [
             "core",

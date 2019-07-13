@@ -1,3 +1,4 @@
+import { join } from 'path';
 import 'reflect-metadata';
 import * as Koa from 'koa';
 import * as KoaBody from 'koa-bodyparser';
@@ -19,14 +20,8 @@ useContainerForTypeORM(Container);
 async function bootstrap() {
     try {
         const bibleEngine = new BibleEngine({
-            type: 'mysql',
-            host: 'localhost',
-            port: 3306,
-            username: 'bibleengine',
-            password: 'bibleengine',
-            database: 'bibleengine'
-            // logger: 'advanced-console',
-            // logging: 'all'
+            type: 'sqlite',
+            database: join(__dirname, './bibles.db')
         });
         Container.set('bibleEngine', bibleEngine);
 
