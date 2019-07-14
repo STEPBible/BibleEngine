@@ -1,6 +1,5 @@
 import normalizeText from './normalizeText';
 import { Analytics } from 'expo-analytics';
-const SECRETS = require('./secrets.json');
 
 export const Flags = {
   DEBUG: false,
@@ -71,5 +70,5 @@ export function randomColor() {
 }
 
 export const googleAnalytics = new Analytics(
-  SECRETS.GOOGLE_ANALYTICS_TRACKING_ID
+  process.env.GOOGLE_ANALYTICS_TRACKING_ID || ''
 );
