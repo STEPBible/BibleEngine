@@ -5,7 +5,8 @@
     "private": true,
     "scripts": {
         "bootstrap": "yarn && yarn workspaces run build",
-        "start": "node server/lib/main.js"
+        "start": "node server/lib/heroku.js",
+        "heroku": "yarn bootstrap && yarn start"
     },
     "workspaces": {
         "packages": [
