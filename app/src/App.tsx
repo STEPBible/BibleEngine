@@ -307,7 +307,7 @@ export default class App extends React.PureComponent<Props, State> {
     const dbIsAvailable = await this.database.databaseIsAvailable();
 
     const internetIsAvailable = await Network.internetIsAvailable();
-    if (!internetIsAvailable && !dbIsAvailable) {
+    if (!dbIsAvailable && (!internetIsAvailable || !Flags.REMOTE_ENABLED)) {
       this.updateLoadingMessage(
         'Updating database... \n\n(can take up to 30 seconds) \n\n Speed improvements coming soon! 🚀'
       );
