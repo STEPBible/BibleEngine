@@ -1,5 +1,6 @@
 import normalizeText from './normalizeText';
 import { Analytics } from 'expo-analytics';
+import { DefaultTheme } from 'react-native-paper';
 
 export const Flags = {
   DEBUG: false,
@@ -51,6 +52,16 @@ export enum AsyncStorageKey {
   CACHED_OSIS_BOOK_NAME = 'cachedBookName',
   CACHED_NEXT_CHAPTER = 'cachedNextChapter'
 }
+
+export const THEME = {
+  ...DefaultTheme,
+  fonts: {
+    regular: FontFamily.OPEN_SANS,
+    medium: FontFamily.OPEN_SANS_SEMIBOLD,
+    light: FontFamily.OPEN_SANS_LIGHT,
+    thin: FontFamily.OPEN_SANS_LIGHT
+  }
+};
 
 export function getDebugStyles() {
   if (Flags.DEBUG) {
