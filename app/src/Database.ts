@@ -111,6 +111,22 @@ export default class Database {
         nextChapter,
         contents: chapterOutput.content.contents
       };
+      if (
+        result.contents &&
+        result.contents.length &&
+        result.contents[0] &&
+        typeof result.contents[0].content === 'string'
+      ) {
+        const fakeSectionToWrapPhrases = {
+          title: '',
+          type: 'section',
+          contents: chapterOutput.content.contents
+        };
+        return {
+          nextChapter,
+          contents: [fakeSectionToWrapPhrases]
+        };
+      }
       return result;
     } catch (error) {
       if (!this.forceRemote) {
