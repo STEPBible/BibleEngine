@@ -15,7 +15,14 @@ const run = async () => {
     sourcePath: 'src/osis-sword-module/data/ESV2016_th.zip'
   });
   creator.addImporter(SwordImporter, {
-    sourcePath: 'src/osis-sword-module/data/ChiUns.zip'
+    sourcePath: 'src/osis-sword-module/data/ChiUns.zip',
+    versionMeta: {
+      title: 'Chinese Union Version',
+      uid: 'CUVs',
+      copyrightShort: 'Asia Bible Society 2013',
+      language: 'zh',
+      hasStrongs: true
+    }
   });
   creator.addImporter(StepLexiconImporter)
 

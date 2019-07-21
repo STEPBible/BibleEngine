@@ -56,6 +56,6 @@ export class SwordImporter extends BibleEngineImporter {
     }
 
     toString() {
-        return 'ESV (English Standard Version)';
+        return 'SwordImporter';
     }
 }
