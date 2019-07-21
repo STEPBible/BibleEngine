@@ -20,8 +20,9 @@ useContainerForTypeORM(Container);
 async function bootstrap() {
     try {
         const bibleEngine = new BibleEngine({
-            type: 'sqlite',
-            database: join(__dirname, './bibles.db')
+            type: 'postgres',
+            url: process.env.DATABASE_URL,
+            ssl: true
         });
         Container.set('bibleEngine', bibleEngine);
 
