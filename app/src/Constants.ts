@@ -50,7 +50,8 @@ export enum AsyncStorageKey {
   CACHED_CHAPTER_OUTPUT = 'cachedChapterOutput',
   CACHED_CHAPTER_NUM = 'cachedChapterNum',
   CACHED_OSIS_BOOK_NAME = 'cachedBookName',
-  CACHED_NEXT_CHAPTER = 'cachedNextChapter'
+  CACHED_NEXT_CHAPTER = 'cachedNextChapter',
+  CACHED_VERSION_UID = 'cachedVersionUid'
 }
 
 export const THEME = {

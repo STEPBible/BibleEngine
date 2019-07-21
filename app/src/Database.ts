@@ -1,4 +1,4 @@
-import { BibleEngine } from '@bible-engine/core';
+import { BibleEngine, IBibleSection } from '@bible-engine/core';
 import { ChapterResult } from './types';
 
 import * as Expo from 'expo';
@@ -88,7 +88,11 @@ export default class Database {
     }
   }
 
-  public async getChapter(bookOsisId: string, versionChapterNum: number) {
+  public async getChapter(
+    versionUid: string,
+    bookOsisId: string,
+    versionChapterNum: number
+  ) {
     let chapterOutput;
     try {
       const bibleEngine = this.forceRemote
@@ -98,7 +102,7 @@ export default class Database {
         {
           bookOsisId,
           versionChapterNum,
-          versionUid: 'ESV'
+          versionUid: versionUid
         },
         true,
         this.forceRemote
@@ -158,6 +162,19 @@ export default class Database {
       title: book.title
     }));
     return bookList;
+  }
+
+  async getVersions() {
+    const bibleEngine = this.forceRemote
+      ? this.remoteBibleEngine
+      : this.localBibleEngine;
+    try {
+      const versions = await bibleEngine!.getVersions(this.forceRemote);
+      return versions;
+    } catch (e) {
+      console.log(`error: ${e}`);
+    }
+    return [];
   }
 
   private async shouldFallBackToNetwork() {
