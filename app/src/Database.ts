@@ -26,7 +26,7 @@ export default class Database {
         type: 'expo',
         synchronize: false
       },
-      { url: 'http://ca2ff0a2.ngrok.io/rest/v1/bible' }
+      { url: process.env.REMOTE_BIBLE_ENGINE_URL || '' }
     );
   }
 
@@ -58,11 +58,14 @@ export default class Database {
   public async setLocalBibleEngine() {
     console.log('setLocalBibleEngine');
     this.forceRemote = false;
-    this.localBibleEngine = new BibleEngine({
-      database: 'bibles.db',
-      type: 'expo',
-      synchronize: false
-    });
+    this.localBibleEngine = new BibleEngine(
+      {
+        database: 'bibles.db',
+        type: 'expo',
+        synchronize: false
+      },
+      { url: process.env.REMOTE_BIBLE_ENGINE_URL || '' }
+    );
   }
 
   public async databaseIsAvailable() {
