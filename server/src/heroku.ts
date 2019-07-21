@@ -1,4 +1,3 @@
-import { join } from 'path';
 import 'reflect-metadata';
 import * as Koa from 'koa';
 import * as KoaBody from 'koa-bodyparser';
