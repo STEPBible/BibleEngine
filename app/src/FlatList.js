@@ -18,7 +18,9 @@ class FlatListHelper extends React.PureComponent {
   }
 
   scrollToOffset = (offset, animated = true) => {
-    this.flatList.getNode().scrollToOffset({ offset, animated });
+    if (this.flatList) {
+      this.flatList.getNode().scrollToOffset({ offset, animated });
+    }
   };
 
   _onScrollEndDrag = e => {
