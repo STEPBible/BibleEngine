@@ -5,7 +5,8 @@ import {
   StyleSheet,
   Dimensions,
   TouchableHighlight,
-  ScrollView
+  ScrollView,
+  FlatList
 } from 'react-native';
 import Popover from './Popover';
 import {
@@ -99,7 +100,7 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
     this.setState({ ...this.state, popoverIsVisible: false });
   };
 
-  _renderItem = item => {
+  _renderItem = ({ item }) => {
     if (!item) {
       return null;
     }
@@ -110,13 +111,13 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
             <Text
               selectable
               style={styles.popover__content__header__gloss}
-            >{`'${item.gloss}' (`}</Text>
+            >{`'${item.gloss || ''}' (`}</Text>
             <Text
               selectable
               style={styles.popover__content__header__transliteration}
             >{`${item.transliteration} - `}</Text>
             <Text selectable style={styles.popover__content__header__lemma}>
-              {`${item.lemma}`}
+              {`${item.lemma || ''}`}
             </Text>
             <Text style={styles.popover__content__header__lemma}>{')'}</Text>
           </View>
@@ -159,7 +160,15 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
         </View>
       );
     }
-    return this._renderItem(this.state.definitions[0]);
+
+    return (
+      <FlatList
+        data={this.state.definitions}
+        showsVerticalScrollIndicator={false}
+        renderItem={this._renderItem}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    )
   };
 
   renderDefinitionContent = (element: DictionaryEntry) => {
