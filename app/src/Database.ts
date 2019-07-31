@@ -6,6 +6,7 @@ import * as store from 'react-native-simple-store';
 import { AsyncStorage } from 'react-native';
 import { AsyncStorageKey } from './Constants';
 import Network from './Network';
+import { REMOTE_BIBLE_ENGINE_URL } from 'react-native-dotenv';
 
 const SQLITE_DIRECTORY = `${Expo.FileSystem.documentDirectory}SQLite`;
 const PATH_TO_DOWNLOAD_TO = `${SQLITE_DIRECTORY}/bibles.db`;
@@ -26,7 +27,7 @@ export default class Database {
         type: 'expo',
         synchronize: false
       },
-      { url: process.env.REMOTE_BIBLE_ENGINE_URL || '' }
+      { url: REMOTE_BIBLE_ENGINE_URL }
     );
   }
 
@@ -64,7 +65,7 @@ export default class Database {
         type: 'expo',
         synchronize: false
       },
-      { url: process.env.REMOTE_BIBLE_ENGINE_URL || '' }
+      { url: REMOTE_BIBLE_ENGINE_URL }
     );
   }
 
