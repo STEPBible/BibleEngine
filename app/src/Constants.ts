@@ -6,7 +6,7 @@ export const Flags = {
   DEBUG: false,
   USE_CACHE: true,
   SEARCH_ENABLED: true,
-  REMOTE_ENABLED: false
+  REMOTE_ENABLED: true
 };
 
 export const Settings = {
