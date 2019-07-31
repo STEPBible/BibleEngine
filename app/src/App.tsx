@@ -463,11 +463,9 @@ export default class App extends React.PureComponent<Props, State> {
     )[0].title;
 
     const versions = await this.database!.getVersions();
-    console.log(versions);
     const currentVersion = versions.filter(
       version => version.uid === versionUid
     )[0];
-    console.log(currentVersion);
     this.updateLoadingMessage('Tidying up...');
     const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
     LayoutAnimation.configureNext(animation);
