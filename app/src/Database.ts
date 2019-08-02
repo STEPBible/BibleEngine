@@ -1,4 +1,8 @@
-import { BibleEngine, IBibleSection } from '@bible-engine/core';
+import {
+  BibleEngine,
+  IBibleSection,
+  IBibleCrossReference
+} from '@bible-engine/core';
 import { ChapterResult } from './types';
 
 import * as Expo from 'expo';
@@ -179,6 +183,21 @@ export default class Database {
       console.log(`error: ${e}`);
     }
     return [];
+  }
+
+  async getVerseContents(refs: IBibleCrossReference[]) {
+    if (this.forceRemote || !this.localBibleEngine) {
+      const emptyVerses = refs.map(ref => ref.range).map(range => '');
+      return emptyVerses;
+    }
+    const referenceRanges = refs.map(ref => ref.range);
+    const verses = await Promise.all(
+      referenceRanges.map(range => this.localBibleEngine!.getPhrases(range))
+    );
+    const verseContents = verses.map(phrases =>
+      phrases.map((phrase: any) => phrase.content).join(' ')
+    );
+    return verseContents;
   }
 
   private async shouldFallBackToNetwork() {
