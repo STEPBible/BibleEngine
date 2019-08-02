@@ -100,37 +100,35 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
     this.setState({ ...this.state, popoverIsVisible: false });
   };
 
-  _renderItem = ({ item }) => {
-    if (!item) {
-      return null;
-    }
-    return (
-      <View>
-        <View style={styles.popover__content}>
-          <View style={styles.popover__content__header}>
-            <Text
-              selectable
-              style={styles.popover__content__header__gloss}
-            >{`'${item.gloss || ''}' (`}</Text>
-            <Text
-              selectable
-              style={styles.popover__content__header__transliteration}
-            >{`${item.transliteration} - `}</Text>
-            <Text selectable style={styles.popover__content__header__lemma}>
-              {`${item.lemma || ''}`}
-            </Text>
-            <Text style={styles.popover__content__header__lemma}>{')'}</Text>
+  renderStrongsHeader = item => (
+    <View style={styles.popover__content__header}>
+      <Text
+        selectable
+        style={styles.popover__content__header__gloss}
+      >{`'${item.gloss || ''}' (`}</Text>
+      <Text
+        selectable
+        style={styles.popover__content__header__transliteration}
+      >{`${item.transliteration} - `}</Text>
+      <Text selectable style={styles.popover__content__header__lemma}>
+        {`${item.lemma || ''}`}
+      </Text>
+      <Text style={styles.popover__content__header__lemma}>{')'}</Text>
+    </View>
+  );
+
+  renderExtraStrongsWords = () => (
+    <View styles={styles.extras}>
+      {this.state.definitions.slice(1).map(definition => (
+        <React.Fragment>
+          {this.renderStrongsHeader(definition)}
+          <View style={styles.popover__content__definitions}>
+            {this.renderDefinitionContent(definition)}
           </View>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.popover__content__definitions}>
-              {this.renderDefinitionContent(item)}
-            </View>
-          </ScrollView>
-        </View>
-        <View style={{ flex: 2, height: 20 }} />
-      </View>
-    );
-  };
+        </React.Fragment>
+      ))}
+    </View>
+  );
 
   renderPopoverContent = () => {
     if (this.state.loading) {
@@ -162,13 +160,19 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
     }
 
     return (
-      <FlatList
-        data={this.state.definitions}
-        showsVerticalScrollIndicator={false}
-        renderItem={this._renderItem}
-        keyExtractor={(item, index) => index.toString()}
-      />
-    )
+      <View>
+        <View style={styles.popover__content}>
+          {this.renderStrongsHeader(this.state.definitions[0])}
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.popover__content__definitions}>
+              {this.renderDefinitionContent(this.state.definitions[0])}
+            </View>
+            {this.renderExtraStrongsWords()}
+          </ScrollView>
+        </View>
+        <View style={{ flex: 2, height: 20 }} />
+      </View>
+    );
   };
 
   renderDefinitionContent = (element: DictionaryEntry) => {
@@ -280,8 +284,10 @@ const styles = StyleSheet.create({
     marginBottom: 0
   },
   popover__content__definitions: {
+    ...getDebugStyles(),
     flex: 1,
-    marginTop: Margin.SMALL
+    marginTop: Margin.SMALL,
+    marginBottom: Margin.MEDIUM
     // backgroundColor: 'magenta'
   },
   popover__content__header: {
