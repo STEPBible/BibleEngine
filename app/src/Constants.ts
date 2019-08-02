@@ -1,11 +1,12 @@
 import normalizeText from './normalizeText';
 import { Analytics } from 'expo-analytics';
-const SECRETS = require('./secrets.json');
+import { DefaultTheme } from 'react-native-paper';
 
 export const Flags = {
   DEBUG: false,
   USE_CACHE: true,
-  SEARCH_ENABLED: true
+  SEARCH_ENABLED: true,
+  REMOTE_ENABLED: true
 };
 
 export const Settings = {
@@ -49,8 +50,19 @@ export enum AsyncStorageKey {
   CACHED_CHAPTER_OUTPUT = 'cachedChapterOutput',
   CACHED_CHAPTER_NUM = 'cachedChapterNum',
   CACHED_OSIS_BOOK_NAME = 'cachedBookName',
-  CACHED_NEXT_CHAPTER = 'cachedNextChapter'
+  CACHED_NEXT_CHAPTER = 'cachedNextChapter',
+  CACHED_VERSION_UID = 'cachedVersionUid'
 }
+
+export const THEME = {
+  ...DefaultTheme,
+  fonts: {
+    regular: FontFamily.OPEN_SANS,
+    medium: FontFamily.OPEN_SANS_SEMIBOLD,
+    light: FontFamily.OPEN_SANS_LIGHT,
+    thin: FontFamily.OPEN_SANS_LIGHT
+  }
+};
 
 export function getDebugStyles() {
   if (Flags.DEBUG) {
@@ -70,5 +82,5 @@ export function randomColor() {
 }
 
 export const googleAnalytics = new Analytics(
-  SECRETS.GOOGLE_ANALYTICS_TRACKING_ID
+  process.env.GOOGLE_ANALYTICS_TRACKING_ID || ''
 );

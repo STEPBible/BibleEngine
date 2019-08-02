@@ -190,6 +190,29 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     });
   };
 
+  onClearTextTap = () => {
+    this.setState({
+      ...this.state,
+      inputText: ''
+    })
+    this.verseResults = []
+  }
+
+  renderClearIcon = () => {
+    if (!this.state.isFocused || !this.state.inputText.length) {
+      return null;
+    }
+    return (
+      <IconButton
+        icon="clear"
+        color="#888889"
+        size={30}
+        style={styles.search__input__clear}
+        onPress={this.onClearTextTap}
+      />
+    )
+  }
+
   render() {
     const { animation } = this.props;
     const transformWrapper = animation.getTransformWrapper();
@@ -212,6 +235,7 @@ export default class SearchPage extends React.PureComponent<Props, State> {
                 this.inputSearch = inputSearch;
               }}
             />
+            {this.renderClearIcon()}
           </Animated.View>
         </Animated.View>
         {this.renderSearchPage()}
@@ -267,6 +291,12 @@ const styles = StyleSheet.create({
   },
   search__input__icon: {
     marginLeft: Margin.MEDIUM,
+    width: 30,
+    height: 30,
+    ...getDebugStyles()
+  },
+  search__input__clear: {
+    marginRight: Margin.MEDIUM,
     width: 30,
     height: 30,
     ...getDebugStyles()

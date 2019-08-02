@@ -12,7 +12,12 @@ import {
 } from 'react-native';
 import * as store from 'react-native-simple-store';
 import { MaterialIcons } from '@expo/vector-icons';
-import { IBibleBook, IBibleContent, IBibleReference } from '@bible-engine/core';
+import {
+  IBibleBook,
+  IBibleContent,
+  IBibleReference,
+  IBibleVersion
+} from '@bible-engine/core';
 import Database from './Database';
 import Fonts from './Fonts';
 import ReadingView from './ReadingView';
@@ -22,7 +27,8 @@ import {
   getDebugStyles,
   FontFamily,
   FontSize,
-  Color
+  Color,
+  THEME
 } from './Constants';
 import { ifIphoneX } from './utils';
 import LoadingScreen from './LoadingScreen';
@@ -32,7 +38,12 @@ import 'react-native-console-time-polyfill';
 const bibleDatabaseModule = require('../assets/bibles.db');
 import ExpandableDrawer from './ExpandableDrawer';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
-import { ActivityIndicator } from 'react-native-paper';
+import {
+  ActivityIndicator,
+  List,
+  Provider as PaperProvider,
+  TouchableRipple
+} from 'react-native-paper';
 import Network from './Network';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
@@ -46,6 +57,7 @@ interface State {
   currentBookOsisId: string;
   currentBookFullTitle: string;
   currentChapterNum: number;
+  currentVersion: IBibleVersion;
   currentVersionUid: string;
   isLeftMenuOpen: boolean;
   isReady: boolean;
@@ -53,6 +65,8 @@ interface State {
   loadingMessage: string;
   nextChapter?: IBibleReference;
   offlineIsReady: boolean;
+  versionDrawerOpen: boolean;
+  versions: any[];
 }
 
 interface Props {}
@@ -71,11 +85,17 @@ export default class App extends React.PureComponent<Props, State> {
     currentBookFullTitle: 'Gen',
     currentChapterNum: 1,
     currentVersionUid: 'ESV',
+    currentVersion: {
+      uid: 'ESV',
+      title: 'English Standard Version'
+    },
     isLeftMenuOpen: false,
     isReady: false,
     loading: false,
     loadingMessage: 'Loading fonts...',
-    offlineIsReady: true
+    offlineIsReady: true,
+    versionDrawerOpen: false,
+    versions: []
   };
 
   constructor(props: Props) {
@@ -88,46 +108,48 @@ export default class App extends React.PureComponent<Props, State> {
       return <LoadingScreen loadingText={this.state.loadingMessage} />;
     }
     return (
-      <DrawerLayout
-        drawerWidth={DRAWER_WIDTH}
-        drawerPosition={DrawerLayout.positions.Left}
-        drawerType="front"
-        drawerBackgroundColor="white"
-        ref={ref => (this.leftMenuRef = ref)}
-        renderNavigationView={this.renderDrawer}
-      >
-        <React.Fragment>
-          <Expo.KeepAwake />
-          <StatusBar hidden={true} />
-          <SearchBarProvider>
-            {(animation: any) => (
-              <React.Fragment>
-                {Flags.SEARCH_ENABLED && (
-                  <SearchBar
-                    database={this.database}
-                    toggleMenu={this.toggleMenu}
-                    animation={animation}
-                  />
-                )}
-                {this.state.loading ? (
-                  <LoadingScreen loadingText="Loading..." />
-                ) : (
-                  <ReadingView
-                    chapterNum={this.state.currentChapterNum}
-                    books={this.state.books}
-                    bookName={this.state.currentBookFullTitle}
-                    bookOsisId={this.state.currentBookOsisId}
-                    changeBookAndChapter={this.changeBookAndChapter}
-                    content={this.state.content}
-                    nextChapter={this.state.nextChapter}
-                    database={this.database!}
-                  />
-                )}
-              </React.Fragment>
-            )}
-          </SearchBarProvider>
-        </React.Fragment>
-      </DrawerLayout>
+      <PaperProvider theme={THEME}>
+        <DrawerLayout
+          drawerWidth={DRAWER_WIDTH}
+          drawerPosition={DrawerLayout.positions.Left}
+          drawerType="front"
+          drawerBackgroundColor="white"
+          ref={ref => (this.leftMenuRef = ref)}
+          renderNavigationView={this.renderDrawer}
+        >
+          <React.Fragment>
+            <Expo.KeepAwake />
+            <StatusBar hidden={true} />
+            <SearchBarProvider>
+              {(animation: any) => (
+                <React.Fragment>
+                  {Flags.SEARCH_ENABLED && (
+                    <SearchBar
+                      database={this.database}
+                      toggleMenu={this.toggleMenu}
+                      animation={animation}
+                    />
+                  )}
+                  {this.state.loading ? (
+                    <LoadingScreen loadingText="Loading..." />
+                  ) : (
+                    <ReadingView
+                      chapterNum={this.state.currentChapterNum}
+                      books={this.state.books}
+                      bookName={this.state.currentBookFullTitle}
+                      bookOsisId={this.state.currentBookOsisId}
+                      changeBookAndChapter={this.changeBookAndChapter}
+                      content={this.state.content}
+                      nextChapter={this.state.nextChapter}
+                      database={this.database!}
+                    />
+                  )}
+                </React.Fragment>
+              )}
+            </SearchBarProvider>
+          </React.Fragment>
+        </DrawerLayout>
+      </PaperProvider>
     );
   }
 
@@ -147,17 +169,83 @@ export default class App extends React.PureComponent<Props, State> {
     </View>
   );
 
+  toggleVersionDrawer = () => {
+    console.log('toggleVersionDrawer');
+    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
+    LayoutAnimation.configureNext(animation);
+    this.setState({
+      ...this.state,
+      versionDrawerOpen: !this.state.versionDrawerOpen
+    });
+  };
+
   renderHeader = () => (
-    <View style={styles.header}>
-      <View>
-        <Text style={styles.header__title}>ESV</Text>
-        <Text style={styles.header__subtitle}>English Standard Version</Text>
-        {this.state.offlineIsReady
-          ? this.renderOfflineSuccessBanner()
-          : this.renderOfflineLoadingBanner()}
-      </View>
-    </View>
+    <React.Fragment>
+      <TouchableRipple onPress={this.toggleVersionDrawer} style={styles.header}>
+        <React.Fragment>
+          <View>
+            <Text style={styles.header__title}>
+              {this.state.currentVersionUid}
+            </Text>
+            {this.state.offlineIsReady
+              ? this.renderOfflineSuccessBanner()
+              : this.renderOfflineLoadingBanner()}
+          </View>
+          <View style={styles.header__icon}>
+            <MaterialIcons
+              color="#676767"
+              name={
+                this.state.versionDrawerOpen ? 'expand-less' : 'expand-more'
+              }
+              size={25}
+            />
+          </View>
+        </React.Fragment>
+      </TouchableRipple>
+      {this.renderVersionList()}
+    </React.Fragment>
   );
+
+  changeVersion = (versionUid: string) => {
+    const currentVersion = this.state.versions.filter(
+      version => version.uid === versionUid
+    )[0];
+    this.setState(
+      {
+        ...this.state,
+        currentVersion,
+        currentVersionUid: versionUid,
+        isLeftMenuOpen: false,
+        versionDrawerOpen: false
+      },
+      () => {
+        this.changeBookAndChapter('Gen', 1);
+      }
+    );
+    store.save(AsyncStorageKey.CACHED_VERSION_UID, versionUid);
+    this.closeDrawer();
+  };
+
+  renderVersionList = () => {
+    if (this.state.versionDrawerOpen) {
+      return (
+        <View style={styles.versions}>
+          {this.state.versions
+            .filter(version => version.uid !== this.state.currentVersionUid)
+            .map((version: IBibleVersion) => (
+              <List.Item
+                key={version.uid}
+                onPress={() => this.changeVersion(version.uid)}
+                title={version.uid}
+                style={{ paddingLeft: 23 }}
+                description={version.title}
+              />
+            ))}
+        </View>
+      );
+    }
+    return null;
+  };
 
   renderDrawer = () => (
     <FlatList
@@ -307,12 +395,12 @@ export default class App extends React.PureComponent<Props, State> {
     const dbIsAvailable = await this.database.databaseIsAvailable();
 
     const internetIsAvailable = await Network.internetIsAvailable();
-    if (!internetIsAvailable && !dbIsAvailable) {
+    if (!dbIsAvailable && (!internetIsAvailable || !Flags.REMOTE_ENABLED)) {
       this.updateLoadingMessage(
         'Updating database... \n\n(can take up to 30 seconds) \n\n Speed improvements coming soon! 🚀'
       );
       await this.database.setLocalDatabase();
-    } else if (internetIsAvailable && !dbIsAvailable) {
+    } else if (Flags.REMOTE_ENABLED && internetIsAvailable && !dbIsAvailable) {
       this.database.forceRemote = true;
       this.database.setLocalDatabase();
       this.pollForLocalDatabaseProgress();
@@ -325,6 +413,7 @@ export default class App extends React.PureComponent<Props, State> {
     let chapterNum = 0;
     let osisBookName = '';
     let nextChapter = null;
+    let versionUid = '';
 
     if (Flags.USE_CACHE) {
       try {
@@ -334,13 +423,15 @@ export default class App extends React.PureComponent<Props, State> {
           chapterOutput,
           chapterNum,
           osisBookName,
-          nextChapter
+          nextChapter,
+          versionUid
         ] = await store.get([
           AsyncStorageKey.CACHED_BOOK_LIST,
           AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
           AsyncStorageKey.CACHED_CHAPTER_NUM,
           AsyncStorageKey.CACHED_OSIS_BOOK_NAME,
-          AsyncStorageKey.CACHED_NEXT_CHAPTER
+          AsyncStorageKey.CACHED_NEXT_CHAPTER,
+          AsyncStorageKey.CACHED_VERSION_UID
         ]);
       } catch (error) {
         this.updateLoadingMessage('Error finding your place: ', error);
@@ -358,6 +449,10 @@ export default class App extends React.PureComponent<Props, State> {
       chapterNum = 1;
       store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum);
     }
+    if (!versionUid) {
+      versionUid = 'ESV';
+      store.save(AsyncStorageKey.CACHED_VERSION_UID, versionUid);
+    }
     if (!chapterOutput || !nextChapter) {
       const result = await this.getChapter(osisBookName, chapterNum);
       nextChapter = result.nextChapter;
@@ -366,6 +461,11 @@ export default class App extends React.PureComponent<Props, State> {
     const currentBookFullTitle = bookList.filter(
       book => book.osisId === osisBookName
     )[0].title;
+
+    const versions = await this.database!.getVersions();
+    const currentVersion = versions.filter(
+      version => version.uid === versionUid
+    )[0];
     this.updateLoadingMessage('Tidying up...');
     const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
     LayoutAnimation.configureNext(animation);
@@ -373,7 +473,10 @@ export default class App extends React.PureComponent<Props, State> {
       ...this.state,
       currentBookFullTitle,
       nextChapter,
+      versions,
+      currentVersion,
       currentBookOsisId: osisBookName,
+      currentVersionUid: versionUid,
       books: bookList,
       content: chapterOutput,
       loadingMessage: 'done!',
@@ -388,6 +491,7 @@ export default class App extends React.PureComponent<Props, State> {
     this.updateLoadingMessage('Loading chapter...');
     try {
       const result = await this.database!.getChapter(
+        this.state.currentVersionUid,
         bookOsisId,
         versionChapterNum
       );
@@ -428,9 +532,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flex: 1,
     flexDirection: 'row',
-    marginBottom: 15,
-    marginTop: ifIphoneX(40, 28),
-    marginLeft: 30,
+    justifyContent: 'space-between',
+    paddingTop: ifIphoneX(40, 28),
+    paddingLeft: 30,
+    paddingRight: 30,
     width: DRAWER_WIDTH
   },
   header__title: {
@@ -443,6 +548,10 @@ const styles = StyleSheet.create({
     color: '#676767',
     fontFamily: FontFamily.OPEN_SANS,
     fontSize: FontSize.EXTRA_SMALL
+  },
+  header__icon: {
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   header__status: {
     flexDirection: 'row',
@@ -459,5 +568,9 @@ const styles = StyleSheet.create({
     color: '#676767',
     fontFamily: FontFamily.OPEN_SANS,
     fontSize: FontSize.EXTRA_SMALL
+  },
+  versions: {
+    backgroundColor: '#ECEEF0',
+    marginBottom: 15
   }
 });

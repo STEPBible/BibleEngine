@@ -2,9 +2,9 @@ import ModuleConfig from './ModuleConfig';
 import VerseScheme from './VerseScheme';
 const base64 = require('base64-js');
 
-let start = 0;
-let buf = null;
-let isEnd = false;
+let start: any = 0;
+let buf: any = null;
+let isEnd: any = false;
 
 /**
  * Index of all book, chapter and verse entry points in a Sword module.
@@ -101,12 +101,12 @@ export default class ModuleIndex {
 
   // Get the positions of each book
   getBookPositions(inBuf: Uint8Array) {
-    let startPos = 0,
+    let startPos: any = 0,
       length: any = 0,
       unused = 0,
       res: any = null,
       end: any = false,
-      bookPositions = [];
+      bookPositions: any = [];
     start = 0;
 
     while (!end) {

@@ -1,3 +1,4 @@
+import { BibleEngineImporter } from './../Importer.interface';
 import { resolve } from 'path';
 
 import {
@@ -5,18 +6,12 @@ import {
     DocumentGroup,
     DocumentPhrase,
     DocumentElement,
-    BibleEngine,
     IDictionaryEntry
 } from '@bible-engine/core';
 
 const fs = require('fs');
 
 const dirProjectRoot = resolve(__dirname + '/../..');
-
-const sqlBible = new BibleEngine({
-    type: 'sqlite',
-    database: `${dirProjectRoot}/output/bibles.db`
-});
 
 enum LexiconEntryType {
     STRONGS_NUM = '@StrNo',
@@ -28,6 +23,47 @@ enum LexiconEntryType {
     GREEK_SHORT_DEFINITION = '@MounceShortDef',
     GREEK_DEFINITION = '@MounceMedDef',
     GREEK_LSJ_DEFINITION = '@FLsjDefs'
+}
+
+export class StepLexiconImporter extends BibleEngineImporter {
+    async import() {
+        // Note: You'll need to remove all the comments at the top of the txt file.
+        const hebrewLexiconLines = fs
+        .readFileSync(`${dirProjectRoot}/src/step-lexicon/data/hebrew_lexicon.txt`)
+        .toString()
+        .split('\n');
+
+        const hebrewLexiconEntries = getStrongsContent(hebrewLexiconLines);
+        const hebrewDictionaryEntries = getDictionaryEntries(
+            hebrewLexiconEntries,
+            LexiconEntryType.HEBREW_DEFINITION
+        );
+        for (let entry of hebrewDictionaryEntries) {
+            console.log(entry.strong)
+            await this.bibleEngine.addDictionaryEntry(entry);
+        }
+
+        const greekLexiconLines = fs
+            .readFileSync(`${dirProjectRoot}/src/step-lexicon/data/greek_lexicon.txt`)
+            .toString()
+            .split('\n');
+
+        const greekLexiconEntries = getStrongsContent(greekLexiconLines);
+        console.log(Object.values(greekLexiconEntries).length);
+        const greekDictionaryEntries = getDictionaryEntries(
+            greekLexiconEntries,
+            LexiconEntryType.GREEK_DEFINITION
+        );
+
+        for (let entry of greekDictionaryEntries) {
+            console.log(entry.strong)
+            await this.bibleEngine.addDictionaryEntry(entry);
+        }
+    }
+
+    toString() {
+        return 'STEP Greek and Hebrew Lexicons'
+    }
 }
 
 function isValidContent(line: string) {
@@ -203,46 +239,3 @@ function getDictionaryEntries(lexiconEntries: any, dictionary: string): IDiction
     });
     return dictionaryEntries;
 }
-
-export const genDb = async () => {
-    // Note: You'll need to remove all the comments at the top of the txt file.
-    const hebrewLexiconLines = fs
-        .readFileSync(`${dirProjectRoot}/src/step-lexicon/data/hebrew_lexicon.txt`)
-        .toString()
-        .split('\n');
-
-    const hebrewLexiconEntries = getStrongsContent(hebrewLexiconLines);
-    const hebrewDictionaryEntries = getDictionaryEntries(
-        hebrewLexiconEntries,
-        LexiconEntryType.HEBREW_DEFINITION
-    );
-    for (let entry of hebrewDictionaryEntries) {
-        sqlBible.addDictionaryEntry(entry);
-    }
-
-    const greekLexiconLines = fs
-        .readFileSync(`${dirProjectRoot}/src/step-lexicon/data/greek_lexicon.txt`)
-        .toString()
-        .split('\n');
-
-    const greekLexiconEntries = getStrongsContent(greekLexiconLines);
-    console.log(Object.values(greekLexiconEntries).length);
-    const greekDictionaryEntries = getDictionaryEntries(
-        greekLexiconEntries,
-        LexiconEntryType.GREEK_DEFINITION
-    );
-
-    // console.log(
-    //   JSON.stringify(greekDictionaryEntries.slice(1000, 1010), null, 2)
-    // );
-
-    for (let entry of greekDictionaryEntries) {
-        sqlBible.addDictionaryEntry(entry);
-    }
-};
-
-const run = async () => {
-    await genDb();
-};
-
-run();

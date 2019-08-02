@@ -1,4 +1,4 @@
-import { BibleEngine } from '@bible-engine/core';
+import { BibleEngine, IBibleSection } from '@bible-engine/core';
 import { ChapterResult } from './types';
 
 import * as Expo from 'expo';
@@ -6,6 +6,7 @@ import * as store from 'react-native-simple-store';
 import { AsyncStorage } from 'react-native';
 import { AsyncStorageKey } from './Constants';
 import Network from './Network';
+import { REMOTE_BIBLE_ENGINE_URL } from 'react-native-dotenv';
 
 const SQLITE_DIRECTORY = `${Expo.FileSystem.documentDirectory}SQLite`;
 const PATH_TO_DOWNLOAD_TO = `${SQLITE_DIRECTORY}/bibles.db`;
@@ -26,7 +27,7 @@ export default class Database {
         type: 'expo',
         synchronize: false
       },
-      { url: 'http://ca2ff0a2.ngrok.io/rest/v1/bible' }
+      { url: REMOTE_BIBLE_ENGINE_URL }
     );
   }
 
@@ -58,11 +59,14 @@ export default class Database {
   public async setLocalBibleEngine() {
     console.log('setLocalBibleEngine');
     this.forceRemote = false;
-    this.localBibleEngine = new BibleEngine({
-      database: 'bibles.db',
-      type: 'expo',
-      synchronize: false
-    });
+    this.localBibleEngine = new BibleEngine(
+      {
+        database: 'bibles.db',
+        type: 'expo',
+        synchronize: false
+      },
+      { url: REMOTE_BIBLE_ENGINE_URL }
+    );
   }
 
   public async databaseIsAvailable() {
@@ -88,7 +92,11 @@ export default class Database {
     }
   }
 
-  public async getChapter(bookOsisId: string, versionChapterNum: number) {
+  public async getChapter(
+    versionUid: string,
+    bookOsisId: string,
+    versionChapterNum: number
+  ) {
     let chapterOutput;
     try {
       const bibleEngine = this.forceRemote
@@ -98,7 +106,7 @@ export default class Database {
         {
           bookOsisId,
           versionChapterNum,
-          versionUid: 'ESV'
+          versionUid: versionUid
         },
         true,
         this.forceRemote
@@ -111,6 +119,22 @@ export default class Database {
         nextChapter,
         contents: chapterOutput.content.contents
       };
+      if (
+        result.contents &&
+        result.contents.length &&
+        result.contents[0] &&
+        typeof result.contents[0].content === 'string'
+      ) {
+        const fakeSectionToWrapPhrases = {
+          title: '',
+          type: 'section',
+          contents: chapterOutput.content.contents
+        };
+        return {
+          nextChapter,
+          contents: [fakeSectionToWrapPhrases]
+        };
+      }
       return result;
     } catch (error) {
       if (!this.forceRemote) {
@@ -142,6 +166,19 @@ export default class Database {
       title: book.title
     }));
     return bookList;
+  }
+
+  async getVersions() {
+    const bibleEngine = this.forceRemote
+      ? this.remoteBibleEngine
+      : this.localBibleEngine;
+    try {
+      const versions = await bibleEngine!.getVersions(this.forceRemote);
+      return versions;
+    } catch (e) {
+      console.log(`error: ${e}`);
+    }
+    return [];
   }
 
   private async shouldFallBackToNetwork() {

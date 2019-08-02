@@ -65,7 +65,7 @@ export default class SwordModule {
       bookNum,
       this.config.versification
     );
-    const chapters = [];
+    const chapters: any = [];
     for (let chapterNum = 1; chapterNum <= maxChapter; chapterNum += 1) {
       const chapter: types.ChapterXML = this.getXMLforChapter(
         `${bookOsisName} ${chapterNum}`

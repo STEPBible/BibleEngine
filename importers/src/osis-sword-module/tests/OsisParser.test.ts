@@ -20,7 +20,6 @@ describe('OsisParser', () => {
       { intro: '', verses: psalmsXML.verses }
     ]);
     const sectionHeader = 'The LORD Is My Shepherd';
-    expect(true).toBe(true)
     expect(JSON.stringify(bookJson)).toEqual(
       expect.stringContaining(sectionHeader)
     )
@@ -47,5 +46,16 @@ describe('OsisParser', () => {
     expect(JSON.stringify(bookJson)).toEqual(
       expect.stringContaining(partOfPsalmTitle)
     );
+  })
+
+  describe('Chinese Union Version Simplified with Strongs', () => {
+    const genesisXml: types.ChapterXML = require('./Gen1CuvXmlResult.json');
+    test('nonempty content returned', () => {
+      const bookJson = getBibleEngineInputFromXML([
+        { intro: '', verses: genesisXml.verses }
+      ]);
+      console.log(JSON.stringify(bookJson[0], null, 2))
+      expect(bookJson.length).toBeGreaterThan(0)
+    })
   })
 });
