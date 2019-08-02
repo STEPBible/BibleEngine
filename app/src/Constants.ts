@@ -5,7 +5,6 @@ import { DefaultTheme } from 'react-native-paper';
 export const Flags = {
   DEBUG: false,
   USE_CACHE: true,
-  SEARCH_ENABLED: true,
   REMOTE_ENABLED: true
 };
 

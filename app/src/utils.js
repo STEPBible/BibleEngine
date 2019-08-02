@@ -31,7 +31,7 @@ export function isIOS() {
 
 export function ifIOS(iosStyle, regularStyle) {
   if (isIOS()) {
-    return androidStyle;
+    return iosStyle;
   }
   return regularStyle;
 }

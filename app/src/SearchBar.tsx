@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { ifIphoneX, ifAndroid } from './utils';
+import { ifIphoneX, ifAndroid, ifIOS } from './utils';
 import { IconButton, TouchableRipple } from 'react-native-paper';
 import {
   BackHandler,
@@ -194,9 +194,9 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     this.setState({
       ...this.state,
       inputText: ''
-    })
-    this.verseResults = []
-  }
+    });
+    this.verseResults = [];
+  };
 
   renderClearIcon = () => {
     if (!this.state.isFocused || !this.state.inputText.length) {
@@ -210,8 +210,8 @@ export default class SearchPage extends React.PureComponent<Props, State> {
         style={styles.search__input__clear}
         onPress={this.onClearTextTap}
       />
-    )
-  }
+    );
+  };
 
   render() {
     const { animation } = this.props;
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS,
     borderWidth: 1,
     borderColor: '#ddd',
-    marginTop: ifIphoneX(20, ifAndroid(-10, 12)),
+    marginTop: ifIOS(ifIphoneX(20, -10), ifAndroid(-10, 12)),
     marginLeft: 10,
     marginRight: 10,
     elevation,
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     height: ifAndroid(54, 60),
     borderBottomWidth: 0.5,
     borderBottomColor: '#ddd',
-    marginTop: ifIphoneX(20, ifAndroid(-10, 12)),
+    marginTop: ifIOS(ifIphoneX(20, -10), ifAndroid(-10, 12)),
     ...getDebugStyles()
   },
   search__input__icon: {

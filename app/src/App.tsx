@@ -123,13 +123,11 @@ export default class App extends React.PureComponent<Props, State> {
             <SearchBarProvider>
               {(animation: any) => (
                 <React.Fragment>
-                  {Flags.SEARCH_ENABLED && (
-                    <SearchBar
-                      database={this.database}
-                      toggleMenu={this.toggleMenu}
-                      animation={animation}
-                    />
-                  )}
+                  <SearchBar
+                    database={this.database}
+                    toggleMenu={this.toggleMenu}
+                    animation={animation}
+                  />
                   {this.state.loading ? (
                     <LoadingScreen loadingText="Loading..." />
                   ) : (
