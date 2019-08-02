@@ -12,7 +12,8 @@ import Popover from './Popover';
 import {
   BibleEngine,
   IDictionaryEntry,
-  DocumentElement
+  DocumentElement,
+  DictionaryEntryEntity
 } from '@bible-engine/core';
 import {
   Color,
@@ -106,10 +107,9 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
         selectable
         style={styles.popover__content__header__gloss}
       >{`'${item.gloss || ''}' (`}</Text>
-      <Text
-        selectable
-        style={styles.popover__content__header__transliteration}
-      >{`${item.transliteration} - `}</Text>
+      <Text selectable style={styles.popover__content__header__transliteration}>
+        {item.transliteration ? `${item.transliteration} - ` : ''}
+      </Text>
       <Text selectable style={styles.popover__content__header__lemma}>
         {`${item.lemma || ''}`}
       </Text>
@@ -118,15 +118,17 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
   );
 
   renderExtraStrongsWords = () => (
-    <View styles={styles.extras}>
-      {this.state.definitions.slice(1).map(definition => (
-        <React.Fragment>
-          {this.renderStrongsHeader(definition)}
-          <View style={styles.popover__content__definitions}>
-            {this.renderDefinitionContent(definition)}
+    <View>
+      {this.state.definitions
+        .slice(1)
+        .map((definition: DictionaryEntryEntity) => (
+          <View key={`definition-${definition.strong}`}>
+            {this.renderStrongsHeader(definition)}
+            <View style={styles.popover__content__definitions}>
+              {this.renderDefinitionContent(definition)}
+            </View>
           </View>
-        </React.Fragment>
-      ))}
+        ))}
     </View>
   );
 
@@ -238,6 +240,7 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
           <Text style={styles.strongWordText}>{this.props.phrase}</Text>
         </TouchableHighlight>
         <Popover
+          debug
           isVisible={this.state.popoverIsVisible}
           fromView={this.touchable}
           popoverStyle={styles.popover__background_container}
