@@ -4,15 +4,16 @@ import {
   IBibleCrossReference
 } from '@bible-engine/core';
 import { ChapterResult } from './types';
-
-import * as Expo from 'expo';
+import { SQLite } from 'expo-sqlite';
+import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system';
 import * as store from 'react-native-simple-store';
 import { AsyncStorage } from 'react-native';
 import { AsyncStorageKey } from './Constants';
 import Network from './Network';
 import { REMOTE_BIBLE_ENGINE_URL } from 'react-native-dotenv';
 
-const SQLITE_DIRECTORY = `${Expo.FileSystem.documentDirectory}SQLite`;
+const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`;
 const PATH_TO_DOWNLOAD_TO = `${SQLITE_DIRECTORY}/bibles.db`;
 
 export default class Database {
@@ -38,21 +39,21 @@ export default class Database {
   public async setLocalDatabase() {
     this.localDbIsReady = false;
     try {
-      const { exists } = await Expo.FileSystem.getInfoAsync(SQLITE_DIRECTORY);
+      const { exists } = await FileSystem.getInfoAsync(SQLITE_DIRECTORY);
       if (!exists) {
-        await Expo.FileSystem.makeDirectoryAsync(SQLITE_DIRECTORY);
+        await FileSystem.makeDirectoryAsync(SQLITE_DIRECTORY);
       }
       await AsyncStorage.multiRemove(Object.keys(AsyncStorageKey));
-      await Expo.FileSystem.deleteAsync(PATH_TO_DOWNLOAD_TO, {
+      await FileSystem.deleteAsync(PATH_TO_DOWNLOAD_TO, {
         idempotent: true
       });
-      const asset = Expo.Asset.fromModule(this.databaseModule);
+      const asset = Asset.fromModule(this.databaseModule);
       const uriToDownload = asset.uri;
-      await Expo.FileSystem.downloadAsync(uriToDownload, PATH_TO_DOWNLOAD_TO);
+      await FileSystem.downloadAsync(uriToDownload, PATH_TO_DOWNLOAD_TO);
       const incomingHash = asset.hash;
       store.save('existingHash', incomingHash);
       await this.setLocalBibleEngine();
-      await Expo.SQLite.openDatabase('bibles.db');
+      await SQLite.openDatabase('bibles.db');
     } catch (e) {
       console.log('error in _setLocalDatabase: ', e);
       this.forceRemote = true;
@@ -75,11 +76,11 @@ export default class Database {
 
   public async databaseIsAvailable() {
     try {
-      const asset = Expo.Asset.fromModule(this.databaseModule);
+      const asset = Asset.fromModule(this.databaseModule);
       const incomingHash = asset.hash;
       const existingHash = await store.get('existingHash');
       let exists = false;
-      const info = await Expo.FileSystem.getInfoAsync(PATH_TO_DOWNLOAD_TO);
+      const info = await FileSystem.getInfoAsync(PATH_TO_DOWNLOAD_TO);
       exists = info.exists;
       const available = exists && incomingHash === existingHash;
       if (!available) {

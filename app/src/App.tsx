@@ -1,4 +1,4 @@
-import * as Expo from 'expo';
+import KeepAwake from 'expo-keep-awake';
 import * as React from 'react';
 import {
   Dimensions,
@@ -118,7 +118,7 @@ export default class App extends React.PureComponent<Props, State> {
           renderNavigationView={this.renderDrawer}
         >
           <React.Fragment>
-            <Expo.KeepAwake />
+            <KeepAwake />
             <StatusBar hidden={true} />
             <SearchBarProvider>
               {(animation: any) => (

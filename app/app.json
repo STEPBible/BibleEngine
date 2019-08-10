@@ -33,7 +33,7 @@
       }
     },
     "packagerOpts": {
-      "sourceExts": ["ts", "tsx"],
+      "sourceExts": ["ts", "tsx", "js"],
       "assetExts": ["db", "mp3", "ttf", "png"]
     },
     "githubUrl": "https://github.com/tyndale/BibleEngine",
