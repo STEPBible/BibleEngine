@@ -1080,10 +1080,27 @@ class Popover extends React.PureComponent<PopoverProps, PopoverState> {
       }
     );
     let contentView = (
-      <View style={[styles.container, { left: 0 }]}>
+      <View
+        style={[
+          styles.container,
+          {
+            left: 0,
+            borderColor: 'transparent',
+            borderWidth: 1
+          }
+        ]}
+      >
         <SafeAreaView
           pointerEvent="none"
-          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderColor: 'transparent',
+            borderWidth: 1
+          }}
         >
           <View
             style={{ flex: 1 }}
