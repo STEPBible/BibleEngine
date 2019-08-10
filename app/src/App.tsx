@@ -248,6 +248,7 @@ export default class App extends React.PureComponent<Props, State> {
   renderDrawer = () => (
     <FlatList
       data={this.state.books}
+      initialNumToRender={100}
       keyExtractor={(item, index) => index.toString()}
       getItemLayout={this.getItemLayout}
       ref={ref => (this.bookListRef = ref)}
