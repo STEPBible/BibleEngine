@@ -25,7 +25,7 @@
     },
     "android": {
       "package": "com.tyndale.stepbible",
-      "versionCode": "4",
+      "versionCode": 2,
       "config": {
         "fabric": {
           "apiKey": "4177638a1668874c4bff059ca4d1a6b72d2b7129",
