@@ -30,7 +30,6 @@ import Footnote from './Footnote';
 import { PageHit } from 'expo-analytics';
 import { Button } from 'react-native-paper';
 import Database from './Database';
-import ReadingSection from './ReadingSection';
 
 interface Props {
   chapterNum: number;
@@ -59,18 +58,118 @@ export default class ReadingView extends React.PureComponent<Props, State> {
       ...this.props
     };
   }
+  renderItem = (content: IBibleContent, index: number): any => {
+    this.itemNum += 1;
+    if (!('type' in content) || content.type === 'phrase') {
+      return this.renderPhrase(content, index);
+    }
+    const children: IBibleContent[] = content.contents;
+
+    if (content.type === 'section') {
+      return (
+        <Fragment key={`section-${index}`}>
+          {this.renderVerseNumber(content)}
+          {this.renderSection(content)}
+        </Fragment>
+      );
+    }
+    if (content.type === 'group') {
+      if (content.groupType === 'paragraph' || content.groupType === 'indent') {
+        return (
+          <Fragment key={`group-${index}`}>
+            <View style={styles.paragraph}>
+              {this.renderVerseNumber(content)}
+              {children.map((child, index) => this.renderItem(child, index))}
+            </View>
+          </Fragment>
+        );
+      }
+    }
+    throw new Error(`Unrecognized content: ${JSON.stringify(content)}`);
+  };
+
+  renderSection = (content: IBibleContent): any => {
+    const children: IBibleContent[] = content.contents;
+    return (
+      <View style={styles.section}>
+        <Text style={styles.title}>{content.title}</Text>
+        {children.map((child, index) => this.renderItem(child, index))}
+      </View>
+    );
+  };
+
+  renderVerseNumber = (content: IBibleContent): any => {
+    if (content.numbering) {
+      return (
+        <Text style={styles.verseNumber}>
+          {content.numbering.versionVerseIsStarting}
+        </Text>
+      );
+    }
+    return null;
+  };
+
+  renderCrossReference = (content: IBiblePhrase): any => {
+    if (
+      !Settings.CROSS_REFERENCES_ENABLED ||
+      !content.crossReferences ||
+      !content.crossReferences.length
+    ) {
+      return null;
+    }
+    return (
+      <CrossReference
+        crossReferences={content.crossReferences}
+        database={this.props.database}
+      />
+    );
+  };
+
+  renderFootnote = (content: IBiblePhrase): any => {
+    if (
+      !Settings.FOOTNOTES_ENABLED ||
+      !content.notes ||
+      !content.notes.length
+    ) {
+      return null;
+    }
+    return <Footnote notes={content.notes} />;
+  };
+
+  renderPhrase = (content: IBibleContent, index): any => {
+    if (content.strongs) {
+      return (
+        <Fragment key={`strong-${this.itemNum}`}>
+          {this.renderFootnote(content)}
+          {this.renderVerseNumber(content)}
+          {this.renderCrossReference(content)}
+          <StrongsWord
+            key={`${content.content}-${content.strongs}`}
+            phrase={content.content}
+            strongs={content.strongs}
+            database={this.props.database}
+          />
+        </Fragment>
+      );
+    }
+    return (
+      <Fragment key={`phrase-${this.itemNum}`}>
+        {this.renderFootnote(content)}
+        {this.renderVerseNumber(content)}
+        {this.renderCrossReference(content)}
+        {content.content.split(' ').map((phrase, index) => (
+          <View key={`phrase-${this.itemNum}-${index}`} style={styles.phrase}>
+            <Text style={styles.phraseText}>{phrase}</Text>
+          </View>
+        ))}
+      </Fragment>
+    );
+  };
 
   renderFlatlistItem = ({ item, index }) => {
     if ('overallTitle' in item) {
       return <Text style={styles.chapterHeader}>{item.overallTitle}</Text>;
     }
-    return (
-      <ReadingSection
-        contents={item}
-        database={this.props.database}
-        index={index}
-      />
-    );
     return this.renderItem(item, index);
   };
 
