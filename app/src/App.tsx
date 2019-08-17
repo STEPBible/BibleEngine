@@ -1,4 +1,3 @@
-import KeepAwake from 'expo-keep-awake';
 import * as React from 'react';
 import {
   Dimensions,
@@ -38,6 +37,7 @@ import 'react-native-console-time-polyfill';
 const bibleDatabaseModule = require('../assets/bibles.db');
 import ExpandableDrawer from './ExpandableDrawer';
 import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
+import { useKeepAwake } from 'expo-keep-awake';
 import {
   ActivityIndicator,
   List,
@@ -72,6 +72,7 @@ interface State {
 interface Props {}
 
 export default class App extends React.PureComponent<Props, State> {
+  useKeepAwake();
   leftMenuRef: any;
   bookListRef: any;
   database?: Database;
@@ -118,7 +119,6 @@ export default class App extends React.PureComponent<Props, State> {
           renderNavigationView={this.renderDrawer}
         >
           <React.Fragment>
-            <KeepAwake />
             <StatusBar hidden={true} />
             <SearchBarProvider>
               {(animation: any) => (
