@@ -12,7 +12,6 @@ import {
   NativeModules,
   View,
   Modal,
-  Keyboard,
   Alert,
   Easing,
   SafeAreaView
@@ -180,74 +179,6 @@ class Popover extends React.PureComponent<PopoverProps, PopoverState> {
       this.skipNextDefaultDisplayArea = false;
     }
   }
-  keyboardDidShow(e) {
-    this.debug('keyboardDidShow - keyboard height: ' + e.endCoordinates.height);
-    this.shiftForKeyboard(e.endCoordinates.height);
-  }
-  keyboardDidHide() {
-    this.debug('keyboardDidHide');
-    // On android, the keyboard update causes a default display area change, so no need to manually trigger
-    this.setState(
-      { shiftedDisplayArea: null },
-      () => isIOS && this.handleGeomChange()
-    );
-  }
-  shiftForKeyboard(keyboardHeight) {
-    const displayArea = this.getDisplayArea();
-    const absoluteVerticalCutoff =
-      Dimensions.get('window').height - keyboardHeight - (isIOS ? 10 : 40);
-    const combinedY = Math.min(
-      displayArea.height + displayArea.y,
-      absoluteVerticalCutoff
-    );
-    this.setState(
-      {
-        shiftedDisplayArea: {
-          x: displayArea.x,
-          y: displayArea.y,
-          width: displayArea.width,
-          height: combinedY - displayArea.y
-        }
-      },
-      () => this.handleGeomChange()
-    );
-  }
-  componentDidMount() {
-    // This is used so that when the device is rotating or the viewport is expanding for any other reason,
-    //  we can suspend updates due to content changes until we are finished calculating the new display
-    //  area and rect for the new viewport size
-    // This makes the recalc on rotation much faster
-    this.waitForResizeToFinish = false;
-    // Show popover if isVisible is initially true
-    if (this.props.isVisible) {
-      if (!Popover.isShowingInModal) {
-        setTimeout(
-          () =>
-            this.calculateRect(
-              this.props,
-              fromRect =>
-                (fromRect || !this.props.fromView) &&
-                this.setState({ fromRect, isAwaitingShow: true, visible: true })
-            ),
-          0
-        );
-        if (this.props.showInModal) Popover.isShowingInModal = true;
-      } else {
-        console.warn(MULTIPLE_POPOVER_WARNING);
-      }
-    }
-    Dimensions.addEventListener('change', this.handleResizeEvent);
-  }
-  componentWillUnmount() {
-    if (this.state.visible) this.animateOut();
-    Dimensions.removeEventListener('change', this.handleResizeEvent);
-  }
-  // First thing called when device rotates
-  handleResizeEvent = event => {
-    if (this.props.isVisible) {
-      this.waitForResizeToFinish = true;
-    }
-  };
   measureContent(requestedContentSize) {
     if (!requestedContentSize.width)
       console.warn(
@@ -911,8 +842,6 @@ class Popover extends React.PureComponent<PopoverProps, PopoverState> {
     }
   }
   animateOut() {
-    this.keyboardDidShowListener && this.keyboardDidShowListener.remove();
-    this.keyboardDidHideListener && this.keyboardDidHideListener.remove();
     this.setState({ shiftedDisplayArea: null });
     this.animateTo({
       values: this.state.animatedValues,
@@ -929,14 +858,6 @@ class Popover extends React.PureComponent<PopoverProps, PopoverState> {
   }
   animateIn() {
     var values = this.state.animatedValues;
-    this.keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      this.keyboardDidShow.bind(this)
-    );
-    this.keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      this.keyboardDidHide.bind(this)
-    );
     this.displayAreaStore = this.getDisplayArea();
     // Should grow from anchor point
     let translateStart = this.getTranslateOrigin();
@@ -1134,7 +1055,7 @@ class Popover extends React.PureComponent<PopoverProps, PopoverState> {
       return (
         <Modal
           transparent={true}
-          supportedOrientations={['portrait', 'landscape']}
+          supportedOrientations={['portrait']}
           hardwareAccelerated={true}
           visible={this.state.visible}
           onRequestClose={this.props.onClose}
