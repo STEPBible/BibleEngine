@@ -122,7 +122,7 @@ export default class CrossReference extends React.PureComponent<Props, State> {
           isVisible={this.state.popoverIsVisible}
           fromView={this.touchable}
           popoverStyle={styles.popover__background_container}
-          onClose={() => this.closePopover()}
+          onRequestClose={() => this.closePopover()}
         >
           {this.renderPopoverContent()}
         </Popover>

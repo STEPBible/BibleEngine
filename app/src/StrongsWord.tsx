@@ -98,6 +98,7 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
   };
 
   closePopover = () => {
+    console.log('closePopover');
     this.setState({ ...this.state, popoverIsVisible: false });
   };
 
@@ -243,8 +244,8 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
           debug
           isVisible={this.state.popoverIsVisible}
           fromView={this.touchable}
+          onRequestClose={() => this.closePopover()}
           popoverStyle={styles.popover__background_container}
-          onClose={() => this.closePopover()}
         >
           {this.renderPopoverContent()}
         </Popover>
