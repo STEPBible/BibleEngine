@@ -1083,7 +1083,7 @@ var styles = {
     top: 0,
     bottom: 0,
     left: 0,
-    right: FIX_SHIFT,
+    right: 0,
     height: Dimensions.get('screen').height,
     position: 'absolute'
   },
