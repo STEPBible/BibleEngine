@@ -1,4 +1,4 @@
-import * as Expo from 'expo';
+import * as Font from 'expo-font';
 
 const openSansBold = require('../assets/fonts/OpenSans-Bold.ttf');
 const openSansSemibold = require('../assets/fonts/OpenSans-Semibold.ttf');
@@ -7,20 +7,20 @@ const openSansLight = require('../assets/fonts/OpenSans-Light.ttf');
 const cardo = require('../assets/fonts/Cardo-Regular.ttf');
 const cardoBold = require('../assets/fonts/Cardo-Bold.ttf');
 const cardoItalic = require('../assets/fonts/Cardo-Italic.ttf');
-const materialIcons = require('@expo/vector-icons/fonts/MaterialIcons.ttf');
-const Ionicons = require('@expo/vector-icons/fonts/Ionicons.ttf');
+import MaterialIcons from '../assets/fonts/MaterialIcons.ttf';
+import Ionicons from '../assets/fonts/Ionicons.ttf';
 
 export default class Fonts {
   static async load() {
-    return Expo.Font.loadAsync({
+    return Font.loadAsync({
       'open-sans-bold': openSansBold,
       'open-sans-semibold': openSansSemibold,
       'open-sans': openSans,
       'open-sans-light': openSansLight,
       'cardo-bold': cardoBold,
       'cardo-italic': cardoItalic,
-      'Material Icons': materialIcons,
-      MaterialIcons: materialIcons,
+      'Material Icons': MaterialIcons,
+      MaterialIcons: MaterialIcons,
       cardo,
       Ionicons
     });

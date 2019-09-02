@@ -1,6 +1,4 @@
-import {
-  Animated, NativeModules, findNodeHandle, Dimensions,
-} from 'react-native';
+import { NativeModules, findNodeHandle, Dimensions } from 'react-native';
 
 export function Point(x, y) {
   this.x = x;
@@ -24,45 +22,74 @@ export function isTablet() {
 }
 
 export function isRect(rect) {
-  return rect && (rect.x || rect.x === 0) && (rect.y || rect.y === 0) && (rect.width || rect.width === 0) && (rect.height || rect.height === 0);
+  return (
+    rect &&
+    (rect.x || rect.x === 0) &&
+    (rect.y || rect.y === 0) &&
+    (rect.width || rect.width === 0) &&
+    (rect.height || rect.height === 0)
+  );
 }
 
 export function isPoint(point) {
-  return point && (point.x || point.x === 0) && point.x !== NaN && (point.y || point.y === 0) && point.y !== NaN;
+  return (
+    point &&
+    (point.x || point.x === 0) &&
+    !isNaN(point.x) &&
+    (point.y || point.y === 0) &&
+    !isNaN(point.y)
+  );
+}
+
+export function getRectForRef(ref, callback) {
+  NativeModules.UIManager.measure(
+    findNodeHandle(ref),
+    (x0, y0, width, height, x, y) => {
+      callback(new Rect(x, y, width, height));
+    }
+  );
 }
 
 export function runAfterChange(getFirst, second, func) {
   let count = 0; // Failsafe so that the interval doesn't run forever
-  const checkFunc = () => getFirst((first) => {
-    if (first !== second) {
-      func();
-    } else if (count < 20) {
-      count++;
-      setTimeout(checkFunc, 100);
-    }
-  });
+  let checkFunc = () =>
+    getFirst(first => {
+      if (first !== second) {
+        func();
+      } else if (count < 20) {
+        count++;
+        setTimeout(checkFunc, 100);
+      }
+    });
 
   checkFunc();
 }
 
-export function waitForNewRect(ref, initialRect, onFinish, verticalOffset = 0) {
-  runAfterChange((callback) => {
-    NativeModules.UIManager.measure(findNodeHandle(ref), (x0, y0, width, height, x, y) => {
-      callback(new Rect(x, y + verticalOffset, width, height));
-    });
-  }, initialRect, () => {
-    NativeModules.UIManager.measure(findNodeHandle(ref), (x0, y0, width, height, x, y) => {
-      onFinish(new Rect(x, y + verticalOffset, width, height));
-    });
-  });
+export function waitForNewRect(ref, initialRect, onFinish) {
+  runAfterChange(
+    callback => {
+      getRectForRef(ref, callback);
+    },
+    initialRect,
+    () => {
+      getRectForRef(ref, onFinish);
+    }
+  );
 }
 
 export function rectChanged(a, b) {
   if (!isRect(a) || !isRect(b)) return false;
-  return (Math.round(a.x) !== Math.round(b.x) || Math.round(a.y) !== Math.round(b.y) || Math.round(a.width) !== Math.round(b.width) || Math.round(a.height) !== Math.round(b.height));
+  return (
+    Math.round(a.x) !== Math.round(b.x) ||
+    Math.round(a.y) !== Math.round(b.y) ||
+    Math.round(a.width) !== Math.round(b.width) ||
+    Math.round(a.height) !== Math.round(b.height)
+  );
 }
 
 export function pointChanged(a, b) {
   if (!isPoint(a) || !isPoint(b)) return false;
-  return (Math.round(a.x) !== Math.round(b.x) || Math.round(a.y) !== Math.round(b.y));
+  return (
+    Math.round(a.x) !== Math.round(b.x) || Math.round(a.y) !== Math.round(b.y)
+  );
 }

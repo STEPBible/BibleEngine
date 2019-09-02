@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, Index, UpdateDateColumn } from 'typeorm';
 import { DocumentRoot, IBibleVersion } from '../models';
 
 @Entity('bible_version')
@@ -31,7 +31,7 @@ export class BibleVersionEntity implements IBibleVersion {
     @Column({ nullable: true })
     hasStrongs?: boolean;
 
-    @Column({ type: 'datetime' })
+    @UpdateDateColumn()
     lastUpdate: Date;
 
     @Column({ type: 'varchar' })
@@ -51,7 +51,6 @@ export class BibleVersionEntity implements IBibleVersion {
     @BeforeInsert()
     @BeforeUpdate()
     async prepare() {
-        this.lastUpdate = new Date();
         // if (this.description) this.descriptionJson = JSON.stringify(this.description);
         // if (this.copyrightLong) this.copyrightLongJson = JSON.stringify(this.copyrightLong);
     }

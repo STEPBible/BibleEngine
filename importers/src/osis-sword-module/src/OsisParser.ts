@@ -80,6 +80,13 @@ export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContent
         context.titleSections.push(context.titleSection);
     }
 
+    if (!context.titleSections.length && context.phrases) {
+        context.titleSections = [{
+            type: 'section',
+            contents: context.phrases
+        }]
+    }
+
     const validSections = context.titleSections.map(section => {
         section.contents = section.contents.filter(content => content);
         return section;
@@ -147,6 +154,9 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
                 context.paragraph = undefined;
             }
             break;
+        }
+        default: {
+            // console.log(`unrecognized osis xml tag: ${node.name}`)
         }
     }
 }

@@ -20,7 +20,7 @@ const run = async () => {
     creator.addImporter(V11nImporter);
 
     const filename = join(__dirname, '../data/ESV2016_th.zip');
-    creator.addImporter(SwordImporter, filename);
+    creator.addImporter(SwordImporter, { sourcePath: filename });
 
     creator.addImporter(NeueImporter);
 

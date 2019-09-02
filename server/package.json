@@ -4,7 +4,8 @@
     "main": "src/main.ts",
     "scripts": {
         "start": "pm2 startOrRestart process.json --env production",
-        "startDev": "pm2 startOrRestart process.json --env dev --watch"
+        "startDev": "pm2 startOrRestart process.json --env dev --watch",
+        "build": "rm -rf ./lib && npx tsc"
     },
     "dependencies": {
         "@koa/cors": "^2.2.3",

@@ -1,13 +1,19 @@
-import { BibleEngine } from '@bible-engine/core';
+import {
+  BibleEngine,
+  IBibleSection,
+  IBibleCrossReference
+} from '@bible-engine/core';
 import { ChapterResult } from './types';
-
-import * as Expo from 'expo';
+import { SQLite } from 'expo-sqlite';
+import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system';
 import * as store from 'react-native-simple-store';
 import { AsyncStorage } from 'react-native';
 import { AsyncStorageKey } from './Constants';
 import Network from './Network';
+import { REMOTE_BIBLE_ENGINE_URL } from 'react-native-dotenv';
 
-const SQLITE_DIRECTORY = `${Expo.FileSystem.documentDirectory}SQLite`;
+const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`;
 const PATH_TO_DOWNLOAD_TO = `${SQLITE_DIRECTORY}/bibles.db`;
 
 export default class Database {
@@ -26,28 +32,28 @@ export default class Database {
         type: 'expo',
         synchronize: false
       },
-      { url: 'http://ca2ff0a2.ngrok.io/rest/v1/bible' }
+      { url: REMOTE_BIBLE_ENGINE_URL }
     );
   }
 
   public async setLocalDatabase() {
     this.localDbIsReady = false;
     try {
-      const { exists } = await Expo.FileSystem.getInfoAsync(SQLITE_DIRECTORY);
+      const { exists } = await FileSystem.getInfoAsync(SQLITE_DIRECTORY);
       if (!exists) {
-        await Expo.FileSystem.makeDirectoryAsync(SQLITE_DIRECTORY);
+        await FileSystem.makeDirectoryAsync(SQLITE_DIRECTORY);
       }
       await AsyncStorage.multiRemove(Object.keys(AsyncStorageKey));
-      await Expo.FileSystem.deleteAsync(PATH_TO_DOWNLOAD_TO, {
+      await FileSystem.deleteAsync(PATH_TO_DOWNLOAD_TO, {
         idempotent: true
       });
-      const asset = Expo.Asset.fromModule(this.databaseModule);
+      const asset = Asset.fromModule(this.databaseModule);
       const uriToDownload = asset.uri;
-      await Expo.FileSystem.downloadAsync(uriToDownload, PATH_TO_DOWNLOAD_TO);
+      await FileSystem.downloadAsync(uriToDownload, PATH_TO_DOWNLOAD_TO);
       const incomingHash = asset.hash;
       store.save('existingHash', incomingHash);
       await this.setLocalBibleEngine();
-      await Expo.SQLite.openDatabase('bibles.db');
+      await SQLite.openDatabase('bibles.db');
     } catch (e) {
       console.log('error in _setLocalDatabase: ', e);
       this.forceRemote = true;
@@ -58,20 +64,23 @@ export default class Database {
   public async setLocalBibleEngine() {
     console.log('setLocalBibleEngine');
     this.forceRemote = false;
-    this.localBibleEngine = new BibleEngine({
-      database: 'bibles.db',
-      type: 'expo',
-      synchronize: false
-    });
+    this.localBibleEngine = new BibleEngine(
+      {
+        database: 'bibles.db',
+        type: 'expo',
+        synchronize: false
+      },
+      { url: REMOTE_BIBLE_ENGINE_URL }
+    );
   }
 
   public async databaseIsAvailable() {
     try {
-      const asset = Expo.Asset.fromModule(this.databaseModule);
+      const asset = Asset.fromModule(this.databaseModule);
       const incomingHash = asset.hash;
       const existingHash = await store.get('existingHash');
       let exists = false;
-      const info = await Expo.FileSystem.getInfoAsync(PATH_TO_DOWNLOAD_TO);
+      const info = await FileSystem.getInfoAsync(PATH_TO_DOWNLOAD_TO);
       exists = info.exists;
       const available = exists && incomingHash === existingHash;
       if (!available) {
@@ -88,7 +97,11 @@ export default class Database {
     }
   }
 
-  public async getChapter(bookOsisId: string, versionChapterNum: number) {
+  public async getChapter(
+    versionUid: string,
+    bookOsisId: string,
+    versionChapterNum: number
+  ) {
     let chapterOutput;
     try {
       const bibleEngine = this.forceRemote
@@ -98,7 +111,7 @@ export default class Database {
         {
           bookOsisId,
           versionChapterNum,
-          versionUid: 'ESV'
+          versionUid: versionUid
         },
         true,
         this.forceRemote
@@ -111,6 +124,22 @@ export default class Database {
         nextChapter,
         contents: chapterOutput.content.contents
       };
+      if (
+        result.contents &&
+        result.contents.length &&
+        result.contents[0] &&
+        typeof result.contents[0].content === 'string'
+      ) {
+        const fakeSectionToWrapPhrases = {
+          title: '',
+          type: 'section',
+          contents: chapterOutput.content.contents
+        };
+        return {
+          nextChapter,
+          contents: [fakeSectionToWrapPhrases]
+        };
+      }
       return result;
     } catch (error) {
       if (!this.forceRemote) {
@@ -142,6 +171,34 @@ export default class Database {
       title: book.title
     }));
     return bookList;
+  }
+
+  async getVersions() {
+    const bibleEngine = this.forceRemote
+      ? this.remoteBibleEngine
+      : this.localBibleEngine;
+    try {
+      const versions = await bibleEngine!.getVersions(this.forceRemote);
+      return versions;
+    } catch (e) {
+      console.log(`error: ${e}`);
+    }
+    return [];
+  }
+
+  async getVerseContents(refs: IBibleCrossReference[]) {
+    if (this.forceRemote || !this.localBibleEngine) {
+      const emptyVerses = refs.map(ref => ref.range).map(range => '');
+      return emptyVerses;
+    }
+    const referenceRanges = refs.map(ref => ref.range);
+    const verses = await Promise.all(
+      referenceRanges.map(range => this.localBibleEngine!.getPhrases(range))
+    );
+    const verseContents = verses.map(phrases =>
+      phrases.map((phrase: any) => phrase.content).join(' ')
+    );
+    return verseContents;
   }
 
   private async shouldFallBackToNetwork() {

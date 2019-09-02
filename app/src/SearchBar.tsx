@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { ifIphoneX, ifAndroid } from './utils';
+import { ifIphoneX, ifAndroid, ifIOS } from './utils';
 import { IconButton, TouchableRipple } from 'react-native-paper';
 import {
   BackHandler,
@@ -190,6 +190,29 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     });
   };
 
+  onClearTextTap = () => {
+    this.setState({
+      ...this.state,
+      inputText: ''
+    });
+    this.verseResults = [];
+  };
+
+  renderClearIcon = () => {
+    if (!this.state.isFocused || !this.state.inputText.length) {
+      return null;
+    }
+    return (
+      <IconButton
+        icon="clear"
+        color="#888889"
+        size={30}
+        style={styles.search__input__clear}
+        onPress={this.onClearTextTap}
+      />
+    );
+  };
+
   render() {
     const { animation } = this.props;
     const transformWrapper = animation.getTransformWrapper();
@@ -212,6 +235,7 @@ export default class SearchPage extends React.PureComponent<Props, State> {
                 this.inputSearch = inputSearch;
               }}
             />
+            {this.renderClearIcon()}
           </Animated.View>
         </Animated.View>
         {this.renderSearchPage()}
@@ -242,7 +266,7 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS,
     borderWidth: 1,
     borderColor: '#ddd',
-    marginTop: ifIphoneX(20, ifAndroid(-10, 12)),
+    marginTop: ifIOS(ifIphoneX(20, -10), ifAndroid(-10, 12)),
     marginLeft: 10,
     marginRight: 10,
     elevation,
@@ -262,11 +286,17 @@ const styles = StyleSheet.create({
     height: ifAndroid(54, 60),
     borderBottomWidth: 0.5,
     borderBottomColor: '#ddd',
-    marginTop: ifIphoneX(20, ifAndroid(-10, 12)),
+    marginTop: ifIOS(ifIphoneX(20, -10), ifAndroid(-10, 12)),
     ...getDebugStyles()
   },
   search__input__icon: {
     marginLeft: Margin.MEDIUM,
+    width: 30,
+    height: 30,
+    ...getDebugStyles()
+  },
+  search__input__clear: {
+    marginRight: Margin.MEDIUM,
     width: 30,
     height: 30,
     ...getDebugStyles()

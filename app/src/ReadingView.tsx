@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { Text, View, StyleSheet, Dimensions } from 'react-native';
 import FlatList from './FlatList';
-import { ifAndroid } from './utils';
+import { ifAndroid, ifIOS, ifIphoneX } from './utils';
 import Sentry from 'sentry-expo';
 Sentry.enableInExpoDevelopment = false;
 Sentry.config(
@@ -230,8 +230,8 @@ const styles = StyleSheet.create({
   chapterHeader: {
     fontSize: FontSize.EXTRA_LARGE,
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
-    marginTop: Flags.SEARCH_ENABLED ? ifAndroid(-55, -30) : ifAndroid(-95, -70),
-    marginBottom: Flags.SEARCH_ENABLED ? Margin.LARGE : Margin.SMALL,
+    marginTop: ifAndroid(-55, ifIphoneX(-30, -55)),
+    marginBottom: Margin.LARGE,
     textAlign: 'center',
     ...getDebugStyles()
   },

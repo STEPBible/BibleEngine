@@ -4,9 +4,9 @@
     "description": "",
     "slug": "step-bible",
     "privacy": "public",
-    "sdkVersion": "32.0.0",
+    "sdkVersion": "34.0.0",
     "platforms": ["ios", "android"],
-    "version": "1.0.1",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -17,14 +17,15 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": ["assets/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tyndale.stepbible",
-      "buildNumber": "2"
+      "bundleIdentifier": "com.tyndale.step",
+      "buildNumber": "8"
     },
     "android": {
       "package": "com.tyndale.stepbible",
+      "versionCode": 2,
       "config": {
         "fabric": {
           "apiKey": "4177638a1668874c4bff059ca4d1a6b72d2b7129",
@@ -33,7 +34,7 @@
       }
     },
     "packagerOpts": {
-      "sourceExts": ["ts", "tsx"],
+      "sourceExts": ["ts", "tsx", "js"],
       "assetExts": ["db", "mp3", "ttf", "png"]
     },
     "githubUrl": "https://github.com/tyndale/BibleEngine",

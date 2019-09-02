@@ -5,13 +5,15 @@ import {
   StyleSheet,
   Dimensions,
   TouchableHighlight,
-  ScrollView
+  ScrollView,
+  FlatList
 } from 'react-native';
 import Popover from './Popover';
 import {
   BibleEngine,
   IDictionaryEntry,
-  DocumentElement
+  DocumentElement,
+  DictionaryEntryEntity
 } from '@bible-engine/core';
 import {
   Color,
@@ -96,40 +98,40 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
   };
 
   closePopover = () => {
+    console.log('closePopover');
     this.setState({ ...this.state, popoverIsVisible: false });
   };
 
-  _renderItem = item => {
-    if (!item) {
-      return null;
-    }
-    return (
-      <View>
-        <View style={styles.popover__content}>
-          <View style={styles.popover__content__header}>
-            <Text
-              selectable
-              style={styles.popover__content__header__gloss}
-            >{`'${item.gloss}' (`}</Text>
-            <Text
-              selectable
-              style={styles.popover__content__header__transliteration}
-            >{`${item.transliteration} - `}</Text>
-            <Text selectable style={styles.popover__content__header__lemma}>
-              {`${item.lemma}`}
-            </Text>
-            <Text style={styles.popover__content__header__lemma}>{')'}</Text>
-          </View>
-          <ScrollView showsVerticalScrollIndicator={false}>
+  renderStrongsHeader = item => (
+    <View style={styles.popover__content__header}>
+      <Text
+        selectable
+        style={styles.popover__content__header__gloss}
+      >{`'${item.gloss || ''}' (`}</Text>
+      <Text selectable style={styles.popover__content__header__transliteration}>
+        {item.transliteration ? `${item.transliteration} - ` : ''}
+      </Text>
+      <Text selectable style={styles.popover__content__header__lemma}>
+        {`${item.lemma || ''}`}
+      </Text>
+      <Text style={styles.popover__content__header__lemma}>{')'}</Text>
+    </View>
+  );
+
+  renderExtraStrongsWords = () => (
+    <View>
+      {this.state.definitions
+        .slice(1)
+        .map((definition: DictionaryEntryEntity) => (
+          <View key={`definition-${definition.strong}`}>
+            {this.renderStrongsHeader(definition)}
             <View style={styles.popover__content__definitions}>
-              {this.renderDefinitionContent(item)}
+              {this.renderDefinitionContent(definition)}
             </View>
-          </ScrollView>
-        </View>
-        <View style={{ flex: 2, height: 20 }} />
-      </View>
-    );
-  };
+          </View>
+        ))}
+    </View>
+  );
 
   renderPopoverContent = () => {
     if (this.state.loading) {
@@ -159,7 +161,21 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
         </View>
       );
     }
-    return this._renderItem(this.state.definitions[0]);
+
+    return (
+      <View>
+        <View style={styles.popover__content}>
+          {this.renderStrongsHeader(this.state.definitions[0])}
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.popover__content__definitions}>
+              {this.renderDefinitionContent(this.state.definitions[0])}
+            </View>
+            {this.renderExtraStrongsWords()}
+          </ScrollView>
+        </View>
+        <View style={{ flex: 2, height: 20 }} />
+      </View>
+    );
   };
 
   renderDefinitionContent = (element: DictionaryEntry) => {
@@ -225,10 +241,11 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
           <Text style={styles.strongWordText}>{this.props.phrase}</Text>
         </TouchableHighlight>
         <Popover
+          debug
           isVisible={this.state.popoverIsVisible}
           fromView={this.touchable}
+          onRequestClose={() => this.closePopover()}
           popoverStyle={styles.popover__background_container}
-          onClose={() => this.closePopover()}
         >
           {this.renderPopoverContent()}
         </Popover>
@@ -271,8 +288,10 @@ const styles = StyleSheet.create({
     marginBottom: 0
   },
   popover__content__definitions: {
+    ...getDebugStyles(),
     flex: 1,
-    marginTop: Margin.SMALL
+    marginTop: Margin.SMALL,
+    marginBottom: Margin.MEDIUM
     // backgroundColor: 'magenta'
   },
   popover__content__header: {

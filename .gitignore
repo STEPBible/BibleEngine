@@ -24,3 +24,5 @@ bibles_default.db
 esvSearchIndex.json
 secrets.json
 output
+.env
+ChiUns.zip
