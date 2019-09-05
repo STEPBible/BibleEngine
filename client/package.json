@@ -1,0 +1,16 @@
+{
+    "name": "@bible-engine/client",
+    "version": "0.1.0",
+    "main": "lib/index.js",
+    "scripts": {
+        "build": "rimraf ./lib && tsc"
+    },
+    "dependencies": {
+        "typeorm": "0.2.18",
+        "whatwg-fetch": "^3.0.0"
+    },
+    "devDependencies": {
+        "rimraf": "^2.6.3",
+        "typescript": "3.3.3"
+    }
+}

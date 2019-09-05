@@ -7,12 +7,19 @@ export class BibleController {
     @Inject('bibleEngine')
     private bibleEngine: BibleEngine;
 
-    @Get('/dictionaries/:dictionaryId/:strongNum')
+    @Get('/definitions/:strongNum/:dictionaryId')
     getDefinition(
-        @Param('dictionaryId') dictionaryId: string,
-        @Param('strongNum') strongNum: string
+        @Param('strongNum') strongNum: string,
+        @Param('dictionaryId') dictionaryId: string
     ) {
-        return this.bibleEngine.getDictionaryEntries(strongNum, dictionaryId)
+        return this.bibleEngine
+            .getDictionaryEntries(strongNum, dictionaryId)
+            .then(entries => (entries.length ? entries[0] : undefined));
+    }
+
+    @Get('/definitions/:strongNum')
+    getDefinitions(@Param('strongNum') strongNum: string) {
+        return this.bibleEngine.getDictionaryEntries(strongNum);
     }
 
     @Get('/versions/:versionUid')

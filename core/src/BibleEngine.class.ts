@@ -65,12 +65,18 @@ import {
     IBibleContentGroup,
     BiblePlaintext
 } from './models';
-import { IBibleEngineOutput } from './models/BibleOutput';
 
 export class NoDbConnectionError extends Error {
     constructor() {
         super('calling a method that expects a DB connection to be set in BibleEngine');
         this.name = 'NoDbConnectionError';
+    }
+}
+
+export class BibleVersionRemoteOnlyError extends Error {
+    constructor() {
+        super('accessing content of a bible version that is only remote');
+        this.name = 'BibleBookContentNotImportedError';
     }
 }
 
@@ -89,18 +95,16 @@ export class BibleEngineRemoteError extends Error {
 }
 
 export class BibleEngine {
-    pDB?: Promise<EntityManager>;
+    pDB: Promise<EntityManager>;
 
-    constructor(dbConfig: ConnectionOptions | null, private remoteConfig?: { url: string }) {
-        if (dbConfig) {
-            this.pDB = createConnection({
-                entities: ENTITIES,
-                synchronize: true,
-                logging: ['error'],
-                name: 'bible-engine',
-                ...dbConfig
-            }).then(conn => conn.manager);
-        }
+    constructor(dbConfig: ConnectionOptions) {
+        this.pDB = createConnection({
+            entities: ENTITIES,
+            synchronize: true,
+            logging: ['error'],
+            name: 'bible-engine',
+            ...dbConfig
+        }).then(conn => conn.manager);
     }
 
     async addBook(book: IBibleBookEntity, entityManager?: EntityManager) {
@@ -277,12 +281,7 @@ export class BibleEngine {
         });
     }
 
-    async getBooksForVersion(versionId: number, forceRemote = false) {
-        if (forceRemote) {
-            const url = `versions/${versionId}/books`
-            if (this.remoteConfig) return this.fetch<IBibleBookEntity>(url);
-            throw new Error(`No remote config provided`);
-        }
+    async getBooksForVersion(versionId: number) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         return db.find(BibleBookEntity, {
@@ -291,12 +290,7 @@ export class BibleEngine {
         });
     }
 
-    async getDictionaryEntries(strong: string, dictionary?: string, forceRemote = false) {
-        if (forceRemote && dictionary) {
-            const url = `dictionaries/${dictionary}/${strong}`
-            if (this.remoteConfig) return this.fetch<DictionaryEntryEntity[]>(url);
-            throw new Error(`No remote config provided`);
-        }
+    async getDictionaryEntries(strong: string, dictionary?: string) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         return db.find(DictionaryEntryEntity, { where: { strong, dictionary } });
@@ -304,40 +298,21 @@ export class BibleEngine {
 
     async getFullDataForReferenceRange(
         rangeQuery: IBibleReferenceRangeQuery,
-        stripUnnecessaryData = false,
-        forceRemote = false
+        stripUnnecessaryData = false
     ): Promise<IBibleOutputRich> {
-        let versionEntity: BibleVersionEntity | undefined;
-        let bookEntity: BibleBookEntity | undefined;
-        let range: IBibleReferenceRangeVersion | undefined;
-        let db: EntityManager | undefined;
-        if (this.pDB && !forceRemote) {
-            db = await this.pDB;
-            versionEntity = await db.findOne(BibleVersionEntity, {
-                where: { uid: rangeQuery.versionUid }
-            });
-            if (versionEntity && versionEntity.dataLocation === 'remote') forceRemote = true;
-        }
+        const db = await this.pDB;
+        const versionEntity = await db.findOne(BibleVersionEntity, {
+            where: { uid: rangeQuery.versionUid }
+        });
 
-        if (versionEntity && !forceRemote) {
-            range = { ...rangeQuery, versionId: versionEntity.id };
-            bookEntity = await this.getBookForVersionReference(range);
-            if (!bookEntity) throw new Error(`can't get formatted text: invalid book`);
-            if (bookEntity.dataLocation === 'file') throw new BibleBookContentNotImportedError();
-        }
+        if (!versionEntity) throw new Error(`can't get formatted text: invalid version`);
+        if (versionEntity.dataLocation === 'remote') throw new BibleVersionRemoteOnlyError();
 
-        if (
-            forceRemote ||
-            !versionEntity ||
-            !range ||
-            !bookEntity ||
-            bookEntity.dataLocation !== 'db'
-        ) {
-            if (this.remoteConfig) return this.fetch<IBibleOutputRich>('ref', rangeQuery);
-            throw new Error(`can't get formatted text: invalid version`);
-        }
+        const range = { ...rangeQuery, versionId: versionEntity.id };
+        const bookEntity = await this.getBookForVersionReference(range);
 
-        if (!db) throw new NoDbConnectionError();
+        if (!bookEntity) throw new Error(`can't get formatted text: invalid book`);
+        if (bookEntity.dataLocation === 'file') throw new BibleBookContentNotImportedError();
 
         const bookAbbreviations = await db
             .find(BibleBookEntity, {
@@ -565,14 +540,10 @@ export class BibleEngine {
         return db.findOne(BibleVersionEntity, { uid: versionUid });
     }
 
-    async getVersions(forceRemote = false): Promise<IBibleVersion[] & IBibleEngineOutput> {
-        if (!this.pDB || forceRemote) {
-            // TODO: persist updates if local database exists
-            return this.fetch<IBibleVersion[]>('versions');
-        } else {
-            const db = await this.pDB;
-            return db.find(BibleVersionEntity);
-        }
+    async getVersions() {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return db.find(BibleVersionEntity);
     }
 
     async updateBook(
@@ -1149,33 +1120,33 @@ export class BibleEngine {
         return { firstPhraseId, lastPhraseId };
     }
 
-    private fetch<T>(path: string, data?: any) {
-        if (!this.remoteConfig) throw new Error(`no remote server configured`);
-        const config: RequestInit = {
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json'
-            }
-        };
-        if (data) {
-            config.method = 'post';
-            config.body = JSON.stringify(data);
-        } else {
-            config.method = 'get';
-        }
+    // private fetch<T>(path: string, data?: any) {
+    //     if (!this.remoteConfig) throw new Error(`no remote server configured`);
+    //     const config: RequestInit = {
+    //         headers: {
+    //             Accept: 'application/json',
+    //             'Content-Type': 'application/json'
+    //         }
+    //     };
+    //     if (data) {
+    //         config.method = 'post';
+    //         config.body = JSON.stringify(data);
+    //     } else {
+    //         config.method = 'get';
+    //     }
 
-        return fetch(this.remoteConfig.url + '/' + path, config).then(async response => {
-            if (response.status === 200)
-                return response.json().then((data: T & IBibleEngineOutput) => {
-                    data.source = 'remote';
-                    return data;
-                });
-            else {
-                const error = await response.json();
-                throw new BibleEngineRemoteError(error.message);
-            }
-        });
-    }
+    //     return fetch(this.remoteConfig.url + '/' + path, config).then(async response => {
+    //         if (response.status === 200)
+    //             return response.json().then((data: T & IBibleEngineOutput) => {
+    //                 data.source = 'remote';
+    //                 return data;
+    //             });
+    //         else {
+    //             const error = await response.json();
+    //             throw new BibleEngineRemoteError(error.message);
+    //         }
+    //     });
+    // }
 
     private async getNormalizedReferenceRange(
         range: IBibleReferenceRangeVersion

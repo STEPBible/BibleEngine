@@ -11,7 +11,8 @@
         "packages": [
             "core",
             "importers",
-            "server"
+            "server",
+            "client"
         ],
         "nohoist": [
             "app"

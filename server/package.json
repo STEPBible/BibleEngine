@@ -1,11 +1,13 @@
 {
     "name": "@bible-engine/server",
     "version": "0.1.0",
-    "main": "src/main.ts",
+    "main": "./lib/index.js",
     "scripts": {
         "start": "pm2 startOrRestart process.json --env production",
         "startDev": "pm2 startOrRestart process.json --env dev --watch",
-        "build": "rm -rf ./lib && npx tsc"
+        "build": "rm -rf ./lib && npx tsc",
+        "ts": "TS_NODE_PROJECT=./tsconfig.json ts-node -r tsconfig-paths/register",
+        "generateApiClient": "ts-node src/genApiClients.ts"
     },
     "dependencies": {
         "@koa/cors": "^2.2.3",
@@ -13,6 +15,7 @@
         "isomorphic-fetch": "^2.2.1",
         "koa": "^2.6.2",
         "koa-bodyparser": "^4.2.1",
+        "koa-compress": "^3.0.0",
         "koa-router": "^7.4.0",
         "mysql2": "^1.6.4",
         "pako": "^1.0.7",
@@ -27,6 +30,7 @@
         "@types/jest": "24.0.11",
         "@types/koa": "^2.0.48",
         "@types/koa-bodyparser": "^4.2.2",
+        "@types/koa-compress": "^2.0.9",
         "@types/koa-router": "^7.0.40",
         "@types/koa__cors": "^2.2.3",
         "@types/node": "^10.12.12",

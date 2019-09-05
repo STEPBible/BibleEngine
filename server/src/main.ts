@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import * as Koa from 'koa';
+import * as KoaCompress from 'koa-compress';
 import * as KoaBody from 'koa-bodyparser';
 import * as KoaCors from '@koa/cors';
 import { Container } from 'typedi';
@@ -32,6 +33,8 @@ async function bootstrap() {
 
         const app = new Koa();
         const PORT = process.env.NODE_ENV === 'production' ? 3456 : 3456;
+
+        app.use(KoaCompress({}));
 
         app.use(
             KoaCors({
