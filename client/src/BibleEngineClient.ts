@@ -22,12 +22,12 @@ export class BibleEngineClient {
         if (bibleEngineOptions) this.localBibleEngine = new BibleEngine(bibleEngineOptions);
     }
 
-    getBooksForVersion(versionId: number, forceRemote = false) {
+    getBooksForVersion(versionUid: string, forceRemote = false) {
         if (forceRemote || !this.localBibleEngine) {
             if (this.remoteApi)
-                return this.remoteApi.getBooks({ versionId }).then(resp => resp.result);
+                return this.remoteApi.getBooksForVersion({ versionUid }).then(resp => resp.result);
             throw new Error(`No remote config provided`);
-        } else return this.localBibleEngine.getBooksForVersion(versionId);
+        } else return this.localBibleEngine.getBooksForVersionUid(versionUid);
     }
 
     getDictionaryEntry(strong: string, dictionary: string, forceRemote = false) {

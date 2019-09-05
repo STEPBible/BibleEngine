@@ -14,15 +14,10 @@ const wordGen = require('random-words');
 
 const dirProjectRoot = resolve(__dirname + '/../../..');
 
-const sqlBible = new BibleEngine(
-    {
-        type: 'sqlite',
-        database: `${dirProjectRoot}/output/bible.db`
-    },
-    {
-        url: 'http://localhost:3456'
-    }
-);
+const sqlBible = new BibleEngine({
+    type: 'sqlite',
+    database: `${dirProjectRoot}/output/bible.db`
+});
 
 export const genDb = async () => {
     const esvVersion = await sqlBible.addVersion(

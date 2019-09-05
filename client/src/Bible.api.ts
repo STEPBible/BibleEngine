@@ -7,36 +7,13 @@
     export class BibleApi implements Clientify<BibleController> {
         constructor(private apiBaseUrl: string) {}    
     
-        getDefinition(
-            params: {
-                strongNum: FirstArgument<BibleController['getDefinition']>;
-                dictionaryId: SecondArgument<BibleController['getDefinition']>;
-            }
+        getVersions(
         ) {
-            let path = '/bible/definitions/:strongNum/:dictionaryId';
+            let path = '/bible/versions';
         
-            path = path.replace(':strongNum', params.strongNum+'');
-            path = path.replace(':dictionaryId', params.dictionaryId+'');
             
             return apiRequest<
-                ThenArg<ReturnType<BibleController['getDefinition']>>
-            >({
-                url: this.apiBaseUrl + path,
-                method: 'GET',
-            });
-        }
-        
-        getDefinitions(
-            params: {
-                strongNum: FirstArgument<BibleController['getDefinitions']>;
-            }
-        ) {
-            let path = '/bible/definitions/:strongNum';
-        
-            path = path.replace(':strongNum', params.strongNum+'');
-            
-            return apiRequest<
-                ThenArg<ReturnType<BibleController['getDefinitions']>>
+                ThenArg<ReturnType<BibleController['getVersions']>>
             >({
                 url: this.apiBaseUrl + path,
                 method: 'GET',
@@ -60,30 +37,17 @@
             });
         }
         
-        getBooks(
+        getBooksForVersion(
             params: {
-                versionId: FirstArgument<BibleController['getBooks']>;
+                versionUid: FirstArgument<BibleController['getBooksForVersion']>;
             }
         ) {
-            let path = '/bible/versions/:versionId/books';
+            let path = '/bible/versions/:versionUid/books';
         
-            path = path.replace(':versionId', params.versionId+'');
+            path = path.replace(':versionUid', params.versionUid+'');
             
             return apiRequest<
-                ThenArg<ReturnType<BibleController['getBooks']>>
-            >({
-                url: this.apiBaseUrl + path,
-                method: 'GET',
-            });
-        }
-        
-        getVersions(
-        ) {
-            let path = '/bible/versions';
-        
-            
-            return apiRequest<
-                ThenArg<ReturnType<BibleController['getVersions']>>
+                ThenArg<ReturnType<BibleController['getBooksForVersion']>>
             >({
                 url: this.apiBaseUrl + path,
                 method: 'GET',
@@ -171,6 +135,42 @@
                 url: this.apiBaseUrl + path,
                 method: 'POST',
                 data: data,
+            });
+        }
+        
+        getDefinitions(
+            params: {
+                strongNum: FirstArgument<BibleController['getDefinitions']>;
+            }
+        ) {
+            let path = '/bible/definitions/:strongNum';
+        
+            path = path.replace(':strongNum', params.strongNum+'');
+            
+            return apiRequest<
+                ThenArg<ReturnType<BibleController['getDefinitions']>>
+            >({
+                url: this.apiBaseUrl + path,
+                method: 'GET',
+            });
+        }
+        
+        getDefinition(
+            params: {
+                strongNum: FirstArgument<BibleController['getDefinition']>;
+                dictionaryId: SecondArgument<BibleController['getDefinition']>;
+            }
+        ) {
+            let path = '/bible/definitions/:strongNum/:dictionaryId';
+        
+            path = path.replace(':strongNum', params.strongNum+'');
+            path = path.replace(':dictionaryId', params.dictionaryId+'');
+            
+            return apiRequest<
+                ThenArg<ReturnType<BibleController['getDefinition']>>
+            >({
+                url: this.apiBaseUrl + path,
+                method: 'GET',
             });
         }
         

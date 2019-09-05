@@ -290,6 +290,16 @@ export class BibleEngine {
         });
     }
 
+    async getBooksForVersionUid(versionUid: string) {
+        const db = await this.pDB;
+        const version = await db.findOne(BibleVersionEntity, {
+            where: { uid: versionUid },
+            select: ['id']
+        });
+        if (!version) throw new Error(`missing version ${versionUid}`);
+        return this.getBooksForVersion(version.id);
+    }
+
     async getDictionaryEntries(strong: string, dictionary?: string) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;

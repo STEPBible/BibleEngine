@@ -7,19 +7,9 @@ export class BibleController {
     @Inject('bibleEngine')
     private bibleEngine: BibleEngine;
 
-    @Get('/definitions/:strongNum/:dictionaryId')
-    getDefinition(
-        @Param('strongNum') strongNum: string,
-        @Param('dictionaryId') dictionaryId: string
-    ) {
-        return this.bibleEngine
-            .getDictionaryEntries(strongNum, dictionaryId)
-            .then(entries => (entries.length ? entries[0] : undefined));
-    }
-
-    @Get('/definitions/:strongNum')
-    getDefinitions(@Param('strongNum') strongNum: string) {
-        return this.bibleEngine.getDictionaryEntries(strongNum);
+    @Get('/versions')
+    getVersions() {
+        return this.bibleEngine.getVersions();
     }
 
     @Get('/versions/:versionUid')
@@ -27,14 +17,9 @@ export class BibleController {
         return this.bibleEngine.getVersion(versionUid);
     }
 
-    @Get('/versions/:versionId/books')
-    getBooks(@Param('versionId') versionId: number) {
-        return this.bibleEngine.getBooksForVersion(versionId);
-    }
-
-    @Get('/versions')
-    getVersions() {
-        return this.bibleEngine.getVersions();
+    @Get('/versions/:versionUid/books')
+    async getBooksForVersion(@Param('versionUid') versionUid: string) {
+        return this.bibleEngine.getBooksForVersionUid(versionUid);
     }
 
     @Get('/ref/:versionUid/:osisId/:chapterNr')
@@ -94,5 +79,20 @@ export class BibleController {
     @Post('/ref')
     getReferenceRange(@Body() ref: IBibleReferenceRangeQuery) {
         return this.bibleEngine.getFullDataForReferenceRange(ref, true);
+    }
+
+    @Get('/definitions/:strongNum')
+    getDefinitions(@Param('strongNum') strongNum: string) {
+        return this.bibleEngine.getDictionaryEntries(strongNum);
+    }
+
+    @Get('/definitions/:strongNum/:dictionaryId')
+    getDefinition(
+        @Param('strongNum') strongNum: string,
+        @Param('dictionaryId') dictionaryId: string
+    ) {
+        return this.bibleEngine
+            .getDictionaryEntries(strongNum, dictionaryId)
+            .then(entries => (entries.length ? entries[0] : undefined));
     }
 }
