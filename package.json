@@ -4,8 +4,9 @@
     "description": "BibleEngine mono-repo root package.json, used mainly to execute build scripts. This package is not published to npm.",
     "private": true,
     "scripts": {
-        "postinstall": "yarn workspaces run build",
-        "heroku": "node server/lib/heroku.js"
+        "postinstall": "yarn run buildAll",
+        "heroku": "node server/lib/heroku.js",
+        "buildAll": "yarn workspace @bible-engine/core run build && yarn workspace @bible-engine/importers run build && yarn workspace @bible-engine/server run generateApiClient && yarn workspace @bible-engine/server run build && yarn workspace @bible-engine/client run build"
     },
     "workspaces": {
         "packages": [
