@@ -257,7 +257,7 @@ const BORDER_RADIUS = 8;
 const styles = StyleSheet.create({
   search: {
     left: 0,
-    height: 100,
+    height: 50,
     position: 'absolute',
     right: 0,
     top: ifAndroid(StatusBar.currentHeight, 20),
