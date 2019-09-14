@@ -124,6 +124,7 @@ export default class App extends React.PureComponent<Props, State> {
               {(animation: any) => (
                 <React.Fragment>
                   <SearchBar
+                    changeBookAndChapter={this.changeBookAndChapter}
                     database={this.database}
                     toggleMenu={this.toggleMenu}
                     animation={animation}
