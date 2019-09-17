@@ -1,7 +1,7 @@
 //  Created by Artem Bogoslavskiy on 7/5/18.
 
-import React, { Component } from 'react';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import React from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
 import { ifIphoneX, ifAndroid, ifIOS } from './utils';
 import { IconButton, TouchableRipple } from 'react-native-paper';
 import {
@@ -9,15 +9,11 @@ import {
   StyleSheet,
   TextInput,
   Animated,
-  TouchableOpacity,
   View,
   Text,
   Dimensions,
-  ScrollView,
   Keyboard,
-  TouchableHighlight,
   FlatList,
-  TouchableNativeFeedback,
   StatusBar,
   LayoutAnimation
 } from 'react-native';
@@ -29,7 +25,6 @@ import {
   Color,
   getDebugStyles
 } from './Constants';
-import Database from './Database';
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
 
@@ -41,7 +36,7 @@ interface VerseResult {
 interface Props {
   toggleMenu: Function;
   animation: any;
-  database: Database;
+  changeBookAndChapter: Function;
 }
 interface State {
   inputText: string;
@@ -148,8 +143,20 @@ export default class SearchPage extends React.PureComponent<Props, State> {
     );
   };
 
+  onSearchResultPress = item => {
+    console.log('onSearchResultPress');
+    console.log(JSON.stringify(item));
+    this.props.changeBookAndChapter(item.bookName, item.chapterNum);
+    this.endSearch();
+  };
+
   renderSearchResult = ({ item }) => (
-    <TouchableRipple onPress={() => {}} underlayColor="#d4d4d4">
+    <TouchableRipple
+      onPress={() => {
+        this.onSearchResultPress(item);
+      }}
+      underlayColor="#d4d4d4"
+    >
       <View style={styles.result}>{this.renderSearchResultContent(item)}</View>
     </TouchableRipple>
   );
@@ -250,7 +257,7 @@ const BORDER_RADIUS = 8;
 const styles = StyleSheet.create({
   search: {
     left: 0,
-    height: 100,
+    height: 50,
     position: 'absolute',
     right: 0,
     top: ifAndroid(StatusBar.currentHeight, 20),
