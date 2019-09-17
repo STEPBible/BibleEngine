@@ -470,22 +470,30 @@ export const generateBibleDocument = (
 
         // set numbering
         // get the most outer group for wich this is the first phrase
-        let numberingGroup: BibleContentGeneratorContainer | null = null;
+        let numberingGroup: IBibleContentGeneratorGroup<ContentGroupType> | null = null;
+        let numberingGroupSection: IBibleContentGeneratorSection | null = null;
         let _numberingGroupTmp: BibleContentGeneratorContainer | undefined = activeGroup;
         do {
-            if (_numberingGroupTmp.type !== 'group' || _numberingGroupTmp.groupType === 'paragraph')
-                continue;
+            if (_numberingGroupTmp.type === 'root') continue;
             else if (_numberingGroupTmp === activeGroup) {
-                if (_numberingGroupTmp.contents.length === 0) numberingGroup = _numberingGroupTmp;
-                else break;
+                if (_numberingGroupTmp.contents.length === 0) {
+                    if (_numberingGroupTmp.type === 'section')
+                        numberingGroupSection = _numberingGroupTmp;
+                    else if (_numberingGroupTmp.groupType !== 'paragraph')
+                        numberingGroup = _numberingGroupTmp;
+                } else break;
             } else {
                 // as soon as we hit a group with more than one content we can break, otherwise it
                 // is a valid numbering group(=> if a parent has only one member it is the one from
                 // where we navigated via the parent attribute)
                 // tslint:disable-next-line:one-line
                 if (_numberingGroupTmp.contents.length > 1) break;
-                else if (_numberingGroupTmp.contents.length === 1)
-                    numberingGroup = _numberingGroupTmp;
+                else if (_numberingGroupTmp.contents.length === 1) {
+                    if (_numberingGroupTmp.type === 'section')
+                        numberingGroupSection = _numberingGroupTmp;
+                    else if (_numberingGroupTmp.groupType !== 'paragraph')
+                        numberingGroup = _numberingGroupTmp;
+                }
                 // there should be no group that is not a phrase group and has no child
                 else if (_numberingGroupTmp.contents.length === 0)
                     throw new Error(
@@ -569,6 +577,8 @@ export const generateBibleDocument = (
 
                 numberingGroup.numbering = numbering;
             }
+
+            if (numberingGroupSection) numberingGroupSection.numberingInternal = numbering;
         }
 
         if (outputPhrase.skipSpace === 'before') {
@@ -600,7 +610,8 @@ export const generateContextSections = (
                 let isSectionWithinParentLevel = false;
                 for (const parentSection of [
                     ...context[section.level - 1].includedSections,
-                    context[section.level - 1].wrappingSection
+                    context[section.level - 1].wrappingSection,
+                    context[section.level - 1].endingSection
                 ]) {
                     if (
                         parentSection &&
@@ -633,6 +644,13 @@ export const generateContextSections = (
             )
                 context[section.level].wrappingSection = section;
             // check if this section starts or ends within the range
+            else if (
+                section.phraseStartId < firstPhraseId &&
+                section.phraseEndId >= firstPhraseId &&
+                section.phraseEndId < lastPhraseId
+            )
+                context[section.level].endingSection = section;
+            // check if this section starts within the range
             else if (
                 (section.phraseStartId >= firstPhraseId && section.phraseStartId <= lastPhraseId) ||
                 (section.phraseEndId >= firstPhraseId && section.phraseEndId <= lastPhraseId)
@@ -838,6 +856,12 @@ export const generateContextRanges = (
                 ].completeRange = generateRangeFromGenericSection(
                     context[sectionLevel].wrappingSection!
                 );
+            } else if (context[sectionLevel].endingSection) {
+                contextRanges.sections[
+                    sectionLevel
+                ].completeStartingRange = generateRangeFromGenericSection(
+                    context[sectionLevel].endingSection!
+                );
             } else if (context[sectionLevel].includedSections.length > 0) {
                 // => if there is a wrapping section, there can't be includedSections on the
                 //    same level
@@ -961,6 +985,7 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
             if (obj.description) inputSection.description = obj.description;
             if (obj.crossReferences && obj.crossReferences.length)
                 inputSection.crossReferences = obj.crossReferences.map(slimDownCrossReference);
+            if (obj.numberingInternal) inputSection.numberingInternal = obj.numberingInternal;
             inputData.push(inputSection);
         }
     }

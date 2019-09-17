@@ -27,6 +27,7 @@ export interface IBibleNumbering {
 export interface IBibleContentSection extends IBibleSectionBase {
     readonly type: 'section';
     contents: IBibleContent[];
+    numberingInternal?: IBibleNumbering['numbering'];
 }
 
 export interface IBibleContentGroup<T extends ContentGroupType>

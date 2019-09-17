@@ -45,9 +45,13 @@ export interface IBibleOutputRich extends IBibleOutputBase {
     context: {
         [index: number]: {
             /**
-             * the sections that start or end within the current range
+             * the sections that start within the current range
              */
             includedSections: IBibleSection[];
+            /**
+             * the section that ends within the current range (but not starts within)
+             */
+            endingSection?: IBibleSection;
             /**
              * the section that wraps the current range (without being contained in it)
              */
