@@ -55,7 +55,7 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
     this.mounted = true;
     setTimeout(() => {
       this.setDictionaryEntries(this.props.strongs);
-    }, 100);
+    }, 1000);
   }
 
   componentWillUnmount() {
@@ -65,7 +65,7 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
   async componentWillReceiveProps(nextProps: Props) {
     setTimeout(() => {
       this.setDictionaryEntries(nextProps.strongs);
-    }, 100);
+    }, 1000);
   }
 
   async setDictionaryEntries(strongs: string[]) {
