@@ -393,19 +393,18 @@ export default class App extends React.PureComponent<Props, State> {
     await Fonts.load();
     this.database = new Database(bibleDatabaseModule);
     const dbIsAvailable = await this.database.databaseIsAvailable();
-
-    const internetIsAvailable = await Network.internetIsAvailable();
-    if (!dbIsAvailable && (!internetIsAvailable || !Flags.REMOTE_ENABLED)) {
-      this.updateLoadingMessage(
-        'Updating database... \n\n(can take up to 30 seconds) \n\n Speed improvements coming soon! 🚀'
-      );
-      await this.database.setLocalDatabase();
-    } else if (Flags.REMOTE_ENABLED && internetIsAvailable && !dbIsAvailable) {
-      this.database.forceRemote = true;
-      this.database.setLocalDatabase();
-      this.pollForLocalDatabaseProgress();
-    } else if (dbIsAvailable) {
-      await this.database.setLocalBibleEngine();
+    if (!dbIsAvailable) {
+      const internetIsAvailable = await Network.internetIsAvailable();
+      if (!internetIsAvailable) {
+        this.updateLoadingMessage(
+          'Updating database... \n\n(can take up to 30 seconds) \n\n Speed improvements coming soon! 🚀'
+        );
+        await this.database.setLocalDatabase();
+      } else {
+        this.database.forceRemote = true;
+        this.database.setLocalDatabase();
+        this.pollForLocalDatabaseProgress();
+      }
     }
 
     let bookList = null;
