@@ -27,7 +27,7 @@ export class SwordImporter extends BibleEngineImporter {
         const esvVersion = await this.bibleEngine.addVersion(
             new BibleVersionEntity({
                 uid: 'ESV',
-                title: 'English Standard Bible',
+                title: 'English Standard Version',
                 copyrightShort: '2001 by Crossway Bibles',
                 language: 'en-US',
                 chapterVerseSeparator: ':',
