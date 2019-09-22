@@ -2,7 +2,8 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: react-native-community/react-native@1.2.1
+      - image: circleci/node:latest
     steps:
+      - checkout
       - run: yarn install
       - run: yarn test:app
