@@ -405,6 +405,8 @@ export default class App extends React.PureComponent<Props, State> {
         this.database.setLocalDatabase();
         this.pollForLocalDatabaseProgress();
       }
+    } else {
+      await this.database.setLocalBibleEngine();
     }
 
     let bookList = null;
