@@ -1,0 +1,8 @@
+version: 2.1
+orbs:
+  react-native: react-native-community/react-native@1.2.1
+jobs:
+  test:
+    steps:
+      - run: yarn install
+      - run: yarn test:app
