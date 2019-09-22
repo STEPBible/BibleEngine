@@ -6,4 +6,5 @@ jobs:
     steps:
       - checkout
       - run: yarn install
-      - run: yarn test:app
+      - run: cd app && yarn install
+      - run: yarn test
