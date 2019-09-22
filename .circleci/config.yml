@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      - react-native-community/react-native@1.2.1
+      - image: react-native-community/react-native@1.2.1
     steps:
       - run: yarn install
       - run: yarn test:app
