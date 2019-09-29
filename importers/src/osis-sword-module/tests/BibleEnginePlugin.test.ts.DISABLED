@@ -21,7 +21,7 @@ const setupSqlBible = async () => {
     await sqlBible.addVersion(
         new BibleVersion({
             version: 'ESV',
-            title: 'English Standard Bible',
+            title: 'English Standard Version',
             language: 'en-US',
             chapterVerseSeparator: ':'
         })

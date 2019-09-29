@@ -53,19 +53,10 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
 
   async componentDidMount() {
     this.mounted = true;
-    setTimeout(() => {
-      this.setDictionaryEntries(this.props.strongs);
-    }, 100);
   }
 
   componentWillUnmount() {
     this.mounted = false;
-  }
-
-  async componentWillReceiveProps(nextProps: Props) {
-    setTimeout(() => {
-      this.setDictionaryEntries(nextProps.strongs);
-    }, 100);
   }
 
   async setDictionaryEntries(strongs: string[]) {
@@ -89,6 +80,7 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
 
   onPress = () => {
     this.setState({ ...this.state, popoverIsVisible: true });
+    this.setDictionaryEntries(this.props.strongs);
     setTimeout(() => {
       this.setState({
         ...this.state,

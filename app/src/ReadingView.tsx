@@ -85,7 +85,6 @@ export default class ReadingView extends React.PureComponent<Props, State> {
         );
       }
     }
-    throw new Error(`Unrecognized content: ${JSON.stringify(content)}`);
   };
 
   renderSection = (content: IBibleContent): any => {
