@@ -1,10 +1,10 @@
-import React from 'react';
-import { StyleSheet, Text, View, Platform } from 'react-native';
-import { BarIndicator } from 'react-native-indicators';
-import { Color, FontSize } from './Constants';
+import React from 'react'
+import { StyleSheet, Text, View, Platform } from 'react-native'
+import { BarIndicator } from 'react-native-indicators'
+import { Color, FontSize } from './Constants'
 
 interface Props {
-  loadingText: string;
+  loadingText: string
 }
 
 export default class LoadingScreen extends React.PureComponent<Props, {}> {
@@ -20,7 +20,7 @@ export default class LoadingScreen extends React.PureComponent<Props, {}> {
         </View>
         <Text style={styles.page__text}>{this.props.loadingText}</Text>
       </View>
-    );
+    )
   }
 }
 
@@ -29,20 +29,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   page__icon: {
     height: 90,
     width: 90,
-    marginBottom: 50
+    marginBottom: 50,
   },
   page__text: {
     color: 'gray',
     fontSize: FontSize.LARGE,
     ...Platform.select({
       ios: { fontFamily: 'System' },
-      android: { fontFamily: 'Roboto' }
+      android: { fontFamily: 'Roboto' },
     }),
-    textAlign: 'center'
-  }
-});
+    textAlign: 'center',
+  },
+})

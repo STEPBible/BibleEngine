@@ -1,4 +1,4 @@
-import { IBibleContent, IBibleReferenceRange } from '@bible-engine/core';
+import { IBibleContent, IBibleReferenceRange } from '@bible-engine/core'
 
 export interface ChapterResult {
   contents: IBibleContent[]
