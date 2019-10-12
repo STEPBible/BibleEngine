@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 import {
   Dimensions,
   FlatList,
@@ -7,19 +7,19 @@ import {
   View,
   Text,
   StyleSheet,
-  LayoutAnimation
-} from 'react-native';
-import * as store from 'react-native-simple-store';
-import { MaterialIcons } from '@expo/vector-icons';
+  LayoutAnimation,
+} from 'react-native'
+import * as store from 'react-native-simple-store'
+import { MaterialIcons } from '@expo/vector-icons'
 import {
   IBibleBook,
   IBibleContent,
   IBibleReference,
-  IBibleVersion
-} from '@bible-engine/core';
-import Database from './Database';
-import Fonts from './Fonts';
-import ReadingView from './ReadingView';
+  IBibleVersion,
+} from '@bible-engine/core'
+import Database from './Database'
+import Fonts from './Fonts'
+import ReadingView from './ReadingView'
 import {
   AsyncStorageKey,
   Flags,
@@ -27,60 +27,61 @@ import {
   FontFamily,
   FontSize,
   Color,
-  THEME
-} from './Constants';
-import { ifIphoneX } from './utils';
-import LoadingScreen from './LoadingScreen';
-import SearchBarProvider from './SearchBarProvider';
-import SearchBar from './SearchBar';
-import 'react-native-console-time-polyfill';
-const bibleDatabaseModule = require('../assets/bibles.db');
-import ExpandableDrawer from './ExpandableDrawer';
-import DrawerLayout from 'react-native-gesture-handler/DrawerLayout';
-import { useKeepAwake } from 'expo-keep-awake';
+  THEME,
+} from './Constants'
+import { ifIphoneX } from './utils'
+import LoadingScreen from './LoadingScreen'
+import SearchBarProvider from './SearchBarProvider'
+import SearchBar from './SearchBar'
+import 'react-native-console-time-polyfill'
+const bibleDatabaseModule = require('../assets/bibles.db')
+import ExpandableDrawer from './ExpandableDrawer'
+import DrawerLayout from 'react-native-gesture-handler/DrawerLayout'
+import { useKeepAwake } from 'expo-keep-awake'
 import {
   ActivityIndicator,
   List,
   Provider as PaperProvider,
-  TouchableRipple
-} from 'react-native-paper';
-import Network from './Network';
+  TouchableRipple,
+} from 'react-native-paper'
 import { createAppContainer } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
 
-const DEVICE_WIDTH = Dimensions.get('window').width;
-const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
-const DRAWER_HEIGHT = 52;
+import Network from './Network'
 import HomeScreen from './HomeScreen'
 import { GlobalContextProvider } from './GlobalContext'
 
+const DEVICE_WIDTH = Dimensions.get('window').width
+const DRAWER_WIDTH = DEVICE_WIDTH * 0.85
+const DRAWER_HEIGHT = 52
+
 interface State {
-  activeBookIndex?: number;
-  books: IBibleBook[];
-  content: IBibleContent[];
-  currentBookOsisId: string;
-  currentBookFullTitle: string;
-  currentChapterNum: number;
-  currentVersion: IBibleVersion;
-  currentVersionUid: string;
-  isLeftMenuOpen: boolean;
-  isReady: boolean;
-  loading: boolean;
-  loadingMessage: string;
-  nextChapter?: IBibleReference;
-  offlineIsReady: boolean;
-  versionDrawerOpen: boolean;
-  versions: any[];
+  activeBookIndex?: number
+  books: IBibleBook[]
+  content: IBibleContent[]
+  currentBookOsisId: string
+  currentBookFullTitle: string
+  currentChapterNum: number
+  currentVersion: IBibleVersion
+  currentVersionUid: string
+  isLeftMenuOpen: boolean
+  isReady: boolean
+  loading: boolean
+  loadingMessage: string
+  nextChapter?: IBibleReference
+  offlineIsReady: boolean
+  versionDrawerOpen: boolean
+  versions: any[]
 }
 
 interface Props {}
 
 export default class App extends React.PureComponent<Props, State> {
-  useKeepAwake();
-  leftMenuRef: any;
-  bookListRef: any;
-  database?: Database;
-  interval: any;
+  useKeepAwake()
+  leftMenuRef: any
+  bookListRef: any
+  database?: Database
+  interval: any
 
   state = {
     activeBookIndex: undefined,
@@ -92,7 +93,7 @@ export default class App extends React.PureComponent<Props, State> {
     currentVersionUid: 'ESV',
     currentVersion: {
       uid: 'ESV',
-      title: 'English Standard Version'
+      title: 'English Standard Version',
     },
     isLeftMenuOpen: false,
     isReady: false,
@@ -100,12 +101,12 @@ export default class App extends React.PureComponent<Props, State> {
     loadingMessage: 'Loading fonts...',
     offlineIsReady: true,
     versionDrawerOpen: false,
-    versions: []
-  };
+    versions: [],
+  }
 
   constructor(props: Props) {
-    super(props);
-    this.loadResourcesAsync();
+    super(props)
+    this.loadResourcesAsync()
   }
 
   render() {
@@ -115,7 +116,7 @@ export default class App extends React.PureComponent<Props, State> {
       </GlobalContextProvider>
     )
     if (!this.state.isReady) {
-      return <LoadingScreen loadingText={this.state.loadingMessage} />;
+      return <LoadingScreen loadingText={this.state.loadingMessage} />
     }
     return (
       <PaperProvider theme={THEME}>
@@ -158,7 +159,7 @@ export default class App extends React.PureComponent<Props, State> {
           </React.Fragment>
         </DrawerLayout>
       </PaperProvider>
-    );
+    )
   }
 
   renderOfflineLoadingBanner = () => (
@@ -166,7 +167,7 @@ export default class App extends React.PureComponent<Props, State> {
       <ActivityIndicator color={Color.TYNDALE_BLUE} />
       <Text style={styles.header__status__text}>Saving for offline use...</Text>
     </View>
-  );
+  )
 
   renderOfflineSuccessBanner = () => (
     <View style={styles.header__status}>
@@ -175,17 +176,17 @@ export default class App extends React.PureComponent<Props, State> {
       </View>
       <Text style={styles.header__status__text}>Offline</Text>
     </View>
-  );
+  )
 
   toggleVersionDrawer = () => {
-    console.log('toggleVersionDrawer');
-    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
-    LayoutAnimation.configureNext(animation);
+    console.log('toggleVersionDrawer')
+    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity')
+    LayoutAnimation.configureNext(animation)
     this.setState({
       ...this.state,
-      versionDrawerOpen: !this.state.versionDrawerOpen
-    });
-  };
+      versionDrawerOpen: !this.state.versionDrawerOpen,
+    })
+  }
 
   renderHeader = () => (
     <React.Fragment>
@@ -212,27 +213,27 @@ export default class App extends React.PureComponent<Props, State> {
       </TouchableRipple>
       {this.renderVersionList()}
     </React.Fragment>
-  );
+  )
 
   changeVersion = (versionUid: string) => {
     const currentVersion = this.state.versions.filter(
       version => version.uid === versionUid
-    )[0];
+    )[0]
     this.setState(
       {
         ...this.state,
         currentVersion,
         currentVersionUid: versionUid,
         isLeftMenuOpen: false,
-        versionDrawerOpen: false
+        versionDrawerOpen: false,
       },
       () => {
-        this.changeBookAndChapter('Gen', 1);
+        this.changeBookAndChapter('Gen', 1)
       }
-    );
-    store.save(AsyncStorageKey.CACHED_VERSION_UID, versionUid);
-    this.closeDrawer();
-  };
+    )
+    store.save(AsyncStorageKey.CACHED_VERSION_UID, versionUid)
+    this.closeDrawer()
+  }
 
   renderVersionList = () => {
     if (this.state.versionDrawerOpen) {
@@ -250,10 +251,10 @@ export default class App extends React.PureComponent<Props, State> {
               />
             ))}
         </View>
-      );
+      )
     }
-    return null;
-  };
+    return null
+  }
 
   renderDrawer = () => (
     <FlatList
@@ -276,60 +277,60 @@ export default class App extends React.PureComponent<Props, State> {
       ListFooterComponent={<View style={styles.footer} />}
       showsVerticalScrollIndicator={false}
     />
-  );
+  )
 
   getItemLayout = (data, index) => ({
     length: DRAWER_HEIGHT,
     offset: DRAWER_HEIGHT * index,
-    index
-  });
+    index,
+  })
 
   scrollToBook = (index: number) => {
     if (index === this.state.activeBookIndex) {
       this.setState({
         ...this.state,
-        activeBookIndex: undefined
-      });
-      return;
+        activeBookIndex: undefined,
+      })
+      return
     }
     this.setState({
       ...this.state,
-      activeBookIndex: index
-    });
-    this.bookListRef.scrollToIndex({ index });
-  };
+      activeBookIndex: index,
+    })
+    this.bookListRef.scrollToIndex({ index })
+  }
 
   openDrawer = () => {
     if (this.leftMenuRef) {
-      this.leftMenuRef.openDrawer();
+      this.leftMenuRef.openDrawer()
     }
-  };
+  }
 
   closeDrawer = () => {
     if (this.leftMenuRef) {
-      this.leftMenuRef.closeDrawer();
+      this.leftMenuRef.closeDrawer()
     }
-  };
+  }
 
   changeBookAndChapter = async (
     bookOsisId: string,
     versionChapterNum: number
   ) => {
-    console.time('changeBookAndChapter');
+    console.time('changeBookAndChapter')
     // this.setState not updating state here, so force a manual update
-    this.state.loading = true;
-    this.forceUpdate();
+    this.state.loading = true
+    this.forceUpdate()
     const { contents, nextChapter } = await this.getChapter(
       bookOsisId,
       versionChapterNum
-    );
+    )
     const currentBookFullTitle = this.state.books.filter(
       book => book.osisId === bookOsisId
-    )[0].title;
-    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, contents);
-    store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, bookOsisId);
-    store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, versionChapterNum);
-    store.save(AsyncStorageKey.CACHED_NEXT_CHAPTER, nextChapter || null);
+    )[0].title
+    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, contents)
+    store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, bookOsisId)
+    store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, versionChapterNum)
+    store.save(AsyncStorageKey.CACHED_NEXT_CHAPTER, nextChapter || null)
     this.setState({
       ...this.state,
       currentBookFullTitle,
@@ -338,147 +339,147 @@ export default class App extends React.PureComponent<Props, State> {
       currentChapterNum: versionChapterNum,
       isLeftMenuOpen: false,
       loading: false,
-      nextChapter: nextChapter
-    });
-    console.timeEnd('changeBookAndChapter');
-  };
+      nextChapter: nextChapter,
+    })
+    console.timeEnd('changeBookAndChapter')
+  }
 
   toggleMenu = () => {
-    this.leftMenuRef.openDrawer();
+    this.leftMenuRef.openDrawer()
     this.setState({
       ...this.state,
-      isLeftMenuOpen: !this.state.isLeftMenuOpen
-    });
-  };
+      isLeftMenuOpen: !this.state.isLeftMenuOpen,
+    })
+  }
 
   updateLoadingMessage = (newMessage: string, error?: any) => {
-    console.log(newMessage);
+    console.log(newMessage)
     if (error) {
       this.setState({
         ...this.state,
-        loadingMessage: newMessage + this.safelyStringify(error)
-      });
-      return;
+        loadingMessage: newMessage + this.safelyStringify(error),
+      })
+      return
     }
     this.setState({
       ...this.state,
-      loadingMessage: newMessage
-    });
-  };
+      loadingMessage: newMessage,
+    })
+  }
 
   safelyStringify = (json: any): string => {
     const getCircularReplacer = () => {
-      const seen = new WeakSet();
+      const seen = new WeakSet()
       return (key: any, value: any) => {
         if (typeof value === 'object' && value !== null) {
           if (seen.has(value)) {
-            return;
+            return
           }
-          seen.add(value);
+          seen.add(value)
         }
-        return value;
-      };
-    };
-    return JSON.stringify(json, getCircularReplacer());
-  };
+        return value
+      }
+    }
+    return JSON.stringify(json, getCircularReplacer())
+  }
 
   pollForLocalDatabaseProgress = () => {
     this.interval = setInterval(() => {
       if (this.database!.localDbIsReady) {
         this.setState({
           ...this.state,
-          offlineIsReady: true
-        });
-        clearInterval(this.interval);
+          offlineIsReady: true,
+        })
+        clearInterval(this.interval)
       }
-    }, 5000);
-  };
+    }, 5000)
+  }
 
   loadResourcesAsync = async () => {
     UIManager.setLayoutAnimationEnabledExperimental &&
-      UIManager.setLayoutAnimationEnabledExperimental(true);
-    console.disableYellowBox = true;
+      UIManager.setLayoutAnimationEnabledExperimental(true)
+    console.disableYellowBox = true
 
-    await Fonts.load();
-    this.database = new Database(bibleDatabaseModule);
-    const dbIsAvailable = await this.database.databaseIsAvailable();
+    await Fonts.load()
+    this.database = new Database(bibleDatabaseModule)
+    const dbIsAvailable = await this.database.databaseIsAvailable()
     if (!dbIsAvailable) {
-      const internetIsAvailable = await Network.internetIsAvailable();
+      const internetIsAvailable = await Network.internetIsAvailable()
       if (!internetIsAvailable) {
         this.updateLoadingMessage(
           'Updating database... \n\n(can take up to 30 seconds) \n\n Speed improvements coming soon! 🚀'
-        );
-        await this.database.setLocalDatabase();
+        )
+        await this.database.setLocalDatabase()
       } else {
-        this.database.forceRemote = true;
-        this.database.setLocalDatabase();
-        this.pollForLocalDatabaseProgress();
+        this.database.forceRemote = true
+        this.database.setLocalDatabase()
+        this.pollForLocalDatabaseProgress()
       }
     } else {
-      await this.database.setLocalBibleEngine();
+      await this.database.setLocalBibleEngine()
     }
 
-    let bookList = null;
-    let chapterOutput = null;
-    let chapterNum = 0;
-    let osisBookName = '';
-    let nextChapter = null;
-    let versionUid = '';
+    let bookList = null
+    let chapterOutput = null
+    let chapterNum = 0
+    let osisBookName = ''
+    let nextChapter = null
+    let versionUid = ''
 
     if (Flags.USE_CACHE) {
       try {
-        this.updateLoadingMessage('Finding your place...');
-        [
+        this.updateLoadingMessage('Finding your place...')
+        ;[
           bookList,
           chapterOutput,
           chapterNum,
           osisBookName,
           nextChapter,
-          versionUid
+          versionUid,
         ] = await store.get([
           AsyncStorageKey.CACHED_BOOK_LIST,
           AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
           AsyncStorageKey.CACHED_CHAPTER_NUM,
           AsyncStorageKey.CACHED_OSIS_BOOK_NAME,
           AsyncStorageKey.CACHED_NEXT_CHAPTER,
-          AsyncStorageKey.CACHED_VERSION_UID
-        ]);
+          AsyncStorageKey.CACHED_VERSION_UID,
+        ])
       } catch (error) {
-        this.updateLoadingMessage('Error finding your place: ', error);
-        throw error;
+        this.updateLoadingMessage('Error finding your place: ', error)
+        throw error
       }
     }
     if (!bookList) {
-      bookList = await this.database.getBooks();
+      bookList = await this.database.getBooks()
     }
     if (!osisBookName) {
-      osisBookName = 'Gen';
-      store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, osisBookName);
+      osisBookName = 'Gen'
+      store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, osisBookName)
     }
     if (!chapterNum) {
-      chapterNum = 1;
-      store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum);
+      chapterNum = 1
+      store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum)
     }
     if (!versionUid) {
-      versionUid = 'ESV';
-      store.save(AsyncStorageKey.CACHED_VERSION_UID, versionUid);
+      versionUid = 'ESV'
+      store.save(AsyncStorageKey.CACHED_VERSION_UID, versionUid)
     }
     if (!chapterOutput || !nextChapter) {
-      const result = await this.getChapter(osisBookName, chapterNum);
-      nextChapter = result.nextChapter;
-      chapterOutput = result.contents;
+      const result = await this.getChapter(osisBookName, chapterNum)
+      nextChapter = result.nextChapter
+      chapterOutput = result.contents
     }
     const currentBookFullTitle = bookList.filter(
       book => book.osisId === osisBookName
-    )[0].title;
+    )[0].title
 
-    const versions = await this.database!.getVersions();
+    const versions = await this.database!.getVersions()
     const currentVersion = versions.filter(
       version => version.uid === versionUid
-    )[0];
-    this.updateLoadingMessage('Tidying up...');
-    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
-    LayoutAnimation.configureNext(animation);
+    )[0]
+    this.updateLoadingMessage('Tidying up...')
+    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity')
+    LayoutAnimation.configureNext(animation)
     this.setState({
       ...this.state,
       currentBookFullTitle,
@@ -493,29 +494,41 @@ export default class App extends React.PureComponent<Props, State> {
       isLeftMenuOpen: false,
       currentChapterNum: chapterNum,
       isReady: true,
-      offlineIsReady: !!this.database.localDbIsReady
-    });
-  };
+      offlineIsReady: !!this.database.localDbIsReady,
+    })
+  }
 
   getChapter = async (bookOsisId: string, versionChapterNum: number) => {
-    this.updateLoadingMessage('Loading chapter...');
+    this.updateLoadingMessage('Loading chapter...')
     try {
       const result = await this.database!.getChapter(
         this.state.currentVersionUid,
         bookOsisId,
         versionChapterNum
-      );
-      store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, result.contents);
+      )
+      store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, result.contents)
       store.save(
         AsyncStorageKey.CACHED_NEXT_CHAPTER,
         result.nextChapter || null
-      );
-      return result;
+      )
+      return result
     } catch (error) {
-      this.updateLoadingMessage('Error loading chapter: ', error);
-      throw error;
+      this.updateLoadingMessage('Error loading chapter: ', error)
+      throw error
     }
-  };
+  }
+
+  getBooks = async () => {
+    this.updateLoadingMessage('Loading books...')
+    try {
+      let bookList: any = await this.database!.getBooks()
+      store.save(AsyncStorageKey.CACHED_BOOK_LIST, bookList)
+      return bookList
+    } catch (error) {
+      this.updateLoadingMessage('Error loading books: ', error)
+      throw error
+    }
+  }
 }
 
 const AppNavigator = createStackNavigator({
@@ -527,7 +540,7 @@ const AppContainer = createAppContainer(AppNavigator)
 
 const styles = StyleSheet.create({
   footer: {
-    height: 100
+    height: 100,
   },
   header: {
     ...getDebugStyles(),
@@ -541,41 +554,41 @@ const styles = StyleSheet.create({
     paddingTop: ifIphoneX(40, 28),
     paddingLeft: 30,
     paddingRight: 30,
-    width: DRAWER_WIDTH
+    width: DRAWER_WIDTH,
   },
   header__title: {
     ...getDebugStyles(),
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
-    fontSize: FontSize.LARGE
+    fontSize: FontSize.LARGE,
   },
   header__subtitle: {
     ...getDebugStyles(),
     color: '#676767',
     fontFamily: FontFamily.OPEN_SANS,
-    fontSize: FontSize.EXTRA_SMALL
+    fontSize: FontSize.EXTRA_SMALL,
   },
   header__icon: {
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   header__status: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 14,
-    marginBottom: 14
+    marginBottom: 14,
   },
   header__status__icon: {
     width: 25,
-    height: 25
+    height: 25,
   },
   header__status__text: {
     marginLeft: 7,
     color: '#676767',
     fontFamily: FontFamily.OPEN_SANS,
-    fontSize: FontSize.EXTRA_SMALL
+    fontSize: FontSize.EXTRA_SMALL,
   },
   versions: {
     backgroundColor: '#ECEEF0',
-    marginBottom: 15
-  }
-});
+    marginBottom: 15,
+  },
+})
