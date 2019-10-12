@@ -1,29 +1,30 @@
-import React from 'react';
+import React from 'react'
 import {
   View,
   Dimensions,
   LayoutAnimation,
   StyleSheet,
-  Text,
-  ScrollView
-} from 'react-native';
-import { FontFamily, FontSize, getDebugStyles } from './Constants';
-import { IBibleBookEntity } from '@bible-engine/core';
-import { TouchableRipple } from 'react-native-paper';
+  ScrollView,
+} from 'react-native'
+import { IBibleBookEntity } from '@bible-engine/core'
+import { TouchableRipple } from 'react-native-paper'
 
-const DEVICE_WIDTH = Dimensions.get('window').width;
-const DRAWER_WIDTH = DEVICE_WIDTH;
-const DRAWER_HEIGHT = 52;
-const CELL_WIDTH = DRAWER_WIDTH / 5 - 4;
+import { FontFamily, FontSize, getDebugStyles } from './Constants'
+import Text from './Text'
+
+const DEVICE_WIDTH = Dimensions.get('window').width
+const DRAWER_WIDTH = DEVICE_WIDTH
+const DRAWER_HEIGHT = 52
+const CELL_WIDTH = DRAWER_WIDTH / 5 - 4
 
 interface Props {
-  item: IBibleBookEntity;
-  changeBookAndChapter: Function;
-  closeDrawer: Function;
-  drawerStyle: any;
-  index: number;
-  open: boolean;
-  scrollToBook: Function;
+  item: IBibleBookEntity
+  changeBookAndChapter: Function
+  closeDrawer: Function
+  drawerStyle: any
+  index: number
+  open: boolean
+  scrollToBook: Function
 }
 interface State {}
 
@@ -32,14 +33,14 @@ export default class ExpandableDrawer extends React.PureComponent<
   State
 > {
   onBookPress = () => {
-    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity');
-    LayoutAnimation.configureNext(animation);
-    this.props.scrollToBook(this.props.index);
-  };
+    const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity')
+    LayoutAnimation.configureNext(animation)
+    this.props.scrollToBook(this.props.index)
+  }
 
   onChapterPress = (num: number) => {
-    this.props.changeBookAndChapter(this.props.item.osisId, num);
-  };
+    this.props.changeBookAndChapter(this.props.item.osisId, num)
+  }
 
   renderChapterNums = () => (
     <ScrollView>
@@ -50,7 +51,7 @@ export default class ExpandableDrawer extends React.PureComponent<
           .map(this.renderChapterNum)}
       </View>
     </ScrollView>
-  );
+  )
 
   renderChapterNum = (num, index) => (
     <TouchableRipple
@@ -61,7 +62,7 @@ export default class ExpandableDrawer extends React.PureComponent<
     >
       <Text style={styles.verses__cell__text}>{num}</Text>
     </TouchableRipple>
-  );
+  )
 
   render() {
     return (
@@ -77,7 +78,7 @@ export default class ExpandableDrawer extends React.PureComponent<
         </TouchableRipple>
         {this.props.open ? this.renderChapterNums() : null}
       </React.Fragment>
-    );
+    )
   }
 }
 
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     justifyContent: 'center',
     height: DRAWER_HEIGHT,
-    marginRight: 16
+    marginRight: 16,
   },
   'drawer--open': {
     borderTopRightRadius: DRAWER_HEIGHT / 2,
@@ -98,14 +99,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#e8eaed',
     justifyContent: 'center',
     height: DRAWER_HEIGHT,
-    marginRight: 16
+    marginRight: 16,
   },
   drawer__text: {
     ...getDebugStyles(),
     color: '#202124',
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.SMALL,
-    marginLeft: 30
+    marginLeft: 30,
   },
   verses: {
     ...getDebugStyles(),
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginLeft: 10,
     marginRight: 10,
-    marginTop: 10
+    marginTop: 10,
   },
   verses__cell: {
     ...getDebugStyles(),
@@ -122,13 +123,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: CELL_WIDTH,
     height: CELL_WIDTH,
-    borderColor: 'gray'
+    borderColor: 'gray',
   },
   verses__cell__text: {
     ...getDebugStyles(),
     color: '#202124',
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.SMALL,
-    textAlign: 'center'
-  }
-});
+    textAlign: 'center',
+  },
+})

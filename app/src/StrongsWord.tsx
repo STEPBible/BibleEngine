@@ -1,61 +1,61 @@
-import React from 'react';
+import React from 'react'
 import {
-  Text,
   View,
   StyleSheet,
   Dimensions,
   TouchableHighlight,
-  ScrollView
-} from 'react-native';
-import Popover from './Popover';
+  ScrollView,
+} from 'react-native'
+import Popover from './Popover'
 import {
   IDictionaryEntry,
   DocumentElement,
-  DictionaryEntryEntity
-} from '@bible-engine/core';
+  DictionaryEntryEntity,
+} from '@bible-engine/core'
 import {
   Color,
   FontFamily,
   FontSize,
   Margin,
-  getDebugStyles
-} from './Constants';
-import { BarIndicator } from 'react-native-indicators';
-import Database from './Database';
-import { withGlobalContext } from './GlobalContext';
+  getDebugStyles,
+} from './Constants'
+import { BarIndicator } from 'react-native-indicators'
+import Database from './Database'
+import { withGlobalContext } from './GlobalContext'
+import Text from './Text'
 
-const DEVICE_WIDTH = Dimensions.get('window').width;
-const DEVICE_HEIGHT = Dimensions.get('window').height;
+const DEVICE_WIDTH = Dimensions.get('window').width
+const DEVICE_HEIGHT = Dimensions.get('window').height
 
 interface Props {
-  phrase: string;
-  strongs: string[];
-  database: Database;
+  phrase: string
+  strongs: string[]
+  database: Database
 }
 
 interface State {
-  popoverIsVisible: boolean;
-  definitions: IDictionaryEntry[];
-  loading: boolean;
+  popoverIsVisible: boolean
+  definitions: IDictionaryEntry[]
+  loading: boolean
 }
 
 class StrongsWord extends React.PureComponent<Props, State> {
-  touchable: any;
-  mounted: boolean = false;
+  touchable: any
+  mounted: boolean = false
 
   state = {
     popoverIsVisible: false,
     definitions: [],
     loading: true,
-    loadingMessage: 'Rummaging around...'
-  };
+    loadingMessage: 'Rummaging around...',
+  }
 
   async componentDidMount() {
-    this.mounted = true;
+    this.mounted = true
   }
 
   componentWillUnmount() {
-    this.mounted = false;
+    this.mounted = false
   }
 
   async setDictionaryEntries(strongs: string[]) {
@@ -66,41 +66,40 @@ class StrongsWord extends React.PureComponent<Props, State> {
     const dictionary = isHebrewStrongs ? '@BdbMedDef' : '@MounceMedDef'
     try {
       const definitions = await Promise.all(
-        strongs.map((
-          strong => this.props.global.bibleEngine.getDictionaryEntry(
-            strong,
-            dictionary
-        )))
+        strongs.map(strong =>
+          this.props.global.bibleEngine.getDictionaryEntry(strong, dictionary)
+        )
       )
+      console.log(definitions)
       if (this.mounted) {
         this.setState({
           ...this.state,
           loading: false,
-          definitions
-        });
+          definitions,
+        })
       }
     } catch (e) {
-      console.log('Couldnt fetch strongs num: ', strongs.join(', '));
-      console.error(e);
-      throw e;
+      console.log('Couldnt fetch strongs num: ', strongs.join(', '))
+      console.error(e)
+      throw e
     }
   }
 
   onPress = () => {
-    this.setState({ ...this.state, popoverIsVisible: true });
-    this.setDictionaryEntries(this.props.strongs);
+    this.setState({ ...this.state, popoverIsVisible: true })
+    this.setDictionaryEntries(this.props.strongs)
     setTimeout(() => {
       this.setState({
         ...this.state,
-        loadingMessage: 'Sorry, this is taking longer than usual...'
-      });
-    }, 4000);
-  };
+        loadingMessage: 'Sorry, this is taking longer than usual...',
+      })
+    }, 4000)
+  }
 
   closePopover = () => {
-    console.log('closePopover');
-    this.setState({ ...this.state, popoverIsVisible: false });
-  };
+    console.log('closePopover')
+    this.setState({ ...this.state, popoverIsVisible: false })
+  }
 
   renderStrongsHeader = item => (
     <View style={styles.popover__content__header}>
@@ -116,12 +115,13 @@ class StrongsWord extends React.PureComponent<Props, State> {
       </Text>
       <Text style={styles.popover__content__header__lemma}>{')'}</Text>
     </View>
-  );
+  )
 
   renderExtraStrongsWords = () => (
     <View>
       {this.state.definitions
         .slice(1)
+        .filter(definition => definition)
         .map((definition: DictionaryEntryEntity) => (
           <View key={`definition-${definition.strong}`}>
             {this.renderStrongsHeader(definition)}
@@ -131,7 +131,7 @@ class StrongsWord extends React.PureComponent<Props, State> {
           </View>
         ))}
     </View>
-  );
+  )
 
   renderPopoverContent = () => {
     if (this.state.loading) {
@@ -148,7 +148,7 @@ class StrongsWord extends React.PureComponent<Props, State> {
             {this.state.loadingMessage}
           </Text>
         </View>
-      );
+      )
     }
     if (!this.state.definitions.length) {
       return (
@@ -159,7 +159,7 @@ class StrongsWord extends React.PureComponent<Props, State> {
             )}`}
           </Text>
         </View>
-      );
+      )
     }
 
     return (
@@ -175,16 +175,16 @@ class StrongsWord extends React.PureComponent<Props, State> {
         </View>
         <View style={{ flex: 2, height: 20 }} />
       </View>
-    );
-  };
+    )
+  }
 
-  renderDefinitionContent = (element: DictionaryEntry) => {
+  renderDefinitionContent = (element: DictionaryEntryEntity) => {
     if (
       !element.content ||
       !element.content.contents ||
       !element.content.contents.length
     ) {
-      return null;
+      return null
     }
     return (
       <View style={styles.popover__content__definitions__entry}>
@@ -193,25 +193,23 @@ class StrongsWord extends React.PureComponent<Props, State> {
             this.renderDocumentElement(element, index)
         )}
       </View>
-    );
-  };
+    )
+  }
 
   renderDocumentElement = (element: DocumentElement, index: number) => {
     if (!element) {
-      return null;
+      return null
     }
     if (element.type === 'phrase' && element.content.length) {
       return (
         <Text key={`doc-phrase-${index}`} style={styles.documentPhrase}>
           {element.content}
         </Text>
-      );
+      )
     }
     if (element.type === 'group') {
       if (element.groupType === 'bold') {
-        const phrases: string[] = element.contents.map(
-          ({ content }) => content
-        );
+        const phrases: string[] = element.contents.map(({ content }) => content)
         return phrases.map((phrase, phraseIndex) => (
           <Text
             key={`bold-${phrase}-${phraseIndex}-${index}`}
@@ -219,14 +217,14 @@ class StrongsWord extends React.PureComponent<Props, State> {
           >
             {phrase}
           </Text>
-        ));
+        ))
       }
-      return element.contents.map((element: DocumentElement) =>
-        this.renderDocumentElement(element)
-      );
+      return element.contents.map((element: DocumentElement, index: number) =>
+        this.renderDocumentElement(element, index)
+      )
     }
-    return null;
-  };
+    return null
+  }
 
   render() {
     return (
@@ -250,33 +248,33 @@ class StrongsWord extends React.PureComponent<Props, State> {
           {this.renderPopoverContent()}
         </Popover>
       </React.Fragment>
-    );
+    )
   }
 }
 
 const styles = StyleSheet.create({
   popover__arrow: {},
   popover__backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.1)'
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   popover__background_container: {
     // backgroundColor: 'yellow',
     overflow: 'hidden',
-    width: DEVICE_WIDTH - 20
+    width: DEVICE_WIDTH - 20,
   },
   popover__loading: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    minHeight: 130
+    minHeight: 130,
   },
   popover__loading__text: {
     color: 'gray',
     marginTop: 10,
     textAlign: 'center',
     fontFamily: FontFamily.OPEN_SANS,
-    fontSize: FontSize.SMALL
+    fontSize: FontSize.SMALL,
   },
   popover__content: {
     // backgroundColor: 'cyan',
@@ -285,13 +283,13 @@ const styles = StyleSheet.create({
     borderBottomColor: 'gray',
     borderBottomWidth: 0.5,
     margin: Margin.LARGE,
-    marginBottom: 0
+    marginBottom: 0,
   },
   popover__content__definitions: {
     ...getDebugStyles(),
     flex: 1,
     marginTop: Margin.SMALL,
-    marginBottom: Margin.MEDIUM
+    marginBottom: Margin.MEDIUM,
     // backgroundColor: 'magenta'
   },
   popover__content__header: {
@@ -301,54 +299,54 @@ const styles = StyleSheet.create({
     minHeight: 45,
     maxHeight: 80,
     borderBottomColor: 'gray',
-    borderBottomWidth: 0.5
+    borderBottomWidth: 0.5,
   },
   popover__content__header__lemma: {
     //backgroundColor: 'orange',
     fontFamily: FontFamily.CARDO_BOLD,
     fontSize: FontSize.MEDIUM,
-    maxHeight: FontSize.EXTRA_LARGE
+    maxHeight: FontSize.EXTRA_LARGE,
   },
   popover__content__header__transliteration: {
     // backgroundColor: 'green',
     fontFamily: FontFamily.CARDO_ITALIC,
     fontSize: FontSize.MEDIUM,
-    maxHeight: FontSize.EXTRA_LARGE
+    maxHeight: FontSize.EXTRA_LARGE,
   },
   popover__content__header__gloss: {
     // backgroundColor: 'cyan',
     fontFamily: FontFamily.CARDO_BOLD,
     fontSize: FontSize.MEDIUM,
-    maxHeight: FontSize.EXTRA_LARGE
+    maxHeight: FontSize.EXTRA_LARGE,
   },
   popover__content__definitions__entry: {
     flex: 1,
     flexDirection: 'row',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   strongWord: {
-    ...getDebugStyles()
+    ...getDebugStyles(),
   },
   strongWordText: {
     color: Color.TYNDALE_BLUE,
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.EXTRA_SMALL,
-    marginRight: 7
+    marginRight: 7,
   },
   documentPhrase: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.SMALL,
     marginBottom: 5,
-    marginRight: 5
+    marginRight: 5,
   },
   boldDocumentPhrase: {
     // backgroundColor: 'yellow',
     fontFamily: FontFamily.CARDO_BOLD,
     fontSize: FontSize.SMALL,
-    marginBottom: 5
+    marginBottom: 5,
     // margin: 5
-  }
-});
+  },
+})
 
-export default withGlobalContext(StrongsWord);
+export default withGlobalContext(StrongsWord)

@@ -1,15 +1,14 @@
-import React, { Fragment } from 'react';
+import React, { Fragment } from 'react'
 import {
-  Text,
   View,
   FlatList,
   StyleSheet,
   Dimensions,
   TouchableHighlight,
-  ScrollView
-} from 'react-native';
-import Popover from './Popover';
-import { BibleEngine, IBibleNote } from '@bible-engine/core';
+  ScrollView,
+} from 'react-native'
+import Popover from './Popover'
+import { BibleEngine, IBibleNote } from '@bible-engine/core'
 import {
   Color,
   FontFamily,
@@ -17,44 +16,45 @@ import {
   Margin,
   randomColor,
   DEBUG,
-  getDebugStyles
-} from './Constants';
+  getDebugStyles,
+} from './Constants'
+import Text from './Text'
 
-const DEVICE_WIDTH = Dimensions.get('window').width;
-const DEVICE_HEIGHT = Dimensions.get('window').height;
+const DEVICE_WIDTH = Dimensions.get('window').width
+const DEVICE_HEIGHT = Dimensions.get('window').height
 
 interface Props {
-  notes: IBibleNote[];
+  notes: IBibleNote[]
 }
 
 interface State {
-  popoverIsVisible: boolean;
+  popoverIsVisible: boolean
 }
 
 export default class Footnote extends React.PureComponent<Props, State> {
-  touchable: any;
+  touchable: any
   state = {
-    popoverIsVisible: false
-  };
+    popoverIsVisible: false,
+  }
 
   onPress = () => {
-    this.setState({ popoverIsVisible: true });
-  };
+    this.setState({ popoverIsVisible: true })
+  }
 
   closePopover = () => {
-    this.setState({ popoverIsVisible: false });
-  };
+    this.setState({ popoverIsVisible: false })
+  }
 
   getNoteText = (note: IBibleNote) => {
     const noteText = note.content.contents
       .map(phrase => phrase.content)
-      .join(' ');
-    return `${note.key}) ${noteText}`;
-  };
+      .join(' ')
+    return `${note.key}) ${noteText}`
+  }
 
   renderFootnote = ({ item }) => (
     <Text style={styles.popover__content__verse}>{this.getNoteText(item)}</Text>
-  );
+  )
 
   renderPopoverContent = () => {
     return (
@@ -69,8 +69,8 @@ export default class Footnote extends React.PureComponent<Props, State> {
         </View>
         <View style={{ flex: 2, height: 20 }} />
       </View>
-    );
-  };
+    )
+  }
 
   render() {
     return (
@@ -93,13 +93,13 @@ export default class Footnote extends React.PureComponent<Props, State> {
           {this.renderPopoverContent()}
         </Popover>
       </React.Fragment>
-    );
+    )
   }
 }
 
 const styles = StyleSheet.create({
   touchable: {
-    marginLeft: -8
+    marginLeft: -8,
   },
   text: {
     marginTop: -4,
@@ -108,15 +108,15 @@ const styles = StyleSheet.create({
     fontSize: FontSize.SMALL,
     color: Color.TYNDALE_BLUE,
     fontFamily: FontFamily.CARDO_ITALIC,
-    ...getDebugStyles
+    ...getDebugStyles,
   },
   popover__arrow: {},
   popover__backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.1)'
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   popover__background_container: {
     overflow: 'hidden',
-    width: DEVICE_WIDTH - 20
+    width: DEVICE_WIDTH - 20,
   },
   popover__content: {
     flex: 1,
@@ -124,20 +124,20 @@ const styles = StyleSheet.create({
     borderBottomColor: 'gray',
     borderBottomWidth: 0.5,
     margin: Margin.LARGE,
-    marginBottom: 0
+    marginBottom: 0,
   },
   popover__content__header: {
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
     fontSize: FontSize.MEDIUM,
-    marginBottom: Margin.SMALL
+    marginBottom: Margin.SMALL,
   },
   popover__content__reference: {
     fontFamily: FontFamily.CARDO_BOLD,
-    fontSize: FontSize.SMALL
+    fontSize: FontSize.SMALL,
   },
   popover__content__verse: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.SMALL,
-    marginBottom: Margin.EXTRA_SMALL
-  }
-});
+    marginBottom: Margin.EXTRA_SMALL,
+  },
+})
