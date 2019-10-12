@@ -115,51 +115,6 @@ export default class App extends React.PureComponent<Props, State> {
         <AppContainer />
       </GlobalContextProvider>
     )
-    if (!this.state.isReady) {
-      return <LoadingScreen loadingText={this.state.loadingMessage} />
-    }
-    return (
-      <PaperProvider theme={THEME}>
-        <DrawerLayout
-          drawerWidth={DRAWER_WIDTH}
-          drawerPosition={DrawerLayout.positions.Left}
-          drawerType="front"
-          drawerBackgroundColor="white"
-          ref={ref => (this.leftMenuRef = ref)}
-          renderNavigationView={this.renderDrawer}
-        >
-          <React.Fragment>
-            <StatusBar hidden={true} />
-            <SearchBarProvider>
-              {(animation: any) => (
-                <React.Fragment>
-                  <SearchBar
-                    changeBookAndChapter={this.changeBookAndChapter}
-                    database={this.database}
-                    toggleMenu={this.toggleMenu}
-                    animation={animation}
-                  />
-                  {this.state.loading ? (
-                    <LoadingScreen loadingText="Loading..." />
-                  ) : (
-                    <ReadingView
-                      chapterNum={this.state.currentChapterNum}
-                      books={this.state.books}
-                      bookName={this.state.currentBookFullTitle}
-                      bookOsisId={this.state.currentBookOsisId}
-                      changeBookAndChapter={this.changeBookAndChapter}
-                      content={this.state.content}
-                      nextChapter={this.state.nextChapter}
-                      database={this.database!}
-                    />
-                  )}
-                </React.Fragment>
-              )}
-            </SearchBarProvider>
-          </React.Fragment>
-        </DrawerLayout>
-      </PaperProvider>
-    )
   }
 
   renderOfflineLoadingBanner = () => (
