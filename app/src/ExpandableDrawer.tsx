@@ -8,9 +8,11 @@ import {
 } from 'react-native'
 import { IBibleBookEntity } from '@bible-engine/core'
 import { TouchableRipple } from 'react-native-paper'
+import { withNavigation } from 'react-navigation'
 
 import { FontFamily, FontSize, getDebugStyles } from './Constants'
 import Text from './Text'
+import { withGlobalContext } from './GlobalContext'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DRAWER_WIDTH = DEVICE_WIDTH
@@ -28,10 +30,7 @@ interface Props {
 }
 interface State {}
 
-export default class ExpandableDrawer extends React.PureComponent<
-  Props,
-  State
-> {
+class ExpandableDrawer extends React.PureComponent<Props, State> {
   onBookPress = () => {
     const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity')
     LayoutAnimation.configureNext(animation)
@@ -39,7 +38,12 @@ export default class ExpandableDrawer extends React.PureComponent<
   }
 
   onChapterPress = (num: number) => {
-    this.props.changeBookAndChapter(this.props.item.osisId, num)
+    this.props.global.updateCurrentBibleReference({
+      bookOsisId: this.props.item.osisId,
+      versionChapterNum: num,
+      versionUid: this.props.global.versionUid,
+    })
+    this.props.navigation.navigate('Home')
   }
 
   renderChapterNums = () => (
@@ -133,3 +137,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 })
+
+export default withNavigation(withGlobalContext(ExpandableDrawer))
