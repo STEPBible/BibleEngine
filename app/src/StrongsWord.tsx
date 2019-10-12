@@ -5,12 +5,10 @@ import {
   StyleSheet,
   Dimensions,
   TouchableHighlight,
-  ScrollView,
-  FlatList
+  ScrollView
 } from 'react-native';
 import Popover from './Popover';
 import {
-  BibleEngine,
   IDictionaryEntry,
   DocumentElement,
   DictionaryEntryEntity
@@ -24,6 +22,7 @@ import {
 } from './Constants';
 import { BarIndicator } from 'react-native-indicators';
 import Database from './Database';
+import { withGlobalContext } from './GlobalContext';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DEVICE_HEIGHT = Dimensions.get('window').height;
@@ -40,7 +39,7 @@ interface State {
   loading: boolean;
 }
 
-export default class StrongsWord extends React.PureComponent<Props, State> {
+class StrongsWord extends React.PureComponent<Props, State> {
   touchable: any;
   mounted: boolean = false;
 
@@ -60,10 +59,19 @@ export default class StrongsWord extends React.PureComponent<Props, State> {
   }
 
   async setDictionaryEntries(strongs: string[]) {
+    if (!strongs.length) {
+      return
+    }
+    const isHebrewStrongs = strongs[0][0] === 'H'
+    const dictionary = isHebrewStrongs ? '@BdbMedDef' : '@MounceMedDef'
     try {
-      const definitions = await this.props.database.getDictionaryEntries(
-        strongs
-      );
+      const definitions = await Promise.all(
+        strongs.map((
+          strong => this.props.global.bibleEngine.getDictionaryEntry(
+            strong,
+            dictionary
+        )))
+      )
       if (this.mounted) {
         this.setState({
           ...this.state,
@@ -342,3 +350,5 @@ const styles = StyleSheet.create({
     // margin: 5
   }
 });
+
+export default withGlobalContext(StrongsWord);
