@@ -50,6 +50,8 @@ import { createStackNavigator } from 'react-navigation-stack'
 import Network from './Network'
 import HomeScreen from './HomeScreen'
 import { GlobalContextProvider } from './GlobalContext'
+import BookScreen from './BookScreen'
+import VersionScreen from './VersionScreen'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DRAWER_WIDTH = DEVICE_WIDTH * 0.85
@@ -489,6 +491,12 @@ export default class App extends React.PureComponent<Props, State> {
 const AppNavigator = createStackNavigator({
   Home: {
     screen: HomeScreen,
+  },
+  Books: {
+    screen: BookScreen,
+  },
+  Versions: {
+    screen: VersionScreen,
   },
 })
 const AppContainer = createAppContainer(AppNavigator)
