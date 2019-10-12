@@ -8,7 +8,7 @@ class FontText extends Component<any, any> {
       return <Text {...this.props}>{this.props.children}</Text>
     }
     const { style, ...props } = this.props
-    delete style.fontFamily
+    if (style) delete style.fontFamily
     return (
       <Text style={style} {...props}>
         {this.props.children}
