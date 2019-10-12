@@ -3,7 +3,6 @@ import {
   View,
   Dimensions,
   LayoutAnimation,
-  TouchableHighlight,
   StyleSheet,
   Text,
   ScrollView
@@ -13,7 +12,7 @@ import { IBibleBookEntity } from '@bible-engine/core';
 import { TouchableRipple } from 'react-native-paper';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
-const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
+const DRAWER_WIDTH = DEVICE_WIDTH;
 const DRAWER_HEIGHT = 52;
 const CELL_WIDTH = DRAWER_WIDTH / 5 - 4;
 
@@ -39,14 +38,13 @@ export default class ExpandableDrawer extends React.PureComponent<
   };
 
   onChapterPress = (num: number) => {
-    this.props.closeDrawer();
     this.props.changeBookAndChapter(this.props.item.osisId, num);
   };
 
   renderChapterNums = () => (
     <ScrollView>
       <View style={styles.verses}>
-        {Array.apply(null, { length: this.props.item.numChapters + 1 })
+        {Array.apply(null, { length: this.props.item.chaptersCount.length + 1 })
           .map(Number.call, Number)
           .slice(1)
           .map(this.renderChapterNum)}
