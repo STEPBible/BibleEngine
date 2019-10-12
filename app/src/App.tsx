@@ -45,10 +45,14 @@ import {
   TouchableRipple
 } from 'react-native-paper';
 import Network from './Network';
+import { createAppContainer } from 'react-navigation'
+import { createStackNavigator } from 'react-navigation-stack'
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const DRAWER_WIDTH = DEVICE_WIDTH * 0.85;
 const DRAWER_HEIGHT = 52;
+import HomeScreen from './HomeScreen'
+import { GlobalContextProvider } from './GlobalContext'
 
 interface State {
   activeBookIndex?: number;
@@ -105,6 +109,11 @@ export default class App extends React.PureComponent<Props, State> {
   }
 
   render() {
+    return (
+      <GlobalContextProvider>
+        <AppContainer />
+      </GlobalContextProvider>
+    )
     if (!this.state.isReady) {
       return <LoadingScreen loadingText={this.state.loadingMessage} />;
     }
@@ -508,6 +517,13 @@ export default class App extends React.PureComponent<Props, State> {
     }
   };
 }
+
+const AppNavigator = createStackNavigator({
+  Home: {
+    screen: HomeScreen,
+  },
+})
+const AppContainer = createAppContainer(AppNavigator)
 
 const styles = StyleSheet.create({
   footer: {
