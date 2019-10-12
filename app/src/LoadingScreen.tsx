@@ -1,50 +1,29 @@
 import React from 'react'
-import { StyleSheet, Text, View, Platform } from 'react-native'
-import { BarIndicator } from 'react-native-indicators'
+import { StyleSheet, View, Platform } from 'react-native'
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder'
 
-import { Color, FontSize } from './Constants'
-import Text from './Text'
+import { FontSize, Margin } from './Constants'
 
-interface Props {
-  loadingText: string
+export default function LoadingScreen() {
+  return (
+    <View style={{ flex: 1, marginLeft: Margin.LARGE }}>
+      <SkeletonPlaceholder>
+        <View style={{ width: 120, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 250, height: 20, marginTop: Margin.LARGE }} />
+        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 120, height: 20, marginTop: Margin.LARGE }} />
+        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 250, height: 20, marginTop: Margin.LARGE }} />
+        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 120, height: 20, marginTop: Margin.LARGE }} />
+        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
+        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
+      </SkeletonPlaceholder>
+    </View>
+  )
 }
-
-export default class LoadingScreen extends React.PureComponent<Props, {}> {
-  render() {
-    return (
-      <View style={styles.page}>
-        <View style={styles.page__icon}>
-          <BarIndicator
-            animationDuration={600}
-            size={85}
-            color={Color.TYNDALE_BLUE}
-          />
-        </View>
-        <Text style={styles.page__text}>{this.props.loadingText}</Text>
-      </View>
-    )
-  }
-}
-
-const styles = StyleSheet.create({
-  page: {
-    flex: 1,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  page__icon: {
-    height: 90,
-    width: 90,
-    marginBottom: 50,
-  },
-  page__text: {
-    color: 'gray',
-    fontSize: FontSize.LARGE,
-    ...Platform.select({
-      ios: { fontFamily: 'System' },
-      android: { fontFamily: 'Roboto' },
-    }),
-    textAlign: 'center',
-  },
-})

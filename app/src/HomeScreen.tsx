@@ -18,6 +18,7 @@ import CrossReference from './CrossReference'
 import Footnote from './Footnote'
 import { withGlobalContext } from './GlobalContext'
 import Text from './Text'
+import LoadingScreen from './LoadingScreen'
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 
@@ -136,6 +137,9 @@ class HomeScreen extends React.Component<any, any> {
   }
 
   render() {
+    if (this.props.global.loading) {
+      return <LoadingScreen />
+    }
     const { paddingHeight, animatedY, onScroll } = this.props.collapsible
     return (
       <AnimatedFlatList
