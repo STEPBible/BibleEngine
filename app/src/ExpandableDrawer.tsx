@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   drawer__text: {
     ...getDebugStyles(),
     color: '#202124',
-    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
+    fontFamily: FontFamily.OPEN_SANS,
     fontSize: FontSize.SMALL,
     marginLeft: 30,
   },
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   verses__cell__text: {
     ...getDebugStyles(),
     color: '#202124',
-    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
+    fontFamily: FontFamily.OPEN_SANS,
     fontSize: FontSize.SMALL,
     textAlign: 'center',
   },
