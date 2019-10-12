@@ -43,10 +43,17 @@ export class BibleEngineClient {
                 .then(entries => (entries.length ? entries[0] : undefined));
     }
 
-    async getFullDataForReferenceRange(rangeQuery: IBibleReferenceRangeQuery, forceRemote = false) {
+    async getFullDataForReferenceRange(
+        rangeQuery: IBibleReferenceRangeQuery,
+        forceRemote = false,
+        stripUnnecessaryData = false
+    ) {
         if (this.localBibleEngine && !forceRemote) {
             try {
-                return this.localBibleEngine.getFullDataForReferenceRange(rangeQuery, false);
+                return this.localBibleEngine.getFullDataForReferenceRange(
+                    rangeQuery,
+                    stripUnnecessaryData
+                );
             } catch (e) {
                 if (!(e instanceof BibleVersionRemoteOnlyError)) throw e;
             }
