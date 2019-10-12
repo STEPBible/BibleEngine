@@ -1,6 +1,8 @@
 import React from 'react'
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import { withNavigation } from 'react-navigation'
+
+import Text from './Text'
 
 interface Props {
   navigation: any
