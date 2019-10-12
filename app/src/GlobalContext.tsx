@@ -1,6 +1,6 @@
 import React from 'react'
 import { BibleEngineClient } from '@bible-engine/client'
-import { IBibleContent, IBibleOutputRich } from '@bible-engine/core'
+import { IBibleReferenceRangeQuery } from '@bible-engine/core'
 
 import Fonts from './Fonts'
 import * as store from 'react-native-simple-store'
@@ -10,10 +10,11 @@ const GlobalContext = React.createContext({})
 
 interface State {
   chapterContent: any
-  versionChapterNum: string
+  versionChapterNum: number
   bookOsisId: string
   versionUid: string
   fontsAreReady: boolean
+  loading: boolean
 }
 
 export class GlobalContextProvider extends React.Component<{}, State> {
@@ -24,6 +25,7 @@ export class GlobalContextProvider extends React.Component<{}, State> {
     bookOsisId: '',
     versionUid: '',
     fontsAreReady: false,
+    loading: true,
   }
   constructor(props: any) {
     super(props)
@@ -61,31 +63,39 @@ export class GlobalContextProvider extends React.Component<{}, State> {
     const versionUid = cachedVersion || DEFAULT_VERSION
 
     console.log(bookOsisId, versionChapterNum, versionUid)
+    await this.updateCurrentBibleReference({
+      bookOsisId,
+      versionChapterNum,
+      versionUid,
+    })
+  }
+
+  updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
     const chapter = await this.bibleEngineClient.getFullDataForReferenceRange(
-      {
-        bookOsisId,
-        versionChapterNum,
-        versionUid,
-      },
+      range,
       false,
       true
     )
     const chapterContent = chapter.content.contents
-    this.setState({
-      ...this.state,
-      bookOsisId,
-      versionChapterNum,
-      versionUid,
-      chapterContent,
-    })
+    this.setState(
+      {
+        ...this.state,
+        ...range,
+        chapterContent,
+      },
+      () => {
+        this.setState({ ...this.state, loading: false })
+      }
+    )
   }
 
   render() {
     return (
       <GlobalContext.Provider
         value={{
-          chapterContent: this.state.chapterContent,
+          ...this.state,
           bibleEngine: this.bibleEngineClient,
+          updateCurrentBibleReference: this.updateCurrentBibleReference,
         }}
       >
         {this.props.children}
