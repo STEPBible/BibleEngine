@@ -141,7 +141,8 @@ class HomeScreen extends React.Component<any, any> {
       <AnimatedFlatList
         data={this.props.global.chapterContent}
         renderItem={this.renderItem}
-        keyExtractor={(item: any, index: any) => `flatlist-item-${index}`}
+        bounces={false}
+        keyExtractor={(item, index) => `flatlist-item-${index}`}
         contentContainerStyle={{ paddingTop: paddingHeight }}
         scrollIndicatorInsets={{ top: paddingHeight }}
         onScroll={onScroll}
