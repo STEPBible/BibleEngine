@@ -18,7 +18,7 @@
         "random-words": "^1.1.0",
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
-        "typeorm": "0.2.18"
+        "typeorm": "0.2.19"
     },
     "devDependencies": {
         "@types/archiver": "^2.1.2",
@@ -29,9 +29,9 @@
         "@types/rimraf": "^2.0.2",
         "copyfiles": "^2.1.0",
         "jest": "24.5.0",
-        "ts-jest": "24.0.0",
-        "ts-node": "8.0.3",
-        "tslint": "5.14.0",
+        "ts-jest": "24.1.0",
+        "ts-node": "8.4.1",
+        "tslint": "5.20.0",
         "typescript": "3.3.3",
         "xml-formatter": "^1.0.1"
     }

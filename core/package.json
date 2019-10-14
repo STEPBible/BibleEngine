@@ -8,7 +8,7 @@
     "dependencies": {
         "bible-passage-reference-parser": "^2.0.1",
         "reflect-metadata": "^0.1.13",
-        "typeorm": "0.2.18",
+        "typeorm": "0.2.19",
         "whatwg-fetch": "^3.0.0"
     },
     "devDependencies": {
@@ -16,9 +16,9 @@
         "@types/node": "11.11.3",
         "jest": "24.5.0",
         "rimraf": "^2.6.3",
-        "ts-jest": "24.0.0",
-        "ts-node": "8.0.3",
-        "tslint": "5.14.0",
+        "ts-jest": "24.1.0",
+        "ts-node": "8.4.1",
+        "tslint": "5.20.0",
         "typescript": "3.3.3"
     }
 }

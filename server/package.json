@@ -11,20 +11,21 @@
     },
     "dependencies": {
         "@koa/cors": "^2.2.3",
-        "@types/koa-router": "^7.0.35",
+        "class-transformer": "^0.2.3",
+        "class-validator": "^0.10.1",
         "isomorphic-fetch": "^2.2.1",
         "koa": "^2.6.2",
         "koa-bodyparser": "^4.2.1",
         "koa-compress": "^3.0.0",
-        "koa-router": "^7.4.0",
+        "koa-router": "7.4.0",
         "mysql2": "^1.6.4",
         "pako": "^1.0.7",
         "pm2": "^3.2.3",
-        "routing-controllers": "^0.7.7",
-        "tsconfig-paths": "^3.7.0",
-        "typedi": "^0.8.0",
-        "typeorm": "0.2.18",
-        "typeorm-typedi-extensions": "^0.2.3"
+        "routing-controllers": "^0.8.0",
+        "tsconfig-paths": "3.9.0",
+        "typedi": "0.8.0",
+        "typeorm": "0.2.19",
+        "typeorm-typedi-extensions": "0.2.3"
     },
     "devDependencies": {
         "@types/jest": "24.0.11",
@@ -37,9 +38,9 @@
         "@types/pako": "^1.0.0",
         "jest": "24.5.0",
         "random-words": "^1.1.0",
-        "ts-jest": "24.0.0",
-        "ts-node": "8.0.3",
-        "tslint": "5.14.0",
+        "ts-jest": "24.1.0",
+        "ts-node": "8.4.1",
+        "tslint": "5.20.0",
         "typescript": "3.3.3"
     }
 }
