@@ -23,7 +23,7 @@ export const genDb = async () => {
     const esvVersion = await sqlBible.addVersion(
         new BibleVersionEntity({
             uid: 'ESV',
-            title: 'English Standard Bible',
+            title: 'English Standard Version',
             language: 'en-US',
             chapterVerseSeparator: ':'
         })

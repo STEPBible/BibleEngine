@@ -1,5 +1,7 @@
 # BibleEngine
 
+[![CircleCI](https://circleci.com/gh/tyndale/BibleEngine.svg?style=svg)](https://circleci.com/gh/tyndale/BibleEngine)
+
 **THIS IS A WORK IN PROGRESS** - don't use it in any kind of production code yet. Things will break.
 
 Having said that: Good you are here! Have a look at our [Project board](https://github.com/tyndale/BibleEngine/projects/1) to get an impression whats going on right now. Contributions welcome!
