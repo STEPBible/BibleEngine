@@ -49,12 +49,14 @@ class NavigationHeader extends React.Component<Props, {}> {
 
 const styles = StyleSheet.create({
   header: {
+    flex: 1,
     backgroundColor: 'white',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   header__chips: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
