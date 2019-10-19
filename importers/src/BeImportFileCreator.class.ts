@@ -12,6 +12,10 @@ import { writeFileSync, createWriteStream } from 'fs';
 import { ensureDirSync } from 'fs-extra';
 import { sync as rmDirRecSync } from 'rimraf';
 
+export interface BeFileCreatorOptions {
+    skipCompression: boolean;
+}
+
 export class BeImportFileCreator {
     private bibleEngine: BibleEngine;
 
@@ -19,7 +23,7 @@ export class BeImportFileCreator {
         this.bibleEngine = new BibleEngine(dbConfig);
     }
 
-    async createAllVersions() {
+    async createAllVersions(options?: BeFileCreatorOptions) {
         const createdVersions: { file: string; version: IBibleVersion }[] = [];
 
         for (const versionEntity of await this.bibleEngine.getVersions()) {
@@ -82,7 +86,7 @@ export class BeImportFileCreator {
         return filename;
     }
 
-    async createVersionFile(versionUid: string) {
+    async createVersionFile(versionUid: string, options?: BeFileCreatorOptions) {
         const versionData = await this.bibleEngine.getVersionFullData(versionUid);
         const targetDir = this.destinationPath + '/' + versionData.version.uid;
         const targetFile = `${this.destinationPath}/${versionData.version.uid}.bef`;
@@ -114,6 +118,10 @@ export class BeImportFileCreator {
 
             // write index file
             writeFileSync(`${targetDir}/index.json`, JSON.stringify(versionIndex));
+
+            if (options && options.skipCompression) {
+                return;
+            }
 
             // pack everything
             const zipArchive = archiver('zip');
