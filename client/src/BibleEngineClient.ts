@@ -23,6 +23,13 @@ export class BibleEngineClient {
         if (bibleEngineOptions) this.localBibleEngine = new BibleEngine(bibleEngineOptions);
     }
 
+    static chunk(arr: any, chunkSize = 1, cache: any[] = []) {
+        const tmp = [...arr];
+        if (chunkSize <= 0) return cache;
+        while (tmp.length) cache.push(tmp.splice(0, chunkSize));
+        return cache;
+    }
+
     getBooksForVersion(versionUid: string, forceRemote = false) {
         if (forceRemote || !this.localBibleEngine) {
             if (this.remoteApi)
