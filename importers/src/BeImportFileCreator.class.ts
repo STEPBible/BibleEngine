@@ -128,9 +128,8 @@ export class BeImportFileCreator {
 
             const output = createWriteStream(targetFile);
             output.on('close', function() {
-                console.log(
-                    `${targetFile} was successfully created with ${zipArchive.pointer()} total bytes`
-                );
+                const bytes = zipArchive.pointer();
+                console.log(`${targetFile} was successfully created with ${bytes} total bytes`);
                 rmDirRecSync(targetDir);
                 pResolve(targetFile);
             });
