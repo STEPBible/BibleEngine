@@ -10,7 +10,10 @@
         "whatwg-fetch": "^3.0.0"
     },
     "devDependencies": {
+        "@types/jest": "^24.0.18",
+        "jest": "^24.9.0",
         "rimraf": "^2.6.3",
+        "ts-jest": "^24.1.0",
         "typescript": "3.3.3"
     }
 }
