@@ -37,7 +37,7 @@ export class BeImportFileCreator {
                     hasStrongs: versionEntity.hasStrongs,
                     lastUpdate: versionEntity.lastUpdate
                 },
-                file: await this.createVersionFile(versionEntity.uid)
+                file: await this.createVersionFile(versionEntity.uid, options)
             });
         }
 
