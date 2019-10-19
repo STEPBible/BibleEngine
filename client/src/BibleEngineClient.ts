@@ -1,4 +1,5 @@
 import { ConnectionOptions } from 'typeorm';
+import 'cross-fetch/polyfill';
 
 import {
     BibleEngine,
