@@ -71,6 +71,7 @@ export class GlobalContextProvider extends React.Component<{}, State> {
   }
 
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
+    this.setState({ ...this.state, ...range, loading: true })
     const chapter = await this.bibleEngineClient.getFullDataForReferenceRange(
       range,
       false,
