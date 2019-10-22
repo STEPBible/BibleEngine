@@ -23,6 +23,7 @@ import { BarIndicator } from 'react-native-indicators'
 import Database from './Database'
 import { withGlobalContext } from './GlobalContext'
 import Text from './Text'
+import StrongsNumber from './models/StrongsNumber'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -62,12 +63,16 @@ class StrongsWord extends React.PureComponent<Props, State> {
     if (!strongs.length) {
       return
     }
-    const isHebrewStrongs = strongs[0][0] === 'H'
+    let normalizedStrongs = strongs.map(strong => new StrongsNumber(strong))
+    const isHebrewStrongs = normalizedStrongs[0].id[0] === 'H'
     const dictionary = isHebrewStrongs ? '@BdbMedDef' : '@MounceMedDef'
     try {
       const definitions = await Promise.all(
-        strongs.map(strong =>
-          this.props.global.bibleEngine.getDictionaryEntry(strong, dictionary)
+        normalizedStrongs.map(strong =>
+          this.props.global.bibleEngine.getDictionaryEntry(
+            strong.id,
+            dictionary
+          )
         )
       )
       console.log(definitions)
@@ -239,7 +244,6 @@ class StrongsWord extends React.PureComponent<Props, State> {
           <Text style={styles.strongWordText}>{this.props.phrase}</Text>
         </TouchableHighlight>
         <Popover
-          debug
           isVisible={this.state.popoverIsVisible}
           fromView={this.touchable}
           onRequestClose={() => this.closePopover()}
