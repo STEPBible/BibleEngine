@@ -1,24 +1,24 @@
-import normalizeText from './normalizeText';
-import { Analytics } from 'expo-analytics';
-import { DefaultTheme } from 'react-native-paper';
+import normalizeText from './normalizeText'
+import { Analytics } from 'expo-analytics'
+import { DefaultTheme } from 'react-native-paper'
 
 export const Flags = {
   DEBUG: false,
   USE_CACHE: true,
-  REMOTE_ENABLED: true
-};
+  REMOTE_ENABLED: true,
+}
 
 export const Settings = {
   CROSS_REFERENCES_ENABLED: true,
-  FOOTNOTES_ENABLED: true
-};
+  FOOTNOTES_ENABLED: true,
+}
 
 export enum Margin {
   EXTRA_SMALL = normalizeText(5),
   SMALL = normalizeText(10),
   MEDIUM = normalizeText(15),
   LARGE = normalizeText(20),
-  EXTRA_LARGE = normalizeText(30)
+  EXTRA_LARGE = normalizeText(30),
 }
 
 export enum FontSize {
@@ -26,12 +26,12 @@ export enum FontSize {
   SMALL = normalizeText(15),
   MEDIUM = normalizeText(18),
   LARGE = normalizeText(20),
-  EXTRA_LARGE = normalizeText(30)
+  EXTRA_LARGE = normalizeText(30),
 }
 
 export enum Color {
   TYNDALE_BLUE = '#38748C',
-  WHITE = 'white'
+  WHITE = 'white',
 }
 
 export enum FontFamily {
@@ -41,7 +41,7 @@ export enum FontFamily {
   OPEN_SANS_LIGHT = 'open-sans-light',
   CARDO_BOLD = 'cardo-bold',
   CARDO_ITALIC = 'cardo-italic',
-  CARDO = 'cardo'
+  CARDO = 'cardo',
 }
 
 export enum AsyncStorageKey {
@@ -50,7 +50,8 @@ export enum AsyncStorageKey {
   CACHED_CHAPTER_NUM = 'cachedChapterNum',
   CACHED_OSIS_BOOK_NAME = 'cachedBookName',
   CACHED_NEXT_CHAPTER = 'cachedNextChapter',
-  CACHED_VERSION_UID = 'cachedVersionUid'
+  CACHED_VERSION_UID = 'cachedVersionUid',
+  HAS_LAUNCHED = 'hasLaunched',
 }
 
 export const THEME = {
@@ -59,27 +60,27 @@ export const THEME = {
     regular: FontFamily.OPEN_SANS,
     medium: FontFamily.OPEN_SANS_SEMIBOLD,
     light: FontFamily.OPEN_SANS_LIGHT,
-    thin: FontFamily.OPEN_SANS_LIGHT
-  }
-};
+    thin: FontFamily.OPEN_SANS_LIGHT,
+  },
+}
 
 export function getDebugStyles() {
   if (Flags.DEBUG) {
     return {
       borderColor: randomColor(),
-      borderWidth: 1
-    };
+      borderWidth: 1,
+    }
   }
-  return {};
+  return {}
 }
 
-const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green'];
+const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green']
 
 export function randomColor() {
-  const index = Math.floor(Math.random() * 4);
-  return testingColors[index];
+  const index = Math.floor(Math.random() * 4)
+  return testingColors[index]
 }
 
 export const googleAnalytics = new Analytics(
   process.env.GOOGLE_ANALYTICS_TRACKING_ID || ''
-);
+)
