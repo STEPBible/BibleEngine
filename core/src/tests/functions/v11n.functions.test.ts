@@ -1,5 +1,5 @@
-import { BibleBookPlaintext } from '../models';
-import { isTestMatching } from './v11n.functions';
+import { BibleBookPlaintext } from '../../models';
+import { isTestMatching } from '../../functions/v11n.functions';
 
 describe('isTestMatching', () => {
     const context: BibleBookPlaintext = new Map([

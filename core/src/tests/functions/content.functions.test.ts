@@ -1,6 +1,6 @@
-import { IBibleOutputRich, IBibleVersion, IBibleOutputRoot, IBibleContent } from '../models';
-import { generateBibleDocument } from './content.functions';
-import { BibleParagraphEntity, BiblePhraseEntity, BibleSectionEntity } from '../entities';
+import { IBibleOutputRich, IBibleVersion, IBibleOutputRoot, IBibleContent } from '../../models';
+import { generateBibleDocument } from '../../functions/content.functions';
+import { BibleParagraphEntity, BiblePhraseEntity, BibleSectionEntity } from '../../entities';
 
 describe('generateBibleDocument', () => {
     let doc: IBibleOutputRoot;
@@ -179,15 +179,6 @@ describe('generateBibleDocument', () => {
     test('should put arrange sections in the correct order', () => {
         expect(item2.type === 'section' && item2.title === 'section2').toBe(true);
         expect(item2_1.type === 'section' && item2_1.title === 'section2_1').toBe(true);
-    });
-
-    test('should add numbering object on verse change', () => {
-        expect(item1_1_1.numbering).not.toBeDefined();
-        expect(item1_1_2.numbering).toBeDefined();
-    });
-
-    test('should create numbering group on the most outer level possible', () => {
-        expect(item1_1.numbering).toBeDefined();
     });
 
     test('should group sequential phrases with the same modifier', () => {
