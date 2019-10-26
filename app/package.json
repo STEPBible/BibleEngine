@@ -50,6 +50,7 @@
     "@bible-engine/client": "file:../client",
     "@bible-engine/core": "file:../core",
     "@expo/vector-icons": "^10.0.4",
+    "@react-native-community/netinfo": "~3.2.1",
     "babel-preset-expo": "^5.2.0",
     "elasticlunr": "^0.9.5",
     "expo": "^34.0.3",

@@ -19,6 +19,7 @@ import Footnote from './Footnote'
 import { withGlobalContext } from './GlobalContext'
 import Text from './Text'
 import LoadingScreen from './LoadingScreen'
+import NetworkErrorScreen from './NetworkErrorScreen'
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 
@@ -137,6 +138,9 @@ class HomeScreen extends React.Component<any, any> {
   }
 
   render() {
+    if (this.props.global.isConnected === false) {
+      return <NetworkErrorScreen />
+    }
     if (this.props.global.loading) {
       return <LoadingScreen />
     }

@@ -1,6 +1,7 @@
 import React from 'react'
 import { BibleEngineClient } from '@bible-engine/client'
 import { IBibleReferenceRangeQuery } from '@bible-engine/core'
+import NetInfo from '@react-native-community/netinfo'
 
 import Fonts from './Fonts'
 import * as store from 'react-native-simple-store'
@@ -26,9 +27,11 @@ export class GlobalContextProvider extends React.Component<{}, State> {
     versionUid: '',
     fontsAreReady: false,
     loading: true,
+    isConnected: true,
   }
   constructor(props: any) {
     super(props)
+    NetInfo.addEventListener(this.onNetworkChange)
     this.bibleEngineClient = new BibleEngineClient({
       bibleEngineOptions: {
         database: 'bibles.db',
@@ -42,6 +45,10 @@ export class GlobalContextProvider extends React.Component<{}, State> {
 
   async componentDidMount() {
     await this.getSavedState()
+  }
+
+  onNetworkChange = ({ isConnected }) => {
+    this.setState({ ...this.state, isConnected })
   }
 
   async loadFonts() {
