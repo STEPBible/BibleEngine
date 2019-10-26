@@ -1,5 +1,6 @@
 import * as types from '../src/types';
 import { getBibleEngineInputFromXML } from '../src/OsisParser';
+import Psalm41 from './Psa41Esv';
 
 describe('OsisParser', () => {
     const psalmsXML: types.ChapterXML = require('./Psa23EsvXmlResult.json');
@@ -34,6 +35,12 @@ describe('OsisParser', () => {
         const partOfPsalmTitle = 'David';
         expect(titleGroupExists).toBe(true);
         expect(JSON.stringify(bookJson)).toEqual(expect.stringContaining(partOfPsalmTitle));
+    });
+
+    test('Erroneous Psalm 42 headings arent included in Psalm 41 output', () => {
+        const bookJson = getBibleEngineInputFromXML([{ intro: '', verses: [Psalm41] }]);
+        const bookContent = JSON.stringify(bookJson);
+        expect(!bookContent.includes('Book Two')).toBeTruthy();
     });
 
     describe('Chinese Union Version Simplified with Strongs', () => {
