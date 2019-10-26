@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "main": "lib/index.js",
     "scripts": {
+        "test": "npx jest",
         "build": "rimraf ./lib && tsc && copyup './src/**/data/*' ./lib"
     },
     "dependencies": {
