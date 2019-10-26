@@ -1206,34 +1206,6 @@ export class BibleEngine {
         return { firstPhraseId, lastPhraseId };
     }
 
-    // private fetch<T>(path: string, data?: any) {
-    //     if (!this.remoteConfig) throw new Error(`no remote server configured`);
-    //     const config: RequestInit = {
-    //         headers: {
-    //             Accept: 'application/json',
-    //             'Content-Type': 'application/json'
-    //         }
-    //     };
-    //     if (data) {
-    //         config.method = 'post';
-    //         config.body = JSON.stringify(data);
-    //     } else {
-    //         config.method = 'get';
-    //     }
-
-    //     return fetch(this.remoteConfig.url + '/' + path, config).then(async response => {
-    //         if (response.status === 200)
-    //             return response.json().then((data: T & IBibleEngineOutput) => {
-    //                 data.source = 'remote';
-    //                 return data;
-    //             });
-    //         else {
-    //             const error = await response.json();
-    //             throw new BibleEngineRemoteError(error.message);
-    //         }
-    //     });
-    // }
-
     private async getNormalizedReferenceRange(
         range: IBibleReferenceRangeVersion
     ): Promise<IBibleReferenceRangeNormalized> {
