@@ -1,5 +1,5 @@
-import { BibleEngine } from '../BibleEngine.class';
-import { BibleVersionEntity } from '../entities';
+import { BibleEngine } from './BibleEngine.class';
+import { BibleVersionEntity } from './entities';
 
 const sqlBible = new BibleEngine({
     type: 'sqlite',
