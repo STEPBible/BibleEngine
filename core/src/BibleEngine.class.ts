@@ -257,6 +257,19 @@ export class BibleEngine {
         return db.save(new BibleVersionEntity(version));
     }
 
+    async updateVersion(version: IBibleVersion) {
+        const existingVersion = await this.getVersion(version.uid);
+        if (!existingVersion) {
+            return this.addVersion(version);
+        }
+        return (await this.pDB)
+            .createQueryBuilder()
+            .update(BibleVersionEntity)
+            .set(version)
+            .where('uid = :uid', { uid: version.uid })
+            .execute();
+    }
+
     async finalizeVersion(versionId: number) {
         this.normalizeCrossReferencesForVersion(versionId);
     }

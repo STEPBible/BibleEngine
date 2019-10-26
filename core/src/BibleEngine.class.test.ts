@@ -1,7 +1,16 @@
+import { BookWithContentForInput } from './models/BibleInput';
+import { IBibleVersion } from './models/BibleVersion';
+import { IBibleBookEntity } from './models/BibleBook';
 import { BibleEngine } from './BibleEngine.class';
-import { BibleVersionEntity } from './entities';
 import { getConnection } from 'typeorm';
 
+const BIBLE_VERSION: IBibleVersion = {
+    uid: 'ESV',
+    title: 'English Standard Version',
+    language: 'en-US',
+    chapterVerseSeparator: ':',
+    dataLocation: 'remote'
+};
 describe('BibleEngine', () => {
     let sqlBible: BibleEngine;
     beforeEach(() => {
@@ -35,6 +44,12 @@ describe('BibleEngine', () => {
                 expect(versionEntity.title).toEqual('English Standard Version');
                 expect(versionEntity.uid).toEqual('ESV');
             }
+        });
+        test('If a Bible version already exists, its updated', async () => {
+            await sqlBible.updateVersion(BIBLE_VERSION);
+            await sqlBible.updateVersion({ ...BIBLE_VERSION, dataLocation: 'db' });
+            const version = await sqlBible.getVersion(BIBLE_VERSION.uid);
+            expect(version!.dataLocation).toBe('db');
         });
     });
 });
