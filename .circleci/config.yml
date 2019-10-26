@@ -19,3 +19,4 @@ jobs:
             - run: cd ~/BibleEngine/app && yarn install
             - run: cd ~/BibleEngine/app && yarn test
             - run: cd ~/BibleEngine/core && yarn test
+            - run: cd ~/BibleEngine/importers && yarn test
