@@ -66,6 +66,7 @@ import {
     BiblePlaintext
 } from './models';
 import migrations from './migrations';
+import { chunk } from './functions/utils.functions';
 
 export class NoDbConnectionError extends Error {
     constructor() {
@@ -593,6 +594,63 @@ export class BibleEngine {
             .where({ versionId: book.versionId, osisId: book.osisId })
             .execute();
         return { ...book, ...updates };
+    }
+
+    async downloadVersion(versionUid: string, fileHostUrl: string) {
+        if (this.versionIsDownloaded(versionUid, fileHostUrl)) {
+            return;
+        }
+        const books = await this.getBookIndexFile(versionUid, fileHostUrl);
+        const version = await this.getRemoteVersionMetadata(versionUid, fileHostUrl);
+        const localVersion = await this.addVersion({ ...version, dataLocation: 'remote' });
+        const BATCH_SIZE = 10;
+        const batches = chunk(books, BATCH_SIZE);
+        for (const batch of batches) {
+            await this.downloadBooks(batch, fileHostUrl, version);
+        }
+        localVersion.dataLocation = 'db';
+        (await this.pDB).save(localVersion);
+    }
+
+    async downloadBooks(books: IBibleBookEntity[], fileUrl: string, version: BibleVersionEntity) {
+        const responses = await this.getBooksForDownload(books, fileUrl, version.uid);
+        for (const response of responses) {
+            const content: any = response;
+            await this.addBookWithContent(version, content);
+        }
+    }
+
+    async versionIsDownloaded(versionUid: string, fileHostUrl: string) {
+        const version = await this.getVersion(versionUid);
+        if (!version) return false;
+        if (version.dataLocation === 'remote') return false;
+        const booksInDb = await this.getBooksForVersionUid(versionUid);
+        const booksNotDownloaded = booksInDb.filter(
+            book => book.dataLocation === 'importing' || book.dataLocation === 'remote'
+        );
+        if (booksNotDownloaded.length) return false;
+        const totalBooks = await this.getBookIndexFile(versionUid, fileHostUrl);
+        return booksInDb.length === totalBooks.length;
+    }
+
+    async getBooksForDownload(books: any[], fileHostUrl: string, versionUid: string) {
+        const responses = await Promise.all(
+            books.map((book: any) => {
+                const bookContentsUrl = `${fileHostUrl}/${versionUid}/${book.osisId}.json`;
+                return fetch(bookContentsUrl).then(response => response.json());
+            })
+        );
+        return responses;
+    }
+
+    async getBookIndexFile(versionUid: string, fileHostUrl: string) {
+        const fileIndexUrl = `${fileHostUrl}/${versionUid}/index.json`;
+        return (await fetch(fileIndexUrl)).json();
+    }
+
+    private async getRemoteVersionMetadata(versionUid: string, fileHostUrl: string) {
+        const fileIndexUrl = `${fileHostUrl}/${versionUid}/version.json`;
+        return (await fetch(fileIndexUrl)).json();
     }
 
     private async addBibleBookContent(
@@ -1165,6 +1223,7 @@ export class BibleEngine {
                 await db
                     .createQueryBuilder()
                     .insert()
+                    .orIgnore()
                     .into(BiblePhraseEntity)
                     .values(globalState.phraseStack.slice(index, index + chunkSize))
                     .execute();
@@ -1174,6 +1233,7 @@ export class BibleEngine {
                 await db
                     .createQueryBuilder()
                     .insert()
+                    .orIgnore()
                     .into(BibleNoteEntity)
                     .values(globalState.noteStack.slice(index, index + chunkSize))
                     .execute();
@@ -1183,6 +1243,7 @@ export class BibleEngine {
                 await db
                     .createQueryBuilder()
                     .insert()
+                    .orIgnore()
                     .into(BibleCrossReferenceEntity)
                     .values(globalState.crossRefStack.slice(index, index + chunkSize))
                     .execute();
@@ -1196,6 +1257,7 @@ export class BibleEngine {
                 await db
                     .createQueryBuilder()
                     .insert()
+                    .orIgnore()
                     .into(BibleParagraphEntity)
                     .values(globalState.paragraphStack.slice(index, index + chunkSize))
                     .execute();
@@ -1210,6 +1272,7 @@ export class BibleEngine {
             for (let index = 0; index < globalState.sectionStack.length; index += chunkSize) {
                 db.createQueryBuilder()
                     .insert()
+                    .orIgnore()
                     .into(BibleSectionEntity)
                     .values(globalState.sectionStack.slice(index, index + chunkSize))
                     .execute();
