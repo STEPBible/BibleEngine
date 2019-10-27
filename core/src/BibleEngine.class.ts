@@ -124,6 +124,7 @@ export class BibleEngine {
         await entityManager
             .createQueryBuilder()
             .insert()
+            .orUpdate()
             .into(BibleBookEntity)
             .values(book)
             .execute();
