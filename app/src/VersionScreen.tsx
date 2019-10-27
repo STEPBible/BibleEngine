@@ -1,9 +1,8 @@
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { List, Button } from 'react-native-paper'
 import { ScrollView } from 'react-native-gesture-handler'
 import hoistNonReactStatics from 'hoist-non-react-statics'
-import { MaterialIcons } from '@expo/vector-icons'
 import { BibleVersionEntity } from '@bible-engine/core'
 
 import { withGlobalContext } from './GlobalContext'
@@ -16,13 +15,7 @@ class VersionScreen extends React.Component {
   state = {
     versions: [],
   }
-  async componentDidMount() {
-    const versions = await this.props.global.bibleEngine.getVersions()
-    console.log(versions)
-    if (!this.state.versions.length) {
-      this.setState({ ...this.state, versions })
-    }
-  }
+
   renderDownloadIcon = (dataLocation: string) => {
     if (dataLocation === 'remote') {
       return (
@@ -40,7 +33,7 @@ class VersionScreen extends React.Component {
   render() {
     return (
       <ScrollView>
-        {this.state.versions.map((version: BibleVersionEntity) => (
+        {this.props.global.bibleVersions.map((version: BibleVersionEntity) => (
           <List.Item
             key={version.uid}
             title={version.uid}

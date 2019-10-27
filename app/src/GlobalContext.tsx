@@ -5,10 +5,7 @@ import * as FileSystem from 'expo-file-system'
 import { Asset } from 'expo-asset'
 import { SQLite } from 'expo-sqlite'
 import NetInfo from '@react-native-community/netinfo'
-import {
-  REMOTE_BIBLE_ENGINE_URL,
-  BIBLE_ENGINE_EXPORTS_S3_URL,
-} from 'react-native-dotenv'
+import { REMOTE_BIBLE_ENGINE_URL } from 'react-native-dotenv'
 
 import Fonts from './Fonts'
 import * as store from 'react-native-simple-store'
@@ -73,11 +70,18 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     const versionUid = cachedVersion || DEFAULT_VERSION
 
     this.setLocalDatabase()
+    this.setVersions()
+
     await this.updateCurrentBibleReference({
       bookOsisId,
       versionChapterNum,
       versionUid,
     })
+  }
+
+  async setVersions() {
+    const bibleVersions = await this.bibleEngineClient.getBothOfflineAndOnlineVersions()
+    this.setState({ ...this.state, bibleVersions })
   }
 
   async setLocalDatabase() {
@@ -118,7 +122,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.setState({ ...this.state, ...range, loading: true })
     const chapter = await this.bibleEngineClient.getFullDataForReferenceRange(
       range,
-      false,
+      this.state.forceRemote,
       true
     )
     const chapterContent = chapter.content.contents
