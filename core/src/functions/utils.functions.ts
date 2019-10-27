@@ -62,10 +62,3 @@ export const pad = (n: number, width: number, z?: string): string => {
     let nStr = n + '';
     return nStr.length >= width ? nStr : new Array(width - nStr.length + 1).join(z) + n;
 };
-
-export function chunk(arr: any, chunkSize = 1, cache: any[] = []) {
-    const tmp = [...arr];
-    if (chunkSize <= 0) return cache;
-    while (tmp.length) cache.push(tmp.splice(0, chunkSize));
-    return cache;
-}
