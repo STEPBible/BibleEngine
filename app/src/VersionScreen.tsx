@@ -16,8 +16,8 @@ class VersionScreen extends React.Component {
     versions: [],
   }
 
-  renderDownloadIcon = (dataLocation: string) => {
-    if (dataLocation === 'remote') {
+  renderDownloadIcon = (version: BibleVersionEntity) => {
+    if (version.dataLocation === 'remote') {
       return (
         <Button
           style={styles.downloadButton}
@@ -38,7 +38,11 @@ class VersionScreen extends React.Component {
             key={version.uid}
             title={version.uid}
             description={version.title}
-            right={() => this.renderDownloadIcon(version.dataLocation)}
+            onPress={() => {
+              this.props.global.changeCurrentBibleVersion(version)
+              this.props.navigation.navigate('Home')
+            }}
+            right={() => this.renderDownloadIcon(version)}
           />
         ))}
       </ScrollView>

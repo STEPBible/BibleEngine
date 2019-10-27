@@ -1,6 +1,10 @@
 import React from 'react'
 import { BibleEngineClient } from '@bible-engine/client'
-import { IBibleReferenceRangeQuery, BibleEngine } from '@bible-engine/core'
+import {
+  IBibleReferenceRangeQuery,
+  BibleEngine,
+  BibleVersionEntity,
+} from '@bible-engine/core'
 import * as FileSystem from 'expo-file-system'
 import { Asset } from 'expo-asset'
 import { SQLite } from 'expo-sqlite'
@@ -25,7 +29,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   bibleEngineClient: BibleEngineClient
   state = {
     chapterContent: [],
-    versionChapterNum: null,
+    versionChapterNum: 1,
     bibleVersions: [],
     books: [],
     bookOsisId: '',
@@ -87,7 +91,10 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   }
 
   async setBooks(versionUid: string) {
-    const books = await this.bibleEngineClient.getBooksForVersion(versionUid)
+    const books = await this.bibleEngineClient.getBooksForVersion(
+      versionUid,
+      this.state.forceRemote
+    )
     this.setState({ ...this.state, books })
   }
 
@@ -145,6 +152,19 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     )
   }
 
+  changeCurrentBibleVersion = async (version: BibleVersionEntity) => {
+    const { bookOsisId, versionChapterNum } = this.state
+    const newReference = {
+      bookOsisId,
+      versionChapterNum,
+      versionUid: version.uid,
+    }
+    const forceRemote = version.dataLocation !== 'db'
+    this.setState({ ...this.state, forceRemote })
+    this.updateCurrentBibleReference(newReference)
+    this.setBooks(version.uid)
+  }
+
   render() {
     return (
       <GlobalContext.Provider
@@ -152,6 +172,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
           ...this.state,
           bibleEngine: this.bibleEngineClient,
           updateCurrentBibleReference: this.updateCurrentBibleReference,
+          changeCurrentBibleVersion: this.changeCurrentBibleVersion,
         }}
       >
         {this.props.children}
