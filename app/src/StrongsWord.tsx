@@ -155,7 +155,7 @@ class StrongsWord extends React.PureComponent<Props, State> {
         </View>
       )
     }
-    if (!this.state.definitions.length) {
+    if (!this.state.definitions.length || !this.state.definitions[0]) {
       return (
         <View style={styles.popover__loading}>
           <Text style={styles.popover__loading__text}>
