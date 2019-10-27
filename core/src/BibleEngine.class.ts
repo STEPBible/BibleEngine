@@ -263,12 +263,13 @@ export class BibleEngine {
         if (!existingVersion) {
             return this.addVersion(version);
         }
-        return (await this.pDB)
+        await (await this.pDB)
             .createQueryBuilder()
             .update(BibleVersionEntity)
             .set(version)
             .where('uid = :uid', { uid: version.uid })
             .execute();
+        return this.getVersion(version.uid);
     }
 
     async finalizeVersion(versionId: number) {
