@@ -20,14 +20,6 @@ class BookScreen extends React.Component<{}, State> {
   state = {
     books: [],
   }
-  async componentDidMount() {
-    if (!this.state.books.length) {
-      const books = await this.props.global.bibleEngine.getBooksForVersion(
-        'ESV'
-      )
-      this.setState({ books })
-    }
-  }
   getItemLayout = (data: any, index: any) => ({
     length: DRAWER_HEIGHT,
     offset: DRAWER_HEIGHT * index,
@@ -51,7 +43,7 @@ class BookScreen extends React.Component<{}, State> {
   render() {
     return (
       <FlatList
-        data={this.state.books}
+        data={this.props.global.books}
         keyExtractor={(item, index) => index.toString()}
         getItemLayout={this.getItemLayout}
         ref={ref => (this.bookListRef = ref)}

@@ -27,6 +27,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     chapterContent: [],
     versionChapterNum: null,
     bibleVersions: [],
+    books: [],
     bookOsisId: '',
     versionUid: '',
     fontsAreReady: false,
@@ -71,6 +72,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
 
     this.setLocalDatabase()
     this.setVersions()
+    this.setBooks(versionUid)
 
     await this.updateCurrentBibleReference({
       bookOsisId,
@@ -82,6 +84,11 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   async setVersions() {
     const bibleVersions = await this.bibleEngineClient.getBothOfflineAndOnlineVersions()
     this.setState({ ...this.state, bibleVersions })
+  }
+
+  async setBooks(versionUid: string) {
+    const books = await this.bibleEngineClient.getBooksForVersion(versionUid)
+    this.setState({ ...this.state, books })
   }
 
   async setLocalDatabase() {
