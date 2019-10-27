@@ -598,22 +598,6 @@ export class BibleEngine {
         return { ...book, ...updates };
     }
 
-    async downloadVersion(versionUid: string, fileHostUrl: string) {
-        if (this.versionIsDownloaded(versionUid, fileHostUrl)) {
-            return;
-        }
-        const books = await this.getBookIndexFile(versionUid, fileHostUrl);
-        const version = await this.getRemoteVersionMetadata(versionUid, fileHostUrl);
-        const localVersion = await this.addVersion({ ...version, dataLocation: 'remote' });
-        const BATCH_SIZE = 10;
-        const batches = chunk(books, BATCH_SIZE);
-        for (const batch of batches) {
-            await this.downloadBooks(batch, fileHostUrl, version);
-        }
-        localVersion.dataLocation = 'db';
-        (await this.pDB).save(localVersion);
-    }
-
     async downloadBooks(books: IBibleBookEntity[], fileUrl: string, version: BibleVersionEntity) {
         const responses = await this.getBooksForDownload(books, fileUrl, version.uid);
         const entityManager = await this.pDB;
@@ -651,7 +635,7 @@ export class BibleEngine {
         return (await fetch(fileIndexUrl)).json();
     }
 
-    private async getRemoteVersionMetadata(versionUid: string, fileHostUrl: string) {
+    async getRemoteVersionMetadata(versionUid: string, fileHostUrl: string) {
         const fileIndexUrl = `${fileHostUrl}/${versionUid}/version.json`;
         return (await fetch(fileIndexUrl)).json();
     }

@@ -4,12 +4,16 @@ import {
   IBibleReferenceRangeQuery,
   BibleEngine,
   BibleVersionEntity,
+  IBibleBookEntity,
 } from '@bible-engine/core'
 import * as FileSystem from 'expo-file-system'
 import { Asset } from 'expo-asset'
 import { SQLite } from 'expo-sqlite'
 import NetInfo from '@react-native-community/netinfo'
-import { REMOTE_BIBLE_ENGINE_URL } from 'react-native-dotenv'
+import {
+  REMOTE_BIBLE_ENGINE_URL,
+  BIBLE_ENGINE_EXPORTS_S3_URL,
+} from 'react-native-dotenv'
 
 import Fonts from './Fonts'
 import * as store from 'react-native-simple-store'
@@ -38,6 +42,8 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     loading: true,
     forceRemote: true,
     isConnected: true,
+    versionUidOfDownload: null,
+    downloadCompletionPercentage: 0,
   }
   constructor(props: any) {
     super(props)
@@ -165,6 +171,59 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.setBooks(version.uid)
   }
 
+  downloadVersion = async (versionUid: string) => {
+    this.setState({ ...this.state, versionUidOfDownload: versionUid })
+    const fileHostUrl = BIBLE_ENGINE_EXPORTS_S3_URL
+    const bibleEngine = this.bibleEngineClient.localBibleEngine
+    if (await bibleEngine.versionIsDownloaded(versionUid, fileHostUrl)) {
+      return
+    }
+    const books = await bibleEngine.getBookIndexFile(versionUid, fileHostUrl)
+    const onlineVersion = await bibleEngine.getRemoteVersionMetadata(
+      versionUid,
+      fileHostUrl
+    )
+    const version = await bibleEngine.updateVersion({
+      ...onlineVersion,
+      dataLocation: 'remote',
+    })
+    const BATCH_SIZE = 10
+    const batches = this.chunk(books, BATCH_SIZE)
+    let index = 0
+    for (const batch of batches) {
+      const responses = await bibleEngine.getBooksForDownload(
+        books,
+        fileHostUrl,
+        version!.uid
+      )
+      const entityManager = await bibleEngine.pDB
+      for (const response of responses) {
+        const content: any = response
+        const downloadCompletionPercentage = index / books.length
+        index += 1
+        this.setState({ ...this.state, downloadCompletionPercentage })
+        await bibleEngine.addBookWithContent(version!, content, {
+          entityManager,
+        })
+      }
+    }
+    await bibleEngine.updateVersion({ ...version!, dataLocation: 'db' })
+    this.setState({ ...this.state, versionUidOfDownload: null })
+  }
+
+  async downloadBooks(
+    books: IBibleBookEntity[],
+    fileUrl: string,
+    version: BibleVersionEntity
+  ) {}
+
+  chunk(arr: any, chunkSize = 1, cache: any[] = []) {
+    const tmp = [...arr]
+    if (chunkSize <= 0) return cache
+    while (tmp.length) cache.push(tmp.splice(0, chunkSize))
+    return cache
+  }
+
   render() {
     return (
       <GlobalContext.Provider
@@ -173,6 +232,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
           bibleEngine: this.bibleEngineClient,
           updateCurrentBibleReference: this.updateCurrentBibleReference,
           changeCurrentBibleVersion: this.changeCurrentBibleVersion,
+          downloadVersion: this.downloadVersion,
         }}
       >
         {this.props.children}
