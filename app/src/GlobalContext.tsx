@@ -1,44 +1,47 @@
 import React from 'react'
 import { BibleEngineClient } from '@bible-engine/client'
-import { IBibleReferenceRangeQuery } from '@bible-engine/core'
+import { IBibleReferenceRangeQuery, BibleEngine } from '@bible-engine/core'
+import * as FileSystem from 'expo-file-system'
+import { Asset } from 'expo-asset'
+import { SQLite } from 'expo-sqlite'
 import NetInfo from '@react-native-community/netinfo'
+import {
+  REMOTE_BIBLE_ENGINE_URL,
+  BIBLE_ENGINE_EXPORTS_S3_URL,
+} from 'react-native-dotenv'
 
 import Fonts from './Fonts'
 import * as store from 'react-native-simple-store'
 import { AsyncStorageKey } from './Constants'
+import { ConnectionOptions } from 'typeorm'
+const bibleDatabaseModule = require('../assets/bibles.db')
+
+const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
+  database: 'bibles.db',
+  type: 'expo',
+  synchronize: false,
+}
 
 const GlobalContext = React.createContext({})
 
-interface State {
-  chapterContent: any
-  versionChapterNum: number
-  bookOsisId: string
-  versionUid: string
-  fontsAreReady: boolean
-  loading: boolean
-}
-
-export class GlobalContextProvider extends React.Component<{}, State> {
+export class GlobalContextProvider extends React.Component<{}, {}> {
   bibleEngineClient: BibleEngineClient
   state = {
     chapterContent: [],
-    versionChapterNum: '',
+    versionChapterNum: null,
+    bibleVersions: [],
     bookOsisId: '',
     versionUid: '',
     fontsAreReady: false,
     loading: true,
+    forceRemote: true,
     isConnected: true,
   }
   constructor(props: any) {
     super(props)
     NetInfo.addEventListener(this.onNetworkChange)
     this.bibleEngineClient = new BibleEngineClient({
-      bibleEngineOptions: {
-        database: 'bibles.db',
-        type: 'expo',
-        synchronize: false,
-      },
-      apiBaseUrl: 'https://stepbible.herokuapp.com/rest/v1/bible',
+      apiBaseUrl: REMOTE_BIBLE_ENGINE_URL,
     })
     this.loadFonts()
   }
@@ -69,12 +72,46 @@ export class GlobalContextProvider extends React.Component<{}, State> {
     const versionChapterNum = cachedChapterNum || DEFAULT_CHAPTER
     const versionUid = cachedVersion || DEFAULT_VERSION
 
-    console.log(bookOsisId, versionChapterNum, versionUid)
+    this.setLocalDatabase()
     await this.updateCurrentBibleReference({
       bookOsisId,
       versionChapterNum,
       versionUid,
     })
+  }
+
+  async setLocalDatabase() {
+    try {
+      const PATH_TO_DOWNLOAD_TO = `${FileSystem.documentDirectory}SQLite/bibles.db`
+      let bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
+      if (!(await this.testQueryWorks(bibleEngine))) {
+        await this.closeDatabaseConnection(bibleEngine)
+        const asset = Asset.fromModule(bibleDatabaseModule)
+        await FileSystem.downloadAsync(asset.uri, PATH_TO_DOWNLOAD_TO)
+        bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
+      }
+      this.bibleEngineClient.localBibleEngine = bibleEngine
+    } catch (e) {}
+  }
+
+  async closeDatabaseConnection(bibleEngine: BibleEngine) {
+    const db = await bibleEngine.pDB
+    await db.connection.close()
+    const expoDb: any = await SQLite.openDatabase('bibles.db')
+    expoDb._db.close()
+  }
+
+  async testQueryWorks(bibleEngine: BibleEngine): Promise<boolean> {
+    try {
+      const result = await bibleEngine.getDictionaryEntries(
+        'H0001',
+        '@BdbMedDef'
+      )
+      return !!result.length
+    } catch (e) {
+      console.log('localDatabaseIsValid catch', e)
+      return false
+    }
   }
 
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
