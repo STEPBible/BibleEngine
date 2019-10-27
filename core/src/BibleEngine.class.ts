@@ -616,9 +616,10 @@ export class BibleEngine {
 
     async downloadBooks(books: IBibleBookEntity[], fileUrl: string, version: BibleVersionEntity) {
         const responses = await this.getBooksForDownload(books, fileUrl, version.uid);
+        const entityManager = await this.pDB;
         for (const response of responses) {
             const content: any = response;
-            await this.addBookWithContent(version, content);
+            await this.addBookWithContent(version, content, { entityManager });
         }
     }
 
