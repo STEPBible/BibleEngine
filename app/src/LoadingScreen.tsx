@@ -1,28 +1,63 @@
 import React from 'react'
-import { StyleSheet, View, Platform } from 'react-native'
+import { View, Dimensions } from 'react-native'
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder'
 
-import { FontSize, Margin } from './Constants'
+import { Margin } from './Constants'
+
+const WIDTH = Dimensions.get('window').width
+const SMALL = WIDTH * 0.25
+const LARGE = WIDTH * 0.85
+const MEDIUM = WIDTH * 0.75
 
 export default function LoadingScreen() {
   return (
     <View style={{ flex: 1, marginLeft: Margin.LARGE }}>
       <SkeletonPlaceholder>
-        <View style={{ width: 120, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 250, height: 20, marginTop: Margin.LARGE }} />
-        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 120, height: 20, marginTop: Margin.LARGE }} />
-        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 250, height: 20, marginTop: Margin.LARGE }} />
-        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 120, height: 20, marginTop: Margin.LARGE }} />
-        <View style={{ width: 300, height: 20, marginTop: Margin.SMALL }} />
-        <View style={{ width: 260, height: 20, marginTop: Margin.SMALL }} />
+        <View
+          style={{ maxWidth: SMALL, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: LARGE, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: MEDIUM, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: MEDIUM, height: 20, marginTop: Margin.LARGE }}
+        />
+        <View
+          style={{ maxWidth: LARGE, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: MEDIUM, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: SMALL, height: 20, marginTop: Margin.LARGE }}
+        />
+        <View
+          style={{ maxWidth: LARGE, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: MEDIUM, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: MEDIUM, height: 20, marginTop: Margin.LARGE }}
+        />
+        <View
+          style={{ maxWidth: LARGE, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: MEDIUM, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: SMALL, height: 20, marginTop: Margin.LARGE }}
+        />
+        <View
+          style={{ maxWidth: LARGE, height: 20, marginTop: Margin.SMALL }}
+        />
+        <View
+          style={{ maxWidth: MEDIUM, height: 20, marginTop: Margin.SMALL }}
+        />
       </SkeletonPlaceholder>
     </View>
   )
