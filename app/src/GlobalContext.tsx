@@ -17,7 +17,7 @@ import {
 
 import Fonts from './Fonts'
 import * as store from 'react-native-simple-store'
-import { AsyncStorageKey } from './Constants'
+import { AsyncStorageKey, SQLITE_DIRECTORY, DATABASE_PATH } from './Constants'
 import { ConnectionOptions } from 'typeorm'
 const bibleDatabaseModule = require('../assets/bibles.db')
 
@@ -80,9 +80,8 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     const versionChapterNum = cachedChapterNum || DEFAULT_CHAPTER
     const versionUid = cachedVersion || DEFAULT_VERSION
 
-    this.setLocalDatabase()
-    this.setVersions()
-    this.setBooks(versionUid)
+    await this.setLocalDatabase()
+    await this.setBooksAndVersions(versionUid)
 
     await this.updateCurrentBibleReference({
       bookOsisId,
@@ -91,26 +90,27 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     })
   }
 
-  async setVersions() {
+  async setBooksAndVersions(versionUid: string) {
     const bibleVersions = await this.bibleEngineClient.getBothOfflineAndOnlineVersions()
     this.setState({ ...this.state, bibleVersions })
-  }
-
-  async setBooks(versionUid: string) {
+    const version = bibleVersions.find(version => version.uid === versionUid)!
+    const forceRemote = version.dataLocation !== 'db'
+    this.setState({ ...this.state, forceRemote })
     const books = await this.bibleEngineClient.getBooksForVersion(
       versionUid,
-      this.state.forceRemote
+      forceRemote
     )
     this.setState({ ...this.state, books })
   }
 
   async setLocalDatabase() {
     try {
-      const PATH_TO_DOWNLOAD_TO = `${FileSystem.documentDirectory}SQLite/bibles.db`
       let bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       if (!(await this.testQueryWorks(bibleEngine))) {
         await this.closeDatabaseConnection(bibleEngine)
+        await this.createSqliteDirectory()
         const asset = Asset.fromModule(bibleDatabaseModule)
+        const PATH_TO_DOWNLOAD_TO = `${FileSystem.documentDirectory}SQLite/bibles.db`
         await FileSystem.downloadAsync(asset.uri, PATH_TO_DOWNLOAD_TO)
         bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       }
@@ -135,6 +135,14 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     } catch (e) {
       console.log('localDatabaseIsValid catch', e)
       return false
+    }
+  }
+
+  async createSqliteDirectory() {
+    const { exists } = await FileSystem.getInfoAsync(SQLITE_DIRECTORY)
+    if (!exists) {
+      console.log('sqlite directory doesnt exist, creating...')
+      await FileSystem.makeDirectoryAsync(SQLITE_DIRECTORY, {})
     }
   }
 
