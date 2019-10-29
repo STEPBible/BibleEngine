@@ -5,6 +5,7 @@ import { BOOK_DATA } from '@bible-engine/core'
 
 import Text from './Text'
 import { withGlobalContext } from './GlobalContext'
+import { STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT } from './Constants'
 
 interface Props {
   navigation: any
@@ -52,8 +53,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     flexDirection: 'row',
+    height: NAV_BAR_HEIGHT,
     alignItems: 'center',
     justifyContent: 'center',
+    borderBottomColor: '#999999',
+    borderBottomWidth: 0.5,
   },
   header__chips: {
     flex: 1,

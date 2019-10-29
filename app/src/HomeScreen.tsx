@@ -1,5 +1,12 @@
 import React from 'react'
-import { FlatList, Animated, Dimensions, View, StyleSheet } from 'react-native'
+import {
+  FlatList,
+  Animated,
+  Dimensions,
+  View,
+  StyleSheet,
+  StatusBar,
+} from 'react-native'
 import { IBibleContent, IBiblePhrase } from '@bible-engine/core'
 import { withCollapsible } from 'react-navigation-collapsible'
 import hoistNonReactStatics from 'hoist-non-react-statics'
@@ -10,6 +17,8 @@ import {
   Settings,
   getDebugStyles,
   FontFamily,
+  STATUS_BAR_HEIGHT,
+  NAV_BAR_HEIGHT,
 } from './Constants'
 import { ifAndroid, ifIphoneX } from './utils'
 import NavigationHeader from './NavigationHeader'
@@ -26,6 +35,9 @@ const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 class HomeScreen extends React.Component<any, any> {
   static navigationOptions = {
     headerTitle: <NavigationHeader />,
+    headerStyle: {
+      height: NAV_BAR_HEIGHT - STATUS_BAR_HEIGHT,
+    },
   }
   itemNum = 0
   renderItem = (content: any, index: number): any => {
@@ -146,17 +158,22 @@ class HomeScreen extends React.Component<any, any> {
     }
     const { paddingHeight, animatedY, onScroll } = this.props.collapsible
     return (
-      <AnimatedFlatList
-        data={this.props.global.chapterContent}
-        renderItem={this.renderItem}
-        bounces={false}
-        keyExtractor={(item, index) => `flatlist-item-${index}`}
-        contentContainerStyle={{ paddingTop: paddingHeight }}
-        scrollIndicatorInsets={{ top: paddingHeight }}
-        onScroll={onScroll}
-        _mustAddThis={animatedY}
-        showsVerticalScrollIndicator={false}
-      />
+      <React.Fragment>
+        <StatusBar hidden />
+        <AnimatedFlatList
+          data={this.props.global.chapterContent}
+          renderItem={this.renderItem}
+          bounces={false}
+          keyExtractor={(item, index) => `flatlist-item-${index}`}
+          contentContainerStyle={{
+            paddingTop: paddingHeight + STATUS_BAR_HEIGHT,
+          }}
+          scrollIndicatorInsets={{ top: paddingHeight }}
+          onScroll={onScroll}
+          _mustAddThis={animatedY}
+          showsVerticalScrollIndicator={false}
+        />
+      </React.Fragment>
     )
   }
 }
