@@ -8,7 +8,7 @@ import {
 } from '@bible-engine/core'
 import * as FileSystem from 'expo-file-system'
 import { Asset } from 'expo-asset'
-import * as SQLite from 'expo-sqlite'
+import { SQLite } from 'expo-sqlite'
 import NetInfo from '@react-native-community/netinfo'
 import {
   REMOTE_BIBLE_ENGINE_URL,
