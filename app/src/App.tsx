@@ -440,7 +440,7 @@ export default class App extends React.PureComponent<Props, State> {
       }
     }
     if (!bookList) {
-      bookList = await this.getBooks();
+      bookList = await this.database.getBooks();
     }
     if (!osisBookName) {
       osisBookName = 'Gen';
@@ -504,18 +504,6 @@ export default class App extends React.PureComponent<Props, State> {
       return result;
     } catch (error) {
       this.updateLoadingMessage('Error loading chapter: ', error);
-      throw error;
-    }
-  };
-
-  getBooks = async () => {
-    this.updateLoadingMessage('Loading books...');
-    try {
-      let bookList: any = await this.database!.getBooks();
-      store.save(AsyncStorageKey.CACHED_BOOK_LIST, bookList);
-      return bookList;
-    } catch (error) {
-      this.updateLoadingMessage('Error loading books: ', error);
       throw error;
     }
   };
