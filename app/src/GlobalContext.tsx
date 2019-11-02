@@ -41,7 +41,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     fontsAreReady: false,
     loading: true,
     forceRemote: true,
-    isConnected: true,
+    isConnected: null,
     versionUidOfDownload: null,
     downloadCompletionPercentage: 0,
   }
@@ -55,7 +55,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   }
 
   async componentDidMount() {
-    await this.getSavedState()
+    await this.setSavedState()
   }
 
   onNetworkChange = ({ isConnected }) => {
@@ -67,7 +67,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.setState({ ...this.state, fontsAreReady: true })
   }
 
-  async getSavedState() {
+  async setSavedState() {
     const [cachedChapterNum, cachedBookName, cachedVersion] = await store.get([
       AsyncStorageKey.CACHED_CHAPTER_NUM,
       AsyncStorageKey.CACHED_OSIS_BOOK_NAME,
@@ -80,25 +80,51 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     const versionChapterNum = cachedChapterNum || DEFAULT_CHAPTER
     const versionUid = cachedVersion || DEFAULT_VERSION
 
-    await this.setLocalDatabase()
-    await this.setBooksAndVersions(versionUid)
+    if (this.state.isConnected === false) {
+      this.loadOfflineContent(versionChapterNum, bookOsisId, versionUid)
+    } else {
+      this.lazyLoadContent(versionChapterNum, bookOsisId, versionUid)
+    }
+  }
 
-    await this.updateCurrentBibleReference({
+  async loadOfflineContent(versionChapterNum, bookOsisId, versionUid) {
+    await this.setLocalDatabase()
+    await this.setVersions()
+    if (this.state.bibleVersions.length === 0) {
+      return
+    }
+    this.updateCurrentBibleReference({
       bookOsisId,
       versionChapterNum,
       versionUid,
     })
   }
 
-  async setBooksAndVersions(versionUid: string) {
-    const bibleVersions = await this.bibleEngineClient.getBothOfflineAndOnlineVersions()
+  async lazyLoadContent(versionChapterNum, bookOsisId, versionUid) {
+    this.setLocalDatabase()
+    this.setVersions()
+    this.setBooks(versionUid)
+    this.updateCurrentBibleReference({
+      bookOsisId,
+      versionChapterNum,
+      versionUid,
+    })
+  }
+
+  async setVersions() {
+    let bibleVersions
+    if (this.state.isConnected) {
+      bibleVersions = await this.bibleEngineClient.getBothOfflineAndOnlineVersions()
+    } else {
+      bibleVersions = await this.bibleEngineClient.getVersions()
+    }
     this.setState({ ...this.state, bibleVersions })
-    const version = bibleVersions.find(version => version.uid === versionUid)!
-    const forceRemote = version.dataLocation !== 'db'
-    this.setState({ ...this.state, forceRemote })
+  }
+
+  async setBooks(versionUid: string) {
     const books = await this.bibleEngineClient.getBooksForVersion(
       versionUid,
-      forceRemote
+      this.state.forceRemote
     )
     this.setState({ ...this.state, books })
   }
@@ -115,6 +141,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       }
       this.bibleEngineClient.localBibleEngine = bibleEngine
+      this.setState({ ...this.state, forceRemote: false })
     } catch (e) {
       console.log('Couldnt set local database: ', e)
     }
@@ -144,7 +171,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     const { exists } = await FileSystem.getInfoAsync(SQLITE_DIRECTORY)
     if (!exists) {
       console.log('sqlite directory doesnt exist, creating...')
-      await FileSystem.makeDirectoryAsync(SQLITE_DIRECTORY, {})
+      await FileSystem.makeDirectoryAsync(SQLITE_DIRECTORY)
     }
   }
 
@@ -176,9 +203,9 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       versionUid: version.uid,
     }
     const forceRemote = version.dataLocation !== 'db'
-    this.setState({ ...this.state, forceRemote })
-    this.updateCurrentBibleReference(newReference)
-    this.setBooks(version.uid)
+    this.setState({ ...this.state, forceRemote }, () => {
+      this.updateCurrentBibleReference(newReference)
+    })
   }
 
   downloadVersion = async (versionUid: string) => {
