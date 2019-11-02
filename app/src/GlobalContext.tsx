@@ -51,6 +51,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.bibleEngineClient = new BibleEngineClient({
       apiBaseUrl: REMOTE_BIBLE_ENGINE_URL,
     })
+    StatusBar.setHidden(true)
     this.loadFonts()
   }
 

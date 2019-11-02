@@ -159,7 +159,6 @@ class HomeScreen extends React.Component<any, any> {
     const { paddingHeight, animatedY, onScroll } = this.props.collapsible
     return (
       <React.Fragment>
-        <StatusBar hidden />
         <AnimatedFlatList
           data={this.props.global.chapterContent}
           renderItem={this.renderItem}
