@@ -115,7 +115,9 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       }
       this.bibleEngineClient.localBibleEngine = bibleEngine
-    } catch (e) {}
+    } catch (e) {
+      console.log('Couldnt set local database: ', e)
+    }
   }
 
   async closeDatabaseConnection(bibleEngine: BibleEngine) {
