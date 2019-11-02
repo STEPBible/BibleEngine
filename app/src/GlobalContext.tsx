@@ -81,6 +81,8 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     const versionChapterNum = cachedChapterNum || DEFAULT_CHAPTER
     const versionUid = cachedVersion || DEFAULT_VERSION
 
+    this.setState({ ...this.state, versionChapterNum, bookOsisId, versionUid })
+
     if (this.state.isConnected === false) {
       this.loadOfflineContent(versionChapterNum, bookOsisId, versionUid)
     } else {
@@ -90,7 +92,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
 
   async loadOfflineContent(versionChapterNum, bookOsisId, versionUid) {
     await this.setLocalDatabase()
-    await this.setVersions()
+    await this.setVersions(versionUid)
     if (this.state.bibleVersions.length === 0) {
       return
     }
@@ -103,16 +105,11 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
 
   async lazyLoadContent(versionChapterNum, bookOsisId, versionUid) {
     this.setLocalDatabase()
-    this.setVersions()
+    this.setVersions(versionUid)
     this.setBooks(versionUid)
-    this.updateCurrentBibleReference({
-      bookOsisId,
-      versionChapterNum,
-      versionUid,
-    })
   }
 
-  async setVersions() {
+  async setVersions(currentVersionUid: string) {
     let bibleVersions
     if (this.state.isConnected) {
       bibleVersions = await this.bibleEngineClient.getBothOfflineAndOnlineVersions()
@@ -120,6 +117,11 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       bibleVersions = await this.bibleEngineClient.getVersions()
     }
     this.setState({ ...this.state, bibleVersions })
+    const version = bibleVersions.filter(
+      version => version.uid === currentVersionUid
+    )[0]
+    await this.changeCurrentBibleVersion(version)
+    return bibleVersions
   }
 
   async setBooks(versionUid: string) {
@@ -142,7 +144,6 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       }
       this.bibleEngineClient.localBibleEngine = bibleEngine
-      this.setState({ ...this.state, forceRemote: false })
     } catch (e) {
       console.log('Couldnt set local database: ', e)
     }
