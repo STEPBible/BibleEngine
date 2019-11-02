@@ -11,7 +11,9 @@ const MEDIUM = WIDTH * 0.75
 
 export default function LoadingScreen() {
   return (
-    <View style={{ flex: 1, marginLeft: Margin.LARGE }}>
+    <View
+      style={{ flex: 1, marginLeft: Margin.LARGE, marginTop: Margin.LARGE }}
+    >
       <SkeletonPlaceholder>
         <View
           style={{ maxWidth: SMALL, height: 20, marginTop: Margin.SMALL }}
