@@ -5,7 +5,8 @@ import { BOOK_DATA } from '@bible-engine/core'
 
 import Text from './Text'
 import { withGlobalContext } from './GlobalContext'
-import { STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT } from './Constants'
+import { STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, FontSize } from './Constants'
+import { TouchableRipple } from 'react-native-paper'
 
 interface Props {
   navigation: any
@@ -68,23 +69,27 @@ const styles = StyleSheet.create({
   header__chips__book: {
     backgroundColor: '#EAEAEA',
     alignItems: 'center',
+    justifyContent: 'center',
     margin: 0,
     borderRadius: 4,
     minWidth: 70,
-    minHeight: 34,
+    minHeight: 32,
   },
   header__chips__book__text: {
+    fontSize: FontSize.EXTRA_SMALL,
     margin: 8,
   },
   header__chips__version: {
-    backgroundColor: '#EAEAEA',
     alignItems: 'center',
-    marginLeft: 10,
     borderRadius: 4,
+    backgroundColor: '#EAEAEA',
+    justifyContent: 'center',
+    marginLeft: 10,
     minWidth: 50,
-    minHeight: 34,
+    minHeight: 32,
   },
   header__chips__version__text: {
+    fontSize: FontSize.EXTRA_SMALL,
     margin: 8,
   },
 })
