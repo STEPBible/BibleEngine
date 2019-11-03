@@ -4,21 +4,15 @@ import hoistNonReactStatics from 'hoist-non-react-statics'
 import { withGlobalContext } from './GlobalContext'
 import ExpandableDrawer from './ExpandableDrawer'
 
-const DEVICE_WIDTH = Dimensions.get('window').width
 const DRAWER_HEIGHT = 52
 
-interface State {
-  activeBookIndex?: number
-  books: any[]
-}
-
-class BookScreen extends React.Component<{}, State> {
+class BookScreen extends React.Component<{}, {}> {
   static navigationOptions = {
     headerTitle: 'Books',
   }
   bookListRef: any
   state = {
-    books: [],
+    activeBookIndex: null,
   }
   getItemLayout = (data: any, index: any) => ({
     length: DRAWER_HEIGHT,
