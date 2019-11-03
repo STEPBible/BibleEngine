@@ -3,6 +3,7 @@ import { Analytics } from 'expo-analytics'
 import { DefaultTheme } from 'react-native-paper'
 import Constants from 'expo-constants'
 import { Platform } from 'react-native'
+import * as FileSystem from 'expo-file-system'
 
 export const Flags = {
   DEBUG: false,
@@ -81,6 +82,9 @@ export const IOS_STATUS_BAR_HEIGHT = 20
 export const STATUS_BAR_HEIGHT =
   NAV_BAR_HEIGHT -
   (Platform.OS === 'ios' ? IOS_STATUS_BAR_HEIGHT : Constants.statusBarHeight)
+
+export const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`
+export const DATABASE_PATH = `${SQLITE_DIRECTORY}/bibles.db`
 
 const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green']
 
