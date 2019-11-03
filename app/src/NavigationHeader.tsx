@@ -24,7 +24,7 @@ class NavigationHeader extends React.Component<Props, {}> {
     return (
       <View style={styles.header}>
         <View style={styles.header__chips}>
-          <TouchableOpacity
+          <TouchableRipple
             onPress={() => this.props.navigation.navigate('Books')}
             style={styles.header__chips__book}
           >
@@ -33,15 +33,15 @@ class NavigationHeader extends React.Component<Props, {}> {
             >{`${this.getBookName()} ${
               this.props.global.versionChapterNum
             }`}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </TouchableRipple>
+          <TouchableRipple
             onPress={() => this.props.navigation.navigate('Versions')}
             style={styles.header__chips__version}
           >
             <Text style={styles.header__chips__version__text}>
               {this.props.global.versionUid}
             </Text>
-          </TouchableOpacity>
+          </TouchableRipple>
         </View>
       </View>
     )
