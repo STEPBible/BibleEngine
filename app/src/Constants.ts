@@ -80,8 +80,7 @@ export function getDebugStyles() {
 export const NAV_BAR_HEIGHT = 49
 export const IOS_STATUS_BAR_HEIGHT = 20
 export const STATUS_BAR_HEIGHT =
-  NAV_BAR_HEIGHT -
-  (Platform.OS === 'ios' ? IOS_STATUS_BAR_HEIGHT : Constants.statusBarHeight)
+  Platform.OS === 'ios' ? IOS_STATUS_BAR_HEIGHT : Constants.statusBarHeight
 
 export const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`
 export const DATABASE_PATH = `${SQLITE_DIRECTORY}/bibles.db`

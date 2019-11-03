@@ -8,7 +8,6 @@ import {
   StatusBar,
 } from 'react-native'
 import { IBibleContent, IBiblePhrase } from '@bible-engine/core'
-import { withCollapsible } from 'react-navigation-collapsible'
 import hoistNonReactStatics from 'hoist-non-react-statics'
 
 import {
@@ -29,6 +28,8 @@ import { withGlobalContext } from './GlobalContext'
 import Text from './Text'
 import LoadingScreen from './LoadingScreen'
 import NetworkErrorScreen from './NetworkErrorScreen'
+import { isAndroid } from './utils'
+import { withCollapsible, setSafeBounceHeight } from './ReactNavCollapsible'
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 
@@ -36,10 +37,16 @@ class HomeScreen extends React.Component<any, any> {
   static navigationOptions = {
     headerTitle: <NavigationHeader />,
     headerStyle: {
-      height: NAV_BAR_HEIGHT - STATUS_BAR_HEIGHT,
+      height: 52,
+      marginTop: STATUS_BAR_HEIGHT * -1 + 10,
     },
   }
   itemNum = 0
+
+  componentDidMount() {
+    setSafeBounceHeight(0)
+  }
+
   renderItem = (content: any, index: number): any => {
     this.itemNum += 1
     if (content.item) {
@@ -161,6 +168,8 @@ class HomeScreen extends React.Component<any, any> {
       return <LoadingScreen />
     }
     const { paddingHeight, animatedY, onScroll } = this.props.collapsible
+    const paddingTop =
+      (isAndroid() ? paddingHeight + STATUS_BAR_HEIGHT : paddingHeight) - 10
     return (
       <React.Fragment>
         <AnimatedFlatList
@@ -169,7 +178,7 @@ class HomeScreen extends React.Component<any, any> {
           bounces={false}
           keyExtractor={(item, index) => `flatlist-item-${index}`}
           contentContainerStyle={{
-            paddingTop: paddingHeight + STATUS_BAR_HEIGHT,
+            paddingTop,
           }}
           scrollIndicatorInsets={{ top: paddingHeight }}
           onScroll={onScroll}
@@ -265,9 +274,9 @@ const styles = StyleSheet.create({
   },
 })
 
-export default hoistNonReactStatics(
-  withCollapsible(withGlobalContext(HomeScreen), {
+export default withCollapsible(
+  hoistNonReactStatics(withGlobalContext(HomeScreen), HomeScreen),
+  {
     iOSCollapsedColor: 'white',
-  }),
-  HomeScreen
+  }
 )

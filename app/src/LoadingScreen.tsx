@@ -2,7 +2,7 @@ import React from 'react'
 import { View, Dimensions } from 'react-native'
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder'
 
-import { Margin } from './Constants'
+import { Margin, NAV_BAR_HEIGHT } from './Constants'
 
 const WIDTH = Dimensions.get('window').width
 const SMALL = WIDTH * 0.25
@@ -12,7 +12,11 @@ const MEDIUM = WIDTH * 0.75
 export default function LoadingScreen() {
   return (
     <View
-      style={{ flex: 1, marginLeft: Margin.LARGE, marginTop: Margin.LARGE }}
+      style={{
+        flex: 1,
+        marginLeft: Margin.LARGE,
+        marginTop: NAV_BAR_HEIGHT + Margin.MEDIUM,
+      }}
     >
       <SkeletonPlaceholder>
         <View
