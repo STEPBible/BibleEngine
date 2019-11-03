@@ -13,12 +13,15 @@ import NetInfo from '@react-native-community/netinfo'
 import {
   REMOTE_BIBLE_ENGINE_URL,
   BIBLE_ENGINE_EXPORTS_S3_URL,
+  DATABASE_DOWNLOAD_URL,
 } from 'react-native-dotenv'
+import 'react-native-console-time-polyfill'
 
 import Fonts from './Fonts'
 import * as store from 'react-native-simple-store'
 import { AsyncStorageKey, SQLITE_DIRECTORY, DATABASE_PATH } from './Constants'
 import { ConnectionOptions } from 'typeorm'
+import { StatusBar } from 'react-native'
 const bibleDatabaseModule = require('../assets/bibles.db')
 
 const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
@@ -43,7 +46,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     forceRemote: true,
     isConnected: null,
     versionUidOfDownload: null,
-    downloadCompletionPercentage: 0,
+    downloadProgress: 0,
   }
   constructor(props: any) {
     super(props)
@@ -84,7 +87,8 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.setState({ ...this.state, versionChapterNum, bookOsisId, versionUid })
 
     if (this.state.isConnected === false) {
-      this.loadOfflineContent(versionChapterNum, bookOsisId, versionUid)
+      await this.loadOfflineContent(versionChapterNum, bookOsisId, versionUid)
+      this.setState({ ...this.state, loading: false })
     } else {
       this.lazyLoadContent(versionChapterNum, bookOsisId, versionUid)
     }
@@ -92,6 +96,9 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
 
   async loadOfflineContent(versionChapterNum, bookOsisId, versionUid) {
     await this.setLocalDatabase()
+    if (this.bibleEngineClient.localBibleEngine === undefined) {
+      return
+    }
     await this.setVersions(versionUid)
     if (this.state.bibleVersions.length === 0) {
       return
@@ -114,7 +121,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     if (this.state.isConnected) {
       bibleVersions = await this.bibleEngineClient.getBothOfflineAndOnlineVersions()
     } else {
-      bibleVersions = await this.bibleEngineClient.getVersions()
+      bibleVersions = await this.bibleEngineClient.localBibleEngine.getVersions()
     }
     this.setState({ ...this.state, bibleVersions })
     const version = bibleVersions.filter(
