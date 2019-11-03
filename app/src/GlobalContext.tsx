@@ -171,7 +171,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       )
       return !!result.length
     } catch (e) {
-      console.log('localDatabaseIsValid catch', e)
+      console.log('Test query failed: ', e)
       return false
     }
   }
