@@ -4,15 +4,12 @@ import {
   IBibleReferenceRangeQuery,
   BibleEngine,
   BibleVersionEntity,
-  IBibleBookEntity,
 } from '@bible-engine/core'
 import * as FileSystem from 'expo-file-system'
-import { Asset } from 'expo-asset'
 import { SQLite } from 'expo-sqlite'
 import NetInfo from '@react-native-community/netinfo'
 import {
   REMOTE_BIBLE_ENGINE_URL,
-  BIBLE_ENGINE_EXPORTS_S3_URL,
   DATABASE_DOWNLOAD_URL,
 } from 'react-native-dotenv'
 import 'react-native-console-time-polyfill'
@@ -22,7 +19,6 @@ import * as store from 'react-native-simple-store'
 import { AsyncStorageKey, SQLITE_DIRECTORY, DATABASE_PATH } from './Constants'
 import { ConnectionOptions } from 'typeorm'
 import { StatusBar } from 'react-native'
-const bibleDatabaseModule = require('../assets/bibles.db')
 
 const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
   database: 'bibles.db',
