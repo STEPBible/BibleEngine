@@ -136,14 +136,21 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     try {
       let bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       if (!(await this.testQueryWorks(bibleEngine))) {
+        if (!this.state.isConnected) {
+          return
+        }
         await this.closeDatabaseConnection(bibleEngine)
         await this.createSqliteDirectory()
-        const asset = Asset.fromModule(bibleDatabaseModule)
         const PATH_TO_DOWNLOAD_TO = `${FileSystem.documentDirectory}SQLite/bibles.db`
-        await FileSystem.downloadAsync(asset.uri, PATH_TO_DOWNLOAD_TO)
+        await FileSystem.downloadAsync(
+          DATABASE_DOWNLOAD_URL,
+          PATH_TO_DOWNLOAD_TO
+        )
+        this.setState({ ...this.state, installingOffline: false })
         bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       }
       this.bibleEngineClient.localBibleEngine = bibleEngine
+      this.setVersions(this.state.versionUid)
     } catch (e) {
       console.log('Couldnt set local database: ', e)
     }
