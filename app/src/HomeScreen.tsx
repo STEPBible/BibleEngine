@@ -150,7 +150,11 @@ class HomeScreen extends React.Component<any, any> {
   }
 
   render() {
-    if (this.props.global.isConnected === false) {
+    if (
+      this.props.global.isConnected === false &&
+      this.props.global.bibleVersions.length === 0 &&
+      this.props.global.loading === false
+    ) {
       return <NetworkErrorScreen />
     }
     if (this.props.global.loading) {
