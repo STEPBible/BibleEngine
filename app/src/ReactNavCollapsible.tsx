@@ -191,7 +191,6 @@ const collapsibleNavigationOptions = (
   const navigationParams = navigation.state.params
 
   if (!navigationParams || !navigationParams.animatedYSum) {
-    // console.log('navigationParams is null');
     return userOptions
   }
 

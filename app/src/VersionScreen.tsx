@@ -17,7 +17,6 @@ class VersionScreen extends React.Component<any, any> {
   }
 
   renderDownloadIcon = (version: BibleVersionEntity) => {
-    console.log(version.dataLocation)
     if (version.dataLocation === 'db') {
       return <List.Icon color={Color.TYNDALE_BLUE} icon="offline-pin" />
     }

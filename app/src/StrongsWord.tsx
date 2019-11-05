@@ -75,7 +75,6 @@ class StrongsWord extends React.PureComponent<Props, State> {
           )
         )
       )
-      console.log(definitions)
       if (this.mounted) {
         this.setState({
           ...this.state,
@@ -102,7 +101,6 @@ class StrongsWord extends React.PureComponent<Props, State> {
   }
 
   closePopover = () => {
-    console.log('closePopover')
     this.setState({ ...this.state, popoverIsVisible: false })
   }
 
