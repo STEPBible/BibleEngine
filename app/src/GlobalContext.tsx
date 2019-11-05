@@ -43,6 +43,8 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     isConnected: null,
     versionUidOfDownload: null,
     downloadProgress: 0,
+    nextRange: {},
+    previousRange: {},
   }
   constructor(props: any) {
     super(props)
@@ -179,13 +181,24 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   }
 
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
-    this.setState({ ...this.state, ...range, loading: true })
+    const rangeQuery = {
+      versionChapterNum: range.normalizedChapterNum,
+      versionUid: this.state.versionUid,
+      ...range,
+    }
+    this.setState({
+      ...this.state,
+      ...rangeQuery,
+      loading: true,
+      chapterContent: [],
+    })
     const chapter = await this.bibleEngineClient.getFullDataForReferenceRange(
-      range,
+      rangeQuery,
       this.state.forceRemote,
       true
     )
     let chapterContent: any = chapter.content.contents
+    const { nextRange, previousRange } = chapter.contextRanges.normalizedChapter
     if (
       chapterContent &&
       chapterContent.length &&
@@ -201,18 +214,21 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         },
       ]
     }
-    this.setState(
-      {
-        ...this.state,
-        ...range,
-        chapterContent,
-      },
-      () => {
-        this.setState({ ...this.state, loading: false })
-      }
-    )
+    this.setState({
+      ...this.state,
+      ...range,
+      nextRange,
+      previousRange,
+      chapterContent,
+      loading: false,
+    })
+    this.cacheCurrentChapterPosition(range)
+  }
+
+  cacheCurrentChapterPosition(range: any) {
+    const chapterNum = range.versionChapterNum || range.normalizedChapterNum
     store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, range.bookOsisId)
-    store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, range.versionChapterNum)
+    store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum)
     store.save(AsyncStorageKey.CACHED_VERSION_UID, range.versionUid)
   }
 

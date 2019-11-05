@@ -182,14 +182,22 @@ class HomeScreen extends React.Component<any, any> {
           small
           style={styles.previousChapterButton}
           icon="chevron-left"
-          onPress={() => console.log('Pressed')}
+          onPress={() =>
+            this.props.global.updateCurrentBibleReference(
+              this.props.global.previousRange
+            )
+          }
         />
         <FAB
           color="#2F3030"
           small
           style={styles.nextChapterButton}
           icon="chevron-right"
-          onPress={() => console.log('Pressed')}
+          onPress={() =>
+            this.props.global.updateCurrentBibleReference(
+              this.props.global.nextRange
+            )
+          }
         />
       </React.Fragment>
     )
