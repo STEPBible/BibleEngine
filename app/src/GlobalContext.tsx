@@ -11,6 +11,7 @@ import NetInfo from '@react-native-community/netinfo'
 import {
   REMOTE_BIBLE_ENGINE_URL,
   DATABASE_DOWNLOAD_URL,
+  SENTRY_DSN,
 } from 'react-native-dotenv'
 import 'react-native-console-time-polyfill'
 
@@ -19,6 +20,7 @@ import * as store from 'react-native-simple-store'
 import { AsyncStorageKey, SQLITE_DIRECTORY, DATABASE_PATH } from './Constants'
 import { ConnectionOptions } from 'typeorm'
 import { StatusBar } from 'react-native'
+import SentryExpo from 'sentry-expo'
 
 const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
   database: 'bibles.db',
@@ -56,6 +58,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   }
 
   async componentDidMount() {
+    this.setUpErrorLogging()
     this.loadFonts()
     this.setSavedState()
   }
@@ -67,6 +70,10 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   async loadFonts() {
     await Fonts.load()
     this.setState({ ...this.state, fontsAreReady: true })
+  }
+
+  async setUpErrorLogging() {
+    SentryExpo.config(SENTRY_DSN).install()
   }
 
   async setSavedState() {
