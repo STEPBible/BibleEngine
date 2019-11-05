@@ -96,14 +96,6 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       return
     }
     await this.setVersions(versionUid)
-    if (this.state.bibleVersions.length === 0) {
-      return
-    }
-    this.updateCurrentBibleReference({
-      bookOsisId,
-      versionChapterNum,
-      versionUid,
-    })
   }
 
   async lazyLoadContent(versionChapterNum, bookOsisId, versionUid) {
@@ -120,6 +112,9 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       bibleVersions = await this.bibleEngineClient.localBibleEngine.getVersions()
     }
     this.setState({ ...this.state, bibleVersions })
+    if (bibleVersions.length === 0) {
+      return
+    }
     const version = bibleVersions.filter(
       version => version.uid === currentVersionUid
     )[0]
