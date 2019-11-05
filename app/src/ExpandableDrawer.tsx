@@ -75,7 +75,7 @@ class ExpandableDrawer extends React.PureComponent<Props, State> {
           borderless
           key={this.props.index}
           underlayColor="#e8eaed"
-          style={this.props.open ? styles['drawer--open'] : styles.drawer}
+          style={styles.drawer}
           onPress={this.onBookPress}
         >
           <Text style={styles.drawer__text}>{this.props.item.title}</Text>
