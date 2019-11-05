@@ -185,7 +185,22 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       this.state.forceRemote,
       true
     )
-    const chapterContent = chapter.content.contents
+    let chapterContent: any = chapter.content.contents
+    if (
+      chapterContent &&
+      chapterContent.length &&
+      chapterContent[0] &&
+      typeof chapterContent[0].content === 'string'
+    ) {
+      // Hack for CUV rendering
+      chapterContent = [
+        {
+          title: '',
+          type: 'section',
+          contents: chapterContent,
+        },
+      ]
+    }
     this.setState(
       {
         ...this.state,
