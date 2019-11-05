@@ -196,6 +196,9 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         this.setState({ ...this.state, loading: false })
       }
     )
+    store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, range.bookOsisId)
+    store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, range.versionChapterNum)
+    store.save(AsyncStorageKey.CACHED_VERSION_UID, range.versionUid)
   }
 
   changeCurrentBibleVersion = async (version: BibleVersionEntity) => {
