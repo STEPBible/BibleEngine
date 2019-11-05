@@ -191,47 +191,6 @@ class HomeScreen extends React.Component<any, any> {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  header__chips: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  header__chips__book: {
-    backgroundColor: '#EAEAEA',
-    alignItems: 'center',
-    margin: 0,
-    borderRadius: 4,
-  },
-  header__chips__book__text: {
-    margin: 8,
-  },
-  header__chips__version: {
-    backgroundColor: '#EAEAEA',
-    alignItems: 'center',
-    marginLeft: 10,
-    borderRadius: 4,
-  },
-  header__chips__version__text: {
-    margin: 8,
-  },
-  background: {
-    backgroundColor: 'white',
-    flex: 1,
-  },
-  chapterHeader: {
-    fontSize: FontSize.EXTRA_LARGE,
-    fontFamily: FontFamily.OPEN_SANS_LIGHT,
-    marginTop: ifAndroid(-55, ifIphoneX(-30, -55)),
-    marginBottom: Margin.LARGE,
-    textAlign: 'center',
-    ...getDebugStyles(),
-  },
   phrase: { flexDirection: 'row', ...getDebugStyles() },
   phraseText: {
     fontFamily: FontFamily.CARDO,
