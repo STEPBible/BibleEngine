@@ -51,11 +51,11 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       apiBaseUrl: REMOTE_BIBLE_ENGINE_URL,
     })
     StatusBar.setHidden(true)
-    this.loadFonts()
   }
 
   async componentDidMount() {
-    await this.setSavedState()
+    this.loadFonts()
+    this.setSavedState()
   }
 
   onNetworkChange = ({ isConnected }) => {
