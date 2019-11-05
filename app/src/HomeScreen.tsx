@@ -178,6 +178,7 @@ class HomeScreen extends React.Component<any, any> {
           showsVerticalScrollIndicator={false}
         />
         <FAB
+          visible={this.props.global.fontsAreReady}
           color="#2F3030"
           small
           style={styles.previousChapterButton}
@@ -189,6 +190,7 @@ class HomeScreen extends React.Component<any, any> {
           }
         />
         <FAB
+          visible={this.props.global.fontsAreReady}
           color="#2F3030"
           small
           style={styles.nextChapterButton}
