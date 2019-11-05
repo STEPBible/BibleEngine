@@ -1,14 +1,8 @@
 import React from 'react'
-import {
-  FlatList,
-  Animated,
-  Dimensions,
-  View,
-  StyleSheet,
-  StatusBar,
-} from 'react-native'
+import { FlatList, Animated, Dimensions, View, StyleSheet } from 'react-native'
 import { IBibleContent, IBiblePhrase } from '@bible-engine/core'
 import hoistNonReactStatics from 'hoist-non-react-statics'
+import { FAB } from 'react-native-paper'
 
 import {
   Margin,
@@ -17,9 +11,7 @@ import {
   getDebugStyles,
   FontFamily,
   STATUS_BAR_HEIGHT,
-  NAV_BAR_HEIGHT,
 } from './Constants'
-import { ifAndroid, ifIphoneX } from './utils'
 import NavigationHeader from './NavigationHeader'
 import StrongsWord from './StrongsWord'
 import CrossReference from './CrossReference'
@@ -30,15 +22,6 @@ import LoadingScreen from './LoadingScreen'
 import NetworkErrorScreen from './NetworkErrorScreen'
 import { isAndroid } from './utils'
 import { withCollapsible, setSafeBounceHeight } from './ReactNavCollapsible'
-import {
-  IconButton,
-  Button,
-  Surface,
-  TouchableRipple,
-  FAB,
-} from 'react-native-paper'
-import { MaterialIcons } from '@expo/vector-icons'
-import { TouchableOpacity } from 'react-native-gesture-handler'
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 

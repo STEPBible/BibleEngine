@@ -1,6 +1,6 @@
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
-import { List, Button, ProgressBar } from 'react-native-paper'
+import { StyleSheet } from 'react-native'
+import { List } from 'react-native-paper'
 import { ScrollView } from 'react-native-gesture-handler'
 import hoistNonReactStatics from 'hoist-non-react-statics'
 import { BibleVersionEntity } from '@bible-engine/core'
