@@ -30,6 +30,15 @@ import LoadingScreen from './LoadingScreen'
 import NetworkErrorScreen from './NetworkErrorScreen'
 import { isAndroid } from './utils'
 import { withCollapsible, setSafeBounceHeight } from './ReactNavCollapsible'
+import {
+  IconButton,
+  Button,
+  Surface,
+  TouchableRipple,
+  FAB,
+} from 'react-native-paper'
+import { MaterialIcons } from '@expo/vector-icons'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 
@@ -185,12 +194,38 @@ class HomeScreen extends React.Component<any, any> {
           _mustAddThis={animatedY}
           showsVerticalScrollIndicator={false}
         />
+        <FAB
+          color="#2F3030"
+          small
+          style={styles.previousChapterButton}
+          icon="chevron-left"
+          onPress={() => console.log('Pressed')}
+        />
+        <FAB
+          color="#2F3030"
+          small
+          style={styles.nextChapterButton}
+          icon="chevron-right"
+          onPress={() => console.log('Pressed')}
+        />
       </React.Fragment>
     )
   }
 }
 
 const styles = StyleSheet.create({
+  previousChapterButton: {
+    backgroundColor: '#F9F9F9',
+    bottom: 16,
+    left: 16,
+    position: 'absolute',
+  },
+  nextChapterButton: {
+    backgroundColor: '#F9F9F9',
+    bottom: 16,
+    position: 'absolute',
+    right: 16,
+  },
   phrase: { flexDirection: 'row', ...getDebugStyles() },
   phraseText: {
     fontFamily: FontFamily.CARDO,
