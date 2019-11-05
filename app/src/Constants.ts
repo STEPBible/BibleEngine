@@ -5,6 +5,8 @@ import Constants from 'expo-constants'
 import { Platform } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 
+import { GOOGLE_ANALYTICS_TRACKING_ID } from 'react-native-dotenv'
+
 export const Flags = {
   DEBUG: false,
   USE_CACHE: true,
@@ -91,7 +93,3 @@ export function randomColor() {
   const index = Math.floor(Math.random() * 4)
   return testingColors[index]
 }
-
-export const googleAnalytics = new Analytics(
-  process.env.GOOGLE_ANALYTICS_TRACKING_ID || ''
-)

@@ -12,6 +12,7 @@ import {
   REMOTE_BIBLE_ENGINE_URL,
   DATABASE_DOWNLOAD_URL,
   SENTRY_DSN,
+  GOOGLE_ANALYTICS_TRACKING_ID,
 } from 'react-native-dotenv'
 import 'react-native-console-time-polyfill'
 
@@ -21,6 +22,7 @@ import { AsyncStorageKey, SQLITE_DIRECTORY, DATABASE_PATH } from './Constants'
 import { ConnectionOptions } from 'typeorm'
 import { StatusBar } from 'react-native'
 import SentryExpo from 'sentry-expo'
+import { Analytics, PageHit } from 'expo-analytics'
 
 const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
   database: 'bibles.db',
@@ -32,6 +34,7 @@ const GlobalContext = React.createContext({})
 
 export class GlobalContextProvider extends React.Component<{}, {}> {
   bibleEngineClient: BibleEngineClient
+  analytics: Analytics
   state = {
     chapterContent: [],
     versionChapterNum: 1,
@@ -55,6 +58,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       apiBaseUrl: REMOTE_BIBLE_ENGINE_URL,
     })
     StatusBar.setHidden(true)
+    this.analytics = new Analytics(GOOGLE_ANALYTICS_TRACKING_ID)
   }
 
   async componentDidMount() {
@@ -230,6 +234,12 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       loading: false,
     })
     this.cacheCurrentChapterPosition(range)
+    this.captureAnalyticsEvent()
+  }
+
+  captureAnalyticsEvent() {
+    const reference = `${this.state.bookOsisId} ${this.state.versionChapterNum} ${this.state.versionUid}`
+    this.analytics.hit(new PageHit(reference))
   }
 
   cacheCurrentChapterPosition(range: any) {
