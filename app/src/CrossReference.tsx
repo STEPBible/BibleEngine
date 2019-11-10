@@ -25,6 +25,7 @@ import {
 import Popover from './Popover'
 import Database from './Database'
 import Text from './Text'
+import { withGlobalContext } from './GlobalContext'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -35,55 +36,37 @@ interface Props {
 }
 
 interface State {
-  popoverIsVisible: boolean
+  visible: boolean
   verseContents: any[]
 }
 
-export default class CrossReference extends React.PureComponent<Props, State> {
+class CrossReference extends React.PureComponent<Props, State> {
   touchable: any
   mounted: boolean
   state = {
-    popoverIsVisible: false,
+    visible: false,
     verseContents: [],
   }
 
-  onPress = () => {
-    this.setState({ popoverIsVisible: true })
+  onPress = async () => {
+    const verseContents = await this.props.global.getVerseContents(
+      this.props.crossReferences
+    )
+    this.setState({ ...this.state, visible: true, verseContents })
+    this.forceUpdate()
   }
 
   closePopover = () => {
-    this.setState({ popoverIsVisible: false })
-  }
-
-  componentDidMount() {
-    this.mounted = true
-    setTimeout(() => {
-      this.getVerseContents(this.props.crossReferences)
-    }, 100)
-  }
-
-  componentWillUnmount() {
-    this.mounted = false
-  }
-
-  async getVerseContents(refs: IBibleCrossReference[]) {
-    const verseContents = await this.props.database.getVerseContents(refs)
-    if (this.mounted) {
-      this.setState({
-        ...this.state,
-        verseContents,
-        popoverIsVisible: false,
-      })
-    }
+    this.setState({ visible: false })
   }
 
   renderCrossReference = ({ item, index }) => (
     <Fragment>
       <Text style={styles.popover__content__reference}>{item.label}</Text>
       <Text style={styles.popover__content__verse}>
-        {this.state.verseContents.length > index
-          ? JSON.stringify(this.state.verseContents[index])
-          : ''}
+        {this.state.verseContents.length > 0
+          ? this.state.verseContents[index]
+          : null}
       </Text>
     </Fragment>
   )
@@ -120,7 +103,7 @@ export default class CrossReference extends React.PureComponent<Props, State> {
           </Text>
         </TouchableHighlight>
         <Popover
-          isVisible={this.state.popoverIsVisible}
+          isVisible={this.state.visible}
           fromView={this.touchable}
           popoverStyle={styles.popover__background_container}
           onRequestClose={() => this.closePopover()}
@@ -180,3 +163,5 @@ const styles = StyleSheet.create({
     marginBottom: Margin.EXTRA_SMALL,
   },
 })
+
+export default withGlobalContext(CrossReference)

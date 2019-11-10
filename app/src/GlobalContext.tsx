@@ -4,6 +4,7 @@ import {
   IBibleReferenceRangeQuery,
   BibleEngine,
   BibleVersionEntity,
+  IBibleCrossReference,
 } from '@bible-engine/core'
 import * as FileSystem from 'expo-file-system'
 import { SQLite } from 'expo-sqlite'
@@ -265,6 +266,23 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     })
   }
 
+  getVerseContents = async (refs: IBibleCrossReference[]) => {
+    if (this.state.forceRemote) {
+      const emptyVerses = refs.map(ref => ref.range).map(range => '')
+      return emptyVerses
+    }
+    const referenceRanges = refs.map(ref => ref.range)
+    const verses = await Promise.all(
+      referenceRanges.map(range =>
+        this.bibleEngineClient.localBibleEngine!.getPhrases(range)
+      )
+    )
+    const verseContents = verses.map(phrases =>
+      phrases.map(phrase => phrase.content).join(' ')
+    )
+    return verseContents
+  }
+
   render() {
     return (
       <GlobalContext.Provider
@@ -273,6 +291,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
           bibleEngine: this.bibleEngineClient,
           updateCurrentBibleReference: this.updateCurrentBibleReference,
           changeCurrentBibleVersion: this.changeCurrentBibleVersion,
+          getVerseContents: this.getVerseContents,
         }}
       >
         {this.props.children}

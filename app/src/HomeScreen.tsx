@@ -88,7 +88,6 @@ class HomeScreen extends React.Component<any, any> {
   }
 
   renderCrossReference = (content: any): any => {
-    return null
     if (
       !Settings.CROSS_REFERENCES_ENABLED ||
       !content.crossReferences ||
