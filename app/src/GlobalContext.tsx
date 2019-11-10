@@ -42,6 +42,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     books: [],
     bookOsisId: '',
     versionUid: '',
+    version: {},
     fontsAreReady: false,
     loading: true,
     forceRemote: true,
@@ -256,6 +257,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       bookOsisId,
       versionChapterNum,
       versionUid: version.uid,
+      version: version,
     }
     const forceRemote = version.dataLocation !== 'db'
     this.setState({ ...this.state, forceRemote }, () => {
