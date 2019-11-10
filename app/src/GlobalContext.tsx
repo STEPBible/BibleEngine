@@ -55,6 +55,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   }
   constructor(props: any) {
     super(props)
+    console.time('totalLoadingTime')
     NetInfo.addEventListener(this.onNetworkChange)
     this.bibleEngineClient = new BibleEngineClient({
       apiBaseUrl: REMOTE_BIBLE_ENGINE_URL,
@@ -160,7 +161,6 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       }
       this.bibleEngineClient.localBibleEngine = bibleEngine
-      this.setVersions(this.state.versionUid)
     } catch (e) {
       console.log('Couldnt set local database: ', e)
     }
@@ -228,14 +228,19 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         },
       ]
     }
-    this.setState({
-      ...this.state,
-      ...range,
-      nextRange,
-      previousRange,
-      chapterContent,
-      loading: false,
-    })
+    this.setState(
+      {
+        ...this.state,
+        ...range,
+        nextRange,
+        previousRange,
+        chapterContent,
+        loading: false,
+      },
+      () => {
+        console.timeEnd('totalLoadingTime')
+      }
+    )
     this.cacheCurrentChapterPosition(range)
     this.captureAnalyticsEvent()
   }
