@@ -97,7 +97,6 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
 
     if (this.state.isConnected === false) {
       await this.loadOfflineContent(versionChapterNum, bookOsisId, versionUid)
-      this.setState({ ...this.state, loading: false })
     } else {
       this.lazyLoadContent(versionChapterNum, bookOsisId, versionUid)
     }
@@ -109,6 +108,8 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       return
     }
     await this.setVersions(versionUid)
+    this.setBooks(versionUid)
+    this.setState({ ...this.state, loading: false })
   }
 
   async lazyLoadContent(versionChapterNum, bookOsisId, versionUid) {
