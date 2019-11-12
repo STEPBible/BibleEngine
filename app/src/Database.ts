@@ -144,7 +144,7 @@ export default class Database {
     } catch (error) {
       if (!this.forceRemote) {
         this.forceRemote = true;
-        return this.getChapter(bookOsisId, versionChapterNum);
+        return this.getChapter(versionUid, bookOsisId, versionChapterNum);
       }
     }
     return null;
