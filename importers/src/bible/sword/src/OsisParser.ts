@@ -5,7 +5,7 @@ import {
     OsisXmlNodeType,
     Indentation,
     ChapterXML
-} from '../src/types';
+} from './types';
 
 import {
     IBibleCrossReference,

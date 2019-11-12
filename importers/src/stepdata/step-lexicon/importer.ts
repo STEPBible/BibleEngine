@@ -1,4 +1,4 @@
-import { BibleEngineImporter } from './../Importer.interface';
+import { BibleEngineImporter } from '../../shared/Importer.interface';
 import { resolve } from 'path';
 
 import {

@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { createInterface } from 'readline';
 import { V11nRuleEntity, getOsisIdFromBookString, getSourceTypeId } from '@bible-engine/core';
-import { BibleEngineImporter } from '../Importer.interface';
+import { BibleEngineImporter } from '../../shared/Importer.interface';
 
 const replaceNoteVars = (note: string) => {
     if (!note) return undefined;

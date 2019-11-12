@@ -9,8 +9,8 @@ import { BookWithContentForInput, BibleReferenceParser, DocumentRoot } from '@bi
 import { visitNode } from './helpers';
 import { bookList } from './meta/books';
 import copyrightLong from './meta/copyright';
-import { BibleEngineImporter } from '../Importer.interface';
-import { streamToString } from '../helpers.functions';
+import { BibleEngineImporter } from '../../shared/Importer.interface';
+import { streamToString } from '../../shared/helpers.functions';
 
 export class NeueImporter extends BibleEngineImporter {
     async import() {
@@ -84,7 +84,7 @@ export class NeueImporter extends BibleEngineImporter {
             const bibleNodes = <TreeDocumentFragment>parseFragment(bookHtml);
             if (!bibleNodes) throw new Error(`can't parse file ${bookFile}`);
 
-            console.log(`parsing book: ${bookMeta.title}`);
+            // console.log(`parsing book: ${bookMeta.title}`);
             const bookData: BookWithContentForInput = {
                 book: {
                     type: bookMeta.bookNum < 40 ? 'ot' : 'nt',

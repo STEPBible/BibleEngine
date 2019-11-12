@@ -24,7 +24,7 @@
         "routing-controllers": "^0.8.0",
         "tsconfig-paths": "3.9.0",
         "typedi": "0.8.0",
-        "typeorm": "0.2.19",
+        "typeorm": "0.2.20",
         "typeorm-typedi-extensions": "0.2.3"
     },
     "devDependencies": {

@@ -137,12 +137,12 @@ describe('generateBibleDocument', () => {
         const paragraphs: BibleParagraphEntity[] = [paragraph1];
         const context: IBibleOutputRich['context'] = {
             1: {
-                includedSections: [section1, section2],
+                startingSections: [section1, section2],
                 nextSections: [],
                 previousSections: []
             },
             2: {
-                includedSections: [section2_1],
+                startingSections: [section2_1],
                 nextSections: [],
                 previousSections: []
             }

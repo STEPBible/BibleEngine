@@ -87,6 +87,7 @@ export interface IBibleReferenceRangeQuery extends IBibleReferenceRange {
     versionUid: string;
     // TODO: implement
     targetVersionUid?: string;
+    skipPartialSectionsInDocument?: boolean;
 }
 
 /* types / interfaces neded for bible-passage-reference-parser */

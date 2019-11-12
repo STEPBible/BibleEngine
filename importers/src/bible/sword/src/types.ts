@@ -19,23 +19,6 @@ export interface VersePosition {
     startPos: number;
 }
 
-export interface VerseXML {
-    text: string;
-    verse: number;
-}
-
-export interface ChapterXML {
-    intro: string;
-    verses: VerseXML[];
-}
-
-export interface BookXML {
-    osisId: string;
-    fullName: string;
-    bookNum: number;
-    chapters: ChapterXML[];
-}
-
 export interface VerseMetadata {
     book: string;
     bookNum: number;
@@ -50,11 +33,6 @@ export interface ChapterPosition {
     length: number;
     startPos: number;
     verses: VersePosition[];
-}
-
-export interface VersePosition {
-    length: number;
-    startPos: number;
 }
 
 export interface JsonFilterOptions {
@@ -76,6 +54,13 @@ export interface VerseXML {
 export interface ChapterXML {
     intro: string;
     verses: VerseXML[];
+}
+
+export interface BookXML {
+    osisId: string;
+    fullName: string;
+    bookNum: number;
+    chapters: ChapterXML[];
 }
 
 export type ParserContext = {

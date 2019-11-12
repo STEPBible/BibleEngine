@@ -15,6 +15,7 @@ import {
     IBibleContent,
     IBibleContentGroup
 } from '@bible-engine/core';
+import { startsWithPunctuationChar } from '../../shared/helpers.functions';
 
 export const getAttribute = (node: TreeElement, name: string) => {
     const attr = node.attrs.find(_attr => _attr.name === name);
@@ -295,8 +296,6 @@ export const visitNode = (
             }
         }
     } else if (node.nodeName === '#text') {
-        const punctuationChars = ['.', ',', ':', '?', '!', ';'];
-
         const text = node.value
             .trim()
             // .replace(/\r?\n|\r/g, ' ')
@@ -309,7 +308,7 @@ export const visitNode = (
                 type: 'phrase',
                 content: text
             };
-            if (punctuationChars.indexOf(text.slice(0, 1)) !== -1) newPhrase.skipSpace = 'before';
+            if (startsWithPunctuationChar(text)) newPhrase.skipSpace = 'before';
 
             // if this is a bible-note:
             if (
@@ -365,7 +364,7 @@ export const visitNode = (
                                 type: 'phrase',
                                 content: fillText
                             };
-                            if (punctuationChars.indexOf(fillText.slice(0, 1)) !== -1)
+                            if (startsWithPunctuationChar(fillText))
                                 fillPhrase.skipSpace = 'before';
                             localState.currentDocument.push(fillPhrase);
                         }
@@ -402,8 +401,7 @@ export const visitNode = (
                         content: refText,
                         bibleReference
                     };
-                    if (punctuationChars.indexOf(refText.slice(0, 1)) !== -1)
-                        refPhrase.skipSpace = 'before';
+                    if (startsWithPunctuationChar(refText)) refPhrase.skipSpace = 'before';
                     localState.currentDocument.push(refPhrase);
 
                     currentIndex = ref.indices[1];
@@ -417,8 +415,7 @@ export const visitNode = (
                             type: 'phrase',
                             content: endText
                         };
-                        if (punctuationChars.indexOf(endText.slice(0, 1)) !== -1)
-                            endPhrase.skipSpace = 'before';
+                        if (startsWithPunctuationChar(endText)) endPhrase.skipSpace = 'before';
                         localState.currentDocument.push(endPhrase);
                     }
                 }
@@ -426,11 +423,7 @@ export const visitNode = (
         } else if (globalState.bookData && localState.currentContentGroup) {
             if (!globalState.currentChapterNumber || !globalState.currentVerseNumber)
                 throw new Error(
-                    `verse numbers are missing in node: <${node.nodeName}>${text}</${
-                        node.nodeName
-                    }> / state: ${globalState.currentChapterNumber}:${
-                        globalState.currentVerseNumber
-                    }`
+                    `verse numbers are missing in node: <${node.nodeName}>${text}</${node.nodeName}> / state: ${globalState.currentChapterNumber}:${globalState.currentVerseNumber}`
                 );
             const numbers = {
                 versionChapterNum: globalState.currentChapterNumber,
@@ -449,8 +442,7 @@ export const visitNode = (
                                 type: 'phrase',
                                 content: phraseText
                             };
-                            if (punctuationChars.indexOf(phraseText.slice(0, 1)) !== -1)
-                                phrase.skipSpace = 'before';
+                            if (startsWithPunctuationChar(phraseText)) phrase.skipSpace = 'before';
                             localState.currentContentGroup.push(phrase);
                         }
                     } else {
@@ -473,7 +465,7 @@ export const visitNode = (
                                     type: 'phrase',
                                     content: startingText
                                 };
-                                if (punctuationChars.indexOf(startingText.slice(0, 1)) !== -1)
+                                if (startsWithPunctuationChar(startingText))
                                     phrase.skipSpace = 'before';
                                 localState.currentContentGroup.push(phrase);
                             }
@@ -486,10 +478,7 @@ export const visitNode = (
                         };
                         // there are cases when `textWithNote` is an empty string (i.e. when right
                         // after a group node)
-                        if (
-                            !textWithNote ||
-                            punctuationChars.indexOf(textWithNote.slice(0, 1)) !== -1
-                        )
+                        if (!textWithNote || startsWithPunctuationChar(textWithNote))
                             phraseWithPendingNote.skipSpace = 'before';
                         localState.currentContentGroup.push(phraseWithPendingNote);
                         if (!globalState.contentWithPendingNotes)
@@ -503,8 +492,7 @@ export const visitNode = (
                     content: text,
                     ...numbers
                 };
-                if (punctuationChars.indexOf(text.slice(0, 1)) !== -1)
-                    newBiblePhrase.skipSpace = 'before';
+                if (startsWithPunctuationChar(text)) newBiblePhrase.skipSpace = 'before';
 
                 localState.currentContentGroup.push(newBiblePhrase);
             }
@@ -610,13 +598,13 @@ export const visitNode = (
                     newBibleGroup.contents.push(titleBibleGroup);
                     childState.currentContentGroup = titleBibleGroup.contents;
                 } else if (node.nodeName === 'p' && hasAttribute(node, 'class', 'poet')) {
-                    const poetryBibleGroup: IBibleContentGroup<'poetry'> = {
+                    const linegroupBibleGroup: IBibleContentGroup<'linegroup'> = {
                         type: 'group',
-                        groupType: 'poetry',
+                        groupType: 'linegroup',
                         contents: []
                     };
-                    newBibleGroup.contents.push(poetryBibleGroup);
-                    childState.currentContentGroup = poetryBibleGroup.contents;
+                    newBibleGroup.contents.push(linegroupBibleGroup);
+                    childState.currentContentGroup = linegroupBibleGroup.contents;
                 } else {
                     childState.currentContentGroup = newBibleGroup.contents;
                 }

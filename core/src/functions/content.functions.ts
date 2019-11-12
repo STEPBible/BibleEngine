@@ -21,7 +21,8 @@ import {
     IBibleSection,
     IBibleNote,
     IBibleVersion,
-    IBibleBook
+    IBibleBook,
+    IBibleReferenceRangeQuery
 } from '../models';
 import {
     BiblePhraseEntity,
@@ -131,16 +132,20 @@ export const generateBibleDocument = (
     paragraphs: BibleParagraphEntity[],
     context: IBibleOutputRich['context'],
     bookAbbreviations: { [index: string]: string },
-    chapterVerseSeparator: string
+    chapterVerseSeparator: string,
+    rangeQuery: IBibleReferenceRangeQuery
 ): IBibleOutputRoot => {
     const rootGroup: IBibleContentGeneratorRoot = {
         type: 'root',
         parent: undefined,
         contents: []
     };
+    if (!phrases.length) return rootGroup;
 
+    const firstPhraseId = phrases[0].id;
+    const lastPhraseId = phrases[phrases.length - 1].id;
     let activeGroup: BibleContentGeneratorContainer = rootGroup;
-    let lastPhrase: IBibleContentGeneratorPhrase | undefined;
+    let previousPhrase: IBibleContentGeneratorPhrase | undefined;
 
     const currentNumbering: {
         normalizedChapter: number;
@@ -201,6 +206,7 @@ export const generateBibleDocument = (
                         phrase.getModifierValue('quoteLevel')! >=
                             (<IBibleContentGeneratorGroup<'quote'>>_group).meta.level;
                 } else if (
+                    _group.groupType === 'line' ||
                     _group.groupType === 'orderedListItem' ||
                     _group.groupType === 'unorderedListItem' ||
                     _group.groupType === 'translationChange' ||
@@ -251,8 +257,11 @@ export const generateBibleDocument = (
                         quoteLevel > activeModifiers['quoteLevel']
                     )
                         activeModifiers['quoteLevel'] = quoteLevel;
-                    activeModifiers['quoteWho'] = _group.modifier;
+                    activeModifiers['quoteWho'] = (_group as IBibleContentGeneratorGroup<
+                        'quote'
+                    >).modifier;
                 } else if (
+                    _group.groupType === 'line' ||
                     _group.groupType === 'orderedListItem' ||
                     _group.groupType === 'unorderedListItem' ||
                     _group.groupType === 'translationChange' ||
@@ -281,8 +290,18 @@ export const generateBibleDocument = (
             .sort()
             .map(key => +key)) {
             // look for the section where the phrase is in (if any) and open it if necessary
-            const section = context[level].includedSections.find(
-                _section => phrase.id >= _section.phraseStartId && phrase.id <= _section.phraseEndId
+            const section = context[level].startingSections.find(
+                _section =>
+                    phrase.id >= _section.phraseStartId &&
+                    phrase.id <= _section.phraseEndId &&
+                    // in some situations (like verse reference popups) we don't want to show
+                    // sections that start at the first phrase of the query and end after the last
+                    // phrase
+                    !(
+                        rangeQuery.skipPartialSectionsInDocument &&
+                        _section.phraseStartId === firstPhraseId &&
+                        _section.phraseEndId > lastPhraseId
+                    )
             );
             // is the section already active?
             if (
@@ -361,12 +380,13 @@ export const generateBibleDocument = (
 
         // force a specific order of modifiers:
         const modifiers: (keyof PhraseModifiers | 'person')[] = [
-            'unorderedListItem',
-            'orderedListItem',
             'indentLevel',
             'quoteLevel',
             'title',
-            'poetry',
+            'linegroup',
+            'line',
+            'unorderedListItem',
+            'orderedListItem',
             'emphasis',
             'bold',
             'italic',
@@ -420,7 +440,8 @@ export const generateBibleDocument = (
                 modifier === 'unorderedListItem' ||
                 modifier === 'translationChange' ||
                 modifier === 'title' ||
-                modifier === 'link'
+                modifier === 'link' ||
+                modifier === 'line'
             ) {
                 if (
                     phrase.getModifierValue(modifier) &&
@@ -583,14 +604,14 @@ export const generateBibleDocument = (
 
         if (outputPhrase.skipSpace === 'before') {
             delete outputPhrase.skipSpace;
-            if (lastPhrase) {
-                lastPhrase.skipSpace = 'after';
+            if (previousPhrase) {
+                previousPhrase.skipSpace = 'after';
             }
         }
 
         // finally we can add our phrase to the data structure
         activeGroup.contents[activeGroup.contents.length] = outputPhrase;
-        lastPhrase = outputPhrase;
+        previousPhrase = outputPhrase;
     }
 
     return rootGroup;
@@ -609,9 +630,9 @@ export const generateContextSections = (
             if (section.level > 1) {
                 let isSectionWithinParentLevel = false;
                 for (const parentSection of [
-                    ...context[section.level - 1].includedSections,
+                    ...context[section.level - 1].startingSections,
                     context[section.level - 1].wrappingSection,
-                    context[section.level - 1].endingSection
+                    context[section.level - 1].endingPartialSection
                 ]) {
                     if (
                         parentSection &&
@@ -630,38 +651,42 @@ export const generateContextSections = (
 
             if (!context[section.level]) {
                 context[section.level] = {
-                    includedSections: [],
+                    startingSections: [],
                     previousSections: [],
                     nextSections: []
                 };
             }
 
-            // check if this section wraps the entire range
-            if (
-                section.phraseStartId <= firstPhraseId &&
-                section.phraseEndId >= lastPhraseId &&
-                (section.phraseStartId !== firstPhraseId || section.phraseEndId !== lastPhraseId)
-            )
-                context[section.level].wrappingSection = section;
-            // check if this section starts or ends within the range
-            else if (
-                section.phraseStartId < firstPhraseId &&
-                section.phraseEndId >= firstPhraseId &&
-                section.phraseEndId < lastPhraseId
-            )
-                context[section.level].endingSection = section;
-            // check if this section starts within the range
-            else if (
-                (section.phraseStartId >= firstPhraseId && section.phraseStartId <= lastPhraseId) ||
-                (section.phraseEndId >= firstPhraseId && section.phraseEndId <= lastPhraseId)
-            )
-                context[section.level].includedSections.push(section);
             // check if this section is before the range
-            else if (section.phraseEndId < firstPhraseId)
+            if (section.phraseEndId < firstPhraseId)
                 context[section.level].previousSections.push(section);
             // check if this section is after the range
             else if (section.phraseStartId > lastPhraseId)
                 context[section.level].nextSections.push(section);
+            // check if this section starts within the range
+            else if (
+                section.phraseStartId >= firstPhraseId &&
+                section.phraseStartId <= lastPhraseId
+                // (section.phraseEndId >= firstPhraseId && section.phraseEndId <= lastPhraseId)
+            )
+                context[section.level].startingSections.push(section);
+            // check if this section ends within the range
+            else if (
+                section.phraseStartId < firstPhraseId &&
+                section.phraseEndId >= firstPhraseId &&
+                section.phraseEndId <= lastPhraseId
+            )
+                context[section.level].endingPartialSection = section;
+            else {
+                //     // check if this section wraps the entire range
+                // if (
+                //     section.phraseStartId <= firstPhraseId &&
+                //     section.phraseEndId >= lastPhraseId &&
+                //     (section.phraseStartId !== firstPhraseId || section.phraseEndId !== lastPhraseId)
+                // )
+                // this seciton wraps the entire range (by exclusion above)
+                context[section.level].wrappingSection = section;
+            }
         }
     }
     return context;
@@ -856,32 +881,32 @@ export const generateContextRanges = (
                 ].completeRange = generateRangeFromGenericSection(
                     context[sectionLevel].wrappingSection!
                 );
-            } else if (context[sectionLevel].endingSection) {
+            } else if (context[sectionLevel].endingPartialSection) {
                 contextRanges.sections[
                     sectionLevel
                 ].completeStartingRange = generateRangeFromGenericSection(
-                    context[sectionLevel].endingSection!
+                    context[sectionLevel].endingPartialSection!
                 );
-            } else if (context[sectionLevel].includedSections.length > 0) {
-                // => if there is a wrapping section, there can't be includedSections on the
+            } else if (context[sectionLevel].startingSections.length > 0) {
+                // => if there is a wrapping section, there can't be startingSections on the
                 //    same level
-                if (context[sectionLevel].includedSections[0].phraseStartId < firstPhraseId) {
+                if (context[sectionLevel].startingSections[0].phraseStartId < firstPhraseId) {
                     contextRanges.sections[
                         sectionLevel
                     ].completeStartingRange = generateRangeFromGenericSection(
-                        context[sectionLevel].includedSections[0]
+                        context[sectionLevel].startingSections[0]
                     );
                 }
                 if (
-                    context[sectionLevel].includedSections[
-                        context[sectionLevel].includedSections.length - 1
+                    context[sectionLevel].startingSections[
+                        context[sectionLevel].startingSections.length - 1
                     ].phraseEndId > lastPhraseId
                 ) {
                     contextRanges.sections[
                         sectionLevel
                     ].completeEndingRange = generateRangeFromGenericSection(
-                        context[sectionLevel].includedSections[
-                            context[sectionLevel].includedSections.length - 1
+                        context[sectionLevel].startingSections[
+                            context[sectionLevel].startingSections.length - 1
                         ]
                     );
                 }
@@ -1034,7 +1059,7 @@ export const stripUnnecessaryDataFromBibleContextData = (
         };
         if (context[level].wrappingSection)
             context[level].wrappingSection = slimDownBibleSection(context[level].wrappingSection!);
-        context[level].includedSections = context[level].includedSections.map(slimDownBibleSection);
+        context[level].startingSections = context[level].startingSections.map(slimDownBibleSection);
         context[level].nextSections = context[level].nextSections.map(slimDownBibleSection);
         context[level].previousSections = context[level].previousSections.map(slimDownBibleSection);
     }

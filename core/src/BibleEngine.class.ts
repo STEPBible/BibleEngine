@@ -377,7 +377,8 @@ export class BibleEngine {
             paragraphs,
             context,
             bookAbbreviations,
-            versionEntity.chapterVerseSeparator
+            versionEntity.chapterVerseSeparator,
+            rangeQuery
         );
 
         if (stripUnnecessaryData) {
@@ -594,6 +595,7 @@ export class BibleEngine {
             currentNormalizedReference?: IBibleReferenceNormalized;
             currentSourceTypeId?: number;
             currentJoinToRefId?: number;
+            isWithinParagraph?: boolean;
         } = {
             phraseStack: [],
             paragraphStack: [],
@@ -885,6 +887,11 @@ export class BibleEngine {
                 )
                     throw new Error(`can't add phrases: normalisation failed`);
 
+                if (!globalState.isWithinParagraph)
+                    console.error(
+                        `can't add phrase "${content.content}" (${book.osisId} ${content.versionChapterNum}:${content.versionVerseNum}): not within a paragraph`
+                    );
+
                 // we are using a phraseStack to improve performance when adding to the database
                 const phraseRef: Required<IBiblePhraseRef> = {
                     isNormalized: true,
@@ -947,7 +954,9 @@ export class BibleEngine {
                     if (!childState.modifierState.quoteLevel)
                         childState.modifierState.quoteLevel = 0;
                     childState.modifierState.quoteLevel++;
-                    childState.columnModifierState.quoteWho = content.modifier;
+                    childState.columnModifierState.quoteWho = (content as IBibleContentGroup<
+                        'quote'
+                    >).modifier;
                 } else if (content.groupType === 'indent') {
                     if (!childState.modifierState.indentLevel)
                         childState.modifierState.indentLevel = 0;
@@ -961,18 +970,33 @@ export class BibleEngine {
                     childState.modifierState.title = (<IBibleContentGroup<'title'>>(
                         content
                     )).modifier = content.modifier === 'pullout' ? 'pullout' : 'inline';
-                else if (content.groupType === 'poetry') childState.modifierState.poetry = true;
+                else if (content.groupType === 'linegroup')
+                    childState.modifierState.linegroup = true;
                 else if (content.groupType === 'sela') childState.modifierState.sela = true;
+                else if (content.groupType === 'line')
+                    childState.modifierState.line = (content as IBibleContentGroup<
+                        'line'
+                    >).modifier;
                 else if (content.groupType === 'link')
-                    childState.modifierState.link = content.modifier;
+                    childState.modifierState.link = (content as IBibleContentGroup<
+                        'link'
+                    >).modifier;
                 else if (content.groupType === 'translationChange')
-                    childState.modifierState.translationChange = content.modifier;
+                    childState.modifierState.translationChange = (content as IBibleContentGroup<
+                        'translationChange'
+                    >).modifier;
                 else if (content.groupType === 'person')
-                    childState.columnModifierState.person = content.modifier;
+                    childState.columnModifierState.person = (content as IBibleContentGroup<
+                        'person'
+                    >).modifier;
                 else if (content.groupType === 'orderedListItem')
-                    childState.modifierState.orderedListItem = content.modifier;
+                    childState.modifierState.orderedListItem = (content as IBibleContentGroup<
+                        'orderedListItem'
+                    >).modifier;
                 else if (content.groupType === 'unorderedListItem')
-                    childState.modifierState.orderedListItem = content.modifier;
+                    childState.modifierState.orderedListItem = (content as IBibleContentGroup<
+                        'orderedListItem'
+                    >).modifier;
                 const {
                     firstPhraseId: groupFirstPhraseId,
                     lastPhraseId: groupLastPhraseId
@@ -998,7 +1022,7 @@ export class BibleEngine {
                 //        since an indent is a block group and a linebreak at the end of a block,
                 //        shouldn't have an effect. If this causes a problem, we will need to
                 //        implement some forward or backward looking magic, which is complex.
-                if (content.groupType === 'indent' || content.groupType === 'poetry')
+                if (content.groupType === 'indent' || content.groupType === 'linegroup')
                     globalState.phraseStack[globalState.phraseStack.length - 1].linebreak = true;
             } else if (
                 (content.type === 'group' && content.groupType === 'paragraph') ||
@@ -1014,6 +1038,9 @@ export class BibleEngine {
                     recursionLevel: localState.recursionLevel + 1
                 };
 
+                if (content.type === 'group' && content.groupType === 'paragraph')
+                    globalState.isWithinParagraph = true;
+
                 let {
                     firstPhraseId: sectionFirstPhraseId,
                     lastPhraseId: sectionLastPhraseId
@@ -1027,6 +1054,9 @@ export class BibleEngine {
                     inputHasNormalizedNumbering,
                     importStrongs
                 );
+
+                if (content.type === 'group' && content.groupType === 'paragraph')
+                    globalState.isWithinParagraph = false;
 
                 if (sectionFirstPhraseId && sectionLastPhraseId) {
                     if (content.type === 'group' && content.groupType === 'paragraph') {

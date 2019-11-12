@@ -35,6 +35,7 @@ export interface IBiblePhraseWithNumbers extends IBiblePhrase, IBibleReferenceVe
 export type PhraseModifiers = {
     indentLevel?: number;
     quoteLevel?: number;
+    line?: number;
     // we have a mix of semantic and style modifiers here - we provide both to be compatible with
     // every bible version while keeping the flexibility for those that use semantic modifiers:
     orderedListItem?: string;
@@ -46,7 +47,7 @@ export type PhraseModifiers = {
     italic?: boolean;
     divineName?: boolean;
     emphasis?: boolean;
-    poetry?: boolean;
+    linegroup?: boolean;
     sela?: boolean;
 };
 
@@ -55,6 +56,7 @@ export type ValueModifiers =
     | 'orderedListItem'
     | 'unorderedListItem'
     | 'title'
-    | 'link';
+    | 'link'
+    | 'line';
 
-export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'poetry' | 'sela';
+export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'linegroup' | 'sela';
