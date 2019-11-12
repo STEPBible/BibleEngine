@@ -26,3 +26,5 @@ output
 .env
 ChiUns.zip
 .vscode
+importers/scripts/data
+importers/src/bible/NEUE/data
