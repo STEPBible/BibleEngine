@@ -49,7 +49,6 @@ class SearchScreen extends React.PureComponent<{}, {}> {
   }
 
   updateSearch = (inputText: string) => {
-    console.log('updateSearch: ', inputText)
     const results = this.lunrSearchEngine.search(inputText, {})
     const refs = results.map(result => result.ref)
     const verseResults = refs.map((ref: any) => ({
@@ -68,8 +67,6 @@ class SearchScreen extends React.PureComponent<{}, {}> {
   }
 
   onSearchResultPress = item => {
-    console.log('onSearchResultPress')
-    console.log(JSON.stringify(item))
     this.props.global.updateCurrentBibleReference({
       versionChapterNum: item.versionChapterNum,
       bookOsisId: item.bookOsisId,
