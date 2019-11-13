@@ -213,6 +213,9 @@ class HomeScreen extends React.Component<any, any> {
 
 const styles = StyleSheet.create({
   container: {
+    marginLeft: Margin.LARGE,
+    marginRight: Margin.LARGE,
+    marginTop: Margin.MEDIUM,
     paddingBottom: 96,
   },
   container__footer: {
@@ -250,15 +253,13 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginLeft: Margin.LARGE,
-    marginRight: Margin.LARGE,
+    marginBottom: Margin.SMALL,
     ...getDebugStyles(),
   },
   title: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.MEDIUM * 0.8,
     marginBottom: Margin.SMALL,
-    marginTop: Margin.SMALL,
     width: Dimensions.get('window').width - Margin.LARGE * 2,
     ...getDebugStyles(),
   },
