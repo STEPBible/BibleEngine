@@ -174,6 +174,8 @@ const styles = StyleSheet.create({
     right: 0,
     top: 8,
     zIndex: 2,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#ddd',
   },
   search__input: {
     display: 'flex',
@@ -181,8 +183,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'orange',
     height: ifAndroid(54, 60),
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#ddd',
     marginTop: ifIOS(ifIphoneX(20, -10), ifAndroid(-10, 12)),
   },
   search__input__icon: {
