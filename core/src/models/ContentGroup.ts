@@ -5,7 +5,7 @@ export type ContentGroupType =
     | 'indent'
     | 'italic'
     | 'line'
-    | 'linegroup'
+    | 'lineGroup'
     | 'link'
     | 'orderedListItem'
     | 'paragraph'

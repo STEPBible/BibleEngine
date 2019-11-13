@@ -47,7 +47,7 @@ export type PhraseModifiers = {
     italic?: boolean;
     divineName?: boolean;
     emphasis?: boolean;
-    linegroup?: boolean;
+    lineGroup?: boolean;
     sela?: boolean;
 };
 
@@ -59,4 +59,4 @@ export type ValueModifiers =
     | 'link'
     | 'line';
 
-export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'linegroup' | 'sela';
+export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'lineGroup' | 'sela';

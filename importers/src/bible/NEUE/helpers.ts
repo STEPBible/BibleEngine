@@ -598,13 +598,13 @@ export const visitNode = (
                     newBibleGroup.contents.push(titleBibleGroup);
                     childState.currentContentGroup = titleBibleGroup.contents;
                 } else if (node.nodeName === 'p' && hasAttribute(node, 'class', 'poet')) {
-                    const linegroupBibleGroup: IBibleContentGroup<'linegroup'> = {
+                    const lineGroupBibleGroup: IBibleContentGroup<'lineGroup'> = {
                         type: 'group',
-                        groupType: 'linegroup',
+                        groupType: 'lineGroup',
                         contents: []
                     };
-                    newBibleGroup.contents.push(linegroupBibleGroup);
-                    childState.currentContentGroup = linegroupBibleGroup.contents;
+                    newBibleGroup.contents.push(lineGroupBibleGroup);
+                    childState.currentContentGroup = lineGroupBibleGroup.contents;
                 } else {
                     childState.currentContentGroup = newBibleGroup.contents;
                 }

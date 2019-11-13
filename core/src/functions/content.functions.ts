@@ -383,7 +383,7 @@ export const generateBibleDocument = (
             'indentLevel',
             'quoteLevel',
             'title',
-            'linegroup',
+            'lineGroup',
             'line',
             'unorderedListItem',
             'orderedListItem',
@@ -677,7 +677,7 @@ export const generateContextSections = (
             )
                 context[section.level].endingPartialSection = section;
             else {
-                // this seciton wraps the entire range (by exclusion above)
+                // this section wraps the entire range (by exclusion above)
                 context[section.level].wrappingSection = section;
             }
         }

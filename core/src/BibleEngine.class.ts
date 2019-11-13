@@ -970,8 +970,8 @@ export class BibleEngine {
                     childState.modifierState.title = (<IBibleContentGroup<'title'>>(
                         content
                     )).modifier = content.modifier === 'pullout' ? 'pullout' : 'inline';
-                else if (content.groupType === 'linegroup')
-                    childState.modifierState.linegroup = true;
+                else if (content.groupType === 'lineGroup')
+                    childState.modifierState.lineGroup = true;
                 else if (content.groupType === 'sela') childState.modifierState.sela = true;
                 else if (content.groupType === 'line')
                     childState.modifierState.line = (content as IBibleContentGroup<
@@ -1022,8 +1022,16 @@ export class BibleEngine {
                 //        since an indent is a block group and a linebreak at the end of a block,
                 //        shouldn't have an effect. If this causes a problem, we will need to
                 //        implement some forward or backward looking magic, which is complex.
-                if (content.groupType === 'indent' || content.groupType === 'linegroup')
-                    globalState.phraseStack[globalState.phraseStack.length - 1].linebreak = true;
+                if (
+                    globalState.phraseStack.length &&
+                    (content.groupType === 'indent' || content.groupType === 'lineGroup')
+                ) {
+                    const lastGroupPhrase =
+                        globalState.phraseStack[globalState.phraseStack.length - 1];
+                    if (lastGroupPhrase.id !== groupLastPhraseId)
+                        throw new Error('global phrase stack is inconsistent');
+                    lastGroupPhrase.linebreak = true;
+                }
             } else if (
                 (content.type === 'group' && content.groupType === 'paragraph') ||
                 content.type === 'section'
