@@ -14,6 +14,8 @@ import {
   StatusBar,
 } from 'react-native'
 import * as elasticlunr from 'elasticlunr'
+import hoistNonReactStatics from 'hoist-non-react-statics'
+
 import {
   Margin,
   FontSize,
@@ -21,12 +23,13 @@ import {
   Color,
   getDebugStyles,
 } from './Constants'
+import { withGlobalContext } from './GlobalContext'
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
 
 const searchIndex = require('../assets/esvSearchIndex.json')
 
-export default class SearchScreen extends React.PureComponent<{}, {}> {
+class SearchScreen extends React.PureComponent<{}, {}> {
   static navigationOptions = {
     header: null,
   }
@@ -53,8 +56,8 @@ export default class SearchScreen extends React.PureComponent<{}, {}> {
       reference: ref,
       verseContent: searchIndex.documentStore.docs[ref].vc,
       verseNum: searchIndex.documentStore.docs[ref].v,
-      chapterNum: searchIndex.documentStore.docs[ref].c,
-      bookName: searchIndex.documentStore.docs[ref].b,
+      versionChapterNum: searchIndex.documentStore.docs[ref].c,
+      bookOsisId: searchIndex.documentStore.docs[ref].b,
     }))
     this.setState({ ...this.state, inputText, verseResults })
   }
@@ -67,7 +70,10 @@ export default class SearchScreen extends React.PureComponent<{}, {}> {
   onSearchResultPress = item => {
     console.log('onSearchResultPress')
     console.log(JSON.stringify(item))
-    // updatebook and chapter
+    this.props.global.updateCurrentBibleReference({
+      versionChapterNum: item.versionChapterNum,
+      bookOsisId: item.bookOsisId,
+    })
     this.endSearch()
   }
 
@@ -241,3 +247,8 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 })
+
+export default hoistNonReactStatics(
+  withGlobalContext(SearchScreen),
+  SearchScreen
+)
