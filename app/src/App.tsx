@@ -20,9 +20,6 @@ export default function App() {
 
 const AppNavigator = createStackNavigator(
   {
-    Search: {
-      screen: SearchScreen,
-    },
     Home: {
       screen: HomeScreen,
     },
@@ -31,6 +28,9 @@ const AppNavigator = createStackNavigator(
     },
     Versions: {
       screen: VersionScreen,
+    },
+    Search: {
+      screen: SearchScreen,
     },
   },
   {
