@@ -6,7 +6,7 @@ import { BOOK_DATA } from '@bible-engine/core'
 import Text from './Text'
 import { withGlobalContext } from './GlobalContext'
 import { STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, FontSize } from './Constants'
-import { TouchableRipple } from 'react-native-paper'
+import { TouchableRipple, IconButton } from 'react-native-paper'
 
 interface Props {
   navigation: any
@@ -44,6 +44,13 @@ class NavigationHeader extends React.Component<Props, {}> {
             </Text>
           </TouchableRipple>
         </View>
+        <IconButton
+          style={styles.header__search}
+          onPress={() => this.props.navigation.navigate('Search')}
+          icon="search"
+          size={25}
+          color="#9b9b9b"
+        />
       </View>
     )
   }
@@ -55,6 +62,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     flexDirection: 'row',
     height: NAV_BAR_HEIGHT,
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomColor: '#999999',
@@ -91,6 +99,10 @@ const styles = StyleSheet.create({
   header__chips__version__text: {
     fontSize: FontSize.EXTRA_SMALL,
     margin: 8,
+  },
+  header__search: {
+    position: 'absolute',
+    right: 4,
   },
 })
 
