@@ -241,7 +241,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         console.timeEnd('totalLoadingTime')
       }
     )
-    this.cacheCurrentChapterPosition(range)
+    this.cacheCurrentChapterPosition(rangeQuery)
     this.captureAnalyticsEvent()
   }
 
