@@ -87,10 +87,21 @@ export interface IBibleReferenceRangeQuery extends IBibleReferenceRange {
     versionUid: string;
     // TODO: implement
     targetVersionUid?: string;
-    skipPartialSectionsInDocument?: boolean;
+    /**
+     * there is a special case of `startingSections` that start at the beginning of the range and
+     * end after it. So they both start in the range and wrap it and also extend after the
+     * range. In a reader/context view we want to show all sections that start in a given range
+     * (in a reader that will usually be a chapter range). However in a verse-reference popup we
+     * probably don't want to show it, e.g. when showing Ps 1:1, we are only interested in the verse
+     * not in the headings "Book One" and "The Way of the Righteous and the Wicked". However when
+     * showing Ps 1 (the chapter) we would show the latter (not the former), since this section is
+     * wrapping but not partial, i.e. it is identical to the range (so the heading is meaningful
+     * also in the context of a popup)
+     */
+    skipPartialWrappingSectionsInDocument?: boolean;
 }
 
-/* types / interfaces neded for bible-passage-reference-parser */
+/* types / interfaces needed for bible-passage-reference-parser */
 export type BibleReferenceBCV = {
     b: 'string';
     c: number;

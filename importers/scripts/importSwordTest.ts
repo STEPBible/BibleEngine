@@ -1,31 +1,36 @@
 import { join } from 'path';
 
-import { ModuleIndex, SwordModule } from '../src';
+import { ModuleIndex, SwordModule, V11nImporter, BeDatabaseCreator, SwordImporter } from '../src';
 import { readFileSync } from 'fs';
 
+// TS complains if we use `const` here, since manual code changes are not part of its use case
+let TEST_SUBJECT: 'parser' | 'bibleengine' = 'parser';
+
 const run = async () => {
-    // const creator = new BeDatabaseCreator({
-    //     type: 'sqlite',
-    //     database: join(__dirname, '../../output/biblesSwordTest.db'),
-    //     dropSchema: true
-    // });
-
-    // creator.addImporter(V11nImporter);
     const filename = join(__dirname, './data/ESV2016_th.zip');
+    if (TEST_SUBJECT === 'bibleengine') {
+        const creator = new BeDatabaseCreator({
+            type: 'sqlite',
+            database: join(__dirname, '../../output/biblesSwordTest.db'),
+            dropSchema: true
+        });
 
-    const contents = readFileSync(filename);
-    const fileIndex = ModuleIndex.fromNodeBuffer(contents);
-    const swordModule = new SwordModule(fileIndex);
-    const xmlResult = swordModule.getXMLforChapter('Psa 41');
+        creator.addImporter(V11nImporter);
 
-    console.log(xmlResult);
+        creator.addImporter(SwordImporter, {
+            sourcePath: filename,
+            versionMeta: { hasStrongs: false }
+        });
 
-    // creator.addImporter(SwordImporter, {
-    //     sourcePath: filename,
-    //     versionMeta: { hasStrongs: false }
-    // });
+        return creator.createDatabase();
+    } else if (TEST_SUBJECT === 'parser') {
+        const contents = readFileSync(filename);
+        const fileIndex = ModuleIndex.fromNodeBuffer(contents);
+        const swordModule = new SwordModule(fileIndex);
+        const xmlResult = swordModule.getXMLforChapter('Psa 41');
 
-    // return creator.createDatabase();
+        console.log(xmlResult);
+    }
 };
 
 console.time('dbsave');

@@ -25,7 +25,7 @@ export interface IContentGroup<T extends ContentGroupType> {
      * - 'title' => 'inline' | 'pullout'
      * - 'orderedListItem' | 'unorderedListItem' => seperate index for each item (also for
      *      unordered items, otherwise items can't be distinguished)
-     * - 'line' => line nr (needed to distinguish lines)
+     * - 'line' => line number (needed to distinguish lines)
      *
      * - the requirement 'jesus words in red' can be achieved via quote='jesus'
      * - we have a seperate modifer for 'divineName' (in addition to 'person'), since person='god'

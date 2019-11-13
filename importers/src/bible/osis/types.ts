@@ -8,9 +8,12 @@ import {
     IBibleContent,
     IBibleCrossReference
 } from '@bible-engine/core';
-import { Tag } from 'sax';
+import { OsisXmlNodeName, OsisXmlNodeType, OsisXmlNode } from '../../shared/osisTypes';
 
-export type TagWithType = Tag & { type?: string };
+export type TagType = OsisXmlNodeName | OsisXmlNodeType;
+export interface ITagWithType extends OsisXmlNode {
+    type: TagType;
+}
 
 export type ParserContext = {
     version?: IBibleVersion;
@@ -25,9 +28,14 @@ export type ParserContext = {
     contentContainerStack: (
         | { type: 'root'; contents: IBibleContent[] }
         | IBibleContentSection
-        | IBibleContentGroup<ContentGroupType>)[];
-    hierarchicalTagStack: TagWithType[];
-    openedSelfClosingTag?: Tag;
-    skipClosingTags: string[];
-    sectionStack: ('majorSection' | 'section' | 'subSection')[];
+        | IBibleContentGroup<ContentGroupType>
+    )[];
+    hierarchicalTagStack: ITagWithType[];
+    openedSelfClosingTag?: ITagWithType;
+    skipClosingTags: TagType[];
+    sectionStack: (
+        | OsisXmlNodeType.SECTION_MAJOR
+        | OsisXmlNodeType.SECTION
+        | OsisXmlNodeType.SECTION_SUB
+    )[];
 };

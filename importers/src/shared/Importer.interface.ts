@@ -3,6 +3,7 @@ import { BibleEngine, IBibleVersion } from '@bible-engine/core';
 export interface IImporterOptions {
     sourceData?: string;
     sourcePath?: string;
+    sourceEncoding?: string;
     versionMeta?: Partial<IBibleVersion>;
     bookMeta?: Map<string, { abbreviation: string; title: string; number: number }>;
 }

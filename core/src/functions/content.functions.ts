@@ -298,7 +298,7 @@ export const generateBibleDocument = (
                     // sections that start at the first phrase of the query and end after the last
                     // phrase
                     !(
-                        rangeQuery.skipPartialSectionsInDocument &&
+                        rangeQuery.skipPartialWrappingSectionsInDocument &&
                         _section.phraseStartId === firstPhraseId &&
                         _section.phraseEndId > lastPhraseId
                     )
@@ -667,7 +667,6 @@ export const generateContextSections = (
             else if (
                 section.phraseStartId >= firstPhraseId &&
                 section.phraseStartId <= lastPhraseId
-                // (section.phraseEndId >= firstPhraseId && section.phraseEndId <= lastPhraseId)
             )
                 context[section.level].startingSections.push(section);
             // check if this section ends within the range
@@ -678,12 +677,6 @@ export const generateContextSections = (
             )
                 context[section.level].endingPartialSection = section;
             else {
-                //     // check if this section wraps the entire range
-                // if (
-                //     section.phraseStartId <= firstPhraseId &&
-                //     section.phraseEndId >= lastPhraseId &&
-                //     (section.phraseStartId !== firstPhraseId || section.phraseEndId !== lastPhraseId)
-                // )
                 // this seciton wraps the entire range (by exclusion above)
                 context[section.level].wrappingSection = section;
             }
