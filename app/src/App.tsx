@@ -7,6 +7,7 @@ import HomeScreen from './HomeScreen'
 import { GlobalContextProvider } from './GlobalContext'
 import BookScreen from './BookScreen'
 import VersionScreen from './VersionScreen'
+import SearchScreen from './SearchScreen'
 
 export default function App() {
   useKeepAwake()
@@ -19,6 +20,9 @@ export default function App() {
 
 const AppNavigator = createStackNavigator(
   {
+    Search: {
+      screen: SearchScreen,
+    },
     Home: {
       screen: HomeScreen,
     },
