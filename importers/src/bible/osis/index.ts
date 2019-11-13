@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import { readFileSync, createReadStream, writeFileSync } from 'fs';
 import { decodeStream, encodeStream } from 'iconv-lite';
-import { parser, Tag } from 'sax';
+import { parser } from 'sax';
 
 import {
     IBibleContentSection,
@@ -51,7 +51,7 @@ export class OsisImporter extends BibleEngineImporter {
 
             xmlStream.ontext = (text: string) => this.parseTextNode(text, context);
             xmlStream.onopentag = (tag: any) => this.parseOpeningTag(tag, context);
-            xmlStream.onclosetag = (tagName: string) => this.parseClosingTag(tagName, context);
+            xmlStream.onclosetag = (tagName: OsisXmlNodeName) => this.parseClosingTag(tagName, context);
             xmlStream.onerror = () => xmlStream.resume();
             xmlStream.onend = () => {
                 resolve(context);

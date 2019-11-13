@@ -334,6 +334,8 @@ function getPhrase(content: string, context: ParserContext): IBibleContentPhrase
 function getCrossReference(context: ParserContext): IBibleCrossReference {
     const key = String(context.currentNoteNode!.attributes.n);
     const { osisRef } = context.currentCrossRefNode!.attributes;
+    if (!osisRef) throw new Error('parsing a cross reference with attribute "osisRef"');
+
     let { bookOsisId, versionChapterNum, versionVerseNum } = getOsisReferenceEntities(osisRef);
     bookOsisId = String(bookOsisId);
     const crossRef: IBibleCrossReference = {
