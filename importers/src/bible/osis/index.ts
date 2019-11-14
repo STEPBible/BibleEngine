@@ -100,6 +100,12 @@ export class OsisImporter extends BibleEngineImporter {
         }
 
         switch (elementType) {
+            case OsisXmlNodeName.CATCH_WORD:
+            case OsisXmlNodeName.REFERENCE:
+            case OsisXmlNodeName.WORK: {
+                // is handled in parseTextNode
+                break;
+            }
             case OsisXmlNodeName.OSIS_ROOT: {
                 if (!tag.attributes.osisIDWork || !tag.attributes['xml:lang'])
                     throw new Error(`missing osisIDWork or xml:lang attribute`);
@@ -110,10 +116,6 @@ export class OsisImporter extends BibleEngineImporter {
                     chapterVerseSeparator: ':',
                     ...this.options.versionMeta
                 };
-                break;
-            }
-            case OsisXmlNodeName.WORK: {
-                // work is handled in text parsing
                 break;
             }
             case OsisXmlNodeType.BOOK: {
@@ -367,10 +369,6 @@ export class OsisImporter extends BibleEngineImporter {
                 };
                 break;
             }
-            case OsisXmlNodeName.CATCH_WORD: {
-                // catchWord is handled in parseTextNode
-                break;
-            }
             case OsisXmlNodeName.TITLE: {
                 if (tag.attributes.canonical === 'true') {
                     const titleGroup: IBibleContentGroup<'title'> = {
@@ -412,10 +410,6 @@ export class OsisImporter extends BibleEngineImporter {
 
                 currentContainer.contents.push(groupItalic);
                 context.contentContainerStack.push(groupItalic);
-                break;
-            }
-            case OsisXmlNodeName.REFERENCE: {
-                // is handled in parseTextNode
                 break;
             }
             case OsisXmlNodeName.QUOTE: {
@@ -632,6 +626,13 @@ export class OsisImporter extends BibleEngineImporter {
 
                 break;
             }
+            case OsisXmlNodeName.OSIS_ROOT:
+            case OsisXmlNodeName.VERSE:
+            case OsisXmlNodeName.CHAPTER:
+            case OsisXmlNodeName.LINEBREAK: {
+                // nothing to do
+                break;
+            }
             case OsisXmlNodeType.SECTION:
             case OsisXmlNodeType.SECTION_MAJOR:
             case OsisXmlNodeType.SECTION_SUB: {
@@ -742,6 +743,26 @@ export class OsisImporter extends BibleEngineImporter {
                     )
                         throw new Error(`unclean container stack while closing divineName group`);
                 }
+                break;
+            }
+            case OsisXmlNodeName.WORD: {
+                // currently not implemented
+                break;
+            }
+            case OsisXmlNodeName.CATCH_WORD:
+            case OsisXmlNodeName.REFERENCE:
+            case OsisXmlNodeName.WORK: {
+                // is handled in parseTextNode
+                break;
+            }
+            case OsisXmlNodeName.XML_ROOT:
+            case OsisXmlNodeName.OSIS_HEADER:
+            case OsisXmlNodeName.IDENTIFIER:
+            case OsisXmlNodeName.VERSION_SCOPE:
+            case OsisXmlNodeName.REF_SYSTEM:
+            case OsisXmlNodeName.WORD_SEGMENT:
+            case OsisXmlNodeName.MILESTONE: {
+                // currently ignored
                 break;
             }
             default: {

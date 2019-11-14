@@ -1,4 +1,4 @@
-import { createReadStream, readFileSync } from 'fs';
+import { createReadStream } from 'fs';
 import { join } from 'path';
 import { decodeStream, encodeStream } from 'iconv-lite';
 
@@ -66,4 +66,4 @@ const run = async (
     await creator.createDatabase();
 };
 
-run({ esv: true });
+run({ neg79: true, v11n: true });
