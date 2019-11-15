@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert, BeforeUpdate, Index, UpdateDateColumn } from 'typeorm';
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    BeforeInsert,
+    BeforeUpdate,
+    Index,
+    UpdateDateColumn
+} from 'typeorm';
 import { DocumentRoot, IBibleVersion } from '../models';
 
 @Entity('bible_version')
@@ -30,6 +38,9 @@ export class BibleVersionEntity implements IBibleVersion {
 
     @Column({ nullable: true })
     hasStrongs?: boolean;
+
+    @Column({ nullable: true })
+    isPlaintext?: boolean;
 
     @UpdateDateColumn()
     lastUpdate: Date;

@@ -176,12 +176,12 @@ export class BibleEngine {
             bookImportPhraseRange = await this.addBibleBookContent(
                 options.entityManager,
                 bookInput.contents,
+                version,
                 bookEntity,
                 textData,
                 undefined,
                 undefined,
-                contentHasNormalizedNumbers,
-                version.hasStrongs
+                contentHasNormalizedNumbers
             );
 
             bookEntity = await this.updateBook(
@@ -212,14 +212,13 @@ export class BibleEngine {
 
                 bookImportPhraseRange = await this.addBibleBookContent(
                     transactionEntityManger,
-                    // entityManager,
                     bookInput.contents,
+                    version,
                     bookEntity,
                     textData,
                     undefined,
                     undefined,
-                    contentHasNormalizedNumbers,
-                    version.hasStrongs
+                    contentHasNormalizedNumbers
                 );
 
                 bookEntity = await this.updateBook(
@@ -377,7 +376,8 @@ export class BibleEngine {
             paragraphs,
             context,
             bookAbbreviations,
-            versionEntity.chapterVerseSeparator
+            versionEntity.chapterVerseSeparator,
+            rangeQuery
         );
 
         if (stripUnnecessaryData) {
@@ -578,6 +578,7 @@ export class BibleEngine {
     private async addBibleBookContent(
         entityManger: EntityManager,
         contents: IBibleContent[],
+        version: BibleVersionEntity,
         book: IBibleBookEntity,
         context: BibleBookPlaintext,
         globalState: {
@@ -594,6 +595,7 @@ export class BibleEngine {
             currentNormalizedReference?: IBibleReferenceNormalized;
             currentSourceTypeId?: number;
             currentJoinToRefId?: number;
+            isWithinParagraph?: boolean;
         } = {
             phraseStack: [],
             paragraphStack: [],
@@ -617,16 +619,17 @@ export class BibleEngine {
             sectionLevel: 0,
             recursionLevel: 0
         },
-        inputHasNormalizedNumbering = false,
-        importStrongs = true
+        inputHasNormalizedNumbering = false
     ): Promise<{ firstPhraseId: number | undefined; lastPhraseId: number | undefined }> {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = entityManger;
+        const skipStrongs = version.hasStrongs === false;
         let firstPhraseId: number | undefined, lastPhraseId: number | undefined;
         let lastContent: IBibleContent | undefined;
         for (const content of contents) {
             let versionNumberingChange = false;
             let phraseMergedWithLast = false;
+            let emptyAddedPhraseId: number | undefined;
 
             if (content.type !== 'section' && content.numbering) {
                 versionNumberingChange = true;
@@ -723,7 +726,6 @@ export class BibleEngine {
                         versionSubverseNum: globalState.currentVersionSubverse
                     };
                     let firstStandardRefId: number | undefined;
-
                     const normalisationRules = await this.getNormalisationRulesForRange(reference);
 
                     for (const rule of normalisationRules) {
@@ -748,7 +750,7 @@ export class BibleEngine {
                             normalizedSubverseNum: rule.standardRef.normalizedSubverseNum || 0,
                             phraseNum: 0
                         };
-                        const emptyPhraseId = generatePhraseId(emptyPhraseReference);
+                        emptyAddedPhraseId = generatePhraseId(emptyPhraseReference);
 
                         if (rule.action === 'Empty verse') {
                             // since this phrase does not relate to any verse in the
@@ -764,10 +766,15 @@ export class BibleEngine {
                                     ...localState.modifierState
                                 })
                             );
-                            if (!firstPhraseId || emptyPhraseId < firstPhraseId)
-                                firstPhraseId = emptyPhraseId;
-                            if (!lastPhraseId || emptyPhraseId > lastPhraseId)
-                                lastPhraseId = emptyPhraseId;
+                            if (
+                                (firstPhraseId && emptyAddedPhraseId < firstPhraseId) ||
+                                (lastPhraseId && emptyAddedPhraseId < lastPhraseId)
+                            )
+                                console.error(
+                                    `shuffled phraseId ${emptyAddedPhraseId}: ${firstPhraseId}(first) ${lastPhraseId}(last)`
+                                );
+                            if (!firstPhraseId) firstPhraseId = emptyAddedPhraseId;
+                            lastPhraseId = emptyAddedPhraseId;
                         } else if (rule.action === 'Renumber verse') {
                             // only the first standardRef is relevant for creating the
                             // normalized reference for this phrase. Additional refs occur when
@@ -805,10 +812,16 @@ export class BibleEngine {
                                     { ...localState.modifierState }
                                 )
                             );
-                            if (!firstPhraseId || emptyPhraseId < firstPhraseId)
-                                firstPhraseId = emptyPhraseId;
-                            if (!lastPhraseId || emptyPhraseId > lastPhraseId)
-                                lastPhraseId = emptyPhraseId;
+                            if (
+                                (firstPhraseId && emptyAddedPhraseId < firstPhraseId) ||
+                                (lastPhraseId && emptyAddedPhraseId < lastPhraseId)
+                            )
+                                console.error(
+                                    `shuffled phraseId ${emptyAddedPhraseId}: ${firstPhraseId}(first) ${lastPhraseId}(last)`
+                                );
+
+                            if (!firstPhraseId) firstPhraseId = emptyAddedPhraseId;
+                            lastPhraseId = emptyAddedPhraseId;
 
                             // the last standardRefId in this range needs to be linked on the
                             // starting verse of the range
@@ -854,7 +867,7 @@ export class BibleEngine {
                 // check if the last and this content item are both phrases that are only
                 // distinguished by strongs - in case we don't want strongs, we merge them
                 if (
-                    !importStrongs &&
+                    skipStrongs &&
                     lastContent &&
                     (lastContent.type === 'phrase' || !lastContent.type) &&
                     !lastContent.crossReferences &&
@@ -885,6 +898,11 @@ export class BibleEngine {
                 )
                     throw new Error(`can't add phrases: normalisation failed`);
 
+                if (!globalState.isWithinParagraph && !version.isPlaintext)
+                    throw new Error(
+                        `can't add phrase "${content.content}" (${book.osisId} ${content.versionChapterNum}:${content.versionVerseNum}): not within a paragraph`
+                    );
+
                 // we are using a phraseStack to improve performance when adding to the database
                 const phraseRef: Required<IBiblePhraseRef> = {
                     isNormalized: true,
@@ -898,8 +916,16 @@ export class BibleEngine {
                     phraseNum: globalState.currentPhraseNum
                 };
                 const phraseId = generatePhraseId(phraseRef);
-                if (!firstPhraseId || phraseId < firstPhraseId) firstPhraseId = phraseId;
-                if (!lastPhraseId || phraseId > lastPhraseId) lastPhraseId = phraseId;
+                if (
+                    (firstPhraseId && phraseId < firstPhraseId) ||
+                    (lastPhraseId && phraseId < lastPhraseId && !globalState.currentJoinToRefId)
+                )
+                    console.error(
+                        `shuffled phraseId ${phraseId} (${emptyAddedPhraseId}): ${firstPhraseId}(first) ${lastPhraseId}(last)`
+                    );
+
+                if (!firstPhraseId) firstPhraseId = phraseId;
+                lastPhraseId = phraseId;
 
                 if (!content.quoteWho && localState.columnModifierState.quoteWho)
                     content.quoteWho = localState.columnModifierState.quoteWho;
@@ -930,10 +956,12 @@ export class BibleEngine {
                         );
                     }
                 }
-                if (content.strongs && !importStrongs) delete content.strongs;
+                if (content.strongs && skipStrongs) delete content.strongs;
 
                 globalState.phraseStack.push(
-                    new BiblePhraseEntity(content, phraseRef, { ...localState.modifierState })
+                    new BiblePhraseEntity(content, phraseRef, {
+                        ...localState.modifierState
+                    })
                 );
             } else if (content.type === 'group' && content.groupType !== 'paragraph') {
                 const childState = {
@@ -947,7 +975,9 @@ export class BibleEngine {
                     if (!childState.modifierState.quoteLevel)
                         childState.modifierState.quoteLevel = 0;
                     childState.modifierState.quoteLevel++;
-                    childState.columnModifierState.quoteWho = content.modifier;
+                    childState.columnModifierState.quoteWho = (content as IBibleContentGroup<
+                        'quote'
+                    >).modifier;
                 } else if (content.groupType === 'indent') {
                     if (!childState.modifierState.indentLevel)
                         childState.modifierState.indentLevel = 0;
@@ -961,35 +991,56 @@ export class BibleEngine {
                     childState.modifierState.title = (<IBibleContentGroup<'title'>>(
                         content
                     )).modifier = content.modifier === 'pullout' ? 'pullout' : 'inline';
-                else if (content.groupType === 'poetry') childState.modifierState.poetry = true;
+                else if (content.groupType === 'lineGroup')
+                    childState.modifierState.lineGroup = true;
                 else if (content.groupType === 'sela') childState.modifierState.sela = true;
+                else if (content.groupType === 'line')
+                    childState.modifierState.line = (content as IBibleContentGroup<
+                        'line'
+                    >).modifier;
                 else if (content.groupType === 'link')
-                    childState.modifierState.link = content.modifier;
+                    childState.modifierState.link = (content as IBibleContentGroup<
+                        'link'
+                    >).modifier;
                 else if (content.groupType === 'translationChange')
-                    childState.modifierState.translationChange = content.modifier;
+                    childState.modifierState.translationChange = (content as IBibleContentGroup<
+                        'translationChange'
+                    >).modifier;
                 else if (content.groupType === 'person')
-                    childState.columnModifierState.person = content.modifier;
+                    childState.columnModifierState.person = (content as IBibleContentGroup<
+                        'person'
+                    >).modifier;
                 else if (content.groupType === 'orderedListItem')
-                    childState.modifierState.orderedListItem = content.modifier;
+                    childState.modifierState.orderedListItem = (content as IBibleContentGroup<
+                        'orderedListItem'
+                    >).modifier;
                 else if (content.groupType === 'unorderedListItem')
-                    childState.modifierState.orderedListItem = content.modifier;
+                    childState.modifierState.orderedListItem = (content as IBibleContentGroup<
+                        'orderedListItem'
+                    >).modifier;
                 const {
                     firstPhraseId: groupFirstPhraseId,
                     lastPhraseId: groupLastPhraseId
                 } = await this.addBibleBookContent(
                     db,
                     content.contents,
+                    version,
                     book,
                     context,
                     globalState,
                     childState,
-                    inputHasNormalizedNumbering,
-                    importStrongs
+                    inputHasNormalizedNumbering
                 );
-                if (groupFirstPhraseId && (!firstPhraseId || groupFirstPhraseId < firstPhraseId))
-                    firstPhraseId = groupFirstPhraseId;
-                if (groupLastPhraseId && (!lastPhraseId || groupLastPhraseId > lastPhraseId))
-                    lastPhraseId = groupLastPhraseId;
+                if (
+                    (firstPhraseId && groupFirstPhraseId && groupFirstPhraseId < firstPhraseId) ||
+                    (lastPhraseId && groupLastPhraseId && groupLastPhraseId < lastPhraseId)
+                )
+                    console.error(
+                        `shuffled phraseId ${groupFirstPhraseId}-${groupLastPhraseId}: ${firstPhraseId}(first) ${lastPhraseId}(last)`
+                    );
+
+                if (groupFirstPhraseId && !firstPhraseId) firstPhraseId = groupFirstPhraseId;
+                if (groupLastPhraseId) lastPhraseId = groupLastPhraseId;
 
                 // if we have multiple groups of the same level after each other, we won't be able
                 // to persist this information (due to the way the schema works). In this case we
@@ -998,8 +1049,14 @@ export class BibleEngine {
                 //        since an indent is a block group and a linebreak at the end of a block,
                 //        shouldn't have an effect. If this causes a problem, we will need to
                 //        implement some forward or backward looking magic, which is complex.
-                if (content.groupType === 'indent' || content.groupType === 'poetry')
-                    globalState.phraseStack[globalState.phraseStack.length - 1].linebreak = true;
+                if (
+                    globalState.phraseStack.length &&
+                    (content.groupType === 'indent' || content.groupType === 'lineGroup')
+                ) {
+                    const lastGroupPhrase =
+                        globalState.phraseStack[globalState.phraseStack.length - 1];
+                    lastGroupPhrase.linebreak = true;
+                }
             } else if (
                 (content.type === 'group' && content.groupType === 'paragraph') ||
                 content.type === 'section'
@@ -1014,19 +1071,25 @@ export class BibleEngine {
                     recursionLevel: localState.recursionLevel + 1
                 };
 
+                if (content.type === 'group' && content.groupType === 'paragraph')
+                    globalState.isWithinParagraph = true;
+
                 let {
                     firstPhraseId: sectionFirstPhraseId,
                     lastPhraseId: sectionLastPhraseId
                 } = await this.addBibleBookContent(
                     db,
                     content.contents,
+                    version,
                     book,
                     context,
                     globalState,
                     childState,
-                    inputHasNormalizedNumbering,
-                    importStrongs
+                    inputHasNormalizedNumbering
                 );
+
+                if (content.type === 'group' && content.groupType === 'paragraph')
+                    globalState.isWithinParagraph = false;
 
                 if (sectionFirstPhraseId && sectionLastPhraseId) {
                     if (content.type === 'group' && content.groupType === 'paragraph') {
@@ -1051,10 +1114,16 @@ export class BibleEngine {
                         );
                     }
 
-                    if (!firstPhraseId || sectionFirstPhraseId < firstPhraseId)
-                        firstPhraseId = sectionFirstPhraseId;
-                    if (!lastPhraseId || sectionLastPhraseId > lastPhraseId)
-                        lastPhraseId = sectionLastPhraseId;
+                    if (
+                        (firstPhraseId && sectionFirstPhraseId < firstPhraseId) ||
+                        (lastPhraseId && sectionLastPhraseId < lastPhraseId)
+                    )
+                        console.error(
+                            `shuffled phraseId ${sectionFirstPhraseId}-${sectionLastPhraseId}: ${firstPhraseId}(first) ${lastPhraseId}(last)`
+                        );
+
+                    if (!firstPhraseId) firstPhraseId = sectionFirstPhraseId;
+                    lastPhraseId = sectionLastPhraseId;
                 }
             }
 

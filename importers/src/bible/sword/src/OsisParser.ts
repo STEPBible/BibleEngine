@@ -1,11 +1,11 @@
+import { ParserContext, ChapterXML } from './types';
+
 import {
-    ParserContext,
     OsisXmlNode,
-    OsisXmlTag,
+    OsisXmlNodeName,
     OsisXmlNodeType,
-    Indentation,
-    ChapterXML
-} from '../src/types';
+    Indentation
+} from '../../../shared/osisTypes';
 
 import {
     IBibleCrossReference,
@@ -81,10 +81,12 @@ export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContent
     }
 
     if (!context.titleSections.length && context.phrases) {
-        context.titleSections = [{
-            type: 'section',
-            contents: context.phrases
-        }]
+        context.titleSections = [
+            {
+                type: 'section',
+                contents: context.phrases
+            }
+        ];
     }
 
     const validSections = context.titleSections.map(section => {
@@ -98,17 +100,17 @@ export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContent
 function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
     context.currentNode = node;
     switch (node.name) {
-        case OsisXmlTag.NOTE: {
+        case OsisXmlNodeName.NOTE: {
             context.currentNoteNode = node;
             break;
         }
-        case OsisXmlTag.CROSS_REFERENCE: {
+        case OsisXmlNodeName.REFERENCE: {
             context.currentCrossRefNode = node;
             const crossRef = getCrossReference(context);
             context.crossRefs.push(crossRef);
             break;
         }
-        case OsisXmlTag.TITLE: {
+        case OsisXmlNodeName.TITLE: {
             if (node.attributes.type === OsisXmlNodeType.PSALM) {
                 context.psalmTitle = node;
                 break;
@@ -120,7 +122,7 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
             }
             break;
         }
-        case OsisXmlTag.POETIC_LINE: {
+        case OsisXmlNodeName.LINE: {
             if (node.attributes.eID) {
                 console.assert(context.phrases);
                 const indentGroup = getIndentGroup(node, context);
@@ -133,11 +135,11 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
             }
             break;
         }
-        case OsisXmlTag.DIVINE_NAME: {
+        case OsisXmlNodeName.DIVINE_NAME: {
             context.divineNameNode = node;
             break;
         }
-        case OsisXmlTag.DIVISION: {
+        case OsisXmlNodeName.DIVISION: {
             if (isStartOfParagraph(node)) {
                 if (context.paragraph && context.paragraph!.contents.length) {
                     throw new Error("Can't add a paragraph when one already exists");
@@ -175,7 +177,7 @@ function parseTextNode(text: string, context: ParserContext) {
     if (formattedText.length === 0) {
         return;
     }
-    if (node && node.name === OsisXmlTag.HIGHLIGHT) {
+    if (node && node.name === OsisXmlNodeName.HIGHLIGHT) {
         formattedText = getPhraseWithHighlighting(formattedText, context);
     }
     if (isFootnote(context.currentNoteNode)) {
@@ -196,7 +198,7 @@ function parseTextNode(text: string, context: ParserContext) {
         return;
     }
     if (context.title) {
-        if (node && node.name === OsisXmlTag.DIVINE_NAME) {
+        if (node && node.name === OsisXmlNodeName.DIVINE_NAME) {
             context.titleText += text.toUpperCase();
             return;
         }
@@ -222,7 +224,7 @@ function parseTextNode(text: string, context: ParserContext) {
     }
     if (node) {
         switch (node.name) {
-            case OsisXmlTag.TITLE:
+            case OsisXmlNodeName.TITLE:
                 context.titleText += formattedText;
                 break;
             default:
@@ -239,10 +241,10 @@ function parseTextNode(text: string, context: ParserContext) {
 function parseClosingTag(tagName: string, context: ParserContext) {
     const { currentNode: node } = context;
     switch (tagName) {
-        case OsisXmlTag.TITLE: {
+        case OsisXmlNodeName.TITLE: {
             if (context.psalmTitle) {
-                const psalmTitle = getPsalmTitle(context)
-                context.phrases.push(psalmTitle)
+                const psalmTitle = getPsalmTitle(context);
+                context.phrases.push(psalmTitle);
                 context.psalmTitle = undefined;
                 context.psalmTitleContents = [];
             }
@@ -266,14 +268,14 @@ function parseClosingTag(tagName: string, context: ParserContext) {
             };
             break;
         }
-        case OsisXmlTag.NOTE: {
+        case OsisXmlNodeName.NOTE: {
             if (context.noteText.trim()) {
                 const footnote = getFootnote(context);
                 if (context.phrases.length) {
                     if (!context.phrases[context.phrases.length - 1].notes) {
                         context.phrases[context.phrases.length - 1].notes = [];
                     }
-                    context.phrases[context.phrases.length - 1].notes.push(footnote)
+                    context.phrases[context.phrases.length - 1].notes.push(footnote);
                 }
                 context.noteCount += 1;
             }
@@ -281,11 +283,11 @@ function parseClosingTag(tagName: string, context: ParserContext) {
             context.currentNoteNode = undefined;
             break;
         }
-        case OsisXmlTag.CROSS_REFERENCE: {
+        case OsisXmlNodeName.REFERENCE: {
             context.currentCrossRefNode = undefined;
             break;
         }
-        case OsisXmlTag.QUOTE: {
+        case OsisXmlNodeName.QUOTE: {
             const isClosingQuotationMark = node && node.isSelfClosing && node.attributes.marker;
             if (isClosingQuotationMark) {
                 // Add this to phrase: node.attributes.marker;
@@ -295,7 +297,7 @@ function parseClosingTag(tagName: string, context: ParserContext) {
             }
             break;
         }
-        case OsisXmlTag.LINE_GROUP: {
+        case OsisXmlNodeName.LINE_GROUP: {
             if (node!.attributes.sID) {
                 context.paragraph! = getNewParagraph();
             }
@@ -305,7 +307,7 @@ function parseClosingTag(tagName: string, context: ParserContext) {
             }
             break;
         }
-        case OsisXmlTag.DIVINE_NAME:
+        case OsisXmlNodeName.DIVINE_NAME:
             context.divineNameNode = undefined;
     }
     context.currentNode = undefined;
@@ -332,6 +334,8 @@ function getPhrase(content: string, context: ParserContext): IBibleContentPhrase
 function getCrossReference(context: ParserContext): IBibleCrossReference {
     const key = String(context.currentNoteNode!.attributes.n);
     const { osisRef } = context.currentCrossRefNode!.attributes;
+    if (!osisRef) throw new Error('parsing a cross reference with attribute "osisRef"');
+
     let { bookOsisId, versionChapterNum, versionVerseNum } = getOsisReferenceEntities(osisRef);
     bookOsisId = String(bookOsisId);
     const crossRef: IBibleCrossReference = {
@@ -447,14 +451,14 @@ function getPsalmTitle(context: ParserContext) {
         type: 'group',
         groupType: 'title',
         contents: context.psalmTitleContents
-    }
-    return psalmTitle
+    };
+    return psalmTitle;
 }
 
 function isFootnote(node: OsisXmlNode | undefined) {
     return (
         node &&
-        node.name === OsisXmlTag.NOTE &&
+        node.name === OsisXmlNodeName.NOTE &&
         node.attributes.type !== OsisXmlNodeType.CROSS_REFERENCE
     );
 }

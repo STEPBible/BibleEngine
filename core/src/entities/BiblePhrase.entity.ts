@@ -157,7 +157,8 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
                 modifier === 'orderedListItem' ||
                 modifier === 'unorderedListItem' ||
                 modifier === 'title' ||
-                modifier === 'link'
+                modifier === 'link' ||
+                modifier === 'line'
             )
                 return undefined;
             else return false;

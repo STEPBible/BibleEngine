@@ -50,7 +50,8 @@ export class BibleController {
                 versionUid,
                 bookOsisId: osisId,
                 versionChapterNum: chapterNr,
-                versionVerseNum: verseNr
+                versionVerseNum: verseNr,
+                skipPartialWrappingSectionsInDocument: true
             },
             true
         );
@@ -70,7 +71,8 @@ export class BibleController {
                 bookOsisId: osisId,
                 versionChapterNum: chapterNr,
                 versionVerseNum: verseNr,
-                versionVerseEndNum: verseEndNr
+                versionVerseEndNum: verseEndNr,
+                skipPartialWrappingSectionsInDocument: true
             },
             true
         );

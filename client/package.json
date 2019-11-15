@@ -6,7 +6,7 @@
         "build": "rimraf ./lib && tsc"
     },
     "dependencies": {
-        "typeorm": "0.2.19",
+        "typeorm": "0.2.20",
         "whatwg-fetch": "^3.0.0"
     },
     "devDependencies": {

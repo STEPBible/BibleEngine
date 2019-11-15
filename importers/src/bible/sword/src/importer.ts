@@ -1,11 +1,11 @@
 import { readFileSync } from 'fs';
 
 import { BibleVersionEntity, IBibleVersion } from '@bible-engine/core';
-import { BibleEngineImporter } from '../../Importer.interface';
+import { BibleEngineImporter } from '../../../shared/Importer.interface';
 
-import { BookXML } from './types';
 import SwordModule from './SwordModule';
 import ModuleIndex from './ModuleIndex';
+import { BookXML } from './types';
 import { getBibleEngineInputFromXML } from './OsisParser';
 
 function getXmlFromModule(filename: string): BookXML[] {
@@ -24,7 +24,7 @@ export class SwordImporter extends BibleEngineImporter {
             );
 
         const versionMeta: Partial<IBibleVersion> = this.options.versionMeta || {};
-        const esvVersion = await this.bibleEngine.addVersion(
+        const version = await this.bibleEngine.addVersion(
             new BibleVersionEntity({
                 uid: 'ESV',
                 title: 'English Standard Version',
@@ -36,12 +36,14 @@ export class SwordImporter extends BibleEngineImporter {
             })
         );
 
+        console.log(`importing version ${version.uid}`);
+
         const books = getXmlFromModule(this.options.sourcePath);
 
         for (const book of books) {
-            console.log(book.osisId);
+            // console.log(book.osisId);
             const bookJson = getBibleEngineInputFromXML(book.chapters);
-            await this.bibleEngine.addBookWithContent(esvVersion, {
+            await this.bibleEngine.addBookWithContent(version, {
                 book: {
                     number: book.bookNum,
                     osisId: book.osisId,
@@ -52,7 +54,7 @@ export class SwordImporter extends BibleEngineImporter {
                 contents: bookJson
             });
         }
-        return this.bibleEngine.finalizeVersion(esvVersion.id);
+        return this.bibleEngine.finalizeVersion(version.id);
     }
 
     toString() {

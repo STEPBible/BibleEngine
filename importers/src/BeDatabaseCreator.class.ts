@@ -1,5 +1,5 @@
 import { ConnectionOptions } from 'typeorm';
-import { BibleEngineImporter, IBibleEngineImporter, IImporterOptions } from './Importer.interface';
+import { BibleEngineImporter, IBibleEngineImporter, IImporterOptions } from './shared/Importer.interface';
 import { BibleEngine } from '@bible-engine/core';
 
 export class BeDatabaseCreator {
