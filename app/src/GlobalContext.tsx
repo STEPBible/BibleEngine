@@ -84,10 +84,16 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   }
 
   async setSavedState() {
-    const [cachedChapterNum, cachedBookName, cachedVersion] = await store.get([
+    const [
+      cachedChapterNum,
+      cachedBookName,
+      cachedVersion,
+      chapterContent,
+    ] = await store.get([
       AsyncStorageKey.CACHED_CHAPTER_NUM,
       AsyncStorageKey.CACHED_OSIS_BOOK_NAME,
       AsyncStorageKey.CACHED_VERSION_UID,
+      AsyncStorageKey.CACHED_CHAPTER_OUTPUT,
     ])
     const DEFAULT_BOOK = 'Gen'
     const DEFAULT_CHAPTER = 1
@@ -96,7 +102,13 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     const versionChapterNum = cachedChapterNum || DEFAULT_CHAPTER
     const versionUid = cachedVersion || DEFAULT_VERSION
 
-    this.setState({ ...this.state, versionChapterNum, bookOsisId, versionUid })
+    this.setState({
+      ...this.state,
+      versionChapterNum,
+      bookOsisId,
+      versionUid,
+      chapterContent,
+    })
 
     if (this.state.isConnected === false) {
       await this.loadOfflineContent(versionUid)
@@ -240,7 +252,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         console.timeEnd('totalLoadingTime')
       }
     )
-    this.cacheCurrentChapterPosition(rangeQuery)
+    this.cacheCurrentChapter(rangeQuery, chapterContent)
     this.captureAnalyticsEvent()
   }
 
@@ -249,7 +261,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.analytics.hit(new PageHit(reference))
   }
 
-  cacheCurrentChapterPosition(range: any) {
+  cacheCurrentChapter(range, chapterContent) {
     const chapterNum = range.versionChapterNum || range.normalizedChapterNum
     store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, range.bookOsisId)
     store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum)
@@ -268,6 +280,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.setState({ ...this.state, forceRemote }, () => {
       this.updateCurrentBibleReference(newReference)
     })
+    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterContent)
   }
 
   getVerseContents = async (refs: IBibleCrossReference[]) => {
