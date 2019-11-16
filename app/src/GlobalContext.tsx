@@ -124,7 +124,6 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     }
     await this.setVersions(versionUid)
     this.setBooks(versionUid)
-    this.setState({ ...this.state, loading: false })
   }
 
   async lazyLoadContent(versionUid) {
