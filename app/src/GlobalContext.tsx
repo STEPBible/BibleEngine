@@ -99,13 +99,13 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.setState({ ...this.state, versionChapterNum, bookOsisId, versionUid })
 
     if (this.state.isConnected === false) {
-      await this.loadOfflineContent(versionChapterNum, bookOsisId, versionUid)
+      await this.loadOfflineContent(versionUid)
     } else {
-      this.lazyLoadContent(versionChapterNum, bookOsisId, versionUid)
+      this.lazyLoadContent(versionUid)
     }
   }
 
-  async loadOfflineContent(versionChapterNum, bookOsisId, versionUid) {
+  async loadOfflineContent(versionUid) {
     await this.setLocalDatabase()
     if (this.bibleEngineClient.localBibleEngine === undefined) {
       return
@@ -115,7 +115,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.setState({ ...this.state, loading: false })
   }
 
-  async lazyLoadContent(versionChapterNum, bookOsisId, versionUid) {
+  async lazyLoadContent(versionUid) {
     this.setLocalDatabase()
     this.setVersions(versionUid)
     this.setBooks(versionUid)
@@ -157,7 +157,6 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         await this.closeDatabaseConnection(bibleEngine)
         await this.createSqliteDirectory()
         await FileSystem.downloadAsync(DATABASE_DOWNLOAD_URL, DATABASE_PATH)
-        this.setState({ ...this.state, installingOffline: false })
         bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       }
       this.bibleEngineClient.localBibleEngine = bibleEngine
