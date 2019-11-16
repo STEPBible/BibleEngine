@@ -265,6 +265,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     store.save(AsyncStorageKey.CACHED_OSIS_BOOK_NAME, range.bookOsisId)
     store.save(AsyncStorageKey.CACHED_CHAPTER_NUM, chapterNum)
     store.save(AsyncStorageKey.CACHED_VERSION_UID, range.versionUid)
+    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterContent)
   }
 
   changeCurrentBibleVersion = async (version: BibleVersionEntity) => {
@@ -279,7 +280,6 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     this.setState({ ...this.state, forceRemote }, () => {
       this.updateCurrentBibleReference(newReference)
     })
-    store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterContent)
   }
 
   getVerseContents = async (refs: IBibleCrossReference[]) => {
