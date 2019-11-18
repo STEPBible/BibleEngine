@@ -122,14 +122,16 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     if (this.bibleEngineClient.localBibleEngine === undefined) {
       return
     }
-    await this.setVersions(versionUid)
+    this.changeCurrentBibleVersion(versionUid)
     this.setBooks(versionUid)
   }
 
   async lazyLoadContent(versionUid) {
     this.setLocalDatabase()
-    this.setVersions(versionUid)
     this.setBooks(versionUid)
+    this.setVersions(versionUid).then(() => {
+      this.changeCurrentBibleVersion(versionUid)
+    })
   }
 
   async setVersions(currentVersionUid: string) {
@@ -140,13 +142,6 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
       bibleVersions = await this.bibleEngineClient.localBibleEngine.getVersions()
     }
     this.setState({ ...this.state, bibleVersions })
-    if (bibleVersions.length === 0) {
-      return
-    }
-    const version = bibleVersions.filter(
-      version => version.uid === currentVersionUid
-    )[0]
-    await this.changeCurrentBibleVersion(version)
     return bibleVersions
   }
 
@@ -171,6 +166,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       }
       this.bibleEngineClient.localBibleEngine = bibleEngine
+      this.setVersions(this.state.versionUid)
     } catch (e) {
       console.log('Couldnt set local database: ', e)
     }
@@ -268,13 +264,19 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     store.save(AsyncStorageKey.CACHED_CHAPTER_OUTPUT, chapterContent)
   }
 
-  changeCurrentBibleVersion = async (version: BibleVersionEntity) => {
+  changeCurrentBibleVersion = async (versionUid: string) => {
+    if (this.state.bibleVersions.length === 0) {
+      return
+    }
     const { bookOsisId, versionChapterNum } = this.state
+    const version = this.state.bibleVersions.filter(
+      version => version.uid === versionUid
+    )[0]
     const newReference = {
       bookOsisId,
       versionChapterNum,
-      versionUid: version.uid,
-      version: version,
+      versionUid,
+      version,
     }
     const forceRemote = version.dataLocation !== 'db'
     this.setState({ ...this.state, forceRemote }, () => {
