@@ -64,13 +64,14 @@ export class V11nRuleEntity implements IV11nRule {
         ['versionDan', 'Normally in this Bible the verse numbering here is Daniel REF'],
         [
             'versionMerge',
-            'Normally in this Bible, this verse and the next are merged into one verse that is numbered REF'
+            'Normally in this Bible this verse and the next are merged into one verse that is numbered REF'
         ],
         [
             'versionMissing',
-            'Normally in this Bible, text may be missing here because this verse is merged with REF'
+            'Normally in this Bible some text may be missing here because it is merged with REF'
         ],
-        ['wordsFrom', 'This verse includes words that are at REF'],
+        ['wordsFrom', 'Normally in this Bible this verse includes words that are at REF'],
+        ['wordsExtraAt', 'The extra words are found at REF'],
         ['wordsAlsoAt', 'This verse includes words that are also at REF'],
         ['wordsAltAt', 'This verse includes words that are alternatively at REF'],
         ['otherWordsAt', 'In some Bibles this verse includes words that are alternatively at REF'],
@@ -83,8 +84,9 @@ export class V11nRuleEntity implements IV11nRule {
         ['otherStart', 'In some Bibles this verse starts on a different word'],
         [
             'otherAdd',
-            'At the end of this verse, some manuscripts add information such as where this letter was written'
-        ]
+            'At the end of this verse some manuscripts add information such as where this letter was written'
+        ],
+        ['otherBookAt', 'In some Bibles this book is found at REF']
     ]);
 
     constructor(rule: IV11nRule) {

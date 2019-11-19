@@ -828,6 +828,7 @@ const sourceTypes = new Map([
     [17, 'English+Hebrew+Latin'],
     [18, 'English+Hebrew+Latin+Greek'],
     [19, 'EngTitleSeparate'],
+    [20, 'English+Latin2'],
     [30, 'Hebrew'],
     [31, 'Hebrew+Greek'],
     [32, 'Hebrew+Latin'],
@@ -837,14 +838,19 @@ const sourceTypes = new Map([
     [41, 'LatinUndivided'],
     [42, 'Latin+Greek'],
     [43, 'Latin2-DRA'],
+    [44, 'Latin2'],
+    [45, 'Latin+Greek2'],
     [50, 'Greek'],
     [51, 'GreekUndivided'],
     [52, 'Greek2'],
     [53, 'Greek2Undivided'],
     [54, 'Greek2-NETS'],
+    [55, 'GreekIntegrated'],
+    [56, 'Greek3'],
     [60, 'Slavonic'],
-    [61, 'Spanish RV'],
-    [62, 'Bangladeshi']
+    [61, 'SpanishRV'],
+    [62, 'Bangladeshi'],
+    [63, 'FrenchNEG']
 ]);
 
 export const getBookGenericIdFromOsisId = (osisId: string, checkAlternatives = false) => {

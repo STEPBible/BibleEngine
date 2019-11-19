@@ -36,7 +36,7 @@ const run = async (
         // ESV OSIS import
         const sourcePath = join(
             __dirname,
-            '../../../emmono/api/data/ESV/ESV2016_vOSIS+Strongs5_fixed.xml'
+            '../../../emmono/api/data/ESV/ESV2016_vOSIS+Strongs5.xml'
         );
 
         creator.addImporter(OsisImporter, {
@@ -66,4 +66,4 @@ const run = async (
     await creator.createDatabase();
 };
 
-run({ neg79: true, v11n: true });
+run({ neg79: false, v11n: true, esv: false });
