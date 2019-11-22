@@ -111,26 +111,30 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
     })
 
     if (this.state.isConnected === false) {
-      await this.loadOfflineContent(versionUid)
+      await this.loadOfflineContent(versionUid, chapterContent)
     } else {
-      this.lazyLoadContent(versionUid)
+      this.lazyLoadContent(versionUid, chapterContent)
     }
   }
 
-  async loadOfflineContent(versionUid) {
+  async loadOfflineContent(versionUid, cachedChapter) {
     await this.setLocalDatabase()
     if (this.bibleEngineClient.localBibleEngine === undefined) {
       return
     }
-    this.changeCurrentBibleVersion(versionUid)
+    if (cachedChapter === null) {
+      this.changeCurrentBibleVersion(versionUid)
+    }
     this.setBooks(versionUid)
   }
 
-  async lazyLoadContent(versionUid) {
+  async lazyLoadContent(versionUid, cachedChapter) {
     this.setLocalDatabase()
     this.setBooks(versionUid)
     this.setVersions(versionUid).then(() => {
-      this.changeCurrentBibleVersion(versionUid)
+      if (cachedChapter === null) {
+        this.changeCurrentBibleVersion(versionUid)
+      }
     })
   }
 
