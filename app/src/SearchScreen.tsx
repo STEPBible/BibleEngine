@@ -34,8 +34,8 @@ class SearchScreen extends React.PureComponent<{}, {}> {
     header: null,
   }
   state = {
-    inputText: '',
-    verseResults: [],
+    searchInputText: '',
+    verseSearchResults: [],
   }
   lunrSearchEngine: any
 
@@ -48,17 +48,17 @@ class SearchScreen extends React.PureComponent<{}, {}> {
     BackHandler.removeEventListener('hardwareBackPress', this.endSearch)
   }
 
-  updateSearch = (inputText: string) => {
-    const results = this.lunrSearchEngine.search(inputText, {})
+  updateSearch = (searchInputText: string) => {
+    const results = this.lunrSearchEngine.search(searchInputText, {})
     const refs = results.map(result => result.ref)
-    const verseResults = refs.map((ref: any) => ({
+    const verseSearchResults = refs.map((ref: any) => ({
       reference: ref,
       verseContent: searchIndex.documentStore.docs[ref].vc,
       verseNum: searchIndex.documentStore.docs[ref].v,
       versionChapterNum: searchIndex.documentStore.docs[ref].c,
       bookOsisId: searchIndex.documentStore.docs[ref].b,
     }))
-    this.setState({ ...this.state, inputText, verseResults })
+    this.setState({ ...this.state, searchInputText, verseSearchResults })
   }
 
   endSearch = () => {
@@ -105,13 +105,13 @@ class SearchScreen extends React.PureComponent<{}, {}> {
   onClearTextTap = () => {
     this.setState({
       ...this.state,
-      inputText: '',
-      verseResults: [],
+      searchInputText: '',
+      verseSearchResults: [],
     })
   }
 
   renderClearIcon = () => {
-    if (!this.state.inputText.length) {
+    if (!this.state.searchInputText.length) {
       return null
     }
     return (
@@ -145,13 +145,13 @@ class SearchScreen extends React.PureComponent<{}, {}> {
             selectionColor={Color.TYNDALE_BLUE}
             autoCorrect={false}
             onChangeText={this.updateSearch}
-            value={this.state.inputText}
+            value={this.state.searchInputText}
           />
           {this.renderClearIcon()}
         </View>
         <View style={styles.results}>
           <FlatList
-            data={this.state.verseResults}
+            data={this.state.verseSearchResults}
             showsVerticalScrollIndicator={false}
             renderItem={this.renderSearchResult}
             ListFooterComponent={<View style={styles.scrollViewBottomBuffer} />}
