@@ -38,7 +38,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   analytics: Analytics
   state = {
     chapterContent: [],
-    versionChapterNum: 1,
+    versionChapterNum: '',
     bibleVersions: [],
     books: [],
     bookOsisId: '',
