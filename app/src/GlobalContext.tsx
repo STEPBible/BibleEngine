@@ -170,7 +170,7 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
         bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       }
       this.bibleEngineClient.localBibleEngine = bibleEngine
-      this.setVersions(this.state.versionUid)
+      await this.setVersions(this.state.versionUid)
     } catch (e) {
       console.log('Couldnt set local database: ', e)
     }
