@@ -65,9 +65,9 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   }
 
   async componentDidMount() {
-    this.setUpErrorLogging()
-    this.loadFonts()
+    await this.loadFonts()
     this.setSavedState()
+    this.setUpErrorLogging()
   }
 
   onNetworkChange = ({ isConnected }) => {
