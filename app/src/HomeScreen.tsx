@@ -172,11 +172,6 @@ class HomeScreen extends React.Component<any, any> {
             paddingTop,
             ...styles.container,
           }}
-          ListFooterComponent={
-            <Text style={styles.container__footer}>
-              {`© ${this.props.global.version.copyrightShort}`}
-            </Text>
-          }
           scrollIndicatorInsets={{ top: paddingHeight }}
           onScroll={onScroll}
           _mustAddThis={animatedY}
