@@ -71,6 +71,10 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   }
 
   onNetworkChange = ({ isConnected }) => {
+    if (!isConnected) {
+      this.setState({ ...this.state, isConnected, forceRemote: false })
+      return
+    }
     this.setState({ ...this.state, isConnected })
   }
 
