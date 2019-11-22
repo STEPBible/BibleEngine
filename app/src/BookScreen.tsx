@@ -13,6 +13,14 @@ class BookScreen extends React.Component<{}, {}> {
   bookListRef: any
   state = {
     activeBookIndex: null,
+    currentBookIndex: 0,
+  }
+  componentDidMount() {
+    const currentBookIndex =
+      this.props.global.books.findIndex(
+        book => book.osisId === this.props.global.bookOsisId
+      ) || 0
+    this.setState({ ...this.state, currentBookIndex })
   }
   getItemLayout = (data: any, index: any) => ({
     length: DRAWER_HEIGHT,
@@ -38,6 +46,7 @@ class BookScreen extends React.Component<{}, {}> {
     return (
       <FlatList
         data={this.props.global.books}
+        initialScrollIndex={Math.max(0, this.state.currentBookIndex - 2)}
         keyExtractor={(item, index) => index.toString()}
         getItemLayout={this.getItemLayout}
         ref={ref => (this.bookListRef = ref)}
@@ -45,8 +54,8 @@ class BookScreen extends React.Component<{}, {}> {
           <ExpandableDrawer
             item={item}
             open={index === this.state.activeBookIndex}
+            isCurrentBook={index === this.state.currentBookIndex}
             scrollToBook={this.scrollToBook}
-            changeBookAndChapter={() => {}}
             index={index}
           />
         )}

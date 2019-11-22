@@ -21,11 +21,10 @@ const CELL_WIDTH = DRAWER_WIDTH / 5 - 4
 
 interface Props {
   item: IBibleBookEntity
-  changeBookAndChapter: Function
-  closeDrawer: Function
   drawerStyle: any
   index: number
   open: boolean
+  isCurrentBook: boolean
   scrollToBook: Function
 }
 interface State {}
@@ -68,6 +67,12 @@ class ExpandableDrawer extends React.PureComponent<Props, State> {
     </TouchableRipple>
   )
 
+  textStyle = () => {
+    return this.props.isCurrentBook
+      ? styles['drawer__text--bold']
+      : styles.drawer__text
+  }
+
   render() {
     return (
       <React.Fragment>
@@ -78,7 +83,7 @@ class ExpandableDrawer extends React.PureComponent<Props, State> {
           style={styles.drawer}
           onPress={this.onBookPress}
         >
-          <Text style={styles.drawer__text}>{this.props.item.title}</Text>
+          <Text style={this.textStyle()}>{this.props.item.title}</Text>
         </TouchableRipple>
         {this.props.open ? this.renderChapterNums() : null}
       </React.Fragment>
@@ -109,6 +114,12 @@ const styles = StyleSheet.create({
     ...getDebugStyles(),
     color: '#202124',
     fontFamily: FontFamily.OPEN_SANS,
+    fontSize: FontSize.SMALL,
+    marginLeft: 30,
+  },
+  'drawer__text--bold': {
+    color: '#202124',
+    fontFamily: FontFamily.OPEN_SANS_BOLD,
     fontSize: FontSize.SMALL,
     marginLeft: 30,
   },
