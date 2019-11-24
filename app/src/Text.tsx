@@ -1,10 +1,14 @@
 import React, { Component } from 'react'
 import { Text } from 'react-native'
-import { withGlobalContext } from './GlobalContext'
+import { observer } from 'mobx-react/native'
 
+import { withGlobalContext } from './GlobalContext'
+import bibleStore from './BibleStore'
+
+@observer
 class FontText extends Component<any, any> {
   render() {
-    if (this.props.global.fontsAreReady) {
+    if (bibleStore.fontsAreReady) {
       return <Text {...this.props}>{this.props.children}</Text>
     }
     const { style, ...props } = this.props

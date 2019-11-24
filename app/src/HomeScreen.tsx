@@ -3,6 +3,7 @@ import { FlatList, Animated, Dimensions, View, StyleSheet } from 'react-native'
 import { IBibleContent, IBiblePhrase } from '@bible-engine/core'
 import hoistNonReactStatics from 'hoist-non-react-statics'
 import { FAB } from 'react-native-paper'
+import { observer } from 'mobx-react/native'
 
 import {
   Margin,
@@ -22,9 +23,11 @@ import LoadingScreen from './LoadingScreen'
 import NetworkErrorScreen from './NetworkErrorScreen'
 import { isAndroid } from './utils'
 import { withCollapsible, setSafeBounceHeight } from './ReactNavCollapsible'
+import bibleStore from './BibleStore'
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 
+@observer
 class HomeScreen extends React.Component<any, any> {
   static navigationOptions = {
     headerTitle: <NavigationHeader />,
@@ -149,13 +152,13 @@ class HomeScreen extends React.Component<any, any> {
 
   render() {
     if (
-      this.props.global.isConnected === false &&
-      this.props.global.bibleVersions.length === 0 &&
-      this.props.global.loading === false
+      bibleStore.isConnected === false &&
+      bibleStore.bibleVersions.length === 0 &&
+      bibleStore.loading === false
     ) {
       return <NetworkErrorScreen />
     }
-    if (this.props.global.loading) {
+    if (bibleStore.loading) {
       return <LoadingScreen />
     }
     const { paddingHeight, animatedY, onScroll } = this.props.collapsible
@@ -164,7 +167,7 @@ class HomeScreen extends React.Component<any, any> {
     return (
       <React.Fragment>
         <AnimatedFlatList
-          data={this.props.global.chapterContent}
+          data={bibleStore.chapterContent}
           renderItem={this.renderItem}
           bounces={false}
           keyExtractor={(item, index) => `flatlist-item-${index}`}
@@ -178,27 +181,23 @@ class HomeScreen extends React.Component<any, any> {
           showsVerticalScrollIndicator={false}
         />
         <FAB
-          visible={this.props.global.fontsAreReady}
+          visible={bibleStore.fontsAreReady}
           color="#2F3030"
           small
           style={styles.previousChapterButton}
           icon="chevron-left"
           onPress={() =>
-            this.props.global.updateCurrentBibleReference(
-              this.props.global.previousRange
-            )
+            bibleStore.updateCurrentBibleReference(bibleStore.previousRange)
           }
         />
         <FAB
-          visible={this.props.global.fontsAreReady}
+          visible={bibleStore.fontsAreReady}
           color="#2F3030"
           small
           style={styles.nextChapterButton}
           icon="chevron-right"
           onPress={() =>
-            this.props.global.updateCurrentBibleReference(
-              this.props.global.nextRange
-            )
+            bibleStore.updateCurrentBibleReference(bibleStore.nextRange)
           }
         />
       </React.Fragment>

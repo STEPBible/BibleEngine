@@ -24,6 +24,7 @@ import { ConnectionOptions } from 'typeorm'
 import { StatusBar } from 'react-native'
 import SentryExpo from 'sentry-expo'
 import { Analytics, PageHit } from 'expo-analytics'
+import bibleStore from './BibleStore'
 
 const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
   database: 'bibles.db',
@@ -55,19 +56,13 @@ export class GlobalContextProvider extends React.Component<{}, {}> {
   }
   constructor(props: any) {
     super(props)
-    console.time('totalLoadingTime')
-    NetInfo.addEventListener(this.onNetworkChange)
-    this.bibleEngineClient = new BibleEngineClient({
-      apiBaseUrl: REMOTE_BIBLE_ENGINE_URL,
-    })
     StatusBar.setHidden(true)
-    this.analytics = new Analytics(GOOGLE_ANALYTICS_TRACKING_ID)
   }
 
   async componentDidMount() {
-    await this.loadFonts()
-    this.setSavedState()
-    this.setUpErrorLogging()
+    console.time('bibleStore')
+    await bibleStore.initialize()
+    console.timeEnd('bibleStore')
   }
 
   onNetworkChange = ({ isConnected }) => {

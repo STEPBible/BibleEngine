@@ -26,6 +26,8 @@ import Popover from './Popover'
 import Database from './Database'
 import Text from './Text'
 import { withGlobalContext } from './GlobalContext'
+import bibleStore from './BibleStore'
+import { observer } from 'mobx-react/native'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -40,16 +42,16 @@ interface State {
   verseContents: any[]
 }
 
-class CrossReference extends React.PureComponent<Props, State> {
+@observer
+class CrossReference extends React.Component<Props, State> {
   touchable: any
-  mounted: boolean
   state = {
     visible: false,
     verseContents: [],
   }
 
   onPress = async () => {
-    const verseContents = await this.props.global.getVerseContents(
+    const verseContents = await bibleStore.getVerseContents(
       this.props.crossReferences
     )
     this.setState({ ...this.state, visible: true, verseContents })

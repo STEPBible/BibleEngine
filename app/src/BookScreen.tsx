@@ -3,9 +3,12 @@ import { View, FlatList, Dimensions, StyleSheet } from 'react-native'
 import hoistNonReactStatics from 'hoist-non-react-statics'
 import { withGlobalContext } from './GlobalContext'
 import ExpandableDrawer from './ExpandableDrawer'
+import bibleStore from './BibleStore'
+import { observer } from 'mobx-react/native'
 
 const DRAWER_HEIGHT = 52
 
+@observer
 class BookScreen extends React.Component<{}, {}> {
   static navigationOptions = {
     headerTitle: 'Books',
@@ -17,8 +20,8 @@ class BookScreen extends React.Component<{}, {}> {
   }
   componentDidMount() {
     const currentBookIndex =
-      this.props.global.books.findIndex(
-        book => book.osisId === this.props.global.bookOsisId
+      bibleStore.books.findIndex(
+        book => book.osisId === bibleStore.bookOsisId
       ) || 0
     this.setState({ ...this.state, currentBookIndex })
   }
@@ -45,7 +48,7 @@ class BookScreen extends React.Component<{}, {}> {
   render() {
     return (
       <FlatList
-        data={this.props.global.books}
+        data={bibleStore.books}
         initialScrollIndex={Math.max(0, this.state.currentBookIndex - 2)}
         keyExtractor={(item, index) => index.toString()}
         getItemLayout={this.getItemLayout}

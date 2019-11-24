@@ -2,24 +2,23 @@ import React from 'react'
 import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import { withNavigation } from 'react-navigation'
 import { BOOK_DATA } from '@bible-engine/core'
+import { TouchableRipple, IconButton } from 'react-native-paper'
+import { observer } from 'mobx-react/native'
 
 import Text from './Text'
 import { withGlobalContext } from './GlobalContext'
 import { STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, FontSize } from './Constants'
-import { TouchableRipple, IconButton } from 'react-native-paper'
+import bibleStore from './BibleStore'
 
 interface Props {
   navigation: any
 }
 
+@observer
 class NavigationHeader extends React.Component<Props, {}> {
   getBookName() {
-    if (
-      !this.props.global.bookOsisId ||
-      !BOOK_DATA[this.props.global.bookOsisId]
-    )
-      return ''
-    return BOOK_DATA[this.props.global.bookOsisId].names.en[0]
+    if (!bibleStore.bookOsisId || !BOOK_DATA[bibleStore.bookOsisId]) return ''
+    return BOOK_DATA[bibleStore.bookOsisId].names.en[0]
   }
   render() {
     return (
@@ -31,16 +30,14 @@ class NavigationHeader extends React.Component<Props, {}> {
           >
             <Text
               style={styles.header__chips__book__text}
-            >{`${this.getBookName()} ${
-              this.props.global.versionChapterNum
-            }`}</Text>
+            >{`${this.getBookName()} ${bibleStore.versionChapterNum}`}</Text>
           </TouchableRipple>
           <TouchableRipple
             onPress={() => this.props.navigation.navigate('Versions')}
             style={styles.header__chips__version}
           >
             <Text style={styles.header__chips__version__text}>
-              {this.props.global.versionUid}
+              {bibleStore.versionUid}
             </Text>
           </TouchableRipple>
         </View>

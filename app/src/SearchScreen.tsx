@@ -11,25 +11,22 @@ import {
   Dimensions,
   Keyboard,
   FlatList,
-  StatusBar,
 } from 'react-native'
 import * as elasticlunr from 'elasticlunr'
 import hoistNonReactStatics from 'hoist-non-react-statics'
+import { observer } from 'mobx-react/native'
 
-import {
-  Margin,
-  FontSize,
-  FontFamily,
-  Color,
-  getDebugStyles,
-} from './Constants'
+import { Margin, FontSize, FontFamily, Color } from './Constants'
 import { withGlobalContext } from './GlobalContext'
+import bibleStore from './BibleStore'
+
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
 
 const searchIndex = require('../assets/esvSearchIndex.json')
 
-class SearchScreen extends React.PureComponent<{}, {}> {
+@observer
+class SearchScreen extends React.Component<{}, {}> {
   static navigationOptions = {
     header: null,
   }
@@ -67,7 +64,7 @@ class SearchScreen extends React.PureComponent<{}, {}> {
   }
 
   onSearchResultPress = item => {
-    this.props.global.updateCurrentBibleReference({
+    bibleStore.updateCurrentBibleReference({
       versionChapterNum: item.versionChapterNum,
       bookOsisId: item.bookOsisId,
     })

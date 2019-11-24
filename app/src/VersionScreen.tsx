@@ -4,10 +4,13 @@ import { List } from 'react-native-paper'
 import { ScrollView } from 'react-native-gesture-handler'
 import hoistNonReactStatics from 'hoist-non-react-statics'
 import { BibleVersionEntity } from '@bible-engine/core'
+import { observer } from 'mobx-react/native'
 
 import { withGlobalContext } from './GlobalContext'
+import bibleStore from './BibleStore'
 import { Color } from './Constants'
 
+@observer
 class VersionScreen extends React.Component<any, any> {
   static navigationOptions = {
     headerTitle: 'Versions',
@@ -25,13 +28,13 @@ class VersionScreen extends React.Component<any, any> {
   render() {
     return (
       <ScrollView>
-        {this.props.global.bibleVersions.map((version: BibleVersionEntity) => (
+        {bibleStore.bibleVersions.map((version: BibleVersionEntity) => (
           <List.Item
             key={version.uid}
             title={version.uid}
             description={version.title}
             onPress={() => {
-              this.props.global.changeCurrentBibleVersion(version.uid)
+              bibleStore.changeCurrentBibleVersion(version.uid)
               this.props.navigation.navigate('Home')
             }}
             right={() => this.renderDownloadIcon(version)}

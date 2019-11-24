@@ -13,6 +13,8 @@ import { withNavigation } from 'react-navigation'
 import { FontFamily, FontSize, getDebugStyles } from './Constants'
 import Text from './Text'
 import { withGlobalContext } from './GlobalContext'
+import bibleStore from './BibleStore'
+import { observer } from 'mobx-react/native'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DRAWER_WIDTH = DEVICE_WIDTH
@@ -29,7 +31,8 @@ interface Props {
 }
 interface State {}
 
-class ExpandableDrawer extends React.PureComponent<Props, State> {
+@observer
+class ExpandableDrawer extends React.Component<Props, State> {
   onBookPress = () => {
     const animation = LayoutAnimation.create(150, 'easeInEaseOut', 'opacity')
     LayoutAnimation.configureNext(animation)
@@ -37,10 +40,10 @@ class ExpandableDrawer extends React.PureComponent<Props, State> {
   }
 
   onChapterPress = (num: number) => {
-    this.props.global.updateCurrentBibleReference({
+    bibleStore.updateCurrentBibleReference({
       bookOsisId: this.props.item.osisId,
       versionChapterNum: num,
-      versionUid: this.props.global.versionUid,
+      versionUid: bibleStore.versionUid,
     })
     this.props.navigation.navigate('Home')
   }

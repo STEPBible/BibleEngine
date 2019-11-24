@@ -24,6 +24,8 @@ import Database from './Database'
 import { withGlobalContext } from './GlobalContext'
 import Text from './Text'
 import StrongsNumber from './models/StrongsNumber'
+import bibleStore from './BibleStore'
+import { observer } from 'mobx-react/native'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -40,7 +42,8 @@ interface State {
   loading: boolean
 }
 
-class StrongsWord extends React.PureComponent<Props, State> {
+@observer
+class StrongsWord extends React.Component<Props, State> {
   touchable: any
   mounted: boolean = false
 
@@ -69,10 +72,7 @@ class StrongsWord extends React.PureComponent<Props, State> {
     try {
       const definitions = await Promise.all(
         normalizedStrongs.map(strong =>
-          this.props.global.bibleEngine.getDictionaryEntry(
-            strong.id,
-            dictionary
-          )
+          bibleStore.getDictionaryEntry(strong.id, dictionary)
         )
       )
       if (this.mounted) {

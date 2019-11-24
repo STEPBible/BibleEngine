@@ -31,7 +31,7 @@ interface State {
   popoverIsVisible: boolean
 }
 
-export default class Footnote extends React.PureComponent<Props, State> {
+export default class Footnote extends React.Component<Props, State> {
   touchable: any
   state = {
     popoverIsVisible: false,
