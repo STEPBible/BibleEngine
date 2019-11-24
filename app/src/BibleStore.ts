@@ -226,20 +226,21 @@ class BibleStore {
   }
 
   getVerseContents = async (refs: IBibleCrossReference[]) => {
-    if (this.forceRemote) {
+    try {
+      const referenceRanges = refs.map(ref => ref.range)
+      const verses = await Promise.all(
+        referenceRanges.map(range =>
+          bibleEngineClient.localBibleEngine!.getPhrases(range)
+        )
+      )
+      const verseContents = verses.map(phrases =>
+        phrases.map(phrase => phrase.content).join(' ')
+      )
+      return verseContents
+    } catch (e) {
       const emptyVerses = refs.map(ref => ref.range).map(range => '')
       return emptyVerses
     }
-    const referenceRanges = refs.map(ref => ref.range)
-    const verses = await Promise.all(
-      referenceRanges.map(range =>
-        bibleEngineClient.localBibleEngine!.getPhrases(range)
-      )
-    )
-    const verseContents = verses.map(phrases =>
-      phrases.map(phrase => phrase.content).join(' ')
-    )
-    return verseContents
   }
 
   async testQueryWorks(bibleEngine: BibleEngine): Promise<boolean> {
