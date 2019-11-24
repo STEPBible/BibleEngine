@@ -64,9 +64,8 @@ class BibleStore {
   }
 
   async initialize() {
-    await Fonts.load()
+    await Promise.all([Fonts.load(), cache.init()])
     this.fontsAreReady = true
-    await cache.init()
     if (
       this.books.length > 0 &&
       this.chapterContent.length > 0 &&
@@ -78,9 +77,9 @@ class BibleStore {
       return
     }
     if (this.isConnected === false) {
-      await this.loadOfflineContent()
+      this.loadOfflineContent()
     } else {
-      await this.lazyLoadContent()
+      this.lazyLoadContent()
     }
   }
 
@@ -96,14 +95,13 @@ class BibleStore {
   }
 
   async lazyLoadContent() {
-    await Promise.all([
-      this.setLocalDatabase(),
-      this.setBooks(this.versionUid),
-      this.setVersions(),
-    ])
-    if (this.chapterContent.length === 0) {
-      await this.changeCurrentBibleVersion(this.versionUid)
-    }
+    this.setBooks(this.versionUid)
+    this.setVersions().then(async () => {
+      if (this.chapterContent.length === 0) {
+        await this.changeCurrentBibleVersion(this.versionUid)
+      }
+    })
+    this.setLocalDatabase()
   }
 
   @action async setBooks(versionUid: string) {
