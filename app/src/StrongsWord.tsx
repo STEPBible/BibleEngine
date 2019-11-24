@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     // backgroundColor: 'magenta'
   },
   popover__content__header: {
-    // backgroundColor: 'yellow',
+    alignItems: 'flex-start',
     flexDirection: 'row',
     flexWrap: 'wrap',
     minHeight: 45,
@@ -304,22 +304,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
   },
   popover__content__header__lemma: {
-    //backgroundColor: 'orange',
     fontFamily: FontFamily.CARDO_BOLD,
     fontSize: FontSize.MEDIUM,
-    maxHeight: FontSize.EXTRA_LARGE,
   },
   popover__content__header__transliteration: {
-    // backgroundColor: 'green',
     fontFamily: FontFamily.CARDO_ITALIC,
     fontSize: FontSize.MEDIUM,
-    maxHeight: FontSize.EXTRA_LARGE,
   },
   popover__content__header__gloss: {
-    // backgroundColor: 'cyan',
     fontFamily: FontFamily.CARDO_BOLD,
     fontSize: FontSize.MEDIUM,
-    maxHeight: FontSize.EXTRA_LARGE,
   },
   popover__content__definitions__entry: {
     flex: 1,
