@@ -127,6 +127,7 @@ class BibleStore {
     if (this.bibleVersions.length === 0) {
       return
     }
+    this.versionUid = versionUid
     const version = this.bibleVersions.filter(
       version => version.uid === versionUid
     )[0]
@@ -190,7 +191,7 @@ class BibleStore {
     this.loading = true
     this.versionChapterNum =
       rangeQuery.versionChapterNum || this.DEFAULT_CHAPTER
-    this.versionUid = this.versionUid
+    this.versionUid = rangeQuery.versionUid
     this.bookOsisId = rangeQuery.bookOsisId
     this.chapterContent = []
 

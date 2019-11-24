@@ -34,8 +34,8 @@ class VersionScreen extends React.Component<any, any> {
             title={version.uid}
             description={version.title}
             onPress={() => {
-              bibleStore.changeCurrentBibleVersion(version.uid)
               this.props.navigation.navigate('Home')
+              bibleStore.changeCurrentBibleVersion(version.uid)
             }}
             right={() => this.renderDownloadIcon(version)}
           />
