@@ -6,7 +6,7 @@
     "privacy": "public",
     "sdkVersion": "34.0.0",
     "platforms": ["ios", "android"],
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -21,11 +21,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tyndale.step",
-      "buildNumber": "8"
+      "buildNumber": "9"
     },
     "android": {
       "package": "com.tyndale.stepbible",
-      "versionCode": 2,
+      "versionCode": 3,
       "config": {
         "fabric": {
           "apiKey": "4177638a1668874c4bff059ca4d1a6b72d2b7129",
