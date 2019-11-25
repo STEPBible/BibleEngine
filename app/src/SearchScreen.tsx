@@ -11,6 +11,7 @@ import {
   Dimensions,
   Keyboard,
   FlatList,
+  SafeAreaView,
 } from 'react-native'
 import * as elasticlunr from 'elasticlunr'
 import hoistNonReactStatics from 'hoist-non-react-statics'
@@ -124,7 +125,7 @@ class SearchScreen extends React.Component<{}, {}> {
 
   render() {
     return (
-      <React.Fragment>
+      <SafeAreaView style={styles.container}>
         <View style={styles.search}>
           <IconButton
             icon="arrow-back"
@@ -155,21 +156,21 @@ class SearchScreen extends React.Component<{}, {}> {
             keyExtractor={(item, index) => index.toString()}
           />
         </View>
-      </React.Fragment>
+      </SafeAreaView>
     )
   }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   search: {
     alignItems: 'center',
     flex: 1,
     flexDirection: 'row',
-    left: 0,
-    height: 50,
-    position: 'absolute',
-    right: 0,
-    top: 8,
+    maxHeight: 50,
+    marginTop: 8,
     zIndex: 2,
     borderBottomWidth: 0.5,
     borderBottomColor: '#ddd',
@@ -203,14 +204,8 @@ const styles = StyleSheet.create({
     height: DEVICE_HEIGHT / 1.5,
   },
   results: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingTop: ifAndroid(67, ifIphoneX(100, 67)),
+    flex: 1,
     width: DEVICE_WIDTH,
-    height: DEVICE_HEIGHT,
-    backgroundColor: 'white',
     zIndex: 1,
   },
   result: {
