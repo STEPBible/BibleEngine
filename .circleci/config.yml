@@ -1,20 +1,21 @@
 version: 2.1
 jobs:
-  build:
-    working_directory: ~/BibleEngine
-    docker:
-      - image: circleci/node:latest
-    steps:
-      - checkout
-      - restore_cache:
-          name: Restore Yarn Package Cache
-          keys:
-            - yarn-packages-{{ checksum "yarn.lock" }}
-      - run: yarn install --frozen-lockfile
-      - save_cache:
-          name: Save Yarn Package Cache
-          key: yarn-packages-{{ checksum "yarn.lock" }}
-          paths:
-            - ~/.cache/yarn
-      - run: cd ~/BibleEngine/app && yarn install
-      - run: cd ~/BibleEngine/app && yarn test
+    build:
+        working_directory: ~/BibleEngine
+        docker:
+            - image: circleci/node:latest
+        steps:
+            - checkout
+            - restore_cache:
+                  name: Restore Yarn Package Cache
+                  keys:
+                      - yarn-packages-{{ checksum "yarn.lock" }}
+            - run: yarn install --frozen-lockfile
+            - save_cache:
+                  name: Save Yarn Package Cache
+                  key: yarn-packages-{{ checksum "yarn.lock" }}
+                  paths:
+                      - ~/.cache/yarn
+            - run: cd ~/BibleEngine/app && yarn install
+            - run: cd ~/BibleEngine/app && yarn test
+            - run: cd ~/BibleEngine/core && yarn test
