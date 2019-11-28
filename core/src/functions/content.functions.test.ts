@@ -152,7 +152,8 @@ describe('generateBibleDocument', () => {
             paragraphs,
             context,
             bookAbbreviations,
-            version.chapterVerseSeparator
+            version.chapterVerseSeparator,
+            { versionUid: version.uid, bookOsisId: 'Gen' }
         );
         item1 = doc.contents[0];
         if (item1.type === 'section') {
