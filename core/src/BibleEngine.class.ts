@@ -1209,7 +1209,6 @@ export class BibleEngine {
                 await db
                     .createQueryBuilder()
                     .insert()
-                    .orIgnore()
                     .into(BiblePhraseEntity)
                     .values(globalState.phraseStack.slice(index, index + chunkSize))
                     .execute();
@@ -1219,7 +1218,6 @@ export class BibleEngine {
                 await db
                     .createQueryBuilder()
                     .insert()
-                    .orIgnore()
                     .into(BibleNoteEntity)
                     .values(globalState.noteStack.slice(index, index + chunkSize))
                     .execute();
@@ -1229,7 +1227,6 @@ export class BibleEngine {
                 await db
                     .createQueryBuilder()
                     .insert()
-                    .orIgnore()
                     .into(BibleCrossReferenceEntity)
                     .values(globalState.crossRefStack.slice(index, index + chunkSize))
                     .execute();
@@ -1243,7 +1240,6 @@ export class BibleEngine {
                 await db
                     .createQueryBuilder()
                     .insert()
-                    .orIgnore()
                     .into(BibleParagraphEntity)
                     .values(globalState.paragraphStack.slice(index, index + chunkSize))
                     .execute();
@@ -1258,7 +1254,6 @@ export class BibleEngine {
             for (let index = 0; index < globalState.sectionStack.length; index += chunkSize) {
                 db.createQueryBuilder()
                     .insert()
-                    .orIgnore()
                     .into(BibleSectionEntity)
                     .values(globalState.sectionStack.slice(index, index + chunkSize))
                     .execute();
