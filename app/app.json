@@ -21,7 +21,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tyndale.step",
-      "buildNumber": "9"
+      "buildNumber": "10"
     },
     "android": {
       "package": "com.tyndale.stepbible",
