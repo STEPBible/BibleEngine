@@ -4,9 +4,10 @@
     "main": "lib/index.js",
     "scripts": {
         "build": "rimraf ./lib && tsc",
-        "test": "npx jest"
+        "test": "yarn jest"
     },
     "dependencies": {
+        "cross-fetch": "^3.0.4",
         "typeorm": "0.2.20",
         "whatwg-fetch": "^3.0.0"
     },

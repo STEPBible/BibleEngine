@@ -1,6 +1,7 @@
 import { BibleVersionEntity } from '@bible-engine/core';
 // import { getConnection } from 'typeorm';
 import { BibleEngineClient } from './BibleEngineClient';
+import 'cross-fetch/polyfill';
 
 const ESV_ONLINE = new BibleVersionEntity({
     uid: 'ESV',
