@@ -32,80 +32,76 @@ versificationMgr.synodal = synodalJson;
 versificationMgr.synodalprot = synodalprotJson;
 versificationMgr.vulg = vulgJson;
 
-function getBooksInOT(v11n: string) {
-  if (v11n !== undefined && versificationMgr[v11n]) {
-    return versificationMgr[v11n].ot.length;
-  }
-  return versificationMgr.kjv.ot.length;
+function getBooksInOT(v11n = 'kjv') {
+    if (v11n !== undefined && versificationMgr[v11n]) {
+        return versificationMgr[v11n].ot.length;
+    }
+    return versificationMgr.kjv.ot.length;
 }
 
-function getBooksInNT(v11n: string) {
-  if (v11n !== undefined && versificationMgr[v11n]) {
-    return versificationMgr[v11n].nt.length;
-  }
-  return versificationMgr.kjv.nt.length;
+function getBooksInNT(v11n = 'kjv') {
+    if (v11n !== undefined && versificationMgr[v11n]) {
+        return versificationMgr[v11n].nt.length;
+    }
+    return versificationMgr.kjv.nt.length;
 }
 
-function getChapterMax(inBookNum: number, v11n: string): number {
-  inBookNum = inBookNum < 0 ? 0 : inBookNum;
-  const booksOT = getBooksInOT(v11n);
-  const testament = inBookNum < booksOT ? 'ot' : 'nt';
-  inBookNum = inBookNum < booksOT ? inBookNum : inBookNum - booksOT;
-  if (v11n !== undefined && versificationMgr[v11n]) {
-    return versificationMgr[v11n][testament][inBookNum].maxChapter;
-  }
-  return versificationMgr.kjv[testament][inBookNum].maxChapter;
+function getChapterMax(inBookNum: number, v11n = 'kjv'): number {
+    inBookNum = inBookNum < 0 ? 0 : inBookNum;
+    const booksOT = getBooksInOT(v11n);
+    const testament = inBookNum < booksOT ? 'ot' : 'nt';
+    inBookNum = inBookNum < booksOT ? inBookNum : inBookNum - booksOT;
+    if (v11n !== undefined && versificationMgr[v11n]) {
+        return versificationMgr[v11n][testament][inBookNum].maxChapter;
+    }
+    return versificationMgr.kjv[testament][inBookNum].maxChapter;
 }
 
-function getVersesInChapter(
-  inBookNum: number,
-  inChapter: number,
-  v11n: string
-) {
-  if (v11n !== undefined && versificationMgr[v11n]) {
-    return versificationMgr[v11n].versesInChapter[inBookNum][inChapter - 1];
-  }
-  return versificationMgr.kjv.versesInChapter[inBookNum][inChapter - 1];
+function getVersesInChapter(inBookNum: number, inChapter: number, v11n = 'kjv') {
+    if (v11n !== undefined && versificationMgr[v11n]) {
+        return versificationMgr[v11n].versesInChapter[inBookNum][inChapter - 1];
+    }
+    return versificationMgr.kjv.versesInChapter[inBookNum][inChapter - 1];
 }
 
-function getBook(inBookNum: number, v11n: string) {
-  inBookNum = inBookNum < 0 ? 0 : inBookNum;
-  const booksOT = getBooksInOT(v11n);
-  const testament = inBookNum < booksOT ? 'ot' : 'nt';
-  inBookNum = inBookNum < booksOT ? inBookNum : inBookNum - booksOT;
-  if (v11n !== undefined && versificationMgr[v11n]) {
-    return versificationMgr[v11n][testament][inBookNum];
-  }
-  return versificationMgr.kjv[testament][inBookNum];
+function getBook(inBookNum: number, v11n = 'kjv') {
+    inBookNum = inBookNum < 0 ? 0 : inBookNum;
+    const booksOT = getBooksInOT(v11n);
+    const testament = inBookNum < booksOT ? 'ot' : 'nt';
+    inBookNum = inBookNum < booksOT ? inBookNum : inBookNum - booksOT;
+    if (v11n !== undefined && versificationMgr[v11n]) {
+        return versificationMgr[v11n][testament][inBookNum];
+    }
+    return versificationMgr.kjv[testament][inBookNum];
 }
 
-function getAllBookOsisNames(v11n: string): string[] {
-  const otNames = versificationMgr[v11n].ot.map((book: any) => book.abbrev);
-  const ntNames = versificationMgr[v11n].nt.map((book: any) => book.abbrev);
-  return [...otNames, ...ntNames];
+function getAllBookOsisNames(v11n = 'kjv'): string[] {
+    const otNames = versificationMgr[v11n].ot.map((book: any) => book.abbrev);
+    const ntNames = versificationMgr[v11n].nt.map((book: any) => book.abbrev);
+    return [...otNames, ...ntNames];
 }
 
-function getAllBookFullNames(v11n: string): string[] {
-  const otNames = versificationMgr[v11n].ot.map((book: any) => book.name);
-  const ntNames = versificationMgr[v11n].nt.map((book: any) => book.name);
-  return [...otNames, ...ntNames];
+function getAllBookFullNames(v11n = 'kjv'): string[] {
+    const otNames = versificationMgr[v11n].ot.map((book: any) => book.name);
+    const ntNames = versificationMgr[v11n].nt.map((book: any) => book.name);
+    return [...otNames, ...ntNames];
 }
 
-function getBookNum(inOsis: string, v11n: string) {
-  const otNames = versificationMgr[v11n].ot.map((book: any) => book.abbrev);
-  const ntNames = versificationMgr[v11n].nt.map((book: any) => book.abbrev);
-  const names = [...otNames, ...ntNames];
-  const bookNum = names.indexOf(inOsis);
-  return bookNum;
+function getBookNum(inOsis: string, v11n = 'kjv') {
+    const otNames = versificationMgr[v11n].ot.map((book: any) => book.abbrev);
+    const ntNames = versificationMgr[v11n].nt.map((book: any) => book.abbrev);
+    const names = [...otNames, ...ntNames];
+    const bookNum = names.indexOf(inOsis);
+    return bookNum;
 }
 
 export default {
-  getAllBookFullNames,
-  getAllBookOsisNames,
-  getBooksInOT,
-  getBooksInNT,
-  getChapterMax,
-  getVersesInChapter,
-  getBook,
-  getBookNum
+    getAllBookFullNames,
+    getAllBookOsisNames,
+    getBooksInOT,
+    getBooksInNT,
+    getChapterMax,
+    getVersesInChapter,
+    getBook,
+    getBookNum
 };

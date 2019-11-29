@@ -1,5 +1,5 @@
-import { getBibleEngineInputFromXML } from '../../../shared/osisParser/OsisParser';
-import { ChapterXML } from '../../../shared/osisParser/types';
+import { getBibleEngineInputFromXML } from '../src/OsisParser';
+import { ChapterXML } from '../src/types';
 
 describe('OsisParser', () => {
     const psalmsXML: ChapterXML = require('./Psa23EsvXmlResult.json');
@@ -40,7 +40,6 @@ describe('OsisParser', () => {
         const genesisXml: ChapterXML = require('./Gen1CuvXmlResult.json');
         test('nonempty content returned', () => {
             const bookJson = getBibleEngineInputFromXML([{ intro: '', verses: genesisXml.verses }]);
-            console.log(JSON.stringify(bookJson[0], null, 2));
             expect(bookJson.length).toBeGreaterThan(0);
         });
     });
