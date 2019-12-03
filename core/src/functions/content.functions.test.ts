@@ -1,4 +1,12 @@
-import { IBibleOutputRich, IBibleVersion, IBibleOutputRoot, IBibleContent } from '../models';
+import {
+    IBibleOutputRich,
+    IBibleVersion,
+    IBibleOutputRoot,
+    IBibleContent,
+    IBibleContentPhrase,
+    IBibleContentGroup,
+    IBibleContentSection
+} from '../models';
 import { generateBibleDocument } from './content.functions';
 import { BibleParagraphEntity, BiblePhraseEntity, BibleSectionEntity } from '../entities';
 
@@ -55,7 +63,7 @@ describe('generateBibleDocument', () => {
             normalizedChapterNum: 1,
             normalizedVerseNum: 2,
             normalizedSubverseNum: 0,
-            phraseNum: 2
+            phraseNum: 1
         },
         { quoteLevel: 1 }
     );
@@ -68,9 +76,9 @@ describe('generateBibleDocument', () => {
             versionId: 1,
             bookOsisId: 'Gen',
             normalizedChapterNum: 1,
-            normalizedVerseNum: 2,
+            normalizedVerseNum: 3,
             normalizedSubverseNum: 0,
-            phraseNum: 3
+            phraseNum: 1
         },
         { quoteLevel: 1 }
     );
@@ -83,9 +91,9 @@ describe('generateBibleDocument', () => {
             versionId: 1,
             bookOsisId: 'Gen',
             normalizedChapterNum: 1,
-            normalizedVerseNum: 2,
+            normalizedVerseNum: 3,
             normalizedSubverseNum: 0,
-            phraseNum: 4
+            phraseNum: 2
         },
         { translationChange: 'change' }
     );
@@ -123,10 +131,14 @@ describe('generateBibleDocument', () => {
     let item1: IBibleContent;
     /** should be paragraph group */
     let item1_1: IBibleContent;
-    /** should be phrase1 */
+    /** should be `phrase1` */
     let item1_1_1: IBibleContent;
     /** should be quote group with numbering object */
     let item1_1_2: IBibleContent;
+    /** should be `phrase2`, i.e. first phrase of quote group without numbering object */
+    let item1_1_2_1: IBibleContent;
+    /** should be `phrase3`, i.e. second phrase of quote group with numbering object */
+    let item1_1_2_2: IBibleContent;
     /** should be section2 group */
     let item2: IBibleContent;
     /** should be section 2_1 group */
@@ -156,17 +168,13 @@ describe('generateBibleDocument', () => {
             { versionUid: version.uid, bookOsisId: 'Gen' }
         );
         item1 = doc.contents[0];
-        if (item1.type === 'section') {
-            item1_1 = item1.contents[0];
-            if (item1_1.type === 'group') {
-                item1_1_1 = item1_1.contents[0];
-                item1_1_2 = item1_1.contents[1];
-            }
-        }
+        item1_1 = (item1 as IBibleContentSection).contents[0];
+        item1_1_1 = (item1_1 as IBibleContentGroup<'paragraph'>).contents[0];
+        item1_1_2 = (item1_1 as IBibleContentGroup<'paragraph'>).contents[1];
+        item1_1_2_1 = (item1_1_2 as IBibleContentGroup<'quote'>).contents[0];
+        item1_1_2_2 = (item1_1_2 as IBibleContentGroup<'quote'>).contents[1];
         item2 = doc.contents[1];
-        if (item2.type === 'section') {
-            item2_1 = item2.contents[0];
-        }
+        item2_1 = (item2 as IBibleContentSection).contents[0];
     });
 
     test('should return a root output node', () => {
@@ -177,7 +185,7 @@ describe('generateBibleDocument', () => {
         expect(item1.type === 'section' && item1.title === 'section1').toBe(true);
     });
 
-    test('should put arrange sections in the correct order', () => {
+    test('should arrange sections in the correct order', () => {
         expect(item2.type === 'section' && item2.title === 'section2').toBe(true);
         expect(item2_1.type === 'section' && item2_1.title === 'section2_1').toBe(true);
     });
@@ -189,6 +197,16 @@ describe('generateBibleDocument', () => {
                 item1_1_2.groupType === 'quote' &&
                 item1_1_2.contents.length === 2
         ).toBe(true);
+    });
+
+    test('should add numbering object on verse change', () => {
+        expect((item1_1_1 as IBibleContentPhrase).numbering).toBeDefined();
+        expect((item1_1_2_2 as IBibleContentPhrase).numbering).toBeDefined();
+    });
+
+    test('should create numbering group on the most outer content group possible', () => {
+        expect((item1_1_2 as IBibleContentGroup<'quote'>).numbering).toBeDefined();
+        expect((item1_1_2_1 as IBibleContentPhrase).numbering).not.toBeDefined();
     });
 
     test('should generate a label of cross references according to version paramters', () => {
