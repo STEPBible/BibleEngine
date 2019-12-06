@@ -65,6 +65,7 @@ import {
     IBibleContentGroup,
     BiblePlaintext
 } from './models';
+import migrations from './migrations';
 
 export class NoDbConnectionError extends Error {
     constructor() {
@@ -103,8 +104,14 @@ export class BibleEngine {
             synchronize: true,
             logging: ['error'],
             name: 'bible-engine',
+            migrations,
             ...dbConfig
         }).then(conn => conn.manager);
+    }
+
+    async runMigrations() {
+        const entityManager = await this.pDB;
+        await entityManager.connection.runMigrations();
     }
 
     async addBook(book: IBibleBookEntity, entityManager?: EntityManager) {
