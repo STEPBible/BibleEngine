@@ -55,7 +55,7 @@ class BibleStore {
   BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
     database: 'bibles.db',
     type: 'expo',
-    synchronize: false,
+    synchronize: true,
   }
 
   constructor() {
