@@ -66,7 +66,6 @@ import {
     BiblePlaintext
 } from './models';
 import migrations from './migrations';
-import { chunk } from './functions/utils.functions';
 
 export class NoDbConnectionError extends Error {
     constructor() {
