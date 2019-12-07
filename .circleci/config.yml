@@ -1,9 +1,9 @@
 version: 2.1
+working_directory: ~/BibleEngine
+docker:
+    - image: circleci/node:latest
 jobs:
     build:
-        working_directory: ~/BibleEngine
-        docker:
-            - image: circleci/node:latest
         steps:
             - checkout
             - restore_cache:
