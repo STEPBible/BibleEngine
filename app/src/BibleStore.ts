@@ -55,7 +55,7 @@ class BibleStore {
   BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
     database: 'bibles.db',
     type: 'expo',
-    synchronize: true,
+    synchronize: false,
   }
 
   constructor() {
@@ -157,6 +157,7 @@ class BibleStore {
         await this.createSqliteDirectory()
         await FileSystem.downloadAsync(DATABASE_DOWNLOAD_URL, DATABASE_PATH)
         bibleEngine = new BibleEngine(this.BIBLE_ENGINE_OPTIONS)
+        await bibleEngine.runMigrations()
       }
       bibleEngineClient.localBibleEngine = bibleEngine
       await this.setVersions()
