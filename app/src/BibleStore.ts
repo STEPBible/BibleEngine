@@ -100,8 +100,8 @@ class BibleStore {
       if (this.chapterContent.length === 0) {
         await this.changeCurrentBibleVersion(this.versionUid)
       }
+      this.setLocalDatabase()
     })
-    this.setLocalDatabase()
   }
 
   @action async setBooks(versionUid: string) {
