@@ -120,6 +120,7 @@ export class BeImportFileCreator {
             writeFileSync(`${targetDir}/index.json`, JSON.stringify(versionIndex));
 
             if (options && options.skipCompression) {
+                pResolve();
                 return;
             }
 
