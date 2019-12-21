@@ -596,48 +596,6 @@ export class BibleEngine {
         return { ...book, ...updates };
     }
 
-    async downloadBooks(books: IBibleBookEntity[], fileUrl: string, version: BibleVersionEntity) {
-        const responses = await this.getBooksForDownload(books, fileUrl, version.uid);
-        const entityManager = await this.pDB;
-        for (const response of responses) {
-            const content: any = response;
-            await this.addBookWithContent(version, content, { entityManager });
-        }
-    }
-
-    async versionIsDownloaded(versionUid: string, fileHostUrl: string) {
-        const version = await this.getVersion(versionUid);
-        if (!version) return false;
-        if (version.dataLocation === 'remote') return false;
-        const booksInDb = await this.getBooksForVersionUid(versionUid);
-        const booksNotDownloaded = booksInDb.filter(
-            book => book.dataLocation === 'importing' || book.dataLocation === 'remote'
-        );
-        if (booksNotDownloaded.length) return false;
-        const totalBooks = await this.getBookIndexFile(versionUid, fileHostUrl);
-        return booksInDb.length === totalBooks.length;
-    }
-
-    async getBooksForDownload(books: any[], fileHostUrl: string, versionUid: string) {
-        const responses = await Promise.all(
-            books.map((book: any) => {
-                const bookContentsUrl = `${fileHostUrl}/${versionUid}/${book.osisId}.json`;
-                return fetch(bookContentsUrl).then(response => response.json());
-            })
-        );
-        return responses;
-    }
-
-    async getBookIndexFile(versionUid: string, fileHostUrl: string) {
-        const fileIndexUrl = `${fileHostUrl}/${versionUid}/index.json`;
-        return (await fetch(fileIndexUrl)).json();
-    }
-
-    async getRemoteVersionMetadata(versionUid: string, fileHostUrl: string) {
-        const fileIndexUrl = `${fileHostUrl}/${versionUid}/version.json`;
-        return (await fetch(fileIndexUrl)).json();
-    }
-
     private async addBibleBookContent(
         entityManger: EntityManager,
         contents: IBibleContent[],
