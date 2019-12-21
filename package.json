@@ -1,6 +1,7 @@
 {
     "name": "@bible-engine/source",
     "version": "0.0.1",
+    "license": "MIT",
     "description": "BibleEngine mono-repo root package.json, used mainly to execute build scripts. This package is not published to npm.",
     "private": true,
     "scripts": {

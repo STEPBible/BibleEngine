@@ -1,91 +1,77 @@
-import React, { Fragment } from 'react';
+import React, { Fragment } from 'react'
 import {
-  Text,
   View,
   FlatList,
   StyleSheet,
   Dimensions,
   TouchableHighlight,
-  ScrollView
-} from 'react-native';
-import Popover from './Popover';
+  ScrollView,
+} from 'react-native'
 import {
   BibleEngine,
   DictionaryEntry,
   DocumentElement,
   IBibleCrossReference,
-  IBibleReferenceRange
-} from '@bible-engine/core';
+  IBibleReferenceRange,
+} from '@bible-engine/core'
+
 import {
   Color,
   FontFamily,
   FontSize,
   Margin,
-  getDebugStyles
-} from './Constants';
-import Database from './Database';
+  getDebugStyles,
+} from './Constants'
+import Popover from './Popover'
+import Database from './Database'
+import Text from './Text'
+import { withGlobalContext } from './GlobalContext'
+import bibleStore from './BibleStore'
+import { observer } from 'mobx-react/native'
 
-const DEVICE_WIDTH = Dimensions.get('window').width;
-const DEVICE_HEIGHT = Dimensions.get('window').height;
+const DEVICE_WIDTH = Dimensions.get('window').width
+const DEVICE_HEIGHT = Dimensions.get('window').height
 
 interface Props {
-  crossReferences: IBibleCrossReference[];
-  database: Database;
+  crossReferences: IBibleCrossReference[]
+  database: Database
 }
 
 interface State {
-  popoverIsVisible: boolean;
-  verseContents: any[];
+  visible: boolean
+  verseContents: any[]
 }
 
-export default class CrossReference extends React.PureComponent<Props, State> {
-  touchable: any;
-  mounted: boolean;
+@observer
+class CrossReference extends React.Component<Props, State> {
+  touchable: any
   state = {
-    popoverIsVisible: false,
-    verseContents: []
-  };
+    visible: false,
+    verseContents: [],
+  }
 
-  onPress = () => {
-    this.setState({ popoverIsVisible: true });
-  };
+  onPress = async () => {
+    const verseContents = await bibleStore.getVerseContents(
+      this.props.crossReferences
+    )
+    this.setState({ ...this.state, visible: true, verseContents })
+    this.forceUpdate()
+  }
 
   closePopover = () => {
-    this.setState({ popoverIsVisible: false });
-  };
-
-  componentDidMount() {
-    this.mounted = true;
-    setTimeout(() => {
-      this.getVerseContents(this.props.crossReferences);
-    }, 100);
-  }
-
-  componentWillUnmount() {
-    this.mounted = false;
-  }
-
-  async getVerseContents(refs: IBibleCrossReference[]) {
-    const verseContents = await this.props.database.getVerseContents(refs);
-    if (this.mounted) {
-      this.setState({
-        ...this.state,
-        verseContents,
-        popoverIsVisible: false
-      });
-    }
+    this.setState({ visible: false })
   }
 
   renderCrossReference = ({ item, index }) => (
     <Fragment>
       <Text style={styles.popover__content__reference}>{item.label}</Text>
       <Text style={styles.popover__content__verse}>
-        {this.state.verseContents.length > index
-          ? JSON.stringify(this.state.verseContents[index])
-          : ''}
+        {this.state.verseContents.length > 0
+          ? this.state.verseContents[index]
+          : null}
       </Text>
     </Fragment>
-  );
+  )
 
   renderPopoverContent = () => {
     return (
@@ -101,8 +87,8 @@ export default class CrossReference extends React.PureComponent<Props, State> {
         </View>
         <View style={{ flex: 2, height: 20 }} />
       </View>
-    );
-  };
+    )
+  }
 
   render() {
     return (
@@ -119,7 +105,7 @@ export default class CrossReference extends React.PureComponent<Props, State> {
           </Text>
         </TouchableHighlight>
         <Popover
-          isVisible={this.state.popoverIsVisible}
+          isVisible={this.state.visible}
           fromView={this.touchable}
           popoverStyle={styles.popover__background_container}
           onRequestClose={() => this.closePopover()}
@@ -127,14 +113,14 @@ export default class CrossReference extends React.PureComponent<Props, State> {
           {this.renderPopoverContent()}
         </Popover>
       </React.Fragment>
-    );
+    )
   }
 }
 
 const styles = StyleSheet.create({
   touchable: {
     marginLeft: -6,
-    ...getDebugStyles()
+    ...getDebugStyles(),
   },
   touchable__text: {
     paddingLeft: 8,
@@ -143,16 +129,16 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     fontSize: FontSize.SMALL,
     color: Color.TYNDALE_BLUE,
-    fontFamily: FontFamily.CARDO_ITALIC
+    fontFamily: FontFamily.CARDO_ITALIC,
   },
   popover__arrow: {},
   popover__backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.1)'
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
   popover__background_container: {
     // backgroundColor: 'yellow',
     overflow: 'hidden',
-    width: DEVICE_WIDTH - 20
+    width: DEVICE_WIDTH - 20,
   },
   popover__content: {
     // backgroundColor: 'cyan',
@@ -161,21 +147,23 @@ const styles = StyleSheet.create({
     borderBottomColor: 'gray',
     borderBottomWidth: 0.5,
     margin: Margin.LARGE,
-    marginBottom: 0
+    marginBottom: 0,
   },
   popover__content__header: {
     // backgroundColor: 'yellow',
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
     fontSize: FontSize.MEDIUM,
-    marginBottom: Margin.SMALL
+    marginBottom: Margin.SMALL,
   },
   popover__content__reference: {
     fontFamily: FontFamily.CARDO_BOLD,
-    fontSize: FontSize.SMALL
+    fontSize: FontSize.SMALL,
   },
   popover__content__verse: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.SMALL,
-    marginBottom: Margin.EXTRA_SMALL
-  }
-});
+    marginBottom: Margin.EXTRA_SMALL,
+  },
+})
+
+export default withGlobalContext(CrossReference)

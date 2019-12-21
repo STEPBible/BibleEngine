@@ -1,6 +1,11 @@
 import normalizeText from './normalizeText';
 import { Analytics } from 'expo-analytics';
 import { DefaultTheme } from 'react-native-paper';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+
+import { GOOGLE_ANALYTICS_TRACKING_ID } from 'react-native-dotenv';
 
 export const Flags = {
   DEBUG: false,
@@ -50,7 +55,8 @@ export enum AsyncStorageKey {
   CACHED_CHAPTER_NUM = 'cachedChapterNum',
   CACHED_OSIS_BOOK_NAME = 'cachedBookName',
   CACHED_NEXT_CHAPTER = 'cachedNextChapter',
-  CACHED_VERSION_UID = 'cachedVersionUid'
+  CACHED_VERSION_UID = 'cachedVersionUid',
+  HAS_LAUNCHED = 'hasLaunched'
 }
 
 export const THEME = {
@@ -66,12 +72,20 @@ export const THEME = {
 export function getDebugStyles() {
   if (Flags.DEBUG) {
     return {
-      borderColor: randomColor(),
+      backgroundColor: randomColor(),
       borderWidth: 1
     };
   }
   return {};
 }
+
+export const NAV_BAR_HEIGHT = 49;
+export const IOS_STATUS_BAR_HEIGHT = 20;
+export const STATUS_BAR_HEIGHT =
+  Platform.OS === 'ios' ? IOS_STATUS_BAR_HEIGHT : Constants.statusBarHeight;
+
+export const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`;
+export const DATABASE_PATH = `${SQLITE_DIRECTORY}/bibles.db`;
 
 const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green'];
 
@@ -79,7 +93,3 @@ export function randomColor() {
   const index = Math.floor(Math.random() * 4);
   return testingColors[index];
 }
-
-export const googleAnalytics = new Analytics(
-  process.env.GOOGLE_ANALYTICS_TRACKING_ID || ''
-);

@@ -14,7 +14,8 @@
     "noUnusedLocals": true,
     "sourceMap": false, // Something else (Babel?) is creating the necessary source maps.
     "strict": true,
-    "target": "es5"
+    "target": "es5",
+    "noImplicitAny": false
   },
   "exclude": ["node_modules"]
 }
