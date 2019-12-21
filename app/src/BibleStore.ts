@@ -123,6 +123,39 @@ class BibleStore {
     return bibleVersions
   }
 
+  async getBothOfflineAndOnlineVersions() {
+    let localVersions: any[] = []
+    if (bibleEngineClient.localBibleEngine) {
+      try {
+        localVersions = await bibleEngineClient.localBibleEngine.getVersions()
+      } catch (e) {
+        localVersions = []
+      }
+    }
+    let remoteVersions: any[] = []
+    if (bibleEngineClient.remoteApi) {
+      const { result } = await bibleEngineClient.remoteApi.getVersions()
+      remoteVersions = result.map(version => ({
+        ...version,
+        dataLocation: 'remote',
+      }))
+    }
+    return this.getMergedOfflineAndOnlineVersions(localVersions, remoteVersions)
+  }
+
+  getMergedOfflineAndOnlineVersions(
+    localVersions: any[],
+    remoteVersions: any[]
+  ) {
+    const versions = localVersions
+    for (const remoteVersion of remoteVersions) {
+      if (!versions.find((version: any) => version.uid === remoteVersion.uid)) {
+        versions.push(remoteVersion)
+      }
+    }
+    return versions
+  }
+
   changeCurrentBibleVersion = async (versionUid: string) => {
     if (this.bibleVersions.length === 0) {
       return

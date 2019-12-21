@@ -71,31 +71,4 @@ export class BibleEngineClient {
             throw new Error(`No remote config provided`);
         } else return this.localBibleEngine.getVersions();
     }
-
-    async getBothOfflineAndOnlineVersions() {
-        let localVersions: any[] = [];
-        if (this.localBibleEngine) {
-            try {
-                localVersions = await this.localBibleEngine.getVersions();
-            } catch (e) {
-                localVersions = [];
-            }
-        }
-        let remoteVersions: any[] = [];
-        if (this.remoteApi) {
-            const { result } = await this.remoteApi.getVersions();
-            remoteVersions = result.map(version => ({ ...version, dataLocation: 'remote' }));
-        }
-        return this.getMergedOfflineAndOnlineVersions(localVersions, remoteVersions);
-    }
-
-    getMergedOfflineAndOnlineVersions(localVersions: any[], remoteVersions: any[]) {
-        const versions = localVersions;
-        for (const remoteVersion of remoteVersions) {
-            if (!versions.find((version: any) => version.uid === remoteVersion.uid)) {
-                versions.push(remoteVersion);
-            }
-        }
-        return versions;
-    }
 }
