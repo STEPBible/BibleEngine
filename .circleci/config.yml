@@ -1,9 +1,9 @@
 version: 2.1
-working_directory: ~/BibleEngine
-docker:
-    - image: circleci/node:latest
 jobs:
     build:
+        working_directory: ~/BibleEngine
+        docker:
+            - image: circleci/node:latest
         steps:
             - checkout
             - restore_cache:
@@ -20,4 +20,4 @@ jobs:
             - run: cd ~/BibleEngine/app && yarn test
             - run: cd ~/BibleEngine/core && yarn test
             - run: cd ~/BibleEngine/importers && yarn test
-            - run: cd ~/BibleEngine/client && yarn test
+            - run: cd ~/BibleEngine/client && yarn test --passWithNoTests
