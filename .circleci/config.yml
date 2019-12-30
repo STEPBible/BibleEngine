@@ -16,8 +16,9 @@ jobs:
                   key: yarn-packages-{{ checksum "yarn.lock" }}
                   paths:
                       - ~/.cache/yarn
-            - run: cd ~/BibleEngine/app && yarn install
-            - run: cd ~/BibleEngine/app && yarn test
+            - run: cd ~/BibleEngine && yarn typeorm migration:run --connection default
             - run: cd ~/BibleEngine/core && yarn test
             - run: cd ~/BibleEngine/importers && yarn test
             - run: cd ~/BibleEngine/client && yarn test --passWithNoTests
+            - run: cd ~/BibleEngine/app && yarn install
+            - run: cd ~/BibleEngine/app && yarn test

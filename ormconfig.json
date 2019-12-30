@@ -1,5 +1,18 @@
 [
     {
+        "name": "default",
+        "type": "sqlite",
+        "database": ":memory:",
+        "entities": ["./core/src/entities/*.entity.ts"],
+        "migrations": ["core/src/migrations/sqlite/*-*.ts"],
+        "migrationsRun": true,
+        "migrationsTableName": "migrations",
+        "cli": {
+            "migrationsDir": "core/src/migrations/sqlite"
+        }
+    },
+    {
+        "name": "postgres",
         "type": "postgres",
         "host": "localhost",
         "port": 5555,
@@ -8,9 +21,10 @@
         "database": "test",
         "entities": ["./core/src/entities/*.entity.ts"],
         "migrationsTableName": "migrations",
-        "migrations": ["core/src/migrations/*.ts"],
+        "migrations": ["core/src/migrations/postgres/*.ts"],
+        "migrationsRun": true,
         "cli": {
-            "migrationsDir": "core/src/migrations"
+            "migrationsDir": "core/src/migrations/postgres"
         }
     }
 ]
