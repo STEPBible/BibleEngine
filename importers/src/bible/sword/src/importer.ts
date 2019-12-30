@@ -32,6 +32,7 @@ export class SwordImporter extends BibleEngineImporter {
                 language: 'en-US',
                 chapterVerseSeparator: ':',
                 hasStrongs: true,
+                isPlaintext: true,
                 ...versionMeta
             })
         );
