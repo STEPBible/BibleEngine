@@ -11,7 +11,7 @@ const run = async () => {
     });
     creator.addImporter(V11nImporter);
     creator.addImporter(SwordImporter, {
-        sourcePath: 'src/osis-sword-module/data/ESV2016_th.zip'
+        sourcePath: 'src/bible/sword/data/ESV2016_th.zip'
     });
     creator.addImporter(StepLexiconImporter);
 
