@@ -1,14 +1,16 @@
-{
-    "type": "postgres",
-    "host": "localhost",
-    "port": 5555,
-    "username": "postgres",
-    "password": "password",
-    "database": "test",
-    "entities": ["./core/src/entities/*.entity.ts"],
-    "migrationsTableName": "migrations",
-    "migrations": ["core/src/migrations/*.ts"],
-    "cli": {
-        "migrationsDir": "core/src/migrations"
+[
+    {
+        "type": "postgres",
+        "host": "localhost",
+        "port": 5555,
+        "username": "postgres",
+        "password": "password",
+        "database": "test",
+        "entities": ["./core/src/entities/*.entity.ts"],
+        "migrationsTableName": "migrations",
+        "migrations": ["core/src/migrations/*.ts"],
+        "cli": {
+            "migrationsDir": "core/src/migrations"
+        }
     }
-}
+]
