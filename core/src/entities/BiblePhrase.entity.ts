@@ -15,11 +15,10 @@ import { generatePhraseId, parsePhraseId } from '../functions/reference.function
 import { PhraseModifiers, IBiblePhraseRef } from '../models';
 import { IBiblePhraseWithNumbers } from '../models/BiblePhrase';
 import { IContentPhrase } from '../models/ContentPhrase';
-import { isNode } from '../functions/utils.functions';
 
 @Entity('bible_phrase')
 export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
-    @PrimaryColumn({ type: isNode && process.argv.indexOf('sqlite') === -1 ? 'bigint' : 'integer' })
+    @PrimaryColumn()
     id: number;
 
     // the id encodes the following attribute:
