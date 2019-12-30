@@ -65,7 +65,8 @@ import {
     IBibleContentGroup,
     BiblePlaintext
 } from './models';
-import migrations from './migrations';
+import sqliteMigrations from './migrations/sqlite';
+import postgresMigrations from './migrations/postgres';
 
 export class NoDbConnectionError extends Error {
     constructor() {
@@ -104,10 +105,23 @@ export class BibleEngine {
             synchronize: false,
             logging: ['error'],
             name: 'bible-engine',
-            migrations,
+            migrations: this.getMigrations(dbConfig),
             migrationsRun: true,
             ...dbConfig
         }).then(conn => conn.manager);
+    }
+
+    getMigrations(dbConfig: ConnectionOptions) {
+        let migrations: any = [];
+        switch (dbConfig.type) {
+            case 'sqlite':
+                migrations = sqliteMigrations;
+                break;
+            case 'postgres':
+                migrations = postgresMigrations;
+                break;
+        }
+        return migrations;
     }
 
     async runMigrations() {
