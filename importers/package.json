@@ -10,6 +10,7 @@
         "archiver": "^3.0.0",
         "base64-js": "^1.3.0",
         "bible-passage-reference-parser": "^2.0.1",
+        "elasticlunr": "^0.9.5",
         "fs-extra": "^7.0.1",
         "iconv-lite": "^0.4.24",
         "jszip": "~2.4.0",
