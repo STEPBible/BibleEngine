@@ -1,0 +1,17 @@
+version: '3'
+services:
+    postgres-db:
+        image: mdillon/postgis:10-alpine
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=password
+            - POSTGRES_DB=test
+        volumes:
+            - ./db-dump/:/docker-entrypoint-initdb.d
+        ports:
+            - '5555:5432'
+        networks:
+            - backend
+networks:
+    backend:
+        external: true
