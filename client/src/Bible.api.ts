@@ -82,6 +82,25 @@ export class BibleApi implements Clientify<BibleController> {
         });
     }
 
+    getVersePlaintext(params: {
+        versionUid: FirstArgument<BibleController['getVersePlaintext']>;
+        bookOsisId: SecondArgument<BibleController['getVersePlaintext']>;
+        versionChapterNum: ThirdArgument<BibleController['getVersePlaintext']>;
+        versionVerseNum: FourthArgument<BibleController['getVersePlaintext']>;
+    }) {
+        let path = '/bible/ref/:versionUid/:osisId/:chapterNr/:verseNr/plaintext';
+
+        path = path.replace(':versionUid', params.versionUid + '');
+        path = path.replace(':osisId', params.bookOsisId + '');
+        path = path.replace(':chapterNr', params.versionChapterNum + '');
+        path = path.replace(':verseNr', params.versionVerseNum + '');
+
+        return apiRequest<ThenArg<ReturnType<BibleController['getVersePlaintext']>>>({
+            url: this.apiBaseUrl + path,
+            method: 'GET'
+        });
+    }
+
     getVerses(params: {
         versionUid: FirstArgument<BibleController['getVerses']>;
         osisId: SecondArgument<BibleController['getVerses']>;

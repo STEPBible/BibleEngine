@@ -57,6 +57,22 @@ export class BibleController {
         );
     }
 
+    @Get('/ref/:versionUid/:osisId/:chapterNr/:verseNr/plaintext')
+    async getVersePlaintext(
+        @Param('versionUid') versionUid: string,
+        @Param('osisId') osisId: string,
+        @Param('chapterNr') chapterNr: number,
+        @Param('verseNr') verseNr: number
+    ) {
+        const verseContent = await this.bibleEngine.getPlaintextForReferenceRange({
+            versionUid,
+            bookOsisId: osisId,
+            versionChapterNum: chapterNr,
+            versionVerseNum: verseNr
+        });
+        return { verseContent };
+    }
+
     @Get('/ref/:versionUid/:osisId/:chapterNr/:verseNr-:verseEndNr')
     getVerses(
         @Param('versionUid') versionUid: string,

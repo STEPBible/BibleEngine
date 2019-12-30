@@ -64,6 +64,21 @@ export class BibleEngineClient {
         throw new Error(`can't get formatted text: invalid version`);
     }
 
+    async getPlaintextForReferenceRange(range: any, forceRemote = false) {
+        if (this.localBibleEngine && !forceRemote) {
+            try {
+                return this.localBibleEngine.getPlaintextForReferenceRange(range);
+            } catch (e) {
+                if (!(e instanceof BibleVersionRemoteOnlyError)) throw e;
+            }
+        }
+        if (this.remoteApi) {
+            const response = await this.remoteApi.getVersePlaintext(range);
+            return response.result.verseContent;
+        }
+        throw new Error(`can't get formatted text: invalid version`);
+    }
+
     getVersions(forceRemote = false) {
         if (!this.localBibleEngine || forceRemote) {
             // TODO: persist updates if local database exists

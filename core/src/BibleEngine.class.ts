@@ -42,7 +42,8 @@ import {
     stripUnnecessaryDataFromBibleVersion,
     stripUnnecessaryDataFromBibleBook,
     stripUnnecessaryDataFromBibleReferenceRange,
-    stripUnnecessaryDataFromBibleContextData
+    stripUnnecessaryDataFromBibleContextData,
+    convertBiblePhrasesToPlaintext
 } from './functions/content.functions';
 import { isTestMatching } from './functions/v11n.functions';
 import {
@@ -458,6 +459,29 @@ export class BibleEngine {
             order: { id: 'ASC' },
             relations: ['notes', 'crossReferences']
         });
+    }
+
+    async getPlaintextForReferenceRange(range: IBibleReferenceRange) {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        if (range.versionUid) {
+            const version = await this.getVersion(range.versionUid);
+            if (!version) throw new Error(`version ${range.versionUid} is not available`);
+            range.versionId = version.id;
+        }
+        const normalizedRange = generateNormalizedRangeFromVersionRange(range);
+        const where: FindConditions<BiblePhraseEntity> = {
+            id: Between(
+                generatePhraseId(normalizedRange),
+                generatePhraseId(generateEndReferenceFromRange(normalizedRange))
+            )
+        };
+        if (range.versionId) where.versionId = range.versionId;
+        const phrases = await db.find(BiblePhraseEntity, {
+            where,
+            order: { id: 'ASC' }
+        });
+        return convertBiblePhrasesToPlaintext(phrases);
     }
 
     async getVersionFullData(versionUid: string) {
