@@ -1,3 +1,3 @@
-import { InitialMigration1577684427757 } from './1577684427757-InitialMigration';
+import { InitialMigration1577688064632 } from './1577688064632-InitialMigration';
 
-export default [InitialMigration1577684427757];
+export default [InitialMigration1577688064632];

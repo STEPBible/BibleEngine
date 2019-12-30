@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitialMigration1577684427757 implements MigrationInterface {
-    name = 'InitialMigration1577684427757';
+export class InitialMigration1577688064632 implements MigrationInterface {
+    name = 'InitialMigration1577688064632';
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(
@@ -33,7 +33,7 @@ export class InitialMigration1577684427757 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_note" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar, "type" varchar, "content" text NOT NULL, "phraseId" bigint)`,
+            `CREATE TABLE "bible_note" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar, "type" varchar, "content" text NOT NULL, "phraseId" integer)`,
             undefined
         );
         await queryRunner.query(
@@ -41,7 +41,7 @@ export class InitialMigration1577684427757 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_phrase" ("id" bigint PRIMARY KEY NOT NULL, "joinToRefId" bigint, "versionId" integer NOT NULL, "versionChapterNum" integer NOT NULL, "versionVerseNum" integer NOT NULL, "versionSubverseNum" integer, "sourceTypeId" integer, "content" text NOT NULL, "linebreak" boolean, "skipSpace" varchar, "modifiers" text, "quoteWho" varchar, "person" varchar, "strongs" text)`,
+            `CREATE TABLE "bible_phrase" ("id" integer PRIMARY KEY NOT NULL, "joinToRefId" bigint, "versionId" integer NOT NULL, "versionChapterNum" integer NOT NULL, "versionVerseNum" integer NOT NULL, "versionSubverseNum" integer, "sourceTypeId" integer, "content" text NOT NULL, "linebreak" boolean, "skipSpace" varchar, "modifiers" text, "quoteWho" varchar, "person" varchar, "strongs" text)`,
             undefined
         );
         await queryRunner.query(
@@ -69,7 +69,7 @@ export class InitialMigration1577684427757 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_cross_reference" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "normalizedRefId" bigint NOT NULL, "partIndicator" varchar, "normalizedRefIdEnd" bigint, "partIndicatorEnd" varchar, "versionId" integer, "versionChapterNum" integer, "versionVerseNum" integer, "versionChapterEndNum" integer, "versionVerseEndNum" integer, "key" varchar, "phraseId" bigint, "sectionId" integer)`,
+            `CREATE TABLE "bible_cross_reference" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "normalizedRefId" bigint NOT NULL, "partIndicator" varchar, "normalizedRefIdEnd" bigint, "partIndicatorEnd" varchar, "versionId" integer, "versionChapterNum" integer, "versionVerseNum" integer, "versionChapterEndNum" integer, "versionVerseEndNum" integer, "key" varchar, "phraseId" integer, "sectionId" integer)`,
             undefined
         );
         await queryRunner.query(
@@ -82,7 +82,7 @@ export class InitialMigration1577684427757 implements MigrationInterface {
         );
         await queryRunner.query(`DROP INDEX "IDX_66a40d0dd1d4dec456e1241d38"`, undefined);
         await queryRunner.query(
-            `CREATE TABLE "temporary_bible_note" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar, "type" varchar, "content" text NOT NULL, "phraseId" bigint, CONSTRAINT "FK_66a40d0dd1d4dec456e1241d382" FOREIGN KEY ("phraseId") REFERENCES "bible_phrase" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION)`,
+            `CREATE TABLE "temporary_bible_note" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar, "type" varchar, "content" text NOT NULL, "phraseId" integer, CONSTRAINT "FK_66a40d0dd1d4dec456e1241d382" FOREIGN KEY ("phraseId") REFERENCES "bible_phrase" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION)`,
             undefined
         );
         await queryRunner.query(
@@ -101,7 +101,7 @@ export class InitialMigration1577684427757 implements MigrationInterface {
         await queryRunner.query(`DROP INDEX "IDX_7ff9093c7d0193dc69753ff634"`, undefined);
         await queryRunner.query(`DROP INDEX "IDX_763d9599de97b88c1adcd12dac"`, undefined);
         await queryRunner.query(
-            `CREATE TABLE "temporary_bible_cross_reference" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "normalizedRefId" bigint NOT NULL, "partIndicator" varchar, "normalizedRefIdEnd" bigint, "partIndicatorEnd" varchar, "versionId" integer, "versionChapterNum" integer, "versionVerseNum" integer, "versionChapterEndNum" integer, "versionVerseEndNum" integer, "key" varchar, "phraseId" bigint, "sectionId" integer, CONSTRAINT "FK_7ff9093c7d0193dc69753ff6346" FOREIGN KEY ("phraseId") REFERENCES "bible_phrase" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION, CONSTRAINT "FK_763d9599de97b88c1adcd12dacb" FOREIGN KEY ("sectionId") REFERENCES "bible_section" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION)`,
+            `CREATE TABLE "temporary_bible_cross_reference" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "normalizedRefId" bigint NOT NULL, "partIndicator" varchar, "normalizedRefIdEnd" bigint, "partIndicatorEnd" varchar, "versionId" integer, "versionChapterNum" integer, "versionVerseNum" integer, "versionChapterEndNum" integer, "versionVerseEndNum" integer, "key" varchar, "phraseId" integer, "sectionId" integer, CONSTRAINT "FK_7ff9093c7d0193dc69753ff6346" FOREIGN KEY ("phraseId") REFERENCES "bible_phrase" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION, CONSTRAINT "FK_763d9599de97b88c1adcd12dacb" FOREIGN KEY ("sectionId") REFERENCES "bible_section" ("id") ON DELETE NO ACTION ON UPDATE NO ACTION)`,
             undefined
         );
         await queryRunner.query(
@@ -131,7 +131,7 @@ export class InitialMigration1577684427757 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_cross_reference" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "normalizedRefId" bigint NOT NULL, "partIndicator" varchar, "normalizedRefIdEnd" bigint, "partIndicatorEnd" varchar, "versionId" integer, "versionChapterNum" integer, "versionVerseNum" integer, "versionChapterEndNum" integer, "versionVerseEndNum" integer, "key" varchar, "phraseId" bigint, "sectionId" integer)`,
+            `CREATE TABLE "bible_cross_reference" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "normalizedRefId" bigint NOT NULL, "partIndicator" varchar, "normalizedRefIdEnd" bigint, "partIndicatorEnd" varchar, "versionId" integer, "versionChapterNum" integer, "versionVerseNum" integer, "versionChapterEndNum" integer, "versionVerseEndNum" integer, "key" varchar, "phraseId" integer, "sectionId" integer)`,
             undefined
         );
         await queryRunner.query(
@@ -153,7 +153,7 @@ export class InitialMigration1577684427757 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_note" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar, "type" varchar, "content" text NOT NULL, "phraseId" bigint)`,
+            `CREATE TABLE "bible_note" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "key" varchar, "type" varchar, "content" text NOT NULL, "phraseId" integer)`,
             undefined
         );
         await queryRunner.query(
