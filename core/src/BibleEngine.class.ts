@@ -101,7 +101,7 @@ export class BibleEngine {
     constructor(dbConfig: ConnectionOptions) {
         this.pDB = createConnection({
             entities: ENTITIES,
-            synchronize: true,
+            synchronize: false,
             logging: ['error'],
             name: 'bible-engine',
             migrations,
