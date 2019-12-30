@@ -7,7 +7,7 @@ import {
     IBibleContentGroup,
     IBibleContentSection
 } from '../models';
-import { generateBibleDocument } from './content.functions';
+import { generateBibleDocument, convertBiblePhrasesToPlaintext } from './content.functions';
 import { BibleParagraphEntity, BiblePhraseEntity, BibleSectionEntity } from '../entities';
 
 describe('generateBibleDocument', () => {
@@ -218,5 +218,31 @@ describe('generateBibleDocument', () => {
         ) {
             expect(item1_1_1.crossReferences[0].label).toBe('Ps 23:5-7');
         }
+    });
+});
+
+describe('convertBibleInputToBookPlaintext', () => {
+    test('If no phrases have skipSpace, joined with spaces', () => {
+        const phrases = [{ content: 'In the' }, { content: 'beginning,' }, { content: 'God' }];
+        const plaintext = convertBiblePhrasesToPlaintext(phrases);
+        expect(plaintext).toBe('In the beginning, God');
+    });
+    test('If phrases have skipSpace after, dont add space', () => {
+        const phrases: any = [
+            { content: 'In the' },
+            { content: 'beginning', skipSpace: 'after' },
+            { content: ', God' }
+        ];
+        const plaintext = convertBiblePhrasesToPlaintext(phrases);
+        expect(plaintext).toBe('In the beginning, God');
+    });
+    test('If phrases have skipSpace before, dont add space', () => {
+        const phrases: any = [
+            { content: 'In the' },
+            { content: 'beginning' },
+            { content: ', God', skipSpace: 'before' }
+        ];
+        const plaintext = convertBiblePhrasesToPlaintext(phrases);
+        expect(plaintext).toBe('In the beginning, God');
     });
 });

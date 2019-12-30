@@ -1058,6 +1058,22 @@ export const stripUnnecessaryDataFromBibleContextData = (
     }
 };
 
+export const convertBiblePhrasesToPlaintext = (phrases: Partial<BiblePhraseEntity>[]) => {
+    let plaintext = '';
+    for (const [index, phrase] of phrases.entries()) {
+        plaintext += phrase.content;
+        const hasNextPhrase = index < phrases.length - 1;
+        if (
+            phrase.skipSpace !== 'after' &&
+            hasNextPhrase &&
+            phrases[index + 1].skipSpace !== 'before'
+        ) {
+            plaintext += ' ';
+        }
+    }
+    return plaintext.trim();
+};
+
 export const stripUnnecessaryDataFromBibleReferenceRange = (
     rangeNormalized: IBibleReferenceRangeNormalized
 ) => {
