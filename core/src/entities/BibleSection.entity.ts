@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, Index } from 'typeorm';
-import { BibleCrossReferenceEntity } from '.';
+import { BibleCrossReferenceEntity } from './BibleCrossReference.entity';
 import { IBibleSectionEntity, DocumentRoot } from '../models';
 
 @Entity('bible_section')
@@ -35,9 +35,13 @@ export class BibleSectionEntity implements IBibleSectionEntity {
     @Column({ nullable: true, type: 'simple-json' })
     description?: DocumentRoot;
 
-    @OneToMany(() => BibleCrossReferenceEntity, crossReference => crossReference.section, {
-        cascade: true
-    })
+    @OneToMany(
+        () => BibleCrossReferenceEntity,
+        crossReference => crossReference.section,
+        {
+            cascade: true
+        }
+    )
     @JoinColumn()
     crossReferences?: BibleCrossReferenceEntity[];
 

@@ -9,7 +9,8 @@ import {
     BeforeUpdate,
     Index
 } from 'typeorm';
-import { BibleCrossReferenceEntity, BibleNoteEntity } from '.';
+import { BibleCrossReferenceEntity } from './BibleCrossReference.entity';
+import { BibleNoteEntity } from './BibleNote.entity';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
 import { PhraseModifiers, IBiblePhraseRef } from '../models';
 import { IBiblePhraseWithNumbers } from '../models/BiblePhrase';
@@ -70,15 +71,23 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
     @Column({ nullable: true, type: 'simple-array' })
     strongs?: string[];
 
-    @OneToMany(() => BibleCrossReferenceEntity, crossReference => crossReference.phrase, {
-        cascade: true
-    })
+    @OneToMany(
+        () => BibleCrossReferenceEntity,
+        crossReference => crossReference.phrase,
+        {
+            cascade: true
+        }
+    )
     @JoinColumn()
     crossReferences: BibleCrossReferenceEntity[];
 
-    @OneToMany(() => BibleNoteEntity, note => note.phrase, {
-        cascade: true
-    })
+    @OneToMany(
+        () => BibleNoteEntity,
+        note => note.phrase,
+        {
+            cascade: true
+        }
+    )
     @JoinColumn()
     notes: BibleNoteEntity[];
 
