@@ -6,8 +6,7 @@ import { BeDatabaseCreator } from './../src/BeDatabaseCreator.class';
 const run = async () => {
     const creator = new BeDatabaseCreator({
         type: 'sqlite',
-        database: 'bibles.db',
-        dropSchema: true
+        database: 'bibles.db'
     });
     creator.addImporter(V11nImporter);
     creator.addImporter(SwordImporter, {
