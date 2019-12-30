@@ -105,6 +105,7 @@ export class BibleEngine {
             logging: ['error'],
             name: 'bible-engine',
             migrations,
+            migrationsRun: true,
             ...dbConfig
         }).then(conn => conn.manager);
     }
