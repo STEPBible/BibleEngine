@@ -16,6 +16,11 @@ describe('getMigrations', () => {
     });
     it('returns postgres migrations for postgres databases', () => {
         expect(bibleEngine.getMigrations('postgres').name).toBe('postgres');
+        expect(bibleEngine.getMigrations('postgres').migrations.length).toBeGreaterThan(0);
+    });
+    it('returns mysql migrations for mysql databases', () => {
+        expect(bibleEngine.getMigrations('mysql').name).toBe('mysql');
+        expect(bibleEngine.getMigrations('mysql').migrations.length).toBeGreaterThan(0);
     });
     it('throws an error for unsupported databases', () => {
         expect(() => bibleEngine.getMigrations('oracle').name).toThrowError();

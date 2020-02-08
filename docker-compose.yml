@@ -12,6 +12,14 @@ services:
             - '5555:5432'
         networks:
             - backend
+    mysql-db:
+        image: mysql:5.7.29
+        restart: always
+        environment:
+            - MYSQL_ROOT_PASSWORD=password
+            - MYSQL_DATABASE=bibleengine
+        ports:
+            - '3306:3306'
 networks:
     backend:
         external: true

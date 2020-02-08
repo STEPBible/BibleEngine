@@ -68,6 +68,7 @@ import {
 } from './models';
 import sqliteMigrations from './migrations/sqlite';
 import postgresMigrations from './migrations/postgres';
+import mysqlMigrations from './migrations/mysql';
 
 export class NoDbConnectionError extends Error {
     constructor() {
@@ -116,9 +117,10 @@ export class BibleEngine {
         const SQLITE_TYPES: DatabaseType[] = ['expo', 'sqlite', 'cordova', 'sqljs'];
         if (SQLITE_TYPES.includes(type)) {
             return sqliteMigrations;
-        }
-        if (type === 'postgres') {
+        } else if (type === 'postgres') {
             return postgresMigrations;
+        } else if (type === 'mysql') {
+            return mysqlMigrations;
         } else {
             throw new Error('Unsupported database type, cannot run migrations');
         }

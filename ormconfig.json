@@ -26,5 +26,23 @@
         "cli": {
             "migrationsDir": "core/src/migrations/postgres"
         }
+    },
+    {
+        "name": "mysql",
+        "type": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "username": "root",
+        "password": "password",
+        "database": "bibleengine",
+        "entities": ["./core/src/entities/*.entity.ts"],
+        "insecureAuth": true,
+        "migrationsTableName": "migrations",
+        "migrations": ["core/src/migrations/mysql/*.ts"],
+        "migrationsRun": true,
+        "synchronize": false,
+        "cli": {
+            "migrationsDir": "core/src/migrations/mysql"
+        }
     }
 ]
