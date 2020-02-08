@@ -20,6 +20,8 @@ services:
             - MYSQL_DATABASE=bibleengine
         ports:
             - '3306:3306'
+        networks:
+            - backend
 networks:
     backend:
         external: true
