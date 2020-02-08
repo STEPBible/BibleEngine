@@ -6,6 +6,7 @@
         "entities": ["./core/src/entities/*.entity.ts"],
         "migrations": ["core/src/migrations/sqlite/*-*.ts"],
         "migrationsRun": true,
+        "synchronize": false,
         "migrationsTableName": "migrations",
         "cli": {
             "migrationsDir": "core/src/migrations/sqlite"
@@ -23,6 +24,7 @@
         "migrationsTableName": "migrations",
         "migrations": ["core/src/migrations/postgres/*.ts"],
         "migrationsRun": true,
+        "synchronize": false,
         "cli": {
             "migrationsDir": "core/src/migrations/postgres"
         }
