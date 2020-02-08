@@ -4,7 +4,8 @@ import {
     Raw,
     EntityManager,
     Between,
-    FindConditions
+    FindConditions,
+    DatabaseType
 } from 'typeorm';
 
 import {
@@ -105,23 +106,22 @@ export class BibleEngine {
             synchronize: false,
             logging: ['error'],
             name: 'bible-engine',
-            migrations: this.getMigrations(dbConfig),
+            migrations: this.getMigrations(dbConfig.type).migrations,
             migrationsRun: true,
             ...dbConfig
         }).then(conn => conn.manager);
     }
 
-    getMigrations(dbConfig: ConnectionOptions) {
-        let migrations: any = [];
-        switch (dbConfig.type) {
-            case 'sqlite':
-                migrations = sqliteMigrations;
-                break;
-            case 'postgres':
-                migrations = postgresMigrations;
-                break;
+    getMigrations(type: DatabaseType): any {
+        const SQLITE_TYPES: DatabaseType[] = ['expo', 'sqlite', 'cordova', 'sqljs'];
+        if (SQLITE_TYPES.includes(type)) {
+            return sqliteMigrations;
         }
-        return migrations;
+        if (type === 'postgres') {
+            return postgresMigrations;
+        } else {
+            throw new Error('Unsupported database type, cannot run migrations');
+        }
     }
 
     async runMigrations() {
