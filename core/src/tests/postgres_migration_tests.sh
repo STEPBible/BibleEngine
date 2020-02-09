@@ -1,14 +1,18 @@
-docker --version
+set -e
+# Use the latest version of Node
+source /opt/circleci/.nvm/nvm.sh && nvm install 13.5.0 && nvm use 13.5.0
 # Start postgres docker container and wipe any persisted data
-docker-compose up -d --build --force-recreate --renew-anon-volumes postgres-db;
+docker-compose up -d --build --force-recreate --renew-anon-volumes postgres-db
 # Wait until postgres container can accept requests
 until [ "$(docker inspect -f='{{.State.Health.Status}}' $(docker ps -q))" = "healthy" ]; do
     sleep 0.1
 done;
 # Run existing migrations
-yarn typeorm migration:run --connection postgres;
+yarn typeorm migration:run --connection postgres
+# Wait a bit for the transaction to finish
+sleep 3
 # Check if any additional migrations are needed
-yarn typeorm migration:generate -n AMissingMigration --connection postgres;
+yarn typeorm migration:generate -n AMissingMigration --connection postgres
 # Stop all open containers
 docker stop $(docker ps -q)
 # Test if the migration was created, and if so, return with error
