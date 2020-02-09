@@ -37,7 +37,6 @@ jobs:
                   name: Restore Yarn Package Cache
                   keys:
                       - node-modules-{{ checksum "yarn.lock" }}
-            - run: cd ~/BibleEngine && yarn typeorm migration:run --connection default
             - run: cd ~/BibleEngine/core && yarn test
             - run: cd ~/BibleEngine/importers && yarn test
             - run: cd ~/BibleEngine/client && yarn test --passWithNoTests
@@ -56,3 +55,4 @@ jobs:
             - run: ~/BibleEngine/core/src/tests/install_yarn.sh
             - run: ~/BibleEngine/core/src/tests/mysql_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/postgres_migration_tests.sh
+            - run: ~/BibleEngine/core/src/tests/sqlite_migration_tests.sh
