@@ -30,3 +30,29 @@ Additional features:
 -   [@bible-engine/importers](https://github.com/tyndale/BibleEngine/tree/master/importers): importers for different data sources
 -   [@bible-engine/server](https://github.com/tyndale/BibleEngine/tree/master/server): implementation example for a remote fallback server
 -   [@bible-engine/app](https://github.com/tyndale/BibleEngine/tree/master/app): react-native app
+
+## Contributing
+
+To set up a local database for testing, install docker-compose and run:
+
+```
+docker-compose up postgres-db
+```
+
+Install all packages:
+
+```
+yarn install
+```
+
+To generate a new migration to capture schema changes:
+
+```
+yarn typeorm migration:generate -n SomeMigrationName
+```
+
+To test a new migration, run:
+
+```
+yarn typeorm migration:run
+```

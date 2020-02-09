@@ -6,12 +6,11 @@ import { BeDatabaseCreator } from './../src/BeDatabaseCreator.class';
 const run = async () => {
     const creator = new BeDatabaseCreator({
         type: 'sqlite',
-        database: 'bibles.db',
-        dropSchema: true
+        database: 'bibles.db'
     });
     creator.addImporter(V11nImporter);
     creator.addImporter(SwordImporter, {
-        sourcePath: 'src/osis-sword-module/data/ESV2016_th.zip'
+        sourcePath: 'src/bible/sword/data/ESV2016_th.zip'
     });
     creator.addImporter(StepLexiconImporter);
 

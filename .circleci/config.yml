@@ -1,23 +1,63 @@
-version: 2.1
+version: 2
+workflows:
+    version: 2
+    build_and_test:
+        jobs:
+            - build
+            - test:
+                  requires:
+                      - build
+            - test_migrations:
+                  requires:
+                      - build
 jobs:
     build:
         working_directory: ~/BibleEngine
         docker:
-            - image: circleci/node:latest
+            - image: circleci/node:13.5.0
         steps:
             - checkout
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
-                      - yarn-packages-{{ checksum "yarn.lock" }}
-            - run: yarn install --frozen-lockfile
+                      - node-modules-{{ checksum "yarn.lock" }}
+            - run: ls node_modules || yarn install --frozen-lockfile
             - save_cache:
                   name: Save Yarn Package Cache
-                  key: yarn-packages-{{ checksum "yarn.lock" }}
+                  key: node-modules-{{ checksum "yarn.lock" }}
                   paths:
+                      - node_modules
                       - ~/.cache/yarn
-            - run: cd ~/BibleEngine/app && yarn install
-            - run: cd ~/BibleEngine/app && yarn test
+    test:
+        working_directory: ~/BibleEngine
+        docker:
+            - image: circleci/node:13.5.0
+        steps:
+            - checkout
+            - restore_cache:
+                  name: Restore Yarn Package Cache
+                  keys:
+                      - node-modules-{{ checksum "yarn.lock" }}
+            - run: yarn
             - run: cd ~/BibleEngine/core && yarn test
             - run: cd ~/BibleEngine/importers && yarn test
             - run: cd ~/BibleEngine/client && yarn test --passWithNoTests
+            - run: cd ~/BibleEngine/app && yarn install
+            - run: cd ~/BibleEngine/app && yarn test
+    test_migrations:
+        working_directory: ~/BibleEngine
+        machine:
+            image: ubuntu-1604:201903-01
+        environment:
+            BASH_ENV: /opt/circleci/.nvm/nvm.sh
+        steps:
+            - checkout
+            - restore_cache:
+                  name: Restore Yarn Package Cache
+                  keys:
+                      - node-modules-{{ checksum "yarn.lock" }}
+            - run: ~/BibleEngine/core/src/tests/install_yarn.sh
+            - run: nvm use 13.5.0 && yarn
+            - run: ~/BibleEngine/core/src/tests/mysql_migration_tests.sh
+            - run: ~/BibleEngine/core/src/tests/postgres_migration_tests.sh
+            - run: ~/BibleEngine/core/src/tests/sqlite_migration_tests.sh

@@ -4,7 +4,8 @@ import {
     Raw,
     EntityManager,
     Between,
-    FindConditions
+    FindConditions,
+    DatabaseType
 } from 'typeorm';
 
 import {
@@ -65,7 +66,9 @@ import {
     IBibleContentGroup,
     BiblePlaintext
 } from './models';
-import migrations from './migrations';
+import sqliteMigrations from './migrations/sqlite';
+import postgresMigrations from './migrations/postgres';
+import mysqlMigrations from './migrations/mysql';
 
 export class NoDbConnectionError extends Error {
     constructor() {
@@ -101,12 +104,26 @@ export class BibleEngine {
     constructor(dbConfig: ConnectionOptions) {
         this.pDB = createConnection({
             entities: ENTITIES,
-            synchronize: true,
+            synchronize: false,
             logging: ['error'],
             name: 'bible-engine',
-            migrations,
+            migrations: this.getMigrations(dbConfig.type).migrations,
+            migrationsRun: true,
             ...dbConfig
         }).then(conn => conn.manager);
+    }
+
+    getMigrations(type: DatabaseType): any {
+        const SQLITE_TYPES: DatabaseType[] = ['expo', 'sqlite', 'cordova', 'react-native', 'sqljs'];
+        if (SQLITE_TYPES.includes(type)) {
+            return sqliteMigrations;
+        } else if (type === 'postgres') {
+            return postgresMigrations;
+        } else if (type === 'mysql') {
+            return mysqlMigrations;
+        } else {
+            throw new Error('Unsupported database type, cannot run migrations');
+        }
     }
 
     async runMigrations() {

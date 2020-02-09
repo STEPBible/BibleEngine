@@ -29,9 +29,9 @@ export class StepLexiconImporter extends BibleEngineImporter {
     async import() {
         // Note: You'll need to remove all the comments at the top of the txt file.
         const hebrewLexiconLines = fs
-        .readFileSync(`${dirProjectRoot}/src/step-lexicon/data/hebrew_lexicon.txt`)
-        .toString()
-        .split('\n');
+            .readFileSync(`${dirProjectRoot}/stepdata/step-lexicon/data/hebrew_lexicon.txt`)
+            .toString()
+            .split('\n');
 
         const hebrewLexiconEntries = getStrongsContent(hebrewLexiconLines);
         const hebrewDictionaryEntries = getDictionaryEntries(
@@ -39,12 +39,12 @@ export class StepLexiconImporter extends BibleEngineImporter {
             LexiconEntryType.HEBREW_DEFINITION
         );
         for (let entry of hebrewDictionaryEntries) {
-            console.log(entry.strong)
+            console.log(entry.strong);
             await this.bibleEngine.addDictionaryEntry(entry);
         }
 
         const greekLexiconLines = fs
-            .readFileSync(`${dirProjectRoot}/src/step-lexicon/data/greek_lexicon.txt`)
+            .readFileSync(`${dirProjectRoot}/stepdata/step-lexicon/data/greek_lexicon.txt`)
             .toString()
             .split('\n');
 
@@ -56,13 +56,13 @@ export class StepLexiconImporter extends BibleEngineImporter {
         );
 
         for (let entry of greekDictionaryEntries) {
-            console.log(entry.strong)
+            console.log(entry.strong);
             await this.bibleEngine.addDictionaryEntry(entry);
         }
     }
 
     toString() {
-        return 'STEP Greek and Hebrew Lexicons'
+        return 'STEP Greek and Hebrew Lexicons';
     }
 }
 

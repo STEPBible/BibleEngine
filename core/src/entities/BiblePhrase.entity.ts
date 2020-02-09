@@ -9,16 +9,16 @@ import {
     BeforeUpdate,
     Index
 } from 'typeorm';
-import { BibleCrossReferenceEntity, BibleNoteEntity } from '.';
+import { BibleCrossReferenceEntity } from './BibleCrossReference.entity';
+import { BibleNoteEntity } from './BibleNote.entity';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
 import { PhraseModifiers, IBiblePhraseRef } from '../models';
 import { IBiblePhraseWithNumbers } from '../models/BiblePhrase';
 import { IContentPhrase } from '../models/ContentPhrase';
-import { isNode } from '../functions/utils.functions';
 
 @Entity('bible_phrase')
 export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
-    @PrimaryColumn({ type: isNode && process.argv.indexOf('sqlite') === -1 ? 'bigint' : 'integer' })
+    @PrimaryColumn()
     id: number;
 
     // the id encodes the following attribute:
@@ -70,15 +70,23 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
     @Column({ nullable: true, type: 'simple-array' })
     strongs?: string[];
 
-    @OneToMany(() => BibleCrossReferenceEntity, crossReference => crossReference.phrase, {
-        cascade: true
-    })
+    @OneToMany(
+        () => BibleCrossReferenceEntity,
+        crossReference => crossReference.phrase,
+        {
+            cascade: true
+        }
+    )
     @JoinColumn()
     crossReferences: BibleCrossReferenceEntity[];
 
-    @OneToMany(() => BibleNoteEntity, note => note.phrase, {
-        cascade: true
-    })
+    @OneToMany(
+        () => BibleNoteEntity,
+        note => note.phrase,
+        {
+            cascade: true
+        }
+    )
     @JoinColumn()
     notes: BibleNoteEntity[];
 
