@@ -16,6 +16,7 @@ docker stop $(docker ps -q)
 # Test if the migration was created, and if so, return with error
 if ls ~/BibleEngine/core/src/migrations/postgres/*AMissingMigration.ts 1> /dev/null 2>&1; then
     echo "Schema changes were made that arent captured by migrations, exiting with error"
+    echo "Run the ./generate_migrations.sh file to create all needed migrations"
     exit 1
 fi
-echo "Success! Current migrations account for all schema changes."
+echo "Success! Current postgres migrations account for all schema changes."
