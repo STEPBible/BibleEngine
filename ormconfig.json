@@ -25,6 +25,7 @@
         "migrations": ["core/src/migrations/postgres/*-*.ts"],
         "migrationsRun": true,
         "synchronize": false,
+        "dropSchema": false,
         "cli": {
             "migrationsDir": "core/src/migrations/postgres"
         }
@@ -43,6 +44,7 @@
         "migrations": ["core/src/migrations/mysql/*-*.ts"],
         "migrationsRun": true,
         "synchronize": false,
+        "dropSchema": false,
         "cli": {
             "migrationsDir": "core/src/migrations/mysql"
         }

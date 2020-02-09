@@ -1,5 +1,5 @@
-import { InitialMigration1577681016410 } from './1577681016410-InitialMigration';
+import { InitialMigration1581232232432 } from './1581232232432-InitialMigration';
 export default {
     name: 'postgres',
-    migrations: [InitialMigration1577681016410]
+    migrations: [InitialMigration1581232232432]
 };

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitialMigration1577681016410 implements MigrationInterface {
-    name = 'InitialMigration1577681016410';
+export class InitialMigration1581232232432 implements MigrationInterface {
+    name = 'InitialMigration1581232232432';
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(
@@ -33,7 +33,7 @@ export class InitialMigration1577681016410 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_note" ("id" SERIAL NOT NULL, "key" character varying, "type" character varying, "content" text NOT NULL, "phraseId" bigint, CONSTRAINT "PK_39d67ee384222ebb0a222ce3a8b" PRIMARY KEY ("id"))`,
+            `CREATE TABLE "bible_note" ("id" SERIAL NOT NULL, "key" character varying, "type" character varying, "content" text NOT NULL, "phraseId" integer, CONSTRAINT "PK_39d67ee384222ebb0a222ce3a8b" PRIMARY KEY ("id"))`,
             undefined
         );
         await queryRunner.query(
@@ -41,7 +41,7 @@ export class InitialMigration1577681016410 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_phrase" ("id" bigint NOT NULL, "joinToRefId" bigint, "versionId" integer NOT NULL, "versionChapterNum" integer NOT NULL, "versionVerseNum" integer NOT NULL, "versionSubverseNum" integer, "sourceTypeId" integer, "content" text NOT NULL, "linebreak" boolean, "skipSpace" character varying, "modifiers" text, "quoteWho" character varying, "person" character varying, "strongs" text, CONSTRAINT "PK_8a809b4bbc283a501f8fd6b44d3" PRIMARY KEY ("id"))`,
+            `CREATE TABLE "bible_phrase" ("id" integer NOT NULL, "joinToRefId" bigint, "versionId" integer NOT NULL, "versionChapterNum" integer NOT NULL, "versionVerseNum" integer NOT NULL, "versionSubverseNum" integer, "sourceTypeId" integer, "content" text NOT NULL, "linebreak" boolean, "skipSpace" character varying, "modifiers" text, "quoteWho" character varying, "person" character varying, "strongs" text, CONSTRAINT "PK_8a809b4bbc283a501f8fd6b44d3" PRIMARY KEY ("id"))`,
             undefined
         );
         await queryRunner.query(
@@ -69,7 +69,7 @@ export class InitialMigration1577681016410 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_cross_reference" ("id" SERIAL NOT NULL, "normalizedRefId" bigint NOT NULL, "partIndicator" character varying, "normalizedRefIdEnd" bigint, "partIndicatorEnd" character varying, "versionId" integer, "versionChapterNum" integer, "versionVerseNum" integer, "versionChapterEndNum" integer, "versionVerseEndNum" integer, "key" character varying, "phraseId" bigint, "sectionId" integer, CONSTRAINT "PK_8b717c53ae076d7c159ffa4158d" PRIMARY KEY ("id"))`,
+            `CREATE TABLE "bible_cross_reference" ("id" SERIAL NOT NULL, "normalizedRefId" bigint NOT NULL, "partIndicator" character varying, "normalizedRefIdEnd" bigint, "partIndicatorEnd" character varying, "versionId" integer, "versionChapterNum" integer, "versionVerseNum" integer, "versionChapterEndNum" integer, "versionVerseEndNum" integer, "key" character varying, "phraseId" integer, "sectionId" integer, CONSTRAINT "PK_8b717c53ae076d7c159ffa4158d" PRIMARY KEY ("id"))`,
             undefined
         );
         await queryRunner.query(

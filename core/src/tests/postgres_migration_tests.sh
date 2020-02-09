@@ -9,8 +9,6 @@ until [ "$(docker inspect -f='{{.State.Health.Status}}' $(docker ps -q))" = "hea
 done;
 # Run existing migrations
 yarn typeorm migration:run --connection postgres
-# Wait a bit for the transaction to finish
-sleep 3
 # Check if any additional migrations are needed
 yarn typeorm migration:generate -n AMissingMigration --connection postgres
 # Stop all open containers
