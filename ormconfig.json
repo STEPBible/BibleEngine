@@ -1,8 +1,8 @@
 [
     {
-        "name": "default",
+        "name": "sqlite",
         "type": "sqlite",
-        "database": ":memory:",
+        "database": "temp.sqlite",
         "entities": ["./core/src/entities/*.entity.ts"],
         "migrations": ["core/src/migrations/sqlite/*-*.ts"],
         "migrationsRun": true,
