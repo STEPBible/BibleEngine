@@ -27,6 +27,7 @@ jobs:
                   key: node-modules-{{ checksum "yarn.lock" }}
                   paths:
                       - node_modules
+                      - ~/.cache/yarn
     test:
         working_directory: ~/BibleEngine
         docker:
