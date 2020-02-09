@@ -14,8 +14,6 @@ services:
             - ./db-dump/:/docker-entrypoint-initdb.d
         ports:
             - '5555:5432'
-        networks:
-            - backend
     mysql-db:
         image: mysql:5.7.29
         restart: always
@@ -29,8 +27,3 @@ services:
             retries: 10
         ports:
             - '3306:3306'
-        networks:
-            - backend
-networks:
-    backend:
-        external: true

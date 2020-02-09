@@ -1,4 +1,9 @@
-version: 2.1
+version: 2
+workflows:
+    version: 2
+    build_and_test:
+        jobs:
+            - test_migrations
 jobs:
     build:
         working_directory: ~/BibleEngine
@@ -16,9 +21,17 @@ jobs:
                   key: yarn-packages-{{ checksum "yarn.lock" }}
                   paths:
                       - ~/.cache/yarn
-            - run: cd ~/BibleEngine && yarn typeorm migration:run --connection default
-            - run: cd ~/BibleEngine/core && yarn test
-            - run: cd ~/BibleEngine/importers && yarn test
-            - run: cd ~/BibleEngine/client && yarn test --passWithNoTests
-            - run: cd ~/BibleEngine/app && yarn install
-            - run: cd ~/BibleEngine/app && yarn test
+    #         - run: cd ~/BibleEngine && yarn typeorm migration:run --connection default
+    #         - run: cd ~/BibleEngine/core && yarn test
+    #         - run: cd ~/BibleEngine/importers && yarn test
+    #         - run: cd ~/BibleEngine/client && yarn test --passWithNoTests
+    #         - run: cd ~/BibleEngine/app && yarn install
+    #         - run: cd ~/BibleEngine/app && yarn test
+    test_migrations:
+        working_directory: ~/BibleEngine
+        machine:
+            image: ubuntu-1604:201903-01
+        steps:
+            - checkout
+            - run: ~/BibleEngine/core/src/tests/mysql_migration_tests.sh
+            - run: ~/BibleEngine/core/src/tests/postgres_migration_tests.sh
