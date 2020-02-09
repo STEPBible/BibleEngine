@@ -22,7 +22,7 @@
         "database": "test",
         "entities": ["./core/src/entities/*.entity.ts"],
         "migrationsTableName": "migrations",
-        "migrations": ["core/src/migrations/postgres/*.ts"],
+        "migrations": ["core/src/migrations/postgres/*-*.ts"],
         "migrationsRun": true,
         "synchronize": false,
         "cli": {
@@ -40,7 +40,7 @@
         "entities": ["./core/src/entities/*.entity.ts"],
         "insecureAuth": true,
         "migrationsTableName": "migrations",
-        "migrations": ["core/src/migrations/mysql/*.ts"],
+        "migrations": ["core/src/migrations/mysql/*-*.ts"],
         "migrationsRun": true,
         "synchronize": false,
         "cli": {
