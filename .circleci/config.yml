@@ -48,6 +48,8 @@ jobs:
         working_directory: ~/BibleEngine
         machine:
             image: ubuntu-1604:201903-01
+        environment:
+            BASH_ENV: /opt/circleci/.nvm/nvm.sh
         steps:
             - checkout
             - restore_cache:
@@ -55,7 +57,7 @@ jobs:
                   keys:
                       - node-modules-{{ checksum "yarn.lock" }}
             - run: ~/BibleEngine/core/src/tests/install_yarn.sh
-            - run: yarn
+            - run: nvm use 13.5.0 && yarn
             - run: ~/BibleEngine/core/src/tests/mysql_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/postgres_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/sqlite_migration_tests.sh
