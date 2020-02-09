@@ -1,5 +1,5 @@
 set -e
-# Use the latest version of Node
+# Yarn requires a modern version of Node, >8
 source /opt/circleci/.nvm/nvm.sh && nvm install 13.5.0 && nvm use 13.5.0
 # Start postgres docker container and wipe any persisted data
 docker-compose up -d --build --force-recreate --renew-anon-volumes postgres-db
