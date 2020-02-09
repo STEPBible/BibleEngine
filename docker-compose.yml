@@ -2,6 +2,7 @@ version: '3'
 services:
     postgres-db:
         image: mdillon/postgis:10-alpine
+        container_name: bibleengine_postgres
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=password
@@ -16,7 +17,7 @@ services:
             - '5555:5432'
     mysql-db:
         image: mysql:5.7.29
-        restart: always
+        container_name: bibleengine_mysql
         environment:
             - MYSQL_USER=root
             - MYSQL_ROOT_PASSWORD=password
