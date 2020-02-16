@@ -33,8 +33,13 @@ resource "aws_route_table" "main" {
   }
 }
 
-resource "aws_route_table_association" "databases" {
-  subnet_id      = aws_subnet.databases.id
+resource "aws_route_table_association" "databases_zone_1" {
+  subnet_id      = aws_subnet.databases_zone_1.id
+  route_table_id = aws_route_table.main.id
+}
+
+resource "aws_route_table_association" "databases_zone_2" {
+  subnet_id      = aws_subnet.databases_zone_2.id
   route_table_id = aws_route_table.main.id
 }
 
@@ -43,12 +48,21 @@ resource "aws_route_table_association" "servers" {
   route_table_id = aws_route_table.main.id
 }
 
-resource "aws_subnet" "databases" {
+resource "aws_subnet" "databases_zone_1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.1.1.0/24"
   availability_zone = "us-east-1a"
   tags = {
-    Name = "Databases"
+    Name = "Databases Zone 1"
+  }
+}
+
+resource "aws_subnet" "databases_zone_2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.1.2.0/24"
+  availability_zone = "us-east-1b"
+  tags = {
+    Name = "Databases Zone 2"
   }
 }
 
@@ -159,7 +173,7 @@ resource "aws_api_gateway_deployment" "main" {
 resource "aws_lambda_function" "main" {
   function_name = "BibleEngine"
   s3_bucket     = "bibleengine-lambda-prod-deployments"
-  s3_key        = "v1.0.0/example.zip"
+  s3_key        = "v1.0.1/example.zip"
 
   # "main" is the filename within the zip file (main.js) and "handler"
   # is the name of the property under which the handler function was
@@ -172,6 +186,12 @@ resource "aws_lambda_function" "main" {
   vpc_config {
     subnet_ids         = [aws_subnet.servers.id]
     security_group_ids = [aws_security_group.allowall.id]
+  }
+
+  environment {
+    variables = {
+      DATABASE_URL = aws_rds_cluster.database.endpoint
+    }
   }
 }
 
@@ -234,4 +254,37 @@ resource "aws_lambda_permission" "allow_api_gateway" {
 
 output "api_base_url" {
   value = aws_api_gateway_deployment.main.invoke_url
+}
+
+resource "aws_db_subnet_group" "main" {
+  name       = "main"
+  subnet_ids = [aws_subnet.databases_zone_1.id, aws_subnet.databases_zone_2.id]
+}
+
+resource "aws_rds_cluster" "database" {
+  availability_zones = ["us-east-1a", "us-east-1b"]
+
+  engine         = "aurora"
+  engine_version = "5.6.10a"
+  engine_mode    = "serverless"
+
+  database_name           = "bibleengine"
+  master_username         = "root"
+  master_password         = "password"
+  db_subnet_group_name    = aws_db_subnet_group.main.name
+  vpc_security_group_ids  = [aws_security_group.allowall.id]
+  backup_retention_period = 5
+  port                    = 3306
+
+  scaling_configuration {
+    auto_pause               = true
+    max_capacity             = 8
+    min_capacity             = 1
+    seconds_until_auto_pause = 300
+    timeout_action           = "ForceApplyCapacityChange"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
