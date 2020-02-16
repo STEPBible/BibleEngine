@@ -4,12 +4,15 @@ workflows:
     build_and_test:
         jobs:
             - build
+            - test_terraform:
+                  context: aws-credentials
             - test:
                   requires:
                       - build
             - test_migrations:
                   requires:
                       - build
+
 jobs:
     build:
         working_directory: ~/BibleEngine
@@ -61,3 +64,14 @@ jobs:
             - run: ~/BibleEngine/core/src/tests/mysql_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/postgres_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/sqlite_migration_tests.sh
+    test_terraform:
+        working_directory: ~/BibleEngine
+        docker:
+            - image: hashicorp/terraform:light
+        environment:
+            BASH_ENV: /opt/circleci/.nvm/nvm.sh
+        steps:
+            - checkout
+            - run: cd ~/BibleEngine/aws && terraform init
+            - run: cd ~/BibleEngine/aws && terraform validate
+            - run: cd ~/BibleEngine/aws && terraform plan
