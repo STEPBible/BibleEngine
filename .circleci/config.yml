@@ -6,7 +6,7 @@ workflows:
             - build
             - test_terraform:
                   context: aws-credentials
-            - test_express
+            - test_controllers
             - test:
                   requires:
                       - build
@@ -74,7 +74,7 @@ jobs:
             - run: cd ~/BibleEngine/aws && terraform init
             - run: cd ~/BibleEngine/aws && terraform validate
             - run: cd ~/BibleEngine/aws && terraform plan
-    test_express:
+    test_controllers:
         working_directory: ~/BibleEngine
         docker:
             - image: circleci/node:13.5.0
