@@ -267,19 +267,29 @@ resource "aws_db_subnet_group" "main" {
 }
 
 resource "aws_rds_cluster" "database" {
-  availability_zones = ["us-east-1a", "us-east-1b"]
+  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1e"]
 
   engine         = "aurora"
   engine_version = "5.6.10a"
   engine_mode    = "serverless"
 
-  database_name           = "bibleengine"
-  master_username         = "root"
-  master_password         = "password"
-  db_subnet_group_name    = aws_db_subnet_group.main.name
-  vpc_security_group_ids  = [aws_security_group.allowall.id]
-  backup_retention_period = 5
-  port                    = 3306
+  database_name                       = "bibleengine"
+  master_username                     = "root"
+  master_password                     = "password"
+  db_subnet_group_name                = aws_db_subnet_group.main.name
+  vpc_security_group_ids              = [aws_security_group.allowall.id]
+  backup_retention_period             = 5
+  port                                = 3306
+  final_snapshot_identifier           = "dbfinalsnapshot"
+  apply_immediately                   = false
+  backtrack_window                    = 0
+  db_cluster_parameter_group_name     = "default.aurora5.6"
+  deletion_protection                 = false
+  enabled_cloudwatch_logs_exports     = null
+  iam_database_authentication_enabled = false
+  preferred_backup_window             = "08:31-09:01"
+  preferred_maintenance_window        = "thu:03:38-thu:04:08"
+  storage_encrypted                   = false
 
   scaling_configuration {
     auto_pause               = true
