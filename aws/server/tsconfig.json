@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "module": "commonjs",
+        "lib": ["dom", "es5", "es6", "esnext.asynciterable"],
+        "outDir": "./dist",
+        "pretty": true,
+        "inlineSourceMap": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "noUnusedLocals": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+    },
+    "include": ["./src", "index.js", "lambda.ts"],
+    "exclude": ["node_modules", "src/tests", "scripts"]
+}

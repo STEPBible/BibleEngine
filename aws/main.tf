@@ -173,13 +173,11 @@ resource "aws_api_gateway_deployment" "main" {
 resource "aws_lambda_function" "main" {
   function_name = "BibleEngine"
   s3_bucket     = "bibleengine-lambda-prod-deployments"
-  s3_key        = "v1.0.1/example.zip"
+  s3_key        = "v1.0.9/server.zip"
 
-  # "main" is the filename within the zip file (main.js) and "handler"
-  # is the name of the property under which the handler function was
-  # exported in that file.
-  handler = "main.handler"
-  runtime = "nodejs10.x"
+  handler = "index.handler"
+  runtime = "nodejs12.x"
+  timeout = 10
 
   role = aws_iam_role.lambda.arn
 

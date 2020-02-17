@@ -6,6 +6,7 @@ workflows:
             - build
             - test_terraform:
                   context: aws-credentials
+            - test_express
             - test:
                   requires:
                       - build
@@ -68,10 +69,16 @@ jobs:
         working_directory: ~/BibleEngine
         docker:
             - image: hashicorp/terraform:light
-        environment:
-            BASH_ENV: /opt/circleci/.nvm/nvm.sh
         steps:
             - checkout
             - run: cd ~/BibleEngine/aws && terraform init
             - run: cd ~/BibleEngine/aws && terraform validate
             - run: cd ~/BibleEngine/aws && terraform plan
+    test_express:
+        working_directory: ~/BibleEngine
+        docker:
+            - image: circleci/node:13.5.0
+        steps:
+            - checkout
+            - run: cd ~/BibleEngine/aws/server && yarn install
+            - run: cd ~/BibleEngine/aws/server && yarn test

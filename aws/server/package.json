@@ -1,0 +1,54 @@
+{
+    "license": "MIT",
+    "scripts": {
+        "clean": "rm -rf ./dist",
+        "test": "yarn jest",
+        "start": "yarn ts-node src/local.ts",
+        "build": "yarn clean && yarn tsc",
+        "package": "yarn && yarn build && zip -r ../server.zip .",
+        "deploy": "aws s3 cp ../server.zip s3://bibleengine-lambda-prod-deployments/v1.0.9/server.zip"
+    },
+    "dependencies": {
+        "@types/aws-serverless-express": "^3.0.1",
+        "@types/compression": "^0.0.35",
+        "@types/cors": "^2.8.3",
+        "aws-serverless-express": "^3.1.0",
+        "compression": "^1.7.1",
+        "cors": "^2.8.4",
+        "express": "^4.16.2",
+        "pug": "^2.0.0-rc.4",
+        "serverless-http": "^2.3.1",
+        "source-map-support": "^0.5.3"
+    },
+    "devDependencies": {
+        "@types/faker": "^4.1.2",
+        "@types/jest": "^21.1.9",
+        "@types/node": "^8.5.1",
+        "@types/supertest": "^2.0.4",
+        "aws-auth-helper": "^1.0.0",
+        "faker": "^4.1.0",
+        "jest": "^22.0.4",
+        "prettier": "^1.9.2",
+        "serverless": "^1.26.0",
+        "supertest": "^3.1.0",
+        "ts-jest": "^22.0.0",
+        "ts-node": "^3.3.0",
+        "typescript": "3.7.3"
+    },
+    "jest": {
+        "transform": {
+            "^.+\\.tsx?$": "ts-jest"
+        },
+        "verbose": true,
+        "testURL": "http://localhost/",
+        "testRegex": ".*\\.test.(ts|tsx|js)",
+        "moduleFileExtensions": [
+            "ts",
+            "tsx",
+            "js",
+            "jsx",
+            "json",
+            "node"
+        ]
+    }
+}
