@@ -9,6 +9,7 @@
         "deploy": "aws s3 cp ../server.zip s3://bibleengine-lambda-prod-deployments/v1.0.9/server.zip"
     },
     "dependencies": {
+        "@sentry/node": "^5.12.3",
         "@types/aws-serverless-express": "^3.0.1",
         "@types/compression": "^0.0.35",
         "@types/cors": "^2.8.3",

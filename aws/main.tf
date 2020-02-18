@@ -189,6 +189,7 @@ resource "aws_lambda_function" "main" {
   environment {
     variables = {
       DATABASE_URL = aws_rds_cluster.database.endpoint
+      NODE_ENV = "production"
     }
   }
 }
