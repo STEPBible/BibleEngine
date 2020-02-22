@@ -1,7 +1,7 @@
 version: 2
 workflows:
     version: 2
-    build_and_test:
+    build_test_deploy:
         jobs:
             - build
             - test:
@@ -10,6 +10,12 @@ workflows:
             - test_migrations:
                   requires:
                       - build
+            - request_deploy:
+                  type: approval
+            - deploy_ios:
+                  context: 'Expo Credentials'
+                  requires:
+                      - request_deploy
 jobs:
     build:
         working_directory: ~/BibleEngine
@@ -61,3 +67,16 @@ jobs:
             - run: ~/BibleEngine/core/src/tests/mysql_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/postgres_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/sqlite_migration_tests.sh
+    deploy_ios:
+        working_directory: ~/BibleEngine
+        docker:
+            - image: circleci/node:13.5.0
+        steps:
+            - checkout
+            - restore_cache:
+                  name: Restore Yarn Package Cache
+                  keys:
+                      - node-modules-{{ checksum "yarn.lock" }}
+            - run: yarn
+            - run: cd ~/BibleEngine/app && expo build:ios --non-interactive
+            - run: cd ~/BibleEngine/app && expo upload:ios --non-interactive
