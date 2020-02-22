@@ -12,7 +12,6 @@ import { withNavigation } from 'react-navigation'
 
 import { FontFamily, FontSize, getDebugStyles } from './Constants'
 import Text from './Text'
-import { withGlobalContext } from './GlobalContext'
 import bibleStore from './BibleStore'
 import { observer } from 'mobx-react/native'
 
@@ -40,12 +39,12 @@ class ExpandableDrawer extends React.Component<Props, State> {
   }
 
   onChapterPress = (num: number) => {
+    this.props.navigation.popToTop()
     bibleStore.updateCurrentBibleReference({
       bookOsisId: this.props.item.osisId,
       versionChapterNum: num,
       versionUid: bibleStore.versionUid,
     })
-    this.props.navigation.navigate('Home')
   }
 
   renderChapterNums = () => (
@@ -152,4 +151,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default withNavigation(withGlobalContext(ExpandableDrawer))
+export default withNavigation(ExpandableDrawer)

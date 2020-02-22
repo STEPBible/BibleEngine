@@ -2,18 +2,24 @@ import React from 'react'
 import { View, Image } from 'react-native'
 import { ProgressBar } from 'react-native-paper'
 
-import { FontFamily, Color } from './Constants'
+import { FontFamily, Color, FontSize, Margin } from './Constants'
 import Text from './Text'
 
 export default class OfflineLoadingScreen extends React.Component {
+  static navigationOptions = {
+    header: null,
+  }
+  interval: any
   state = {
     downloadProgress: 0,
   }
-  interval: any
   componentDidMount() {
     this.interval = setInterval(() => {
+      if (this.state.downloadProgress === 100) {
+        this.props.navigation.navigate('OfflineSuccess')
+      }
       this.setState({ downloadProgress: this.state.downloadProgress + 1 })
-    }, 200)
+    }, 15)
   }
   componentWillUnmount() {
     clearInterval(this.interval)
@@ -34,7 +40,7 @@ export default class OfflineLoadingScreen extends React.Component {
         <Text
           style={{
             fontFamily: FontFamily.OPEN_SANS_BOLD,
-            fontSize: 20,
+            fontSize: FontSize.LARGE,
             marginTop: 58,
           }}
         >
@@ -43,11 +49,14 @@ export default class OfflineLoadingScreen extends React.Component {
         <Text
           style={{
             fontFamily: FontFamily.OPEN_SANS,
-            fontSize: 20,
-            marginTop: 20,
+            fontSize: FontSize.LARGE,
+            marginTop: Margin.LARGE,
+            marginLeft: Margin.LARGE,
+            marginRight: Margin.LARGE,
+            textAlign: 'center',
           }}
         >
-          This can take a while, hang tight!
+          Preparing for offline usage, hang tight!
         </Text>
         <ProgressBar
           color={Color.TYNDALE_BLUE}
@@ -57,7 +66,7 @@ export default class OfflineLoadingScreen extends React.Component {
         <Text
           style={{
             fontFamily: FontFamily.OPEN_SANS_BOLD,
-            fontSize: 20,
+            fontSize: FontSize.LARGE,
             marginTop: 26,
           }}
         >

@@ -7,24 +7,23 @@ import {
   StyleSheet,
   TextInput,
   View,
-  Text,
   Dimensions,
   Keyboard,
   FlatList,
   SafeAreaView,
+  Image,
 } from 'react-native'
 import * as elasticlunr from 'elasticlunr'
 import hoistNonReactStatics from 'hoist-non-react-statics'
 import { observer } from 'mobx-react/native'
 
 import { Margin, FontSize, FontFamily, Color } from './Constants'
-import { withGlobalContext } from './GlobalContext'
 import bibleStore from './BibleStore'
+import JsonAsset from './JsonAsset'
+import Text from './Text'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
-
-const searchIndex = require('../assets/esvSearchIndex.json')
 
 @observer
 class SearchScreen extends React.Component<{}, {}> {
@@ -36,9 +35,13 @@ class SearchScreen extends React.Component<{}, {}> {
     verseSearchResults: [],
   }
   lunrSearchEngine: any
+  searchIndex: any
 
-  componentDidMount() {
-    this.lunrSearchEngine = elasticlunr.Index.load(searchIndex)
+  async componentDidMount() {
+    bibleStore.loadSearchIndex()
+    const asset: JsonAsset = await bibleStore.searchIndexAsset
+    this.searchIndex = asset.json
+    this.lunrSearchEngine = elasticlunr.Index.load(this.searchIndex)
     BackHandler.addEventListener('hardwareBackPress', this.endSearch)
   }
 
@@ -47,16 +50,19 @@ class SearchScreen extends React.Component<{}, {}> {
   }
 
   updateSearch = (searchInputText: string) => {
-    const results = this.lunrSearchEngine.search(searchInputText, {})
-    const refs = results.map(result => result.ref)
-    const verseSearchResults = refs.map((ref: any) => ({
-      reference: ref,
-      verseContent: searchIndex.documentStore.docs[ref].vc,
-      verseNum: searchIndex.documentStore.docs[ref].v,
-      versionChapterNum: searchIndex.documentStore.docs[ref].c,
-      bookOsisId: searchIndex.documentStore.docs[ref].b,
-    }))
-    this.setState({ ...this.state, searchInputText, verseSearchResults })
+    this.setState({ ...this.state, searchInputText }, () => {
+      if (!this.lunrSearchEngine) return
+      const results = this.lunrSearchEngine.search(searchInputText, {})
+      const refs = results.map(result => result.ref)
+      const verseSearchResults = refs.map((ref: any) => ({
+        reference: ref,
+        verseContent: this.searchIndex.documentStore.docs[ref].vc,
+        verseNum: this.searchIndex.documentStore.docs[ref].v,
+        versionChapterNum: this.searchIndex.documentStore.docs[ref].c,
+        bookOsisId: this.searchIndex.documentStore.docs[ref].b,
+      }))
+      this.setState({ ...this.state, verseSearchResults })
+    })
   }
 
   endSearch = () => {
@@ -123,6 +129,35 @@ class SearchScreen extends React.Component<{}, {}> {
     )
   }
 
+  renderEmptyState = () => (
+    <View style={{ flex: 1, alignItems: 'center' }}>
+      <Image
+        style={{ width: 100, height: 100, marginTop: Margin.EXTRA_LARGE }}
+        source={require('../assets/lightning.png')}
+      />
+      <Text
+        style={{
+          fontFamily: FontFamily.OPEN_SANS_BOLD,
+          fontSize: FontSize.MEDIUM,
+          marginTop: Margin.EXTRA_LARGE,
+          textAlign: 'center',
+        }}
+      >
+        Search Anything
+      </Text>
+      <Text
+        style={{
+          fontFamily: FontFamily.OPEN_SANS,
+          fontSize: FontSize.MEDIUM,
+          marginTop: Margin.EXTRA_LARGE,
+          textAlign: 'center',
+        }}
+      >
+        {`Offline, flexible search\npowered by AI`}
+      </Text>
+    </View>
+  )
+
   render() {
     return (
       <SafeAreaView style={styles.container}>
@@ -153,6 +188,7 @@ class SearchScreen extends React.Component<{}, {}> {
             showsVerticalScrollIndicator={false}
             renderItem={this.renderSearchResult}
             ListFooterComponent={<View style={styles.scrollViewBottomBuffer} />}
+            ListEmptyComponent={this.renderEmptyState}
             keyExtractor={(item, index) => index.toString()}
           />
         </View>
@@ -237,7 +273,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default hoistNonReactStatics(
-  withGlobalContext(SearchScreen),
-  SearchScreen
-)
+export default SearchScreen

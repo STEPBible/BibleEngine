@@ -4,10 +4,10 @@ import { withNavigation } from 'react-navigation'
 import { BOOK_DATA } from '@bible-engine/core'
 import { TouchableRipple, IconButton } from 'react-native-paper'
 import { observer } from 'mobx-react/native'
+import { MaterialIcons } from '@expo/vector-icons'
 
 import Text from './Text'
-import { withGlobalContext } from './GlobalContext'
-import { STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, FontSize } from './Constants'
+import { NAV_BAR_HEIGHT, FontSize, FontFamily } from './Constants'
 import bibleStore from './BibleStore'
 
 interface Props {
@@ -23,28 +23,48 @@ class NavigationHeader extends React.Component<Props, {}> {
   render() {
     return (
       <View style={styles.header}>
+        {!bibleStore.loading && (
+          <IconButton
+            disabled={bibleStore.showSettings}
+            style={styles.header__settings}
+            onPress={bibleStore.toggleSettings}
+            icon="dots-vertical"
+            size={25}
+            color="#9b9b9b"
+          />
+        )}
         <View style={styles.header__chips}>
           <TouchableRipple
             onPress={() => this.props.navigation.navigate('Books')}
             style={styles.header__chips__book}
           >
-            <Text
-              style={styles.header__chips__book__text}
-            >{`${this.getBookName()} ${bibleStore.versionChapterNum}`}</Text>
+            <React.Fragment>
+              <Text style={styles.header__chips__book__text}>
+                {bibleStore.currentBookAndChapter}
+              </Text>
+              {bibleStore.versionUidToDisplay ? (
+                <MaterialIcons name="expand-more" size={25} color="#9b9b9b" />
+              ) : null}
+            </React.Fragment>
           </TouchableRipple>
           <TouchableRipple
             onPress={() => this.props.navigation.navigate('Versions')}
             style={styles.header__chips__version}
           >
-            <Text style={styles.header__chips__version__text}>
-              {bibleStore.versionUid}
-            </Text>
+            <React.Fragment>
+              <Text style={styles.header__chips__version__text}>
+                {bibleStore.versionUidToDisplay}
+              </Text>
+              {bibleStore.versionUidToDisplay ? (
+                <MaterialIcons name="expand-more" size={25} color="#9b9b9b" />
+              ) : null}
+            </React.Fragment>
           </TouchableRipple>
         </View>
         <IconButton
           style={styles.header__search}
           onPress={() => this.props.navigation.navigate('Search')}
-          icon="search"
+          icon="magnify"
           size={25}
           color="#9b9b9b"
         />
@@ -70,32 +90,46 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    marginLeft: 45,
+    marginRight: 45,
   },
   header__chips__book: {
+    flexDirection: 'row',
     backgroundColor: '#EAEAEA',
     alignItems: 'center',
     justifyContent: 'center',
     margin: 0,
     borderRadius: 4,
     minWidth: 70,
-    minHeight: 32,
+    minHeight: 36,
+    paddingLeft: 8,
+    paddingRight: 4,
   },
   header__chips__book__text: {
     fontSize: FontSize.EXTRA_SMALL,
-    margin: 8,
+    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
+    paddingRight: 2,
   },
   header__chips__version: {
+    flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 4,
     backgroundColor: '#EAEAEA',
     justifyContent: 'center',
-    marginLeft: 10,
+    marginLeft: 8,
     minWidth: 50,
-    minHeight: 32,
+    minHeight: 36,
+    paddingLeft: 8,
+    paddingRight: 4,
   },
   header__chips__version__text: {
     fontSize: FontSize.EXTRA_SMALL,
-    margin: 8,
+    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
+    paddingRight: 2,
+  },
+  header__settings: {
+    position: 'absolute',
+    left: 4,
   },
   header__search: {
     position: 'absolute',
@@ -103,4 +137,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default withGlobalContext(withNavigation(NavigationHeader))
+export default withNavigation(NavigationHeader)

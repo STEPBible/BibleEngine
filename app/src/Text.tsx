@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Text } from 'react-native'
 import { observer } from 'mobx-react/native'
 
-import { withGlobalContext } from './GlobalContext'
 import bibleStore from './BibleStore'
 
 @observer
@@ -22,4 +21,4 @@ class FontText extends Component<any, any> {
   }
 }
 
-export default withGlobalContext(FontText)
+export default FontText

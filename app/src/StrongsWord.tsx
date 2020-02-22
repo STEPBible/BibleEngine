@@ -19,13 +19,11 @@ import {
   Margin,
   getDebugStyles,
 } from './Constants'
-import { BarIndicator } from 'react-native-indicators'
-import Database from './Database'
-import { withGlobalContext } from './GlobalContext'
 import Text from './Text'
 import StrongsNumber from './models/StrongsNumber'
 import bibleStore from './BibleStore'
 import { observer } from 'mobx-react/native'
+import { ActivityIndicator } from 'react-native-paper'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -108,15 +106,33 @@ class StrongsWord extends React.Component<Props, State> {
     <View style={styles.popover__content__header}>
       <Text
         selectable
-        style={styles.popover__content__header__gloss}
+        style={bibleStore.scaledFontSize(
+          styles.popover__content__header__gloss
+        )}
       >{`'${item.gloss || ''}' (`}</Text>
-      <Text selectable style={styles.popover__content__header__transliteration}>
+      <Text
+        selectable
+        style={bibleStore.scaledFontSize(
+          styles.popover__content__header__transliteration
+        )}
+      >
         {item.transliteration ? `${item.transliteration} - ` : ''}
       </Text>
-      <Text selectable style={styles.popover__content__header__lemma}>
+      <Text
+        selectable
+        style={bibleStore.scaledFontSize(
+          styles.popover__content__header__lemma
+        )}
+      >
         {`${item.lemma || ''}`}
       </Text>
-      <Text style={styles.popover__content__header__lemma}>{')'}</Text>
+      <Text
+        style={bibleStore.scaledFontSize(
+          styles.popover__content__header__lemma
+        )}
+      >
+        {')'}
+      </Text>
     </View>
   )
 
@@ -128,7 +144,11 @@ class StrongsWord extends React.Component<Props, State> {
         .map((definition: DictionaryEntryEntity) => (
           <View key={`definition-${definition.strong}`}>
             {this.renderStrongsHeader(definition)}
-            <View style={styles.popover__content__definitions}>
+            <View
+              style={bibleStore.scaledFontSize(
+                styles.popover__content__definitions
+              )}
+            >
               {this.renderDefinitionContent(definition)}
             </View>
           </View>
@@ -137,17 +157,16 @@ class StrongsWord extends React.Component<Props, State> {
   )
 
   renderPopoverContent = () => {
+    if (this.state.popoverIsVisible === false) return null
     if (this.state.loading) {
       return (
         <View style={styles.popover__loading}>
           <View style={{ height: 30, width: 30 }}>
-            <BarIndicator
-              animationDuration={600}
-              size={30}
-              color={Color.TYNDALE_BLUE}
-            />
+            <ActivityIndicator animating={true} color={Color.TYNDALE_BLUE} />
           </View>
-          <Text style={styles.popover__loading__text}>
+          <Text
+            style={bibleStore.scaledFontSize(styles.popover__loading__text)}
+          >
             {this.state.loadingMessage}
           </Text>
         </View>
@@ -156,7 +175,9 @@ class StrongsWord extends React.Component<Props, State> {
     if (!this.state.definitions.length || !this.state.definitions[0]) {
       return (
         <View style={styles.popover__loading}>
-          <Text style={styles.popover__loading__text}>
+          <Text
+            style={bibleStore.scaledFontSize(styles.popover__loading__text)}
+          >
             {`Sorry, no definition for Strongs reference: ${this.props.strongs.join(
               ', '
             )}`}
@@ -205,7 +226,10 @@ class StrongsWord extends React.Component<Props, State> {
     }
     if (element.type === 'phrase' && element.content.length) {
       return (
-        <Text key={`doc-phrase-${index}`} style={styles.documentPhrase}>
+        <Text
+          key={`doc-phrase-${index}`}
+          style={bibleStore.scaledFontSize(styles.documentPhrase)}
+        >
           {element.content}
         </Text>
       )
@@ -216,7 +240,7 @@ class StrongsWord extends React.Component<Props, State> {
         return phrases.map((phrase, phraseIndex) => (
           <Text
             key={`bold-${phrase}-${phraseIndex}-${index}`}
-            style={styles.boldDocumentPhrase}
+            style={bibleStore.scaledFontSize(styles.boldDocumentPhrase)}
           >
             {phrase}
           </Text>
@@ -230,6 +254,15 @@ class StrongsWord extends React.Component<Props, State> {
   }
 
   render() {
+    if (bibleStore.showStrongs === false) {
+      return (
+        <View>
+          <Text style={bibleStore.scaledFontSize(styles.phraseText)}>
+            {this.props.phrase}
+          </Text>
+        </View>
+      )
+    }
     return (
       <React.Fragment>
         <TouchableHighlight
@@ -239,16 +272,20 @@ class StrongsWord extends React.Component<Props, State> {
           underlayColor="#C5D8EA"
           style={styles.strongWord}
         >
-          <Text style={styles.strongWordText}>{this.props.phrase}</Text>
+          <Text style={bibleStore.scaledFontSize(styles.strongWordText)}>
+            {this.props.phrase}
+          </Text>
         </TouchableHighlight>
-        <Popover
-          isVisible={this.state.popoverIsVisible}
-          fromView={this.touchable}
-          onRequestClose={() => this.closePopover()}
-          popoverStyle={styles.popover__background_container}
-        >
-          {this.renderPopoverContent()}
-        </Popover>
+        {this.state.popoverIsVisible && (
+          <Popover
+            isVisible={this.state.popoverIsVisible}
+            fromView={this.touchable}
+            onRequestClose={() => this.closePopover()}
+            popoverStyle={styles.popover__background_container}
+          >
+            {this.renderPopoverContent()}
+          </Popover>
+        )}
       </React.Fragment>
     )
   }
@@ -269,7 +306,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    minHeight: 130,
+    minHeight: DEVICE_HEIGHT * 0.4,
+    maxHeight: DEVICE_HEIGHT * 0.4,
   },
   popover__loading__text: {
     color: 'gray',
@@ -281,6 +319,7 @@ const styles = StyleSheet.create({
   popover__content: {
     // backgroundColor: 'cyan',
     flex: 1,
+    minHeight: DEVICE_HEIGHT * 0.4,
     maxHeight: DEVICE_HEIGHT * 0.4,
     borderBottomColor: 'gray',
     borderBottomWidth: 0.5,
@@ -330,6 +369,12 @@ const styles = StyleSheet.create({
     marginBottom: Margin.EXTRA_SMALL,
     marginRight: 7,
   },
+  phraseText: {
+    fontFamily: FontFamily.CARDO,
+    fontSize: FontSize.MEDIUM,
+    marginBottom: Margin.EXTRA_SMALL,
+    marginRight: 7,
+  },
   documentPhrase: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.SMALL,
@@ -345,4 +390,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default withGlobalContext(StrongsWord)
+export default StrongsWord
