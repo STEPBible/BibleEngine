@@ -3,7 +3,6 @@ workflows:
     version: 2
     build_test_deploy:
         jobs:
-            # - build
             # - test:
             #       requires:
             #           - build
@@ -16,6 +15,8 @@ workflows:
                   context: expo-credentials
                   #   requires:
                   #       - request_deploy
+            - deploy_android:
+                  context: expo-credentials
 jobs:
     build:
         working_directory: ~/BibleEngine
@@ -26,13 +27,15 @@ jobs:
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
-                      - node-modules-{{ checksum "yarn.lock" }}
+                      - yarn-{{ checksum "yarn.lock" }}-{{ checksum "~/BibleEngine/app/yarn.lock" }}
             - run: ls node_modules || yarn install --frozen-lockfile
+            - run: ls ~BibleEngine/app/node_modules || cd ~/BibleEngine/app && yarn install --frozen-lockfile
             - save_cache:
                   name: Save Yarn Package Cache
-                  key: node-modules-{{ checksum "yarn.lock" }}
+                  key: yarn-{{ checksum "yarn.lock" }}-{{ checksum "~/BibleEngine/app/yarn.lock" }}
                   paths:
                       - node_modules
+                      - ~/BibleEngine/app/node_modules
                       - ~/.cache/yarn
     test:
         working_directory: ~/BibleEngine
@@ -43,7 +46,7 @@ jobs:
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
-                      - node-modules-{{ checksum "yarn.lock" }}
+                      - yarn-{{ checksum "yarn.lock" }}
             - run: yarn
             - run: cd ~/BibleEngine/core && yarn test
             - run: cd ~/BibleEngine/importers && yarn test
@@ -61,25 +64,53 @@ jobs:
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
-                      - node-modules-{{ checksum "yarn.lock" }}
+                      - yarn-{{ checksum "yarn.lock" }}
             - run: ~/BibleEngine/core/src/tests/install_yarn.sh
             - run: nvm use 13.5.0 && yarn
             - run: ~/BibleEngine/core/src/tests/mysql_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/postgres_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/sqlite_migration_tests.sh
-    deploy_ios:
-        working_directory: ~/BibleEngine
+    deploy_android:
         macos:
             xcode: 11.3.0
         steps:
             - checkout
             - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
-            - run: cp ~/step-bible-secrets/.env ~/BibleEngine/app
+            - run: cp ~/step-bible-secrets/android_upload_key_secrets.json ~/secrets.json
             - restore_cache:
-                  name: Restore Yarn Package Cache
+                  name: Restore Yarn Mac Package Cache
                   keys:
-                      - node-modules-{{ checksum "yarn.lock" }}
-            - run: cd ~/BibleEngine/app && yarn
-            - run: cd ~/BibleEngine/app && yarn expo login --non-interactive -u technical@tyndalehouse.com
-            - run: cd ~/BibleEngine/app && yarn expo build:ios --no-publish --non-interactive
-            - run: cd ~/BibleEngine/app && yarn expo upload:ios --non-interactive
+                      - yarn-mac-{{ checksum "yarn.lock" }}
+            - run: ls node_modules || yarn install --frozen-lockfile
+            - run: cd app && yarn install --frozen-lockfile
+            - save_cache:
+                  name: Save Yarn Mac Package Cache
+                  key: yarn-mac-{{ checksum "yarn.lock" }}
+                  paths:
+                      - node_modules
+                      - app/node_modules
+                      - ~/.cache/yarn
+            - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
+            - run: cd app && yarn expo upload:android --non-interactive --key ~/secrets.json
+    deploy_ios:
+        macos:
+            xcode: 11.3.0
+        steps:
+            - checkout
+            # - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
+            # - run: cp ~/step-bible-secrets/.env ~/BibleEngine/app
+            - restore_cache:
+                  name: Restore Yarn Mac Package Cache
+                  keys:
+                      - yarn-mac-{{ checksum "yarn.lock" }}
+            - run: ls node_modules || yarn install --frozen-lockfile
+            - run: cd app && yarn install --frozen-lockfile
+            - save_cache:
+                  name: Save Yarn Mac Package Cache
+                  key: yarn-mac-{{ checksum "yarn.lock" }}
+                  paths:
+                      - node_modules
+                      - app/node_modules
+                      - ~/.cache/yarn
+            - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
+            - run: cd app && yarn expo upload:ios --non-interactive
