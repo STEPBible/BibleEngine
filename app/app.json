@@ -1,54 +1,49 @@
 {
-  "expo": {
-    "name": "STEP Bible",
-    "description": "",
-    "slug": "step-bible",
-    "privacy": "public",
-    "sdkVersion": "36.0.0",
-    "platforms": ["ios", "android"],
-    "version": "2.0.1",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": ["assets/*"],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.tyndale.step",
-      "buildNumber": "12"
-    },
-    "android": {
-      "package": "com.tyndale.stepbible",
-      "versionCode": 18,
-      "config": {
-        "fabric": {
-          "apiKey": "4177638a1668874c4bff059ca4d1a6b72d2b7129",
-          "buildSecret": "eb2a96a85da5e453cff3bd9bfb901b476eeb1c7781ceeee9147ba38639fce0c0"
+    "expo": {
+        "name": "STEP Bible",
+        "description": "",
+        "slug": "step-bible",
+        "privacy": "unlisted",
+        "sdkVersion": "36.0.0",
+        "platforms": ["ios", "android"],
+        "version": "2.1.0",
+        "orientation": "portrait",
+        "icon": "./assets/icon.png",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+        },
+        "updates": {
+            "enabled": false,
+            "fallbackToCacheTimeout": 0
+        },
+        "assetBundlePatterns": ["assets/*"],
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.tyndale.step",
+            "buildNumber": "13"
+        },
+        "android": {
+            "package": "com.tyndale.stepbible",
+            "versionCode": 19
+        },
+        "packagerOpts": {
+            "sourceExts": ["ts", "tsx", "js"],
+            "assetExts": ["json", "db", "mp3", "ttf", "png"]
+        },
+        "githubUrl": "https://github.com/tyndale/BibleEngine",
+        "hooks": {
+            "postPublish": [
+                {
+                    "file": "sentry-expo/upload-sourcemaps",
+                    "config": {
+                        "organization": "tyndale-house-uk",
+                        "project": "step-bible",
+                        "authToken": "af85f774dc0541708fb2fc1ef188fdaeb93305d255284b48a97bd99635b1fd52"
+                    }
+                }
+            ]
         }
-      }
-    },
-    "packagerOpts": {
-      "sourceExts": ["ts", "tsx", "js"],
-      "assetExts": ["json", "db", "mp3", "ttf", "png"]
-    },
-    "githubUrl": "https://github.com/tyndale/BibleEngine",
-    "hooks": {
-      "postPublish": [
-        {
-          "file": "sentry-expo/upload-sourcemaps",
-          "config": {
-            "organization": "tyndale-house-uk",
-            "project": "step-bible",
-            "authToken": "af85f774dc0541708fb2fc1ef188fdaeb93305d255284b48a97bd99635b1fd52"
-          }
-        }
-      ]
     }
-  }
 }
