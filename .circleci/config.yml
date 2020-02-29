@@ -69,8 +69,8 @@ jobs:
             - run: ~/BibleEngine/core/src/tests/sqlite_migration_tests.sh
     deploy_ios:
         working_directory: ~/BibleEngine
-        docker:
-            - image: circleci/node:13.5.0
+        macos:
+            xcode: 11.3.0
         steps:
             - checkout
             - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
