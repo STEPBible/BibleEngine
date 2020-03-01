@@ -215,6 +215,7 @@ class BibleStore {
     } catch (e) {
       console.error('Couldnt set local database: ', e)
       Sentry.captureException(e)
+      await FileSystem.deleteAsync(DATABASE_PATH)
     }
     console.timeEnd('setLocalDatabase')
   }
