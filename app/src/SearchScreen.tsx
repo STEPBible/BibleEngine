@@ -14,7 +14,6 @@ import {
   Image,
 } from 'react-native'
 import * as elasticlunr from 'elasticlunr'
-import hoistNonReactStatics from 'hoist-non-react-statics'
 import { observer } from 'mobx-react/native'
 
 import { Margin, FontSize, FontFamily, Color } from './Constants'
@@ -36,8 +35,12 @@ class SearchScreen extends React.Component<{}, {}> {
   }
   lunrSearchEngine: any
   searchIndex: any
+  textInput: any
 
   async componentDidMount() {
+    requestAnimationFrame(() => {
+      this.textInput.focus()
+    })
     bibleStore.loadSearchIndex()
     const asset: JsonAsset = await bibleStore.searchIndexAsset
     this.searchIndex = asset.json
@@ -120,7 +123,7 @@ class SearchScreen extends React.Component<{}, {}> {
     }
     return (
       <IconButton
-        icon="clear"
+        icon="close"
         color="#888889"
         size={30}
         style={styles.search__input__clear}
@@ -163,14 +166,16 @@ class SearchScreen extends React.Component<{}, {}> {
       <SafeAreaView style={styles.container}>
         <View style={styles.search}>
           <IconButton
-            icon="arrow-back"
+            icon="arrow-left"
             color="#888889"
             size={30}
             style={styles.search__input__icon}
             onPress={this.endSearch}
           />
           <TextInput
-            autoFocus
+            ref={view => {
+              this.textInput = view
+            }}
             style={styles.search__input__text}
             placeholder={'Search...'}
             placeholderTextColor={'#828282'}
