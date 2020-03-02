@@ -54,7 +54,7 @@ jobs:
                   name: Restore Yarn Package Cache
                   keys:
                       - yarn-modules-{{ checksum "yarn.lock" }}
-            - run: yarn
+            - run: yarn install --frozen-lockfile
             - run: cd core && yarn test
             - run: cd importers && yarn test
             - run: cd client && yarn test --passWithNoTests
