@@ -88,8 +88,8 @@ jobs:
                   keys:
                       - yarn-modules-{{ checksum "yarn.lock" }}
             - run: cd app && yarn install --frozen-lockfile
-            - run: cd app && yarn expo login -u technical@tyndalehouse.com
-            - run: cd app && yarn expo publish --release-channel $(git rev-parse --short HEAD)
+            - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
+            - run: cd app && yarn expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
     deploy_android:
         docker:
             - image: circleci/node:13.5.0
@@ -103,9 +103,9 @@ jobs:
                     - yarn-modules-{{ checksum "yarn.lock" }}
             - run: ls node_modules || yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
-            - run: cd app && yarn expo login -u technical@tyndalehouse.com
-            - run: cd app && yarn expo build:android --no-publish --release-channel $(git rev-parse --short HEAD)
-            - run: cd app && yarn expo upload:android --key ~/secrets.json
+            - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
+            - run: cd app && yarn expo build:android --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
+            - run: cd app && yarn expo upload:android --non-interactive --key ~/secrets.json
     deploy_ios:
         macos:
             xcode: 11.3.0
@@ -124,5 +124,5 @@ jobs:
                       - node_modules
                       - app/node_modules
             - run: cd app && yarn expo login -u technical@tyndalehouse.com
-            - run: cd app && yarn expo build:ios --no-publish --release-channel $(git rev-parse --short HEAD)
-            - run: cd app && yarn expo upload:ios
+            - run: cd app && yarn expo build:ios --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
+            - run: cd app && yarn expo upload:ios --non-interactive
