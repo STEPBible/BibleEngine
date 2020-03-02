@@ -83,6 +83,7 @@ jobs:
             - checkout
             - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
             - run: cp ~/step-bible-secrets/.env app
+            - run: cp ~/step-bible-secrets/esvSearchIndex.db app/assets
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
