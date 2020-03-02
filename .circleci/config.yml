@@ -71,6 +71,7 @@ jobs:
                   name: Restore Yarn Package Cache
                   keys:
                       - yarn-modules-{{ checksum "yarn.lock" }}
+            - run: yarn install --frozen-lockfile
             - run: core/src/tests/install_yarn.sh
             - run: nvm use 13.5.0 && yarn
             - run: core/src/tests/mysql_migration_tests.sh
@@ -88,6 +89,7 @@ jobs:
                   name: Restore Yarn Package Cache
                   keys:
                       - yarn-modules-{{ checksum "yarn.lock" }}
+            - run: yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
             - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
             - run: cd app && yarn expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
@@ -116,7 +118,7 @@ jobs:
                   name: Restore Yarn Mac Package Cache
                   keys:
                       - yarn-mac-{{ checksum "yarn.lock" }}
-            - run: ls node_modules || yarn install --frozen-lockfile
+            - run: yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
             - save_cache:
                   name: Save Yarn Mac Package Cache
