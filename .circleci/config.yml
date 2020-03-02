@@ -92,7 +92,7 @@ jobs:
             - run: yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
             - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
-            - run: cd app && yarn expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
+            - run: cd app && EXPO_DEBUG=true yarn expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
     deploy_android:
         macos:
             xcode: 11.3.0
