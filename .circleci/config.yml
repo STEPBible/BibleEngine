@@ -3,20 +3,30 @@ workflows:
     version: 2
     build_test_deploy:
         jobs:
-            # - test:
-            #       requires:
-            #           - build
-            # - test_migrations:
-            #       requires:
-            #           - build
-            # - request_deploy:
-            #       type: approval
+            - build_yarn
+            - test:
+                  requires:
+                      - build_yarn
+            - test_migrations:
+                  requires:
+                      - build_yarn
+            - request_deploy_app:
+                  type: approval
+                  requires:
+                    - test
+                    - test_migrations
+            - deploy_expo:
+                  context: expo-credentials
+                  requires:
+                    - request_deploy_app
             - deploy_ios:
                   context: expo-credentials
-                  #   requires:
-                  #       - request_deploy
+                  requires:
+                    - deploy_expo
             - deploy_android:
                   context: expo-credentials
+                  requires:
+                    - deploy_expo
 jobs:
     build_yarn:
         docker:
