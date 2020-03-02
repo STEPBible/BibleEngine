@@ -67,6 +67,20 @@ jobs:
             - run: core/src/tests/mysql_migration_tests.sh
             - run: core/src/tests/postgres_migration_tests.sh
             - run: core/src/tests/sqlite_migration_tests.sh
+    deploy_expo:
+        docker:
+            - image: circleci/node:13.5.0
+        steps:
+            - checkout
+            - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
+            - run: cp ~/step-bible-secrets/.env app
+            - restore_cache:
+                  name: Restore Yarn Package Cache
+                  keys:
+                      - yarn-{{ checksum "yarn.lock" }}
+            - run: cd app && yarn install --frozen-lockfile
+            - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
+            - run: cd app && yarn expo publish --release-channel $(git rev-parse --short HEAD)
     deploy_android:
         docker:
             - image: circleci/node:13.5.0
