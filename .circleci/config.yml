@@ -36,12 +36,12 @@ jobs:
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
-                      - yarn-pkg-{{ checksum "yarn.lock" }}
+                      - yarn-modules-{{ checksum "yarn.lock" }}
             - run: ls node_modules || yarn install --frozen-lockfile
             - run: ls app/node_modules || (cd app && yarn install --frozen-lockfile)
             - save_cache:
                   name: Save Yarn Package Cache
-                  key: yarn-pkg-{{ checksum "yarn.lock" }}
+                  key: yarn-modules-{{ checksum "yarn.lock" }}
                   paths:
                       - node_modules
                       - app/node_modules
@@ -53,7 +53,7 @@ jobs:
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
-                      - yarn-pkg-{{ checksum "yarn.lock" }}
+                      - yarn-modules-{{ checksum "yarn.lock" }}
             - run: yarn
             - run: cd core && yarn test
             - run: cd importers && yarn test
@@ -70,7 +70,7 @@ jobs:
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
-                      - yarn-pkg-{{ checksum "yarn.lock" }}
+                      - yarn-modules-{{ checksum "yarn.lock" }}
             - run: core/src/tests/install_yarn.sh
             - run: nvm use 13.5.0 && yarn
             - run: core/src/tests/mysql_migration_tests.sh
@@ -86,7 +86,7 @@ jobs:
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
-                      - yarn-pkg-{{ checksum "yarn.lock" }}
+                      - yarn-modules-{{ checksum "yarn.lock" }}
             - run: cd app && yarn install --frozen-lockfile
             - run: cd app && yarn expo login -u technical@tyndalehouse.com
             - run: cd app && yarn expo publish --release-channel $(git rev-parse --short HEAD)
@@ -100,7 +100,7 @@ jobs:
             - restore_cache:
                 name: Restore Yarn Package Cache
                 keys:
-                    - yarn-pkg-{{ checksum "yarn.lock" }}
+                    - yarn-modules-{{ checksum "yarn.lock" }}
             - run: ls node_modules || yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
             - run: cd app && yarn expo login -u technical@tyndalehouse.com
