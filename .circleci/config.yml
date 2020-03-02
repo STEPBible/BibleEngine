@@ -105,7 +105,7 @@ jobs:
             - run: ls node_modules || yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
             - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
-            - run: cd app && yarn expo build:android --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
+            - run: cd app && yarn expo build:android --non-interactive --no-publish -t app-bundle --release-channel $(git rev-parse --short HEAD)
             - run: cd app && yarn expo upload:android --non-interactive --key ~/secrets.json
     deploy_ios:
         macos:
