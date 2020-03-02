@@ -57,7 +57,9 @@ export default class Footnote extends React.Component<Props, State> {
   }
 
   renderFootnote = ({ item }) => (
-    <Text style={styles.popover__content__verse}>{this.getNoteText(item)}</Text>
+    <Text style={bibleStore.scaledFontSize(styles.popover__content__verse)}>
+      {this.getNoteText(item)}
+    </Text>
   )
 
   renderPopoverContent = () => {
