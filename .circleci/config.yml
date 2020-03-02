@@ -71,25 +71,18 @@ jobs:
             - run: ~/BibleEngine/core/src/tests/postgres_migration_tests.sh
             - run: ~/BibleEngine/core/src/tests/sqlite_migration_tests.sh
     deploy_android:
-        macos:
-            xcode: 11.3.0
+        docker:
+            - image: circleci/node:13.5.0
         steps:
             - checkout
             - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
             - run: cp ~/step-bible-secrets/android_upload_key_secrets.json ~/secrets.json
             - restore_cache:
-                  name: Restore Yarn Mac Package Cache
-                  keys:
-                      - yarn-mac-{{ checksum "yarn.lock" }}
+                name: Restore Yarn Package Cache
+                keys:
+                    - yarn-{{ checksum "yarn.lock" }}
             - run: ls node_modules || yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
-            - save_cache:
-                  name: Save Yarn Mac Package Cache
-                  key: yarn-mac-{{ checksum "yarn.lock" }}
-                  paths:
-                      - node_modules
-                      - app/node_modules
-                      - ~/.cache/yarn
             - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
             - run: cd app && yarn expo upload:android --non-interactive --key ~/secrets.json
     deploy_ios:
