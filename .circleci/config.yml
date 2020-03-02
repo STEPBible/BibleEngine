@@ -18,8 +18,7 @@ workflows:
             - deploy_android:
                   context: expo-credentials
 jobs:
-    build:
-        working_directory: ~/BibleEngine
+    build_yarn:
         docker:
             - image: circleci/node:13.5.0
         steps:
@@ -27,18 +26,17 @@ jobs:
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
-                      - yarn-{{ checksum "yarn.lock" }}-{{ checksum "~/BibleEngine/app/yarn.lock" }}
+                      - yarn-{{ checksum "yarn.lock" }}
             - run: ls node_modules || yarn install --frozen-lockfile
-            - run: ls ~BibleEngine/app/node_modules || cd ~/BibleEngine/app && yarn install --frozen-lockfile
+            - run: ls app/node_modules || cd app && yarn install --frozen-lockfile
             - save_cache:
                   name: Save Yarn Package Cache
-                  key: yarn-{{ checksum "yarn.lock" }}-{{ checksum "~/BibleEngine/app/yarn.lock" }}
+                  key: yarn-{{ checksum "yarn.lock" }}
                   paths:
                       - node_modules
-                      - ~/BibleEngine/app/node_modules
+                      - app/node_modules
                       - ~/.cache/yarn
     test:
-        working_directory: ~/BibleEngine
         docker:
             - image: circleci/node:13.5.0
         steps:
@@ -48,13 +46,12 @@ jobs:
                   keys:
                       - yarn-{{ checksum "yarn.lock" }}
             - run: yarn
-            - run: cd ~/BibleEngine/core && yarn test
-            - run: cd ~/BibleEngine/importers && yarn test
-            - run: cd ~/BibleEngine/client && yarn test --passWithNoTests
-            - run: cd ~/BibleEngine/app && yarn install
-            - run: cd ~/BibleEngine/app && yarn test
+            - run: cd core && yarn test
+            - run: cd importers && yarn test
+            - run: cd client && yarn test --passWithNoTests
+            - run: cd app && yarn install
+            - run: cd app && yarn test
     test_migrations:
-        working_directory: ~/BibleEngine
         machine:
             image: ubuntu-1604:201903-01
         environment:
@@ -65,11 +62,11 @@ jobs:
                   name: Restore Yarn Package Cache
                   keys:
                       - yarn-{{ checksum "yarn.lock" }}
-            - run: ~/BibleEngine/core/src/tests/install_yarn.sh
+            - run: core/src/tests/install_yarn.sh
             - run: nvm use 13.5.0 && yarn
-            - run: ~/BibleEngine/core/src/tests/mysql_migration_tests.sh
-            - run: ~/BibleEngine/core/src/tests/postgres_migration_tests.sh
-            - run: ~/BibleEngine/core/src/tests/sqlite_migration_tests.sh
+            - run: core/src/tests/mysql_migration_tests.sh
+            - run: core/src/tests/postgres_migration_tests.sh
+            - run: core/src/tests/sqlite_migration_tests.sh
     deploy_android:
         docker:
             - image: circleci/node:13.5.0
