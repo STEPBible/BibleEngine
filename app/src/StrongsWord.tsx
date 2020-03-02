@@ -24,6 +24,7 @@ import StrongsNumber from './models/StrongsNumber'
 import bibleStore from './BibleStore'
 import { observer } from 'mobx-react/native'
 import { ActivityIndicator } from 'react-native-paper'
+import StrongsDefinition from './models/StrongsDefinition'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -66,13 +67,23 @@ class StrongsWord extends React.Component<Props, State> {
     }
     let normalizedStrongs = strongs.map(strong => new StrongsNumber(strong))
     const isHebrewStrongs = normalizedStrongs[0].id[0] === 'H'
-    const dictionary = isHebrewStrongs ? '@BdbMedDef' : '@MounceMedDef'
+    const dictionaries = isHebrewStrongs
+      ? ['@BdbMedDef']
+      : ['@MounceShortDef', '@MounceMedDef']
     try {
-      const definitions = await Promise.all(
+      const requests = await Promise.all(
         normalizedStrongs.map(strong =>
-          bibleStore.getDictionaryEntry(strong.id, dictionary)
+          Promise.all(
+            dictionaries.map(dictionary =>
+              bibleStore.getDictionaryEntry(strong.id, dictionary)
+            )
+          )
         )
       )
+      const definitions = requests.map(request =>
+        StrongsDefinition.merge(request)
+      )
+
       if (this.mounted) {
         this.setState({
           ...this.state,
