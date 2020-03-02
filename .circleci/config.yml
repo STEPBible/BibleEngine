@@ -45,7 +45,6 @@ jobs:
                   paths:
                       - node_modules
                       - app/node_modules
-                      - ~/.cache/yarn
     test:
         docker:
             - image: circleci/node:13.5.0
@@ -123,6 +122,5 @@ jobs:
                   paths:
                       - node_modules
                       - app/node_modules
-                      - ~/.cache/yarn
             - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
             - run: cd app && yarn expo upload:ios --non-interactive
