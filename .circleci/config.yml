@@ -101,8 +101,6 @@ jobs:
             xcode: 11.3.0
         steps:
             - checkout
-            # - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
-            # - run: cp ~/step-bible-secrets/.env ~/BibleEngine/app
             - restore_cache:
                   name: Restore Yarn Mac Package Cache
                   keys:
