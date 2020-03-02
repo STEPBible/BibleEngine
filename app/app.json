@@ -22,11 +22,11 @@
         "ios": {
             "supportsTablet": true,
             "bundleIdentifier": "com.tyndale.step",
-            "buildNumber": "15"
+            "buildNumber": "16"
         },
         "android": {
             "package": "com.tyndale.stepbible",
-            "versionCode": 21
+            "versionCode": 22
         },
         "packagerOpts": {
             "sourceExts": ["ts", "tsx", "js"],
