@@ -92,17 +92,17 @@ jobs:
             - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
             - run: cd app && yarn expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
     deploy_android:
-        docker:
-            - image: circleci/node:13.5.0
+        macos:
+            xcode: 11.3.0
         steps:
             - checkout
             - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
             - run: cp ~/step-bible-secrets/android_upload_key_secrets.json ~/secrets.json
             - restore_cache:
-                name: Restore Yarn Package Cache
+                name: Restore Yarn Mac Package Cache
                 keys:
-                    - yarn-modules-{{ checksum "yarn.lock" }}
-            - run: ls node_modules || yarn install --frozen-lockfile
+                    - yarn-mac-{{ checksum "yarn.lock" }}
+            - run: yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
             - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
             - run: cd app && yarn expo build:android --non-interactive --no-publish -t app-bundle --release-channel $(git rev-parse --short HEAD)
