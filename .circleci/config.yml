@@ -67,12 +67,12 @@ jobs:
             BASH_ENV: /opt/circleci/.nvm/nvm.sh
         steps:
             - checkout
+            - run: core/src/tests/install_yarn.sh
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
                       - yarn-modules-{{ checksum "yarn.lock" }}
             - run: yarn install --frozen-lockfile
-            - run: core/src/tests/install_yarn.sh
             - run: nvm use 13.5.0 && yarn
             - run: core/src/tests/mysql_migration_tests.sh
             - run: core/src/tests/postgres_migration_tests.sh
