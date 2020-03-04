@@ -7,8 +7,9 @@ import {
   TouchableHighlight,
   ScrollView,
 } from 'react-native'
-import Popover from './Popover'
 import { BibleEngine, IBibleNote } from '@bible-engine/core'
+import { observer } from 'mobx-react/native'
+
 import {
   Color,
   FontFamily,
@@ -19,6 +20,8 @@ import {
   getDebugStyles,
 } from './Constants'
 import Text from './Text'
+import Popover from './Popover'
+import bibleStore from './BibleStore'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -31,6 +34,7 @@ interface State {
   popoverIsVisible: boolean
 }
 
+@observer
 export default class Footnote extends React.Component<Props, State> {
   touchable: any
   state = {
@@ -53,7 +57,9 @@ export default class Footnote extends React.Component<Props, State> {
   }
 
   renderFootnote = ({ item }) => (
-    <Text style={styles.popover__content__verse}>{this.getNoteText(item)}</Text>
+    <Text style={bibleStore.scaledFontSize(styles.popover__content__verse)}>
+      {this.getNoteText(item)}
+    </Text>
   )
 
   renderPopoverContent = () => {
@@ -82,7 +88,9 @@ export default class Footnote extends React.Component<Props, State> {
           underlayColor="#C5D8EA"
           style={styles.touchable}
         >
-          <Text style={styles.text}>{this.props.notes[0].key}</Text>
+          <Text style={bibleStore.scaledFontSize(styles.text)}>
+            {this.props.notes[0].key}
+          </Text>
         </TouchableHighlight>
         <Popover
           isVisible={this.state.popoverIsVisible}

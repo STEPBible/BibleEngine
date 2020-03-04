@@ -1,7 +1,6 @@
 import React from 'react'
 import { View, FlatList, Dimensions, StyleSheet } from 'react-native'
 import hoistNonReactStatics from 'hoist-non-react-statics'
-import { withGlobalContext } from './GlobalContext'
 import ExpandableDrawer from './ExpandableDrawer'
 import bibleStore from './BibleStore'
 import { observer } from 'mobx-react/native'
@@ -75,4 +74,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default hoistNonReactStatics(withGlobalContext(BookScreen), BookScreen)
+export default BookScreen

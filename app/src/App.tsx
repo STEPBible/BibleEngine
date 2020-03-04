@@ -2,36 +2,46 @@ import * as React from 'react'
 import { useKeepAwake } from 'expo-keep-awake'
 import { createAppContainer } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
+import * as SQLite from 'expo-sqlite'
+import { SafeAreaProvider } from 'react-native-safe-area-view'
+import { StatusBar } from 'react-native'
+import { Provider as PaperProvider, DarkTheme } from 'react-native-paper'
 
 import HomeScreen from './HomeScreen'
-import { GlobalContextProvider } from './GlobalContext'
 import BookScreen from './BookScreen'
 import VersionScreen from './VersionScreen'
 import SearchScreen from './SearchScreen'
+import OnboardingScreen from './OnboardingScreen'
+import OfflineLoadingScreen from './OfflineLoadingScreen'
+import OfflineSuccessScreen from './OfflineSuccessScreen'
+import { GlobalContextProvider } from './GlobalContext'
+
+// Hack to support TypeORM: https://github.com/typeorm/typeorm/issues/4846
+;(window as any).Expo = Object.freeze({ ...(window as any).Expo, SQLite })
 
 export default function App() {
   useKeepAwake()
   return (
-    <GlobalContextProvider>
-      <AppContainer />
-    </GlobalContextProvider>
+    <SafeAreaProvider>
+      <PaperProvider theme={DarkTheme}>
+        <GlobalContextProvider>
+          <StatusBar hidden={true} />
+          <AppContainer />
+        </GlobalContextProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
   )
 }
 
-const AppNavigator = createStackNavigator(
+const AppStack = createStackNavigator(
   {
-    Home: {
-      screen: HomeScreen,
-    },
-    Books: {
-      screen: BookScreen,
-    },
-    Versions: {
-      screen: VersionScreen,
-    },
-    Search: {
-      screen: SearchScreen,
-    },
+    Home: HomeScreen,
+    Search: SearchScreen,
+    Books: BookScreen,
+    Versions: VersionScreen,
+    Onboarding: OnboardingScreen,
+    OfflineLoading: OfflineLoadingScreen,
+    OfflineSuccess: OfflineSuccessScreen,
   },
   {
     defaultNavigationOptions: {
@@ -40,4 +50,5 @@ const AppNavigator = createStackNavigator(
     mode: 'modal',
   }
 )
-const AppContainer = createAppContainer(AppNavigator)
+
+const AppContainer = createAppContainer(AppStack)

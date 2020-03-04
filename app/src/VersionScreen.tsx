@@ -1,14 +1,12 @@
 import React from 'react'
-import { StyleSheet } from 'react-native'
-import { List } from 'react-native-paper'
+import { StyleSheet, Text, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import hoistNonReactStatics from 'hoist-non-react-statics'
 import { BibleVersionEntity } from '@bible-engine/core'
 import { observer } from 'mobx-react/native'
 
-import { withGlobalContext } from './GlobalContext'
 import bibleStore from './BibleStore'
-import { Color } from './Constants'
+import { FontFamily } from './Constants'
+import { TouchableRipple } from 'react-native-paper'
 
 @observer
 class VersionScreen extends React.Component<any, any> {
@@ -20,25 +18,28 @@ class VersionScreen extends React.Component<any, any> {
   }
 
   renderDownloadIcon = (version: BibleVersionEntity) => {
-    if (version.dataLocation === 'db') {
-      return <List.Icon color={Color.TYNDALE_BLUE} icon="offline-pin" />
-    }
     return null
   }
   render() {
     return (
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.list}>
         {bibleStore.bibleVersions.map((version: BibleVersionEntity) => (
-          <List.Item
-            key={version.uid}
-            title={version.uid}
-            description={version.title}
+          <TouchableRipple
             onPress={() => {
               this.props.navigation.navigate('Home')
               bibleStore.changeCurrentBibleVersion(version.uid)
             }}
-            right={() => this.renderDownloadIcon(version)}
-          />
+            underlayColor="#e8eaed"
+            key={version.uid}
+            style={styles.list__item}
+          >
+            <React.Fragment>
+              <Text style={styles.list__item__header}>{version.uid}</Text>
+              <Text style={styles.list__item__description}>
+                {version.title}
+              </Text>
+            </React.Fragment>
+          </TouchableRipple>
         ))}
       </ScrollView>
     )
@@ -46,18 +47,26 @@ class VersionScreen extends React.Component<any, any> {
 }
 
 const styles = StyleSheet.create({
-  downloadButton: {
-    marginTop: 8,
+  list: {
+    paddingTop: 8,
   },
-  progressBar: {
-    maxWidth: 50,
-    flex: 1,
-    justifyContent: 'center',
-    marginRight: 8,
+  list__item: {
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingBottom: 8,
+    padding: 8,
+  },
+  list__item__header: {
+    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
+    fontSize: 16,
+    paddingBottom: 8,
+  },
+  list__item__description: {
+    color: '#9B9B9B',
+    fontFamily: FontFamily.OPEN_SANS,
+    fontSize: 14,
+    paddingBottom: 8,
   },
 })
 
-export default hoistNonReactStatics(
-  withGlobalContext(VersionScreen),
-  VersionScreen
-)
+export default VersionScreen

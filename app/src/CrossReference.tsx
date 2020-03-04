@@ -25,7 +25,6 @@ import {
 import Popover from './Popover'
 import Database from './Database'
 import Text from './Text'
-import { withGlobalContext } from './GlobalContext'
 import bibleStore from './BibleStore'
 import { observer } from 'mobx-react/native'
 
@@ -64,8 +63,12 @@ class CrossReference extends React.Component<Props, State> {
 
   renderCrossReference = ({ item, index }) => (
     <Fragment>
-      <Text style={styles.popover__content__reference}>{item.label}</Text>
-      <Text style={styles.popover__content__verse}>
+      <Text
+        style={bibleStore.scaledFontSize(styles.popover__content__reference)}
+      >
+        {item.label}
+      </Text>
+      <Text style={bibleStore.scaledFontSize(styles.popover__content__verse)}>
         {this.state.verseContents.length > 0
           ? this.state.verseContents[index]
           : null}
@@ -76,8 +79,12 @@ class CrossReference extends React.Component<Props, State> {
   renderPopoverContent = () => {
     return (
       <View>
-        <View style={styles.popover__content}>
-          <Text style={styles.popover__content__header}>Related Verses</Text>
+        <View style={bibleStore.scaledFontSize(styles.popover__content)}>
+          <Text
+            style={bibleStore.scaledFontSize(styles.popover__content__header)}
+          >
+            Related Verses
+          </Text>
           <FlatList
             data={this.props.crossReferences}
             showsVerticalScrollIndicator={false}
@@ -100,7 +107,7 @@ class CrossReference extends React.Component<Props, State> {
           underlayColor="#C5D8EA"
           style={styles.touchable}
         >
-          <Text style={styles.touchable__text}>
+          <Text style={bibleStore.scaledFontSize(styles.touchable__text)}>
             {this.props.crossReferences[0].key}
           </Text>
         </TouchableHighlight>
@@ -166,4 +173,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default withGlobalContext(CrossReference)
+export default CrossReference

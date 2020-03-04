@@ -17,7 +17,8 @@ export default class NetworkErrorScreen extends React.Component {
         <View>
           <Text style={styles.page__header}>We're Sorry</Text>
           <Text style={styles.page__body}>
-            Can't connect to the Internet, and no offline versions were found
+            Can't connect to the Internet, and this translation requires
+            Internet access
           </Text>
         </View>
       </View>

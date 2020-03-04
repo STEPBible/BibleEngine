@@ -1,9 +1,10 @@
 import React from 'react'
 import { FlatList, Animated, Dimensions, View, StyleSheet } from 'react-native'
 import { IBibleContent, IBiblePhrase } from '@bible-engine/core'
-import hoistNonReactStatics from 'hoist-non-react-statics'
-import { FAB } from 'react-native-paper'
+import { FAB, TouchableRipple, Surface } from 'react-native-paper'
 import { observer } from 'mobx-react/native'
+import store from 'react-native-simple-store'
+import BottomSheet from 'reanimated-bottom-sheet'
 
 import {
   Margin,
@@ -12,34 +13,63 @@ import {
   getDebugStyles,
   FontFamily,
   STATUS_BAR_HEIGHT,
+  AsyncStorageKey,
 } from './Constants'
 import NavigationHeader from './NavigationHeader'
 import StrongsWord from './StrongsWord'
 import CrossReference from './CrossReference'
 import Footnote from './Footnote'
-import { withGlobalContext } from './GlobalContext'
 import Text from './Text'
 import LoadingScreen from './LoadingScreen'
 import NetworkErrorScreen from './NetworkErrorScreen'
-import { isAndroid } from './utils'
-import { withCollapsible, setSafeBounceHeight } from './ReactNavCollapsible'
 import bibleStore from './BibleStore'
+import { observe } from 'mobx'
+import QuickSettings from './QuickSettings'
 
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
+const DEVICE_HEIGHT = Dimensions.get('window').height
+const DEVICE_WIDTH = Dimensions.get('window').width
 
 @observer
-class HomeScreen extends React.Component<any, any> {
+class HomeScreen extends React.Component<{}, {}> {
   static navigationOptions = {
     headerTitle: <NavigationHeader />,
     headerStyle: {
-      height: 52,
+      height: 49,
       marginTop: STATUS_BAR_HEIGHT * -1 + 10,
+      elevation: 0,
+      shadowOpacity: 0,
     },
+    headerLeft: null,
   }
+  flatListRef: any
+  settingsRef = React.createRef()
   itemNum = 0
 
-  componentDidMount() {
-    setSafeBounceHeight(0)
+  state = {
+    fontScale: 1,
+  }
+
+  constructor(props) {
+    super(props)
+  }
+
+  async componentDidMount() {
+    store.get(AsyncStorageKey.HAS_LAUNCHED).then(hasLaunched => {
+      if (!hasLaunched) {
+        this.props.navigation.navigate('Onboarding')
+        bibleStore.loadSearchIndex()
+      }
+    })
+    await bibleStore.initialize()
+    observe(bibleStore, 'loading', () => {
+      this.scrollToTop()
+    })
+    observe(bibleStore, 'fontScale', () => {
+      // This component doesnt react to BibleStore.fontScale updates, for some reason
+      // So we have to set the fontScale in the local component state
+      this.setState({ ...this.state, fontScale: bibleStore.fontScale })
+    })
+    this.setState({ ...this.state, fontScale: bibleStore.fontScale })
   }
 
   renderItem = (content: any, index: number): any => {
@@ -73,7 +103,11 @@ class HomeScreen extends React.Component<any, any> {
     const children: IBibleContent[] = content.contents
     return (
       <View style={styles.section}>
-        <Text style={styles.title}>{content.title}</Text>
+        {content.title ? (
+          <Text style={bibleStore.scaledFontSize(styles.title)}>
+            {content.title}
+          </Text>
+        ) : null}
         {children.map((child, index) => this.renderItem(child, index))}
       </View>
     )
@@ -82,7 +116,7 @@ class HomeScreen extends React.Component<any, any> {
   renderVerseNumber = (content: any): any => {
     if (content.numbering) {
       return (
-        <Text style={styles.verseNumber}>
+        <Text style={bibleStore.scaledFontSize(styles.verseNumber)}>
           {content.numbering.versionVerseIsStarting}
         </Text>
       )
@@ -139,67 +173,78 @@ class HomeScreen extends React.Component<any, any> {
         {this.renderCrossReference(content)}
         {content.content.split(' ').map((phrase, index) => (
           <View key={`phrase-${this.itemNum}-${index}`}>
-            <Text style={styles.phraseText}>{phrase}</Text>
+            <Text style={bibleStore.scaledFontSize(styles.phraseText)}>
+              {phrase}
+            </Text>
           </View>
         ))}
       </View>
     )
   }
 
+  scaledFontSize = (style: any) => {
+    return {
+      ...style,
+      fontSize: style.fontSize
+        ? style.fontSize * bibleStore.fontScale
+        : undefined,
+    }
+  }
+
   renderFlatlistItem = ({ item, index }) => {
     return this.renderItem(item, index)
   }
 
+  scrollToTop = () => {
+    if (this.flatListRef) {
+      this.flatListRef.scrollToOffset({ animated: false, offset: 0 })
+    }
+  }
+
   render() {
-    if (
-      bibleStore.isConnected === false &&
-      bibleStore.bibleVersions.length === 0 &&
-      bibleStore.loading === false
-    ) {
-      return <NetworkErrorScreen />
-    }
-    if (bibleStore.loading) {
-      return <LoadingScreen />
-    }
-    const { paddingHeight, animatedY, onScroll } = this.props.collapsible
-    const paddingTop =
-      (isAndroid() ? paddingHeight + STATUS_BAR_HEIGHT : paddingHeight) - 10
     return (
       <React.Fragment>
-        <AnimatedFlatList
-          data={bibleStore.chapterContent}
+        <FlatList
+          data={bibleStore.chapterSections}
+          ref={ref => (this.flatListRef = ref)}
           renderItem={this.renderItem}
           bounces={false}
           keyExtractor={(item, index) => `flatlist-item-${index}`}
-          contentContainerStyle={{
-            paddingTop,
-            ...styles.container,
-          }}
-          scrollIndicatorInsets={{ top: paddingHeight }}
-          onScroll={onScroll}
-          _mustAddThis={animatedY}
+          contentContainerStyle={styles.container}
+          onEndReached={bibleStore.loadAnotherSection}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={bibleStore.loading && LoadingScreen}
+          ListFooterComponent={
+            bibleStore.notAllSectionsAreLoaded && <LoadingScreen />
+          }
         />
         <FAB
-          visible={bibleStore.fontsAreReady}
+          visible={
+            bibleStore.fontsAreReady &&
+            !bibleStore.loading &&
+            !bibleStore.showSettings &&
+            !!bibleStore.previousRange
+          }
           color="#2F3030"
           small
           style={styles.previousChapterButton}
           icon="chevron-left"
-          onPress={() =>
-            bibleStore.updateCurrentBibleReference(bibleStore.previousRange)
-          }
+          onPress={bibleStore.goToPreviousChapter}
         />
         <FAB
-          visible={bibleStore.fontsAreReady}
+          visible={
+            bibleStore.fontsAreReady &&
+            !bibleStore.loading &&
+            !bibleStore.showSettings &&
+            !!bibleStore.nextRange
+          }
           color="#2F3030"
           small
           style={styles.nextChapterButton}
           icon="chevron-right"
-          onPress={() =>
-            bibleStore.updateCurrentBibleReference(bibleStore.nextRange)
-          }
+          onPress={bibleStore.goToNextChapter}
         />
+        <QuickSettings />
       </React.Fragment>
     )
   }
@@ -209,7 +254,7 @@ const styles = StyleSheet.create({
   container: {
     marginLeft: Margin.LARGE,
     marginRight: Margin.LARGE,
-    marginTop: Margin.MEDIUM,
+    marginTop: Margin.LARGE,
     paddingBottom: 96,
   },
   container__footer: {
@@ -272,9 +317,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default withCollapsible(
-  hoistNonReactStatics(withGlobalContext(HomeScreen), HomeScreen),
-  {
-    iOSCollapsedColor: 'white',
-  }
-)
+export default HomeScreen
