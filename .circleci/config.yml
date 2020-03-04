@@ -72,8 +72,7 @@ jobs:
                   name: Restore Yarn Package Cache
                   keys:
                       - yarn-modules-{{ checksum "yarn.lock" }}
-            - run: yarn install --frozen-lockfile
-            - run: nvm use 13.5.0 && yarn
+            - run: nvm use 13.5.0 && yarn install --frozen-lockfile
             - run: core/src/tests/mysql_migration_tests.sh
             - run: core/src/tests/postgres_migration_tests.sh
             - run: core/src/tests/sqlite_migration_tests.sh
