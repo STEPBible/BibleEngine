@@ -4,17 +4,17 @@ workflows:
     build_test_deploy:
         jobs:
             - build_yarn
-            # - test:
-            #       requires:
-            #           - build_yarn
-            # - test_migrations:
-            #       requires:
-            #           - build_yarn
+            - test:
+                  requires:
+                      - build_yarn
+            - test_migrations:
+                  requires:
+                      - build_yarn
             - request_deploy_app:
                   type: approval
-                #   requires:
-                #     - test
-                #     - test_migrations
+                  requires:
+                    - test
+                    - test_migrations
             - deploy_expo:
                   context: expo-credentials
                   requires:
