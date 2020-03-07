@@ -12,13 +12,12 @@ workflows:
                       - build_yarn
             - request_deploy_app:
                   type: approval
-                  requires:
-                    - test
-                    - test_migrations
             - deploy_expo:
                   context: expo-credentials
                   requires:
                     - request_deploy_app
+                    - test
+                    - test_migrations
             - deploy_ios:
                   context: expo-credentials
                   requires:
