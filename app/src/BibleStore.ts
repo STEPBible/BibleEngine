@@ -324,7 +324,10 @@ class BibleStore {
   async testQueryWorks(): Promise<boolean> {
     let bibleEngine
     try {
-      bibleEngine = new BibleEngine(this.BIBLE_ENGINE_OPTIONS)
+      bibleEngine = new BibleEngine({
+        ...this.BIBLE_ENGINE_OPTIONS,
+        migrationsRun: false,
+      })
       await bibleEngine.runMigrations()
       const result = await bibleEngine.getDictionaryEntries(
         'H0001',

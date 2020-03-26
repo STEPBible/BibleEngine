@@ -12,13 +12,12 @@ workflows:
                       - build_yarn
             - request_deploy_app:
                   type: approval
-                  requires:
-                    - test
-                    - test_migrations
             - deploy_expo:
                   context: expo-credentials
                   requires:
                     - request_deploy_app
+                    - test
+                    - test_migrations
             - deploy_ios:
                   context: expo-credentials
                   requires:
@@ -90,8 +89,13 @@ jobs:
                       - yarn-modules-{{ checksum "yarn.lock" }}
             - run: yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
-            - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
-            - run: cd app && EXPO_DEBUG=true yarn expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
+            - run: yarn global add expo-cli
+            - run:
+                command: |
+                    export PATH="$PATH:$( yarn global bin )"
+                    cd app
+                    expo login --non-interactive -u technical@tyndalehouse.com
+                    EXPO_DEBUG=true expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
     deploy_android:
         macos:
             xcode: 11.3.0
