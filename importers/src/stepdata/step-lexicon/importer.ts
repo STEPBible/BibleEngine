@@ -71,7 +71,7 @@ function isValidContent(line: string) {
         line &&
         line.split('=').length >= 2 &&
         line.split('=')[1].trim().length &&
-        Object.values(LexiconEntryType).includes(line.split('=')[0].trim())
+        Object.values(LexiconEntryType).includes(line.split('=')[0].trim() as LexiconEntryType)
     );
 }
 

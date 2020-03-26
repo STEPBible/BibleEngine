@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osis xmlns="http://www.bibletechnologies.net/2003/OSIS/namespace" 
+    xmlns:osis="http://www.bibletechnologies.net/2003/OSIS/namespace" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bibletechnologies.net/2003/OSIS/namespace http://www.bibletechnologies.net/osisCore.2.1.1.xsd">
+    <osisText xml:lang="en" osisIDWork="ESV">
+        <header>
+            <work osisWork="ESV">
+                <title>English Standard Version</title>
+                <identifier type="OSIS">Bible.ESV</identifier>
+                <scope>Gen-Rev</scope>
+            </work>
+        </header>
+        <div osisID="Gen" type="book">
+            <div type="introduction">
+                <p>
+                    Bucheinleitung.
+                </p>
+            </div>
+            <div type="section">
+                <title>Oberabschnitt</title>
+                <chapter sID="Gen.1" osisID="Gen.1"/>
+                <div type="subSection">
+                    <title>Unterabschnitt</title>
+                    <title type="parallel">
+                        <reference osisRef="Job.38.4-Job.38.7">Job 38:4-7</reference>
+                        <reference osisRef="Isa.45.18">45:18</reference>
+                    </title>
+                    <p>
+                        <verse sID="Gen.1.1" osisID="Gen.1.1"/>
+                        <divineName>Lorem</divineName> ipsum dolor sit amet
+                        <note n="1" osisID="Gen.1.1!note.1" osisRef="Gen.1.1" type="alternative">Or <hi type="italic"><catchWord>a</catchWord> canopy</hi>; also verses <reference osisRef="Gen.1.7">7</reference> and <reference osisRef="Gen.1.14">14</reference></note>
+                        , consectetur <hi type="italic">adipiscing</hi>
+                        <note osisID="Gen.1.1!crossReference.a" osisRef="Gen.1.1" n="a" type="crossReference"><reference osisRef="Jer.4.23">Jer. 4:23</reference></note> 
+                        elit.
+                        <verse sID="Gen.1.1" osisID="Gen.1.1"/>
+                    </p>
+                    <chapter eID="Gen.1" osisID="Gen.1"/>
+                    <chapter sID="Gen.2" osisID="Gen.2"/>
+                    <!-- Ein Absatz -->
+                    <p>
+                        <verse sID="Gen.2.1" osisID="Gen.2.1"/>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                        <verse eID="Gen.2.1" osisID="Gen.2.1"/>
+                        <verse sID="Gen.2.2" osisID="Gen.2.2"/>
+                        Sed sapien nunc, porttitor quis ultricies sit amet, fringilla varius mi.
+                        <!-- Absatzende vor Versende -->
+                    </p>
+                    <p>
+                        Praesent auctor magna neque,
+                        <!-- Zeilenumbruch im Absatz -->
+                        <lb type='x-newLine'/>
+                        ac commodo libero bibendum sit amet.
+                        <verse eID="Gen.2.2" osisID="Gen.2.2"/>
+                    </p>
+                    <!-- Abschnittende vor Kapitelende -->
+                </div>
+                <div type="subSection">
+                    <title>Unterabschnitt</title>
+                    <!-- Eine Abschnitts-Notiz -->
+                    <note>Lorem ipsum</note>
+                    <!-- Eine Strophe -->
+                    <lg>
+                        <!-- Eine Zeile -->
+                        <l>
+                            <verse sID="Gen.2.1" osisID="Gen.2.1"/>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                            <verse eID="Gen.2.1" osisID="Gen.2.1"/>
+                        </l>
+                        <l>
+                            <verse sID="Gen.2.1" osisID="Gen.2.1"/>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                            <verse eID="Gen.2.1" osisID="Gen.2.1"/>
+                        </l>
+                    </lg>
+                </div>
+                <chapter eID="Gen.2" osisID="Gen.2"/>
+        </div>
+        <div osisId="Ps" type="book">
+            <chapter sID="Ps.13" osisID="Ps.13"/>
+            <div type="section">
+                <!-- Psalm-Titel der Übersetzung -->
+                <title>How Long, O <divineName>Lord</divineName>?</title>
+                <verse sID="Ps.13.1" osisID="Ps.13.1"/>
+                <!-- Psalm-Titel im Bibletext -->
+                <title canonical="true" type="psalm">To the choirmaster.</title>
+                <lg>
+                    <l level="1">
+                        Lorem ipsum
+                        <verse eID="Ps.13.1" osisID="Ps.13.1"/>
+                    </l>
+                    <verse sID="Ps.13.2" osisID="Ps.13.2"/>
+                    <l level="1">Lorem ipsum</l>
+                    <l level="2">dolor sit amet</l>
+                    <verse eID="Ps.13.2" osisID="Ps.13.2"/>
+                </lg>
+                <!-- Zweite Strophe -->
+                <lg>
+                    <verse sID="Ps.13.3" osisID="Ps.13.3"/>
+                    <l level="1">Lorem ipsum</l>
+                    <verse eID="Ps.13.3" osisID="Ps.13.3"/>
+                    <verse sID="Ps.13.4" osisID="Ps.13.4"/>
+                    <l level="1">Lorem ipsum</l>
+                    <verse eID="Ps.13.4" osisID="Ps.13.4"/>
+                </lg>
+            </div>
+            <chapter eID="Ps.13" osisID="Ps.13"/>
+        </div>
+    </osisText>
+</osis>

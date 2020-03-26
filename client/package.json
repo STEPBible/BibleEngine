@@ -8,7 +8,7 @@
     },
     "dependencies": {
         "cross-fetch": "^3.0.4",
-        "typeorm": "0.2.20",
+        "typeorm": "0.2.24",
         "whatwg-fetch": "^3.0.0"
     },
     "devDependencies": {
@@ -16,6 +16,6 @@
         "jest": "^24.9.0",
         "rimraf": "^2.6.3",
         "ts-jest": "^24.1.0",
-        "typescript": "3.3.3"
+        "typescript": "3.8.3"
     }
 }

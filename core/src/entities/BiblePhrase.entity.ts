@@ -157,19 +157,22 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
         if (this.modifiers && this.modifiers[modifier]) return this.modifiers[modifier];
         else {
             // default values
-            if (modifier === 'indentLevel' || modifier === 'quoteLevel') return 0;
-            else if (
-                modifier === 'person' ||
-                modifier === 'quote' ||
+            if (modifier === 'indentLevel' || modifier === 'quoteLevel') {
+                return 0 as PhraseModifiers[T];
+            } else if (
+                // modifier === 'person' ||
+                // modifier === 'quote' ||
                 modifier === 'translationChange' ||
                 modifier === 'orderedListItem' ||
                 modifier === 'unorderedListItem' ||
                 modifier === 'title' ||
                 modifier === 'link' ||
                 modifier === 'line'
-            )
+            ) {
                 return undefined;
-            else return false;
+            } else {
+                return false as PhraseModifiers[T];
+            }
         }
     }
 }

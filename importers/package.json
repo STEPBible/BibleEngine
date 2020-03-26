@@ -19,13 +19,13 @@
         "random-words": "^1.1.0",
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
-        "typeorm": "0.2.20"
+        "typeorm": "0.2.24"
     },
     "devDependencies": {
         "@types/archiver": "^2.1.2",
         "@types/fs-extra": "^5.0.4",
         "@types/jest": "24.0.11",
-        "@types/node": "12.11.2",
+        "@types/node": "12.12.31",
         "@types/pako": "^1.0.0",
         "@types/rimraf": "^2.0.2",
         "@types/sax": "^1.2.0",
@@ -33,9 +33,9 @@
         "jest": "24.5.0",
         "sqlite3": "^4.1.0",
         "ts-jest": "24.1.0",
-        "ts-node": "8.4.1",
-        "tslint": "5.20.0",
-        "typescript": "3.3.3",
+        "ts-node": "8.8.1",
+        "tslint": "6.1.0",
+        "typescript": "3.8.3",
         "xml-formatter": "^1.0.1"
     }
 }
