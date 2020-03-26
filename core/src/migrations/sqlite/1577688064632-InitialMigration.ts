@@ -41,7 +41,7 @@ export class InitialMigration1577688064632 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_phrase" ("id" integer PRIMARY KEY NOT NULL, "joinToRefId" bigint, "versionId" integer NOT NULL, "versionChapterNum" integer NOT NULL, "versionVerseNum" integer NOT NULL, "versionSubverseNum" integer, "sourceTypeId" integer, "content" text NOT NULL, "linebreak" boolean, "skipSpace" varchar, "modifiers" text, "quoteWho" varchar, "person" varchar, "strongs" text)`,
+            `CREATE TABLE "bible_phrase" ("id" integer PRIMARY KEY NOT NULL, "joinToRefId" bigint, "versionId" integer NOT NULL, "versionChapterNum" integer NOT NULL, "versionVerseNum" integer NOT NULL, "versionSubverseNum" integer, "sourceTypeId" integer, "content" text NOT NULL, "linebreak" boolean, "skipSpace" varchar, "modifiers" text, "quoteWho" varchar, "person" varchar, "strongs" text) WITHOUT ROWID`,
             undefined
         );
         await queryRunner.query(

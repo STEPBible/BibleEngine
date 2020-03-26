@@ -21,11 +21,11 @@ export class InitialMigration1581194174760 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            'CREATE TABLE `bible_note` (`id` int NOT NULL AUTO_INCREMENT, `key` varchar(255) NULL, `type` varchar(255) NULL, `content` text NOT NULL, `phraseId` int NULL, INDEX `IDX_66a40d0dd1d4dec456e1241d38` (`phraseId`), PRIMARY KEY (`id`)) ENGINE=InnoDB',
+            'CREATE TABLE `bible_note` (`id` int NOT NULL AUTO_INCREMENT, `key` varchar(255) NULL, `type` varchar(255) NULL, `content` text NOT NULL, `phraseId` bigint NULL, INDEX `IDX_66a40d0dd1d4dec456e1241d38` (`phraseId`), PRIMARY KEY (`id`)) ENGINE=InnoDB',
             undefined
         );
         await queryRunner.query(
-            'CREATE TABLE `bible_phrase` (`id` int NOT NULL, `joinToRefId` bigint NULL, `versionId` int NOT NULL, `versionChapterNum` int NOT NULL, `versionVerseNum` int NOT NULL, `versionSubverseNum` int NULL, `sourceTypeId` int NULL, `content` text NOT NULL, `linebreak` tinyint NULL, `skipSpace` varchar(255) NULL, `modifiers` text NULL, `quoteWho` varchar(255) NULL, `person` varchar(255) NULL, `strongs` text NULL, INDEX `IDX_09d57b6b557db9a20107239b77` (`versionId`), PRIMARY KEY (`id`)) ENGINE=InnoDB',
+            'CREATE TABLE `bible_phrase` (`id` bigint NOT NULL, `joinToRefId` bigint NULL, `versionId` int NOT NULL, `versionChapterNum` int NOT NULL, `versionVerseNum` int NOT NULL, `versionSubverseNum` int NULL, `sourceTypeId` int NULL, `content` text NOT NULL, `linebreak` tinyint NULL, `skipSpace` varchar(255) NULL, `modifiers` text NULL, `quoteWho` varchar(255) NULL, `person` varchar(255) NULL, `strongs` text NULL, INDEX `IDX_09d57b6b557db9a20107239b77` (`versionId`), PRIMARY KEY (`id`)) ENGINE=InnoDB',
             undefined
         );
         await queryRunner.query(
@@ -41,7 +41,7 @@ export class InitialMigration1581194174760 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            'CREATE TABLE `bible_cross_reference` (`id` int NOT NULL AUTO_INCREMENT, `normalizedRefId` bigint NOT NULL, `partIndicator` varchar(255) NULL, `normalizedRefIdEnd` bigint NULL, `partIndicatorEnd` varchar(255) NULL, `versionId` int NULL, `versionChapterNum` int NULL, `versionVerseNum` int NULL, `versionChapterEndNum` int NULL, `versionVerseEndNum` int NULL, `key` varchar(255) NULL, `phraseId` int NULL, `sectionId` int NULL, INDEX `IDX_7ff9093c7d0193dc69753ff634` (`phraseId`), INDEX `IDX_763d9599de97b88c1adcd12dac` (`sectionId`), PRIMARY KEY (`id`)) ENGINE=InnoDB',
+            'CREATE TABLE `bible_cross_reference` (`id` int NOT NULL AUTO_INCREMENT, `normalizedRefId` bigint NOT NULL, `partIndicator` varchar(255) NULL, `normalizedRefIdEnd` bigint NULL, `partIndicatorEnd` varchar(255) NULL, `versionId` int NULL, `versionChapterNum` int NULL, `versionVerseNum` int NULL, `versionChapterEndNum` int NULL, `versionVerseEndNum` int NULL, `key` varchar(255) NULL, `phraseId` bigint NULL, `sectionId` int NULL, INDEX `IDX_7ff9093c7d0193dc69753ff634` (`phraseId`), INDEX `IDX_763d9599de97b88c1adcd12dac` (`sectionId`), PRIMARY KEY (`id`)) ENGINE=InnoDB',
             undefined
         );
         await queryRunner.query(

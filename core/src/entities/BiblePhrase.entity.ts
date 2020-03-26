@@ -16,9 +16,9 @@ import { PhraseModifiers, IBiblePhraseRef } from '../models';
 import { IBiblePhraseWithNumbers } from '../models/BiblePhrase';
 import { IContentPhrase } from '../models/ContentPhrase';
 
-@Entity('bible_phrase')
+@Entity('bible_phrase', { withoutRowid: true })
 export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
-    @PrimaryColumn()
+    @PrimaryColumn({ type: 'bigint' })
     id: number;
 
     // the id encodes the following attribute:
