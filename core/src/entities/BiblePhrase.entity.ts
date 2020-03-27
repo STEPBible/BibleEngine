@@ -160,8 +160,6 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
             if (modifier === 'indentLevel' || modifier === 'quoteLevel') {
                 return 0 as PhraseModifiers[T];
             } else if (
-                // modifier === 'person' ||
-                // modifier === 'quote' ||
                 modifier === 'translationChange' ||
                 modifier === 'orderedListItem' ||
                 modifier === 'unorderedListItem' ||
