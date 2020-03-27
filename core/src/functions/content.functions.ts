@@ -38,6 +38,7 @@ import {
     slimDownReferenceRange
 } from './reference.functions';
 import { getNormalizedChapterCountForOsisId, getNormalizedVerseCount } from './v11n.functions';
+import { StringModifiers } from '../models/BiblePhrase';
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
@@ -261,15 +262,29 @@ export const generateBibleDocument = (
                         'quote'
                     >).modifier;
                 } else if (
-                    _group.groupType === 'line' ||
+                    // since typescript 3.5 we have to do this weird switch for different modifier
+                    // types (although the code inside the cases is exactly the same). i don't
+                    // understand the reason why typescript refuses to figure that out on its own,
+                    // however its not considered a bug
+                    // (https://github.com/microsoft/TypeScript/issues/32698). Open issue for
+                    // tracking this: https://github.com/microsoft/TypeScript/issues/33014
                     _group.groupType === 'orderedListItem' ||
                     _group.groupType === 'unorderedListItem' ||
                     _group.groupType === 'translationChange' ||
-                    _group.groupType === 'title' ||
                     _group.groupType === 'person' ||
                     _group.groupType === 'link'
                 ) {
-                    activeModifiers[_group.groupType] = _group.modifier;
+                    activeModifiers[_group.groupType] = (_group as IBibleContentGeneratorGroup<
+                        StringModifiers
+                    >).modifier;
+                } else if (_group.groupType === 'line') {
+                    activeModifiers[_group.groupType] = (_group as IBibleContentGeneratorGroup<
+                        'line'
+                    >).modifier;
+                } else if (_group.groupType === 'title') {
+                    activeModifiers[_group.groupType] = (_group as IBibleContentGeneratorGroup<
+                        'title'
+                    >).modifier;
                 } else {
                     // => this group has a boolean modifier
                     activeModifiers[_group.groupType] = true;
@@ -455,7 +470,18 @@ export const generateBibleDocument = (
                         parent: activeGroup,
                         contents: []
                     };
-                    activeModifiers[modifier] = phrase.getModifierValue(modifier);
+
+                    // since typescript 3.5 we have to do this weird switch for different modifier
+                    // types (although the code inside the cases is exactly the same). i don't
+                    // understand the reason why typescript refuses to figure that out on its own,
+                    // however its not considered a bug
+                    // (https://github.com/microsoft/TypeScript/issues/32698). Open issue for
+                    // tracking this: https://github.com/microsoft/TypeScript/issues/33014
+                    if (modifier === 'line')
+                        activeModifiers[modifier] = phrase.getModifierValue(modifier);
+                    else if (modifier === 'title')
+                        activeModifiers[modifier] = phrase.getModifierValue(modifier);
+                    else activeModifiers[modifier] = phrase.getModifierValue(modifier);
                 }
             } else if (modifier === 'person') {
                 if (phrase.person && phrase.person !== activeModifiers['person']) {

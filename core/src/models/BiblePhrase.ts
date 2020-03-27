@@ -51,12 +51,11 @@ export type PhraseModifiers = {
     sela?: boolean;
 };
 
-export type ValueModifiers =
+export type StringModifiers =
     | 'translationChange'
     | 'orderedListItem'
     | 'unorderedListItem'
-    | 'title'
-    | 'link'
-    | 'line';
-
+    | 'link';
+export type NumberModifiers = 'line';
+export type ValueModifiers = StringModifiers | NumberModifiers | 'title';
 export type BooleanModifiers = 'bold' | 'italic' | 'divineName' | 'emphasis' | 'lineGroup' | 'sela';
