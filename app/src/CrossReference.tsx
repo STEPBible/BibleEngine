@@ -23,7 +23,6 @@ import {
   getDebugStyles,
 } from './Constants'
 import Popover from './Popover'
-import Database from './Database'
 import Text from './Text'
 import bibleStore from './BibleStore'
 import { observer } from 'mobx-react/native'
@@ -33,7 +32,6 @@ const DEVICE_HEIGHT = Dimensions.get('window').height
 
 interface Props {
   crossReferences: IBibleCrossReference[]
-  database: Database
 }
 
 interface State {
