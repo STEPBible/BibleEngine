@@ -16,7 +16,7 @@ import OfflineSuccessScreen from './OfflineSuccessScreen'
 import { GlobalContextProvider } from './GlobalContext'
 
 export default function App() {
-  useKeepAwake()
+  try { useKeepAwake() } catch (e) { }
   return (
     <SafeAreaProvider>
       <PaperProvider theme={DarkTheme}>
