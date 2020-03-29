@@ -205,8 +205,7 @@ export default class ReadingScreen extends React.Component<any, any> {
 
 const styles = StyleSheet.create({
   page: {
-    marginLeft: Margin.LARGE,
-    marginRight: Margin.LARGE,
+    padding: Margin.LARGE,
   },
   page__section: {
     backgroundColor: 'yellow',
