@@ -150,7 +150,7 @@ export default class ReadingScreen extends React.Component<any, any> {
 
   lineBreak = index => (
     <Text key={`line-break-${index}`} style={styles.page__break}>
-      {'\n\n'}
+      {'\n'}
     </Text>
   )
 
