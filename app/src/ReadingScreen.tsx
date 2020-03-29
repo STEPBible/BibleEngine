@@ -44,7 +44,7 @@ export default class ReadingScreen extends React.Component<any, any> {
   bibleSection = (item, index) => (
     <React.Fragment key={`section-${index}`}>
       {this.sectionTitle(item.title, index)}
-      {this.sectionContents(item, index)}
+      {this.mappedContents(item, index)}
     </React.Fragment>
   )
 
@@ -65,7 +65,13 @@ export default class ReadingScreen extends React.Component<any, any> {
 
   renderItem = (item, index) => {
     if (!('type' in item)) {
-      return this.phrase(item, index)
+      return (
+        <React.Fragment key={`item-${index}`}>
+          {this.verseNumber(item, index)}
+          {this.phrase(item, index)}
+        </React.Fragment>
+
+      )
     }
     if (item.type === 'group') {
       if (item.groupType === 'paragraph') {
@@ -99,6 +105,7 @@ export default class ReadingScreen extends React.Component<any, any> {
   paragraph = (item, index) => (
     <React.Fragment key={`paragraph-${index}`}>
       {this.lineBreak(index)}
+      {this.verseNumber(item, index)}
       {this.mappedContents(item, index)}
     </React.Fragment>
   )
@@ -122,20 +129,21 @@ export default class ReadingScreen extends React.Component<any, any> {
     const verseNum = item?.numbering?.normalizedVerseIsStarting
     if (verseNum === this.targetVerseNum) {
       return (
-        <React.Fragment>
+        <React.Fragment key={`verse-search-${index}`}>
           <View
             ref={ref => this.targetVerseRef = ref}
             style={styles.page__verseNumberMarkerForSearch}
+            key={`verse-marker-${index}`}
           />
-          {this.verseNumberText(verseNum)}
+          {this.verseNumberText(verseNum, index)}
         </React.Fragment>
       )
     }
-    return this.verseNumberText(verseNum)
+    return this.verseNumberText(verseNum, index)
   }
 
-  verseNumberText = (verseNum) => (
-    <Text style={bibleStore.scaledFontSize(styles.page__verseNum)}>
+  verseNumberText = (verseNum, index) => (
+    <Text style={styles.page__verseNum} key={`verse-num-${verseNum}-${index}`}>
       {verseNum}
     </Text>
   )
@@ -184,9 +192,11 @@ export default class ReadingScreen extends React.Component<any, any> {
           contentContainerStyle={styles.page}
           showsVerticalScrollIndicator={false}
         >
-          {
-            data.map((section, index) => this.bibleSection(section, index))
-          }
+          <Text style={styles.page__section} selectable>
+            {
+              bibleStore.chapterSections.map((section, index) => this.bibleSection(section, index))
+            }
+          </Text>
         </ScrollView>
         <Popover
           isVisible={this.state.popoverIsVisible}
