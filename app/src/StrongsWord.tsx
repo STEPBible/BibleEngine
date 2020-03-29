@@ -276,25 +276,17 @@ class StrongsWord extends React.Component<Props, State> {
     }
     return (
       <React.Fragment>
-        <TouchableHighlight
+        <Text
+          selectable
           ref={ref => (this.touchable = ref)}
           onPress={this.onPress}
-          activeOpacity={0.5}
-          underlayColor="#C5D8EA"
-          style={styles.strongWord}
+          style={{
+            ...styles.strongWord,
+            ...bibleStore.scaledFontSize(styles.strongWordText),
+          }}
         >
-          <Text style={bibleStore.scaledFontSize(styles.strongWordText)}>
-            {this.props.phrase}
-          </Text>
-        </TouchableHighlight>
-        <Popover
-          isVisible={this.state.popoverIsVisible}
-          fromView={this.touchable}
-          onRequestClose={() => this.closePopover()}
-          popoverStyle={styles.popover__background_container}
-        >
-          {this.renderPopoverContent()}
-        </Popover>
+          {this.props.phrase}
+        </Text>
       </React.Fragment>
     )
   }

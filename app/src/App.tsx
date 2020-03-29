@@ -7,6 +7,7 @@ import { StatusBar } from 'react-native'
 import { Provider as PaperProvider, DarkTheme } from 'react-native-paper'
 
 import HomeScreen from './HomeScreen'
+import ReadingScreen from './ReadingScreen'
 import BookScreen from './BookScreen'
 import VersionScreen from './VersionScreen'
 import SearchScreen from './SearchScreen'
@@ -31,7 +32,12 @@ export default function App() {
 
 const AppStack = createStackNavigator(
   {
-    Home: HomeScreen,
+    Home: {
+      screen: ReadingScreen,
+      navigationOptions: {
+        header: null
+      }
+    },
     Search: SearchScreen,
     Books: BookScreen,
     Versions: VersionScreen,
