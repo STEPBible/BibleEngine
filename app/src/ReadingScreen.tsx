@@ -172,13 +172,6 @@ export default class ReadingScreen extends React.Component<any, any> {
   }
 
   render() {
-    const contents = psalm.content.contents
-    const data: any = []
-    let i = 0;
-    for (; i < 1; ++i) {
-      data.push(...contents)
-    }
-    console.log('attempting render...')
     if (bibleStore.fontsAreReady === false) {
       return null
     }
