@@ -11,6 +11,8 @@ import Popover from './Popover'
 import { Color } from './Constants'
 import bibleStore from './BibleStore'
 import 'react-native-console-time-polyfill'
+import NavigationHeader from './NavigationHeader'
+import QuickSettings from './QuickSettings'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 
@@ -174,6 +176,7 @@ export default class ReadingScreen extends React.Component<any, any> {
     }
     return (
       <React.Fragment>
+        <NavigationHeader />
         <ScrollView
           ref={(ref) => this.listRef = ref}
           onLayout={this.scrollToTargetVerseRef}
@@ -194,6 +197,7 @@ export default class ReadingScreen extends React.Component<any, any> {
             hiiii
           </Text>
         </Popover>
+        <QuickSettings />
       </React.Fragment>
     )
   }
