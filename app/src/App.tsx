@@ -2,7 +2,6 @@ import * as React from 'react'
 import { useKeepAwake } from 'expo-keep-awake'
 import { createAppContainer } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
-import * as SQLite from 'expo-sqlite'
 import { SafeAreaProvider } from 'react-native-safe-area-view'
 import { StatusBar } from 'react-native'
 import { Provider as PaperProvider, DarkTheme } from 'react-native-paper'
@@ -15,9 +14,6 @@ import OnboardingScreen from './OnboardingScreen'
 import OfflineLoadingScreen from './OfflineLoadingScreen'
 import OfflineSuccessScreen from './OfflineSuccessScreen'
 import { GlobalContextProvider } from './GlobalContext'
-
-// Hack to support TypeORM: https://github.com/typeorm/typeorm/issues/4846
-;(window as any).Expo = Object.freeze({ ...(window as any).Expo, SQLite })
 
 export default function App() {
   useKeepAwake()
