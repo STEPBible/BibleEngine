@@ -65,6 +65,7 @@ class BibleStore {
   BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
     database: 'bibles.db',
     type: 'expo',
+    driver: require('expo-sqlite'),
     synchronize: false,
   }
 
