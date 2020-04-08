@@ -287,16 +287,14 @@ class StrongsWord extends React.Component<Props, State> {
             {this.props.phrase}
           </Text>
         </TouchableHighlight>
-        {this.state.popoverIsVisible && (
-          <Popover
-            isVisible={this.state.popoverIsVisible}
-            fromView={this.touchable}
-            onRequestClose={() => this.closePopover()}
-            popoverStyle={styles.popover__background_container}
-          >
-            {this.renderPopoverContent()}
-          </Popover>
-        )}
+        <Popover
+          isVisible={this.state.popoverIsVisible}
+          fromView={this.touchable}
+          onRequestClose={() => this.closePopover()}
+          popoverStyle={styles.popover__background_container}
+        >
+          {this.renderPopoverContent()}
+        </Popover>
       </React.Fragment>
     )
   }
