@@ -64,7 +64,7 @@ import {
     IBibleBookEntity,
     IBibleContent,
     IBibleContentGroup,
-    BiblePlaintext
+    BiblePlaintext,
 } from './models';
 import sqliteMigrations from './migrations/sqlite';
 import postgresMigrations from './migrations/postgres';
@@ -362,9 +362,9 @@ export class BibleEngine {
 
         const rangeNormalized = isReferenceNormalized(range)
             ? <IBibleReferenceRangeNormalized>range
-            : await this.getNormalizedReferenceRange(range);
+            : await this.getNormalizedReferenceRange(range, bookEntity);
 
-        const phrases = await this.getPhrases(rangeNormalized);
+        const phrases = await this.getPhrases(rangeNormalized, bookEntity);
         const paragraphs = await db
             .createQueryBuilder(BibleParagraphEntity, 'paragraph')
             .where(
@@ -456,13 +456,13 @@ export class BibleEngine {
         return lastPhrase.length ? parsePhraseId(lastPhrase[0].id).phraseNum! + 1 : 1;
     }
 
-    async getPhrases(range: IBibleReferenceRangeNormalized | IBibleReferenceRangeVersion) {
+    async getPhrases(range: IBibleReferenceRangeNormalized | IBibleReferenceRangeVersion, book?: BibleBookEntity) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         const normalizedRange =
             range.isNormalized === true
                 ? <IBibleReferenceRangeNormalized>range
-                : await this.getNormalizedReferenceRange(range);
+                : await this.getNormalizedReferenceRange(range, book);
         const where: FindConditions<BiblePhraseEntity> = {
             id: Between(
                 generatePhraseId(normalizedRange),
@@ -1224,14 +1224,42 @@ export class BibleEngine {
     }
 
     private async getNormalizedReferenceRange(
-        range: IBibleReferenceRangeVersion
+        inputRange: IBibleReferenceRangeVersion,
+        book?: BibleBookEntity
     ): Promise<IBibleReferenceRangeNormalized> {
-        if (isReferenceNormalized(range)) return { ...range, isNormalized: true };
+        if (isReferenceNormalized(inputRange)) return { ...inputRange, isNormalized: true };
+
+        // no mutation
+        const range = {...inputRange};
+        
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+
+        if(!range.versionId && range.versionUid) {
+            const version = await db.findOne(BibleVersionEntity, {
+                where: { uid: range.versionUid },
+                select: ['id']
+            });
+            if(version) range.versionId = version.id;
+        }
 
         // if reference has no data that can cause normalisation changes, return the reference
         // (-range) right away
-        if (!range.versionId || !range.versionChapterNum || !range.versionVerseNum)
+        if (!range.versionId || !range.versionChapterNum)
             return generateNormalizedRangeFromVersionRange(range);
+        
+        if(!range.versionVerseNum ) {
+            if(!book) {
+                book = await db.findOne(BibleBookEntity, {
+                    where: { versionId: range.versionId, osisId: range.bookOsisId },
+                    select: ['chaptersCount']
+                });
+            }
+            if(!book) throw new Error(`missing book data for ${range.bookOsisId} during reference normalization`);
+
+            range.versionVerseNum = 1;
+            range.versionVerseEndNum = range.versionChapterEndNum ? book.chaptersCount[range.versionChapterEndNum - 1] : book.chaptersCount[range.versionChapterNum - 1];
+        }
 
         const rules = await this.getNormalisationRulesForRange(range);
 
@@ -1270,8 +1298,7 @@ export class BibleEngine {
             normalizedSubverseEndNum: standardRefEnd.normalizedSubverseNum
         };
 
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
+        
         // const phraseStart = await entityManager.findOne(BiblePhrase, {
         //     where: {
         //         id: Raw(col => generatePhraseIdSql(pontentialNormalizedRange, col)),
@@ -1373,7 +1400,7 @@ export class BibleEngine {
                 // we know that this crossRef has a versionId since we queried for it
                 const normalizedRange = await this.getNormalizedReferenceRange(
                     // prettier-ignore
-                    <IBibleReferenceRangeVersion>cRef.range
+                    <IBibleReferenceRangeVersion>cRef.range, book
                 );
                 if (cRef.versionChapterNum)
                     cRef.range.normalizedChapterNum = normalizedRange.normalizedChapterNum;
