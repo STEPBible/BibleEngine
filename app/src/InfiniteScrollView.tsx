@@ -49,7 +49,7 @@ export default class InfiniteScrollView extends React.Component<any, any> {
       <React.Fragment>
         <ScrollView
           {...this.props}
-          ref={(ref) => this.listRef = ref}
+          ref={(ref) => { this.listRef = ref; this.props.scrollViewRef(ref); }}
         >
           {
             this.state._items.map(

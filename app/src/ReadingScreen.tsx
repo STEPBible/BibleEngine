@@ -13,6 +13,7 @@ import bibleStore from './BibleStore'
 import 'react-native-console-time-polyfill'
 import NavigationHeader from './NavigationHeader'
 import QuickSettings from './QuickSettings'
+import InfiniteScrollView from './InfiniteScrollView'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 
@@ -24,7 +25,7 @@ export default class ReadingScreen extends React.Component<any, any> {
   state = {
     popoverIsVisible: false,
   }
-  targetVerseNum = 240
+  targetVerseNum = 1
   targetVerseRef?: View | null
   listRef?: ScrollView | null
 
@@ -171,19 +172,22 @@ export default class ReadingScreen extends React.Component<any, any> {
     return (
       <React.Fragment>
         <NavigationHeader />
-        <ScrollView
-          ref={(ref) => this.listRef = ref}
+        <InfiniteScrollView
+          scrollViewRef={(ref) => this.listRef = ref}
           onLayout={this.scrollToTargetVerseRef}
           bounces={false}
           contentContainerStyle={styles.page}
           showsVerticalScrollIndicator={false}
-        >
-          <Text style={styles.page__section} selectable>
+          items={bibleStore.chapterSections}
+          renderItem={({ item, index }) => (
+            <Text style={styles.page__section} selectable>
             {
-              bibleStore.chapterSections.map((section, index) => this.bibleSection(section, index))
+              this.bibleSection(item, index)
             }
           </Text>
-        </ScrollView>
+          )}
+        >
+        </InfiniteScrollView>
         <Popover
           isVisible={this.state.popoverIsVisible}
           fromView={null}
@@ -217,8 +221,6 @@ const styles = StyleSheet.create({
   },
   page__break: {
     fontFamily: FontFamily.CARDO,
-    height: 0,
-    width: 100,
     lineHeight: LINE_HEIGHT,
   },
   page__strongs: {
