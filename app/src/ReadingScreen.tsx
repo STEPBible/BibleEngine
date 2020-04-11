@@ -57,12 +57,6 @@ export default class ReadingScreen extends React.Component<any, any> {
     </Text>
   )
 
-  sectionContents = (item, index) => (
-    <Text style={styles.page__section} selectable key={`section-${index}`}>
-      {this.mappedContents(item, index)}
-    </Text>
-  )
-
   renderItem = (item, index) => {
     if (!('type' in item)) {
       return (
@@ -70,7 +64,6 @@ export default class ReadingScreen extends React.Component<any, any> {
           {this.verseNumber(item, index)}
           {this.phrase(item, index)}
         </React.Fragment>
-
       )
     }
     if (item.type === 'group') {
