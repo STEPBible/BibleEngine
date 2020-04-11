@@ -199,27 +199,32 @@ export default class ReadingScreen extends React.Component<any, any> {
   }
 }
 
+const LINE_HEIGHT = 27
+
 const styles = StyleSheet.create({
   page: {
-    padding: Margin.LARGE,
+    margin: Margin.LARGE,
   },
   page__section: {
-    backgroundColor: 'yellow',
-    marginBottom: Margin.SMALL,
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.SMALL,
+    lineHeight: LINE_HEIGHT,
   },
   page__section__title: {
-    backgroundColor: 'cyan',
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
-    marginBottom: Margin.SMALL,
+    fontSize: FontSize.EXTRA_SMALL,
+    lineHeight: LINE_HEIGHT,
   },
   page__break: {
-    fontSize: 0,
-    width: DEVICE_WIDTH
+    fontFamily: FontFamily.CARDO,
+    height: 0,
+    width: 100,
+    lineHeight: LINE_HEIGHT,
   },
   page__strongs: {
-    color: Color.TYNDALE_BLUE
+    fontFamily: FontFamily.CARDO,
+    color: Color.TYNDALE_BLUE,
+    lineHeight: LINE_HEIGHT,
   },
   page__verseNumberMarkerForSearch: {
     height: 10,
