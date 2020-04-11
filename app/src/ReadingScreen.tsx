@@ -104,12 +104,12 @@ export default class ReadingScreen extends React.Component<any, any> {
   )
 
   indentedGroup = (item, index) => (
-    <Text key={`indent-${index}`}>
+    <React.Fragment key={`indent-${index}`}>
       {this.lineBreak(index)}
       <Text>{'\t\t\t'}</Text>
       {this.verseNumber(item, index)}
       {this.mappedContents(item, index)}
-    </Text>
+    </React.Fragment>
   )
 
   mappedContents = (item, index, multiplier = 100) =>
