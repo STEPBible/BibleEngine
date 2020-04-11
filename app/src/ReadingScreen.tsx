@@ -137,7 +137,7 @@ export default class ReadingScreen extends React.Component<any, any> {
 
   verseNumberText = (verseNum, index) => (
     <Text style={styles.page__verseNum} key={`verse-num-${verseNum}-${index}`}>
-      {verseNum}
+      {`${verseNum} `}
     </Text>
   )
 
