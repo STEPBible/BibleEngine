@@ -226,14 +226,8 @@ const styles = StyleSheet.create({
     width: 0
   },
   page__verseNum: {
-    // backgroundColor: 'red',
-    borderBottomColor: 'red',
-    borderBottomWidth: 10,
-    width: 5,
-    paddingRight: 10,
-    color: 'black',
-    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
-    fontSize: FontSize.EXTRA_SMALL,
-    textAlignVertical: 'top',
+    fontFamily: FontFamily.CARDO,
+    fontWeight: 'bold',
+    lineHeight: LINE_HEIGHT,
   }
 })
