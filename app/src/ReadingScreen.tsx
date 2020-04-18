@@ -3,9 +3,7 @@ import { Text, Dimensions, View, ScrollView, StyleSheet } from 'react-native'
 import store from 'react-native-simple-store'
 import { observer } from 'mobx-react/native'
 
-import {
-  AsyncStorageKey, FontSize, Margin, FontFamily,
-} from './Constants'
+import { AsyncStorageKey, FontSize, Margin, FontFamily } from './Constants'
 import psalm from './tests/models/Ps117.json'
 import Popover from './Popover'
 import { Color } from './Constants'
@@ -20,12 +18,12 @@ const DEVICE_WIDTH = Dimensions.get('window').width
 @observer
 export default class ReadingScreen extends React.Component<any, any> {
   static navigationOptions = {
-    headerShown: false
+    headerShown: false,
   }
   state = {
     popoverIsVisible: false,
   }
-  targetVerseNum = 1
+  targetVerseNum = 5
   targetVerseRef?: View | null
   listRef?: ScrollView | null
 
@@ -50,10 +48,7 @@ export default class ReadingScreen extends React.Component<any, any> {
   )
 
   sectionTitle = (title, index) => (
-    <Text
-      style={styles.page__section__title}
-      key={`title-${index}`}
-    >
+    <Text style={styles.page__section__title} key={`title-${index}`}>
       {title}
     </Text>
   )
@@ -125,7 +120,7 @@ export default class ReadingScreen extends React.Component<any, any> {
       return (
         <React.Fragment key={`verse-search-${index}`}>
           <View
-            ref={ref => this.targetVerseRef = ref}
+            ref={ref => (this.targetVerseRef = ref)}
             style={styles.page__verseNumberMarkerForSearch}
             key={`verse-marker-${index}`}
           />
@@ -165,6 +160,20 @@ export default class ReadingScreen extends React.Component<any, any> {
     })
   }
 
+  onTopReached = () => {
+    console.log('loadMoreOnTop')
+    return []
+  }
+
+  onBottomReached = () => {
+    console.log('onBottomReached')
+    bibleStore.loadAnotherSection()
+  }
+
+  keyExtractor = (item: any, index: number): string => {
+    return item?.id
+  }
+
   render() {
     if (bibleStore.fontsAreReady === false) {
       return null
@@ -173,11 +182,16 @@ export default class ReadingScreen extends React.Component<any, any> {
       <React.Fragment>
         <NavigationHeader />
         <InfiniteScrollView
-          scrollViewRef={(ref) => this.listRef = ref}
+          scrollViewRef={ref => (this.listRef = ref)}
           onLayout={this.scrollToTargetVerseRef}
           bounces={false}
+          onTopReached={this.onTopReached}
+          onBottomReached={this.onBottomReached}
+          onTopReachedThreshold={0.1}
+          onBottomoReachedThreshold={0.5}
           contentContainerStyle={styles.page}
           showsVerticalScrollIndicator={false}
+          keyExtractor={this.keyExtractor}
           items={bibleStore.chapterSections}
           renderItem={({ item, index }) => (
             <Text style={styles.page__section} selectable>
@@ -186,8 +200,7 @@ export default class ReadingScreen extends React.Component<any, any> {
             }
           </Text>
           )}
-        >
-        </InfiniteScrollView>
+        />
         <Popover
           isVisible={this.state.popoverIsVisible}
           fromView={null}
@@ -230,11 +243,11 @@ const styles = StyleSheet.create({
   },
   page__verseNumberMarkerForSearch: {
     height: 10,
-    width: 0
+    width: 0,
   },
   page__verseNum: {
     fontFamily: FontFamily.CARDO,
     fontWeight: 'bold',
     lineHeight: LINE_HEIGHT,
-  }
+  },
 })
