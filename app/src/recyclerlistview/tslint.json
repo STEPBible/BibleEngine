@@ -1,0 +1,26 @@
+{
+    "extends": [
+        "tslint:recommended"
+    ],
+    "rules": {
+        "max-line-length": {
+            "options": [
+                160
+            ]
+        },
+        "typedef": [
+            true,
+            "call-signature",
+            "property-declaration"
+        ],
+        "max-classes-per-file":false,
+        "typeof-compare": true,
+        "interface-name": false,
+        "variable-name": false,
+        "comment-format": false,
+        "no-bitwise": false,
+        "member-access": true,
+        "ordered-imports": false,
+        "object-literal-sort-keys": false
+    }
+}
