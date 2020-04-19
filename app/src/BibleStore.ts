@@ -286,8 +286,8 @@ class BibleStore {
     this.nextRange = nextRange
     this.previousRange = previousRange
 
+    this.dataProvider = this.dataProvider.cloneWithRows(chapterContent)
     this.chapterContent = chapterContent
-    this.dataProvider = this.dataProvider.cloneWithRows(this.chapterContent)
     this.loading = false
     console.timeEnd('render')
     this.captureAnalyticsEvent()
