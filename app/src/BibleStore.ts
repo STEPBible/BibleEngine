@@ -39,7 +39,7 @@ class BibleStore {
   DEFAULT_VERSION = 'ESV'
 
   @version(1) @observable isFirstLoad = true
-  @version(1) @observable chapterContent = []
+  @version(3) @observable chapterContent = []
   @version(1) @observable versionChapterNum = this.DEFAULT_CHAPTER
   @version(1) @observable bibleVersions = []
   @version(1) @observable books: BibleBookEntity[] = []
@@ -61,6 +61,7 @@ class BibleStore {
   @ignore @observable showSettings = false
   @ignore @observable cacheIsRestored = false
   @ignore settingsRef
+  @ignore @observable dataProvider = new DataProvider((r1, r2) => r1.id !== r2.id)
 
   BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
     database: 'bibles.db',
@@ -259,13 +260,17 @@ class BibleStore {
       forceRemote,
       true
     )
-    let chapterContent: any = chapter.content.contents
+    let chapterContent: any = chapter.content.contents.map((content, index) => ({
+      section: content,
+      id: `${rangeQuery.bookOsisId}-${this.versionChapterNum}-${index}`
+    }))
+
     const { nextRange, previousRange } = chapter.contextRanges.normalizedChapter
     if (
       chapterContent &&
       chapterContent.length &&
       chapterContent[0] &&
-      typeof chapterContent[0].content === 'string'
+      typeof chapterContent[0].section.content === 'string'
     ) {
       // Hack for CUV rendering
       chapterContent = [
@@ -280,7 +285,7 @@ class BibleStore {
     this.previousRange = previousRange
 
     this.chapterContent = chapterContent
-    this.chapterSections = chapterContent.slice(0, 1)
+    this.dataProvider = this.dataProvider.cloneWithRows(this.chapterContent)
     this.loading = false
     setTimeout(() => {
       LayoutAnimation.configureNext(
