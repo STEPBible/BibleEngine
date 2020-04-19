@@ -5,29 +5,21 @@ import {
   View,
   ScrollView,
   StyleSheet,
-  LayoutChangeEvent,
-  UIManager,
-  findNodeHandle,
 } from 'react-native'
 import store from 'react-native-simple-store'
 import { observer } from 'mobx-react/native'
 
 import { AsyncStorageKey, FontSize, Margin, FontFamily } from './Constants'
-import psalm from './tests/models/Ps117.json'
 import Popover from './Popover'
 import { Color } from './Constants'
 import bibleStore from './BibleStore'
 import 'react-native-console-time-polyfill'
 import NavigationHeader from './NavigationHeader'
 import QuickSettings from './QuickSettings'
-import InfiniteScrollView from './InfiniteScrollView'
 import {
   RecyclerListView,
-  DataProvider,
   LayoutProvider,
 } from './recyclerlistview/src'
-
-const DEVICE_WIDTH = Dimensions.get('window').width
 
 @observer
 export default class ReadingScreen extends React.Component<any, any> {
