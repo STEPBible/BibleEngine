@@ -53,7 +53,13 @@ const POPOVER_MODE = Object.freeze({
   TOOLTIP: 'tooltip',
 })
 
-class Popover extends React.Component {
+interface Props {
+  isVisible: boolean
+  fromView: any
+  onRequestClose: Function
+}
+
+class Popover extends React.Component<Props, any> {
   constructor(props) {
     super(props)
 

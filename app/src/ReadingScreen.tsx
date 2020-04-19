@@ -1,5 +1,14 @@
 import React from 'react'
-import { Text, Dimensions, View, ScrollView, StyleSheet } from 'react-native'
+import {
+  Text,
+  Dimensions,
+  View,
+  ScrollView,
+  StyleSheet,
+  LayoutChangeEvent,
+  UIManager,
+  findNodeHandle,
+} from 'react-native'
 import store from 'react-native-simple-store'
 import { observer } from 'mobx-react/native'
 
@@ -12,6 +21,11 @@ import 'react-native-console-time-polyfill'
 import NavigationHeader from './NavigationHeader'
 import QuickSettings from './QuickSettings'
 import InfiniteScrollView from './InfiniteScrollView'
+import {
+  RecyclerListView,
+  DataProvider,
+  LayoutProvider,
+} from './recyclerlistview/src'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 
@@ -20,12 +34,20 @@ export default class ReadingScreen extends React.Component<any, any> {
   static navigationOptions = {
     headerShown: false,
   }
-  state = {
-    popoverIsVisible: false,
-  }
-  targetVerseNum = 5
+  targetVerseNum = 7
   targetVerseRef?: View | null
   listRef?: ScrollView | null
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      popoverIsVisible: false,
+      layoutProvider: new LayoutProvider(
+        () => 'layoutType',
+        (type, dim, index) => {}
+      ),
+    }
+  }
 
   async componentDidMount() {
     await this.setupFirstTimeUserIfNeeded()
@@ -152,22 +174,14 @@ export default class ReadingScreen extends React.Component<any, any> {
   }
 
   scrollToTargetVerseRef = () => {
-    this.targetVerseRef?.measureInWindow((x, y) => {
-      console.log('scrollToOffset: ', y)
-      const deviceHeight = Dimensions.get('window').height
-      const showInTopThirdOfScreen = Math.max(0, y - deviceHeight / 3)
-      this.listRef?.scrollTo({ y: showInTopThirdOfScreen, animated: true })
+    requestAnimationFrame(() => {
+      this.targetVerseRef?.measureInWindow((x, y) => {
+        const deviceHeight = Dimensions.get('window').height
+        const showInTopThirdOfScreen = Math.max(0, y - deviceHeight / 3)
+        console.log('listRef.scrollTo: ', y, showInTopThirdOfScreen, !!this.listRef)
+        this.listRef?.scrollTo(0, 200, true)
+      })
     })
-  }
-
-  onTopReached = () => {
-    console.log('loadMoreOnTop')
-    return []
-  }
-
-  onBottomReached = () => {
-    console.log('onBottomReached')
-    bibleStore.loadAnotherSection()
   }
 
   keyExtractor = (item: any, index: number): string => {
@@ -175,32 +189,9 @@ export default class ReadingScreen extends React.Component<any, any> {
   }
 
   render() {
-    if (bibleStore.fontsAreReady === false) {
-      return null
-    }
     return (
-      <React.Fragment>
+      <View style={styles.page}>
         <NavigationHeader />
-        <InfiniteScrollView
-          scrollViewRef={ref => (this.listRef = ref)}
-          onLayout={this.scrollToTargetVerseRef}
-          bounces={false}
-          onTopReached={this.onTopReached}
-          onBottomReached={this.onBottomReached}
-          onTopReachedThreshold={0.1}
-          onBottomoReachedThreshold={0.5}
-          contentContainerStyle={styles.page}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={this.keyExtractor}
-          items={bibleStore.chapterSections}
-          renderItem={({ item, index }) => (
-            <Text style={styles.page__section} selectable>
-            {
-              this.bibleSection(item, index)
-            }
-          </Text>
-          )}
-        />
         <Popover
           isVisible={this.state.popoverIsVisible}
           fromView={null}
@@ -210,8 +201,27 @@ export default class ReadingScreen extends React.Component<any, any> {
             hiiii
           </Text>
         </Popover>
+        {bibleStore.chapterContent.length > 0 ? (
+          <RecyclerListView
+            scrollViewProps={{
+              ref: ref => { this.listRef = ref },
+              onLayout: () => {
+                this.scrollToTargetVerseRef()
+              },
+            }}
+            forceNonDeterministicRendering
+            style={{ flex: 1 }}
+            layoutProvider={this.state.layoutProvider}
+            dataProvider={bibleStore.dataProvider}
+            rowRenderer={(type, data) => (
+              <Text style={styles.page__section} selectable>
+                {this.bibleSection(data.section, 0)}
+              </Text>
+            )}
+          />
+        ) : null }
         <QuickSettings />
-      </React.Fragment>
+      </View>
     )
   }
 }
