@@ -26,6 +26,7 @@ import { observable, action } from 'mobx'
 import Fonts from './Fonts'
 import { SQLITE_DIRECTORY, DATABASE_PATH } from './Constants'
 import JsonAsset from './JsonAsset'
+import { DataProvider } from './recyclerlistview/src'
 
 const analytics = new Analytics(GOOGLE_ANALYTICS_TRACKING_ID)
 const bibleEngineClient = new BibleEngineClient({
@@ -180,6 +181,7 @@ class BibleStore {
   }
 
   changeCurrentBibleVersion = async (versionUid: string) => {
+    console.log('changeCurrentBibleVersion')
     if (this.bibleVersions.length === 0) {
       return
     }
@@ -188,7 +190,6 @@ class BibleStore {
       version => version.uid === versionUid
     )[0]
     const newReference = {
-      version: this.version,
       versionUid,
       bookOsisId: this.bookOsisId,
       versionChapterNum: this.versionChapterNum,
@@ -238,13 +239,13 @@ class BibleStore {
   }
 
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
-    console.time('updateCurrentBibleReference')
     this.loading = true
     this.showStrongs = false
     const rangeQuery = {
       versionChapterNum: range.normalizedChapterNum,
       versionUid: this.versionUid,
       ...range,
+      bookOsisId: range.bookOsisId.trim(),
     }
     this.versionChapterNum =
       rangeQuery.versionChapterNum || this.DEFAULT_CHAPTER
@@ -260,6 +261,7 @@ class BibleStore {
       forceRemote,
       true
     )
+    console.time('render')
     let chapterContent: any = chapter.content.contents.map((content, index) => ({
       section: content,
       id: `${rangeQuery.bookOsisId}-${this.versionChapterNum}-${index}`
@@ -287,13 +289,7 @@ class BibleStore {
     this.chapterContent = chapterContent
     this.dataProvider = this.dataProvider.cloneWithRows(this.chapterContent)
     this.loading = false
-    setTimeout(() => {
-      LayoutAnimation.configureNext(
-        LayoutAnimation.create(1000, 'easeInEaseOut', 'opacity')
-      )
-      this.showStrongs = true
-    }, 100)
-    console.timeEnd('updateCurrentBibleReference')
+    console.timeEnd('render')
     this.captureAnalyticsEvent()
   }
 
