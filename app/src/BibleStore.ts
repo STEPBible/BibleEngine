@@ -17,7 +17,7 @@ import {
 } from 'react-native-dotenv'
 import 'react-native-console-time-polyfill'
 import { ConnectionOptions } from 'typeorm'
-import { AsyncStorage, LayoutAnimation } from 'react-native'
+import { AsyncStorage } from 'react-native'
 import * as Sentry from 'sentry-expo'
 import { Analytics, PageHit } from 'expo-analytics'
 import { AsyncTrunk, ignore, version } from 'mobx-sync'
@@ -26,7 +26,7 @@ import { observable, action } from 'mobx'
 import Fonts from './Fonts'
 import { SQLITE_DIRECTORY, DATABASE_PATH } from './Constants'
 import JsonAsset from './JsonAsset'
-import { DataProvider } from './recyclerlistview/src'
+import { DataProvider } from 'recyclerlistview'
 
 const analytics = new Analytics(GOOGLE_ANALYTICS_TRACKING_ID)
 const bibleEngineClient = new BibleEngineClient({

@@ -19,7 +19,7 @@ import QuickSettings from './QuickSettings'
 import {
   RecyclerListView,
   LayoutProvider,
-} from './recyclerlistview/src'
+} from 'recyclerlistview'
 
 @observer
 export default class ReadingScreen extends React.Component<any, any> {
@@ -193,16 +193,18 @@ export default class ReadingScreen extends React.Component<any, any> {
             hiiii
           </Text>
         </Popover>
-        {bibleStore.chapterContent.length > 0 ? (
+        {bibleStore.chapterContent.length ? (
           <RecyclerListView
             scrollViewProps={{
               ref: ref => { this.listRef = ref },
               onLayout: () => {
                 this.scrollToTargetVerseRef()
               },
+              showsVerticalScrollIndicator: false
             }}
             forceNonDeterministicRendering
             style={{ flex: 1 }}
+            contentContainerStyle={{ margin: 3 }}
             layoutProvider={this.state.layoutProvider}
             dataProvider={bibleStore.dataProvider}
             rowRenderer={(type, data) => (
@@ -222,7 +224,7 @@ const LINE_HEIGHT = 27
 
 const styles = StyleSheet.create({
   page: {
-    margin: Margin.LARGE,
+    flex: 1,
   },
   page__section: {
     fontFamily: FontFamily.CARDO,
