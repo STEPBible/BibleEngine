@@ -293,18 +293,6 @@ class BibleStore {
     this.captureAnalyticsEvent()
   }
 
-  get notAllSectionsAreLoaded() {
-    return this.chapterSections.length < this.chapterContent.length
-  }
-
-  loadAnotherSection = () => {
-    if (this.notAllSectionsAreLoaded) {
-      this.chapterSections.push(
-        this.chapterContent[this.chapterSections.length]
-      )
-    }
-  }
-
   getVerseContents = async (refs: IBibleCrossReference[]) => {
     try {
       const referenceRanges = refs.map(ref => ref.range)
@@ -342,14 +330,6 @@ class BibleStore {
       await this.closeDatabaseConnection(bibleEngine)
       return false
     }
-  }
-
-  goToPreviousChapter = () => {
-    this.updateCurrentBibleReference(this.previousRange)
-  }
-
-  goToNextChapter = () => {
-    this.updateCurrentBibleReference(this.nextRange)
   }
 
   toggleSettings = () => {
