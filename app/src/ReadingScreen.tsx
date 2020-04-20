@@ -201,7 +201,7 @@ export default class ReadingScreen extends React.Component<any, any> {
             }}
             forceNonDeterministicRendering
             style={{ flex: 1 }}
-            contentContainerStyle={{ margin: 3 }}
+            contentContainerStyle={styles.page__container}
             layoutProvider={this.state.layoutProvider}
             dataProvider={bibleStore.dataProvider}
             rowRenderer={(type, data) => (
@@ -222,6 +222,9 @@ const LINE_HEIGHT = 27
 const styles = StyleSheet.create({
   page: {
     flex: 1,
+  },
+  page__container: {
+    paddingTop: Margin.SMALL
   },
   page__section: {
     fontFamily: FontFamily.CARDO,
