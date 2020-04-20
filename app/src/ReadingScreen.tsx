@@ -227,17 +227,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   page__container: {
-    paddingTop: Margin.SMALL,
+    paddingTop: Margin.MEDIUM,
   },
   page__section: {
+    fontSize: FontSize.SMALL,
     paddingLeft: Margin.LARGE,
     paddingRight: Margin.LARGE,
-    paddingTop: 0,
+    paddingBottom: Margin.SMALL,
   },
   page__section__title: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.EXTRA_SMALL,
-    lineHeight: LINE_HEIGHT,
+    lineHeight: 50,
   },
   page__break: {
     fontFamily: FontFamily.CARDO,
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
   },
   page__verseNum: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
-    fontSize: FontSize.EXTRA_SMALL,
+    fontSize: FontSize.SMALL,
     lineHeight: LINE_HEIGHT,
   },
 })
