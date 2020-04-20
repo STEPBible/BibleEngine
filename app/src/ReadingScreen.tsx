@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   page__break: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.SMALL,
-    lineHeight: LINE_HEIGHT,
+    lineHeight: 0,
   },
   page__phrase: {
     fontFamily: FontFamily.CARDO,
