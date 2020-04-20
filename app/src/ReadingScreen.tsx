@@ -1,11 +1,5 @@
 import React from 'react'
-import {
-  Text,
-  Dimensions,
-  View,
-  ScrollView,
-  StyleSheet,
-} from 'react-native'
+import { Text, Dimensions, View, ScrollView, StyleSheet } from 'react-native'
 import store from 'react-native-simple-store'
 import { observer } from 'mobx-react/native'
 
@@ -16,10 +10,7 @@ import bibleStore from './BibleStore'
 import 'react-native-console-time-polyfill'
 import NavigationHeader from './NavigationHeader'
 import QuickSettings from './QuickSettings'
-import {
-  RecyclerListView,
-  LayoutProvider,
-} from 'recyclerlistview'
+import { RecyclerListView, LayoutProvider } from 'recyclerlistview'
 
 @observer
 export default class ReadingScreen extends React.Component<any, any> {
@@ -91,7 +82,12 @@ export default class ReadingScreen extends React.Component<any, any> {
     if ('strongs' in item) {
       return this.strongsPhrase(item, index)
     }
-    return <Text key={`phrase-${index}`}>{`${item.content} `}</Text>
+    return (
+      <Text
+        style={styles.page__phrase}
+        key={`phrase-${index}`}
+      >{`${item.content} `}</Text>
+    )
   }
 
   strongsPhrase = (item, index) => (
@@ -116,7 +112,7 @@ export default class ReadingScreen extends React.Component<any, any> {
   indentedGroup = (item, index) => (
     <React.Fragment key={`indent-${index}`}>
       {this.lineBreak(index)}
-      <Text>{'\t\t\t'}</Text>
+      <Text style={styles.page__phrase}>{'\t\t\t'}</Text>
       {this.verseNumber(item, index)}
       {this.mappedContents(item, index)}
     </React.Fragment>
@@ -170,7 +166,12 @@ export default class ReadingScreen extends React.Component<any, any> {
       this.targetVerseRef?.measureInWindow((x, y) => {
         const deviceHeight = Dimensions.get('window').height
         const showInTopThirdOfScreen = Math.max(0, y - deviceHeight / 3)
-        console.log('listRef.scrollTo: ', y, showInTopThirdOfScreen, !!this.listRef)
+        console.log(
+          'listRef.scrollTo: ',
+          y,
+          showInTopThirdOfScreen,
+          !!this.listRef
+        )
         this.listRef?.scrollTo(0, 200, true)
       })
     })
@@ -196,8 +197,10 @@ export default class ReadingScreen extends React.Component<any, any> {
         {bibleStore.chapterContent.length ? (
           <RecyclerListView
             scrollViewProps={{
-              ref: ref => { this.listRef = ref },
-              showsVerticalScrollIndicator: false
+              ref: ref => {
+                this.listRef = ref
+              },
+              showsVerticalScrollIndicator: false,
             }}
             forceNonDeterministicRendering
             style={{ flex: 1 }}
@@ -210,7 +213,7 @@ export default class ReadingScreen extends React.Component<any, any> {
               </Text>
             )}
           />
-        ) : null }
+        ) : null}
         <QuickSettings />
       </View>
     )
@@ -224,12 +227,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   page__container: {
-    paddingTop: Margin.SMALL
+    paddingTop: Margin.SMALL,
   },
   page__section: {
-    fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.SMALL,
-    lineHeight: LINE_HEIGHT,
+    paddingLeft: Margin.LARGE,
+    paddingRight: Margin.LARGE,
+    paddingTop: 0,
   },
   page__section__title: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
@@ -238,10 +241,17 @@ const styles = StyleSheet.create({
   },
   page__break: {
     fontFamily: FontFamily.CARDO,
+    fontSize: FontSize.SMALL,
+    lineHeight: LINE_HEIGHT,
+  },
+  page__phrase: {
+    fontFamily: FontFamily.CARDO,
+    fontSize: FontSize.SMALL,
     lineHeight: LINE_HEIGHT,
   },
   page__strongs: {
     fontFamily: FontFamily.CARDO,
+    fontSize: FontSize.SMALL,
     color: Color.TYNDALE_BLUE,
     lineHeight: LINE_HEIGHT,
   },
@@ -250,8 +260,8 @@ const styles = StyleSheet.create({
     width: 0,
   },
   page__verseNum: {
-    fontFamily: FontFamily.CARDO,
-    fontWeight: 'bold',
+    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
+    fontSize: FontSize.EXTRA_SMALL,
     lineHeight: LINE_HEIGHT,
   },
 })
