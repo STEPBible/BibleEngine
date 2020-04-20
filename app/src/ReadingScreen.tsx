@@ -197,9 +197,6 @@ export default class ReadingScreen extends React.Component<any, any> {
           <RecyclerListView
             scrollViewProps={{
               ref: ref => { this.listRef = ref },
-              onLayout: () => {
-                this.scrollToTargetVerseRef()
-              },
               showsVerticalScrollIndicator: false
             }}
             forceNonDeterministicRendering
