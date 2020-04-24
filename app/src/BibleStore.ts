@@ -82,6 +82,7 @@ class BibleStore {
     this.fontsAreReady = true
     await cache.init()
     this.cacheIsRestored = true
+    this.dataProvider = this.dataProvider.cloneWithRows(this.chapterContent)
     this.chapterSections = this.chapterContent.slice(0, 1)
     if (
       this.books.length > 0 &&
