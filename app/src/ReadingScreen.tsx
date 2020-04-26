@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, Dimensions, View, ScrollView, StyleSheet } from 'react-native'
+import { Text, View, ScrollView, StyleSheet, Dimensions } from 'react-native'
 import store from 'react-native-simple-store'
 import { observer } from 'mobx-react/native'
 
@@ -11,6 +11,7 @@ import 'react-native-console-time-polyfill'
 import NavigationHeader from './NavigationHeader'
 import QuickSettings from './QuickSettings'
 import { RecyclerListView, LayoutProvider } from 'recyclerlistview'
+import StrongsPopover from './StrongsPopover'
 
 @observer
 export default class ReadingScreen extends React.Component<any, any> {
@@ -29,6 +30,7 @@ export default class ReadingScreen extends React.Component<any, any> {
         () => 'layoutType',
         (type, dim, index) => {}
       ),
+      strongsNumbers: []
     }
   }
 
@@ -94,7 +96,7 @@ export default class ReadingScreen extends React.Component<any, any> {
     <Text
       selectionColor={'#C5D8EA'}
       style={styles.page__strongs}
-      onPress={() => this.onWordPress(index)}
+      onPress={() => this.onWordPress(item.strongs)}
       key={`strongs-${index}`}
     >
       {`${item.content} `}
@@ -153,8 +155,8 @@ export default class ReadingScreen extends React.Component<any, any> {
     </Text>
   )
 
-  onWordPress = index => {
-    this.setState({ ...this.state, popoverIsVisible: true })
+  onWordPress = (strongsNumbers) => {
+    this.setState({ ...this.state, strongsNumbers, popoverIsVisible: true })
   }
 
   onRequestClose = () => {
@@ -173,10 +175,9 @@ export default class ReadingScreen extends React.Component<any, any> {
           isVisible={this.state.popoverIsVisible}
           fromView={null}
           onRequestClose={this.onRequestClose}
+          popoverStyle={styles.page__popover}
         >
-          <Text style={{ backgroundColor: 'white', height: 100, width: 100 }}>
-            hiiii
-          </Text>
+          <StrongsPopover strongs={this.state.strongsNumbers} />
         </Popover>
         {bibleStore.dataProvider.getSize() ? (
           <RecyclerListView
@@ -205,6 +206,7 @@ export default class ReadingScreen extends React.Component<any, any> {
 }
 
 const LINE_HEIGHT = 27
+const DEVICE_WIDTH = Dimensions.get('window').width
 
 const styles = StyleSheet.create({
   page: {
@@ -248,5 +250,9 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.SMALL,
     lineHeight: LINE_HEIGHT,
+  },
+  page__popover: {
+    overflow: 'hidden',
+    width: DEVICE_WIDTH - 20,
   },
 })

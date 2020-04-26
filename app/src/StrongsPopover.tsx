@@ -6,7 +6,7 @@ import {
   TouchableHighlight,
   ScrollView,
 } from 'react-native'
-import Popover from './Popover'
+import * as Sentry from 'sentry-expo'
 import {
   IDictionaryEntry,
   DocumentElement,
@@ -26,45 +26,53 @@ import { observer } from 'mobx-react/native'
 import { ActivityIndicator } from 'react-native-paper'
 import StrongsDefinition from './models/StrongsDefinition'
 
-const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
 
 interface Props {
-  phrase: string
   strongs: string[]
-  database: Database
 }
 
 interface State {
-  popoverIsVisible: boolean
-  definitions: IDictionaryEntry[]
+  definitions: (IDictionaryEntry | null)[]
   loading: boolean
+  loadingMessage: string
 }
 
 @observer
-class StrongsWord extends React.Component<Props, State> {
-  touchable: any
-  mounted: boolean = false
-
+export default class StrongsPopover extends React.Component<Props, State> {
   state = {
-    popoverIsVisible: false,
     definitions: [],
     loading: true,
     loadingMessage: 'Rummaging around...',
   }
 
+  constructor(props) {
+    super(props)
+    console.log('HIIIIII I EXIST')
+    this.initialize()
+  }
+
   async componentDidMount() {
-    this.mounted = true
-  }
-
-  componentWillUnmount() {
-    this.mounted = false
-  }
-
-  async setDictionaryEntries(strongs: string[]) {
-    if (!strongs.length) {
-      return
+    if (this.props.strongs) {
+      await this.initialize()
     }
+  }
+
+  initialize = async () => {
+    const definitions = await this.getDictionaryEntries(this.props.strongs)
+    this.setState({...this.state, definitions, loading: false }, () => {
+      console.log('finished setting the definitions, ')
+    })
+    setTimeout(() => {
+      this.setState({
+        ...this.state,
+        loadingMessage: 'Sorry, this is taking longer than usual...',
+      })
+    }, 4000)
+  }
+
+  async getDictionaryEntries(strongs: string[]): Promise<(IDictionaryEntry | null)[]> {
+    if (!strongs.length) return []
     let normalizedStrongs = strongs.map(strong => new StrongsNumber(strong))
     const isHebrewStrongs = normalizedStrongs[0].id[0] === 'H'
     const dictionaries = isHebrewStrongs
@@ -83,34 +91,12 @@ class StrongsWord extends React.Component<Props, State> {
       const definitions = requests.map(request =>
         StrongsDefinition.merge(request)
       )
-
-      if (this.mounted) {
-        this.setState({
-          ...this.state,
-          loading: false,
-          definitions,
-        })
-      }
+      return definitions
     } catch (e) {
       console.log('Couldnt fetch strongs num: ', strongs.join(', '))
-      console.error(e)
-      throw e
+      Sentry.captureException(e)
+      return []
     }
-  }
-
-  onPress = () => {
-    this.setState({ ...this.state, popoverIsVisible: true })
-    this.setDictionaryEntries(this.props.strongs)
-    setTimeout(() => {
-      this.setState({
-        ...this.state,
-        loadingMessage: 'Sorry, this is taking longer than usual...',
-      })
-    }, 4000)
-  }
-
-  closePopover = () => {
-    this.setState({ ...this.state, popoverIsVisible: false })
   }
 
   renderStrongsHeader = item => (
@@ -168,7 +154,6 @@ class StrongsWord extends React.Component<Props, State> {
   )
 
   renderPopoverContent = () => {
-    if (this.state.popoverIsVisible === false) return null
     if (this.state.loading) {
       return (
         <View style={styles.popover__loading}>
@@ -196,7 +181,6 @@ class StrongsWord extends React.Component<Props, State> {
         </View>
       )
     }
-
     return (
       <View>
         <View style={styles.popover__content}>
@@ -265,30 +249,7 @@ class StrongsWord extends React.Component<Props, State> {
   }
 
   render() {
-    if (bibleStore.showStrongs === false) {
-      return (
-        <View>
-          <Text style={bibleStore.scaledFontSize(styles.phraseText)}>
-            {this.props.phrase}
-          </Text>
-        </View>
-      )
-    }
-    return (
-      <React.Fragment>
-        <Text
-          selectable
-          ref={ref => (this.touchable = ref)}
-          onPress={this.onPress}
-          style={{
-            ...styles.strongWord,
-            ...bibleStore.scaledFontSize(styles.strongWordText),
-          }}
-        >
-          {this.props.phrase}
-        </Text>
-      </React.Fragment>
-    )
+    return this.renderPopoverContent()
   }
 }
 
@@ -296,11 +257,6 @@ const styles = StyleSheet.create({
   popover__arrow: {},
   popover__backdrop: {
     backgroundColor: 'rgba(0,0,0,0.1)',
-  },
-  popover__background_container: {
-    // backgroundColor: 'yellow',
-    overflow: 'hidden',
-    width: DEVICE_WIDTH - 20,
   },
   popover__loading: {
     flex: 1,
@@ -318,7 +274,6 @@ const styles = StyleSheet.create({
     fontSize: FontSize.SMALL,
   },
   popover__content: {
-    // backgroundColor: 'cyan',
     flex: 1,
     minHeight: DEVICE_HEIGHT * 0.4,
     maxHeight: DEVICE_HEIGHT * 0.4,
@@ -332,7 +287,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: Margin.SMALL,
     marginBottom: Margin.MEDIUM,
-    // backgroundColor: 'magenta'
   },
   popover__content__header: {
     alignItems: 'flex-start',
@@ -360,9 +314,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  strongWord: {
-    ...getDebugStyles(),
-  },
+  strongWord: {},
   strongWordText: {
     color: Color.TYNDALE_BLUE,
     fontFamily: FontFamily.CARDO,
@@ -383,12 +335,8 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   boldDocumentPhrase: {
-    // backgroundColor: 'yellow',
     fontFamily: FontFamily.CARDO_BOLD,
     fontSize: FontSize.SMALL,
     marginBottom: 5,
-    // margin: 5
   },
 })
-
-export default StrongsWord
