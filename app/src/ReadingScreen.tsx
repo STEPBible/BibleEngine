@@ -161,22 +161,6 @@ export default class ReadingScreen extends React.Component<any, any> {
     this.setState({ ...this.state, popoverIsVisible: false })
   }
 
-  scrollToTargetVerseRef = () => {
-    requestAnimationFrame(() => {
-      this.targetVerseRef?.measureInWindow((x, y) => {
-        const deviceHeight = Dimensions.get('window').height
-        const showInTopThirdOfScreen = Math.max(0, y - deviceHeight / 3)
-        console.log(
-          'listRef.scrollTo: ',
-          y,
-          showInTopThirdOfScreen,
-          !!this.listRef
-        )
-        this.listRef?.scrollTo(0, 200, true)
-      })
-    })
-  }
-
   keyExtractor = (item: any, index: number): string => {
     return item?.id
   }
