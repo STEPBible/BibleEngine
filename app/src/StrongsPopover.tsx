@@ -46,12 +46,6 @@ export default class StrongsPopover extends React.Component<Props, State> {
     loadingMessage: 'Rummaging around...',
   }
 
-  constructor(props) {
-    super(props)
-    console.log('HIIIIII I EXIST')
-    this.initialize()
-  }
-
   async componentDidMount() {
     if (this.props.strongs) {
       await this.initialize()
@@ -60,9 +54,7 @@ export default class StrongsPopover extends React.Component<Props, State> {
 
   initialize = async () => {
     const definitions = await this.getDictionaryEntries(this.props.strongs)
-    this.setState({...this.state, definitions, loading: false }, () => {
-      console.log('finished setting the definitions, ')
-    })
+    this.setState({...this.state, definitions, loading: false })
     setTimeout(() => {
       this.setState({
         ...this.state,
