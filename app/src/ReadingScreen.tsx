@@ -178,7 +178,7 @@ export default class ReadingScreen extends React.Component<any, any> {
             hiiii
           </Text>
         </Popover>
-        {bibleStore.chapterContent.length ? (
+        {bibleStore.dataProvider.getSize() ? (
           <RecyclerListView
             scrollViewProps={{
               ref: ref => {
