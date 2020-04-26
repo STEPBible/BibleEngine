@@ -17,7 +17,7 @@ import {
 } from 'react-native-dotenv'
 import 'react-native-console-time-polyfill'
 import { ConnectionOptions } from 'typeorm'
-import { AsyncStorage } from 'react-native'
+import { AsyncStorage, Platform, UIManager } from 'react-native'
 import * as Sentry from 'sentry-expo'
 import { Analytics, PageHit } from 'expo-analytics'
 import { AsyncTrunk, ignore, version } from 'mobx-sync'
@@ -395,6 +395,14 @@ class BibleStore {
   captureAnalyticsEvent() {
     const reference = `${this.bookOsisId} ${this.versionChapterNum} ${this.versionUid}`
     analytics.hit(new PageHit(reference))
+  }
+
+  enableLayoutAnimations() {
+    if (Platform.OS === 'android') {
+      if (UIManager.setLayoutAnimationEnabledExperimental) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
+    }
   }
 }
 
