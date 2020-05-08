@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, ScrollView, StyleSheet, Dimensions } from 'react-native'
+import { Text, View, ScrollView, StyleSheet, Dimensions, RefreshControl } from 'react-native'
 import store from 'react-native-simple-store'
 import { observer } from 'mobx-react/native'
 
@@ -167,6 +167,16 @@ export default class ReadingScreen extends React.Component<any, any> {
     return item?.id
   }
 
+  onRefresh = async () => {
+    if (bibleStore.previousRange === undefined) {
+      this.setState({ ...this.state, refreshing: false })
+      return
+    }
+    this.setState({ ...this.state, refreshing: true })
+    await bibleStore.updateCurrentBibleReference(bibleStore.previousRange)
+    this.setState({ ...this.state, refreshing: false })
+  }
+
   render() {
     return (
       <View style={styles.page}>
@@ -185,6 +195,8 @@ export default class ReadingScreen extends React.Component<any, any> {
               ref: ref => {
                 this.listRef = ref
               },
+              refreshControl:
+                <RefreshControl refreshing={this.state.refreshing} onRefresh={this.onRefresh} />,
               showsVerticalScrollIndicator: false,
             }}
             forceNonDeterministicRendering

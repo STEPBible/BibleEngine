@@ -47,8 +47,8 @@ class BibleStore {
   @version(1) @observable bookOsisId = this.DEFAULT_BOOK
   @version(1) @observable versionUid = this.DEFAULT_VERSION
   @version(1) @observable version = {}
-  @version(1) @observable nextRange?= {}
-  @version(1) @observable previousRange?= {}
+  @version(1) @observable nextRange?: any
+  @version(1) @observable previousRange?: any
   @version(1) @observable fontScale = 1
 
   @ignore @observable searchIndexAsset
@@ -74,6 +74,7 @@ class BibleStore {
   constructor() {
     NetInfo.addEventListener(this.onNetworkChange)
     this.setUpErrorLogging()
+    this.enableLayoutAnimations()
     cache = new AsyncTrunk(this, { storage: AsyncStorage })
   }
 
