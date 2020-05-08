@@ -240,9 +240,7 @@ class BibleStore {
     }
   }
 
-  updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
-    this.loading = true
-    this.showStrongs = false
+  getChapter = async (range: IBibleReferenceRangeQuery) => {
     const rangeQuery = {
       versionChapterNum: range.normalizedChapterNum,
       versionUid: this.versionUid,
@@ -263,13 +261,10 @@ class BibleStore {
       forceRemote,
       true
     )
-    console.time('render')
     let chapterContent: any = chapter.content.contents.map((content, index) => ({
       section: content,
       id: `${rangeQuery.bookOsisId}-${this.versionChapterNum}-${index}`
     }))
-
-    const { nextRange, previousRange } = chapter.contextRanges.normalizedChapter
     if (
       chapterContent &&
       chapterContent.length &&
@@ -277,17 +272,30 @@ class BibleStore {
       typeof chapterContent[0].section.content === 'string'
     ) {
       // Hack for CUV rendering
-      chapterContent = [
-        {
+      chapterContent = [{
+        section: {
           title: '',
           type: 'section',
           contents: chapterContent,
         },
-      ]
+        id: `${rangeQuery.bookOsisId}-${this.versionChapterNum}-${0}`
+      }]
     }
+    const { nextRange, previousRange } = chapter.contextRanges.normalizedChapter
+    return {
+      chapterContent,
+      nextRange,
+      previousRange
+    }
+  }
+
+  updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
+    this.loading = true
+    this.showStrongs = false
+    const { chapterContent, nextRange, previousRange } = await this.getChapter(range)
     this.nextRange = nextRange
     this.previousRange = previousRange
-
+    console.time('render')
     this.dataProvider = this.dataProvider.cloneWithRows(chapterContent)
     this.chapterContent = chapterContent
     this.loading = false
