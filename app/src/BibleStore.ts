@@ -242,6 +242,7 @@ class BibleStore {
   }
 
   getChapter = async (range: IBibleReferenceRangeQuery) => {
+    this.loading = true
     const rangeQuery = {
       versionChapterNum: range.normalizedChapterNum,
       versionUid: this.versionUid,
@@ -283,6 +284,7 @@ class BibleStore {
       }]
     }
     const { nextRange, previousRange } = chapter.contextRanges.normalizedChapter
+    this.loading = false
     return {
       chapterContent,
       nextRange,
@@ -291,7 +293,6 @@ class BibleStore {
   }
 
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
-    this.loading = true
     this.showStrongs = false
     const { chapterContent, nextRange, previousRange } = await this.getChapter(range)
     this.nextRange = nextRange
@@ -299,7 +300,6 @@ class BibleStore {
     console.time('render')
     this.dataProvider = this.dataProvider.cloneWithRows(chapterContent)
     this.chapterContent = chapterContent
-    this.loading = false
     console.timeEnd('render')
     this.captureAnalyticsEvent()
   }
