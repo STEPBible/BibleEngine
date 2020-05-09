@@ -1,10 +1,11 @@
 import { BibleEngineClient } from '@bible-engine/client'
 import {
-  IBibleReferenceRangeQuery,
+  IBibleReferenceRange,
   BibleEngine,
   IBibleCrossReference,
   BibleBookEntity,
   BOOK_DATA,
+  IBibleOutputRich,
 } from '@bible-engine/core'
 import * as FileSystem from 'expo-file-system'
 import * as SQLite from 'expo-sqlite'
@@ -47,8 +48,8 @@ class BibleStore {
   @version(1) @observable bookOsisId = this.DEFAULT_BOOK
   @version(1) @observable versionUid = this.DEFAULT_VERSION
   @version(1) @observable version = {}
-  @version(1) @observable nextRange?: any
-  @version(1) @observable previousRange?: any
+  @version(1) @observable nextRange?: IBibleReferenceRange | undefined
+  @version(1) @observable previousRange?: IBibleReferenceRange | undefined
   @version(1) @observable fontScale = 1
 
   @ignore @observable searchIndexAsset
@@ -256,7 +257,7 @@ class BibleStore {
 
     const forceRemote = version.dataLocation !== 'db' && this.isConnected
 
-    const chapter = await bibleEngineClient.getFullDataForReferenceRange(
+    const chapter: IBibleOutputRich = await bibleEngineClient.getFullDataForReferenceRange(
       rangeQuery,
       forceRemote,
       true
