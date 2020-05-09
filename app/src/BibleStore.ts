@@ -265,7 +265,8 @@ class BibleStore {
     )
     let chapterContent: any = chapter.content.contents.map((content, index) => ({
       section: content,
-      id: `${rangeQuery.bookOsisId}-${this.versionChapterNum}-${index}`
+      id: `${rangeQuery.bookOsisId}-${this.versionChapterNum}-${index}`,
+      ...rangeQuery
     }))
     if (
       chapterContent &&
@@ -302,6 +303,14 @@ class BibleStore {
     this.chapterContent = chapterContent
     console.timeEnd('render')
     this.captureAnalyticsEvent()
+  }
+
+  appendNextChapterToBottom = async (range: IBibleReferenceRangeQuery) => {
+    const { chapterContent, nextRange } = await this.getChapter(range)
+    this.dataProvider = this.dataProvider.cloneWithRows([
+      ...this.dataProvider.getAllData(), ...chapterContent,
+    ])
+    this.nextRange = nextRange
   }
 
   getVerseContents = async (refs: IBibleCrossReference[]) => {

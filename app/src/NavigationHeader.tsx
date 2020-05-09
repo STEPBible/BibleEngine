@@ -12,6 +12,7 @@ import bibleStore from './BibleStore'
 
 interface Props {
   navigation: any
+  chapterNum: number
 }
 
 @observer
@@ -40,7 +41,7 @@ class NavigationHeader extends React.Component<Props, {}> {
           >
             <React.Fragment>
               <Text style={styles.header__chips__book__text}>
-                {bibleStore.currentBookAndChapter}
+                {`${this.getBookName()} ${this.props.chapterNum || ''}`}
               </Text>
               {bibleStore.versionUidToDisplay ? (
                 <MaterialIcons name="expand-more" size={25} color="#9b9b9b" />

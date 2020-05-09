@@ -1,5 +1,12 @@
 import React from 'react'
-import { Text, View, ScrollView, StyleSheet, Dimensions, RefreshControl } from 'react-native'
+import {
+  Text,
+  View,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  RefreshControl,
+} from 'react-native'
 import store from 'react-native-simple-store'
 import { observer } from 'mobx-react/native'
 
@@ -12,6 +19,7 @@ import NavigationHeader from './NavigationHeader'
 import QuickSettings from './QuickSettings'
 import { RecyclerListView, LayoutProvider } from 'recyclerlistview'
 import StrongsPopover from './StrongsPopover'
+import { ActivityIndicator } from 'react-native-paper'
 
 @observer
 export default class ReadingScreen extends React.Component<any, any> {
@@ -30,7 +38,10 @@ export default class ReadingScreen extends React.Component<any, any> {
         () => 'layoutType',
         (type, dim, index) => {}
       ),
-      strongsNumbers: []
+      refreshing: false,
+      loadingMoreOnBottom: true,
+      strongsNumbers: [],
+      visibleChapterNum: null,
     }
   }
 
@@ -155,7 +166,7 @@ export default class ReadingScreen extends React.Component<any, any> {
     </Text>
   )
 
-  onWordPress = (strongsNumbers) => {
+  onWordPress = strongsNumbers => {
     this.setState({ ...this.state, strongsNumbers, popoverIsVisible: true })
   }
 
@@ -173,14 +184,52 @@ export default class ReadingScreen extends React.Component<any, any> {
       return
     }
     this.setState({ ...this.state, refreshing: true })
+    const visibleChapterNum = bibleStore.previousRange.versionChapterNum
     await bibleStore.updateCurrentBibleReference(bibleStore.previousRange)
-    this.setState({ ...this.state, refreshing: false })
+    this.setState({
+      ...this.state,
+      refreshing: false,
+      visibleChapterNum
+    })
   }
+
+  onEndReached = async () => {
+    if (bibleStore.nextRange === undefined) {
+      this.setState({ ...this.state, loadingMoreOnBottom: false })
+      return
+    }
+    this.setState({ ...this.state, loadingMoreOnBottom: true })
+    await bibleStore.appendNextChapterToBottom(bibleStore.nextRange)
+    this.setState({ ...this.state, loadingMoreOnBottom: false })
+  }
+
+  onVisibleIndicesChanged = async (all: number[]) => {
+    const visibleChapterNum = bibleStore.dataProvider.getDataForIndex(all[0])
+      ?.versionChapterNum
+    console.log('onVisibleIndicesChanged: ', visibleChapterNum)
+    if (this.state.visibleChapterNum !== visibleChapterNum) {
+      this.setState({ ...this.state, visibleChapterNum })
+    }
+  }
+
+  renderFooter = () =>
+    this.state.loadingMoreOnBottom ? (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 100,
+        }}
+      >
+        <ActivityIndicator animating={true} color={Color.TYNDALE_BLUE} />
+      </View>
+    ) : null
 
   render() {
     return (
       <View style={styles.page}>
-        <NavigationHeader />
+        <NavigationHeader chapterNum={this.state.visibleChapterNum} />
         <Popover
           isVisible={this.state.popoverIsVisible}
           fromView={null}
@@ -195,15 +244,23 @@ export default class ReadingScreen extends React.Component<any, any> {
               ref: ref => {
                 this.listRef = ref
               },
-              refreshControl:
-                <RefreshControl refreshing={this.state.refreshing} onRefresh={this.onRefresh} />,
+              refreshControl: (
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this.onRefresh}
+                />
+              ),
               showsVerticalScrollIndicator: false,
             }}
             forceNonDeterministicRendering
             style={{ flex: 1 }}
             contentContainerStyle={styles.page__container}
+            onVisibleIndicesChanged={this.onVisibleIndicesChanged}
+            onEndReached={this.onEndReached}
+            onEndReachedThreshold={1000}
             layoutProvider={this.state.layoutProvider}
             dataProvider={bibleStore.dataProvider}
+            renderFooter={this.renderFooter}
             rowRenderer={(type, data) => (
               <Text style={styles.page__section} selectable>
                 {this.bibleSection(data.section, 0)}
@@ -266,5 +323,11 @@ const styles = StyleSheet.create({
   page__popover: {
     overflow: 'hidden',
     width: DEVICE_WIDTH - 20,
+  },
+  page__footer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 100,
   },
 })
