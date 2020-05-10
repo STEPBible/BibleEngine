@@ -17,7 +17,9 @@ import OfflineSuccessScreen from './OfflineSuccessScreen'
 import { GlobalContextProvider } from './GlobalContext'
 
 export default function App() {
-  try { useKeepAwake() } catch (e) { }
+  try {
+    useKeepAwake()
+  } catch (e) {}
   return (
     <SafeAreaProvider>
       <PaperProvider theme={DarkTheme}>
@@ -35,8 +37,8 @@ const AppStack = createStackNavigator(
     Home: {
       screen: ReadingScreen,
       navigationOptions: {
-        header: null
-      }
+        header: null,
+      },
     },
     Search: SearchScreen,
     Books: BookScreen,

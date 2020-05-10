@@ -54,7 +54,7 @@ export default class StrongsPopover extends React.Component<Props, State> {
 
   initialize = async () => {
     const definitions = await this.getDictionaryEntries(this.props.strongs)
-    this.setState({...this.state, definitions, loading: false })
+    this.setState({ ...this.state, definitions, loading: false })
     setTimeout(() => {
       this.setState({
         ...this.state,
@@ -63,7 +63,9 @@ export default class StrongsPopover extends React.Component<Props, State> {
     }, 4000)
   }
 
-  async getDictionaryEntries(strongs: string[]): Promise<(IDictionaryEntry | null)[]> {
+  async getDictionaryEntries(
+    strongs: string[]
+  ): Promise<(IDictionaryEntry | null)[]> {
     if (!strongs.length) return []
     let normalizedStrongs = strongs.map(strong => new StrongsNumber(strong))
     const isHebrewStrongs = normalizedStrongs[0].id[0] === 'H'
