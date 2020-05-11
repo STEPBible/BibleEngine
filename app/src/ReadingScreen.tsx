@@ -20,6 +20,7 @@ import QuickSettings from './QuickSettings'
 import { RecyclerListView, LayoutProvider } from 'recyclerlistview'
 import StrongsPopover from './StrongsPopover'
 import { ActivityIndicator } from 'react-native-paper'
+import StrongsWord from './StrongsWord'
 
 @observer
 export default class ReadingScreen extends React.Component<any, any> {
@@ -93,7 +94,9 @@ export default class ReadingScreen extends React.Component<any, any> {
 
   phrase = (item, index) => {
     if ('strongs' in item) {
-      return this.strongsPhrase(item, index)
+      return (
+        <StrongsWord onWordPress={this.onWordPress} item={item} index={index} />
+      )
     }
     return (
       <Text
@@ -102,17 +105,6 @@ export default class ReadingScreen extends React.Component<any, any> {
       >{`${item.content} `}</Text>
     )
   }
-
-  strongsPhrase = (item, index) => (
-    <Text
-      selectionColor={'#C5D8EA'}
-      style={styles.page__strongs}
-      onPress={() => this.onWordPress(item.strongs)}
-      key={`strongs-${index}`}
-    >
-      {`${item.content} `}
-    </Text>
-  )
 
   paragraph = (item, index) => (
     <React.Fragment key={`paragraph-${index}`}>
@@ -189,7 +181,7 @@ export default class ReadingScreen extends React.Component<any, any> {
     this.setState({
       ...this.state,
       refreshing: false,
-      visibleChapterNum
+      visibleChapterNum,
     })
   }
 
