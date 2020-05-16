@@ -285,12 +285,12 @@ const styles = StyleSheet.create({
   page__section__title: {
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     fontSize: FontSize.EXTRA_SMALL,
-    lineHeight: 50,
+    lineHeight: LINE_HEIGHT,
   },
   page__break: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.SMALL,
-    lineHeight: 0,
+    lineHeight: LINE_HEIGHT,
   },
   page__phrase: {
     fontFamily: FontFamily.CARDO,
