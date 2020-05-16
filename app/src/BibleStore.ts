@@ -382,7 +382,9 @@ class BibleStore {
     return {
       ...style,
       fontSize: style.fontSize ? style.fontSize * this.fontScale : undefined,
-      lineHeight: style.lineHeight ? style.lineHeight * this.fontScale : undefined,
+      lineHeight: style.lineHeight
+        ? style.lineHeight * this.fontScale
+        : undefined,
     }
   }
 

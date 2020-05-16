@@ -4,6 +4,7 @@ import { FontFamily, FontSize, Color, Margin } from './Constants'
 import { observer } from 'mobx-react/native'
 import bibleStore from './BibleStore'
 import StrongsWord from './StrongsWord'
+import unicodeMapping from './unicode_superscript_mapping.json'
 
 @observer
 export default class BibleSection extends React.Component<any, any> {
@@ -89,9 +90,13 @@ export default class BibleSection extends React.Component<any, any> {
       style={bibleStore.scaledFontSize(styles.page__verseNum)}
       key={`verse-num-${verseNum}-${index}`}
     >
-      {`${verseNum} `}
+      {`${this.getSuperscriptOfWord(verseNum)} `}
     </Text>
   )
+
+  getSuperscriptOfWord(input: number | string) {
+    return String(input).split('').map(character => unicodeMapping[character]).join('')
+  }
 
   lineBreak = index => (
     <Text
