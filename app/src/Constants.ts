@@ -42,6 +42,7 @@ export enum Color {
 export enum FontFamily {
   OPEN_SANS_BOLD = 'open-sans-bold',
   OPEN_SANS_SEMIBOLD = 'open-sans-semibold',
+  OPEN_SANS_ITALIC = 'open-sans-italic',
   OPEN_SANS = 'open-sans',
   OPEN_SANS_LIGHT = 'open-sans-light',
   CARDO_BOLD = 'cardo-bold',

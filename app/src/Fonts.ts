@@ -1,5 +1,6 @@
 import * as Font from 'expo-font'
 
+const openSansItalic = require('../assets/fonts/OpenSans-LightItalic.ttf')
 const openSansBold = require('../assets/fonts/OpenSans-Bold.ttf')
 const openSansSemibold = require('../assets/fonts/OpenSans-Semibold.ttf')
 const openSans = require('../assets/fonts/OpenSans-Regular.ttf')
@@ -11,6 +12,7 @@ const cardoItalic = require('../assets/fonts/Cardo-Italic.ttf')
 export default class Fonts {
   static async load() {
     return Font.loadAsync({
+      'open-sans-italic': openSansItalic,
       'open-sans-bold': openSansBold,
       'open-sans-semibold': openSansSemibold,
       'open-sans': openSans,
