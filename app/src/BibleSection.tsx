@@ -90,12 +90,33 @@ export default class BibleSection extends React.Component<any, any> {
       style={bibleStore.scaledFontSize(styles.page__verseNum)}
       key={`verse-num-${verseNum}-${index}`}
     >
-      {`${this.getSuperscriptOfWord(verseNum)} `}
+      {`${this.toSuperscript(verseNum)} `}
     </Text>
   )
 
-  getSuperscriptOfWord(input: number | string) {
-    return String(input).split('').map(character => unicodeMapping[character]).join('')
+  crossReference = (item, index) => {
+    if (!item.crossReferences || !item.crossReferences.length) {
+      return null
+    }
+    return (
+      <Text
+        style={bibleStore.scaledFontSize({
+          color: Color.TYNDALE_BLUE,
+          fontSize: FontSize.EXTRA_SMALL,
+          fontFamily: FontFamily.OPEN_SANS_ITALIC,
+          lineHeight: 27,
+        })}
+      >
+        {`${this.toSuperscript(item.crossReferences[0].key)} `}
+      </Text>
+    )
+  }
+
+  toSuperscript(input: number | string) {
+    return String(input)
+      .split('')
+      .map(character => unicodeMapping[character])
+      .join('')
   }
 
   lineBreak = index => (
