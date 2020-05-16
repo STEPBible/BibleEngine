@@ -21,6 +21,7 @@ import { RecyclerListView, LayoutProvider } from 'recyclerlistview'
 import StrongsPopover from './StrongsPopover'
 import { ActivityIndicator } from 'react-native-paper'
 import StrongsWord from './StrongsWord'
+import BibleSection from './BibleSection'
 
 @observer
 export default class ReadingScreen extends React.Component<any, any> {
@@ -58,105 +59,6 @@ export default class ReadingScreen extends React.Component<any, any> {
       bibleStore.loadSearchIndex()
     }
   }
-
-  bibleSection = (item, index) => (
-    <React.Fragment key={`section-${index}`}>
-      {this.sectionTitle(item.title, index)}
-      {this.mappedContents(item, index)}
-    </React.Fragment>
-  )
-
-  sectionTitle = (title, index) => (
-    <Text style={styles.page__section__title} key={`title-${index}`}>
-      {title}
-    </Text>
-  )
-
-  renderItem = (item, index) => {
-    if (!('type' in item)) {
-      return (
-        <React.Fragment key={`item-${index}`}>
-          {this.verseNumber(item, index)}
-          {this.phrase(item, index)}
-        </React.Fragment>
-      )
-    }
-    if (item.type === 'group') {
-      if (item.groupType === 'paragraph') {
-        return this.paragraph(item, index)
-      }
-      if (item.groupType === 'indent') {
-        return this.indentedGroup(item, index)
-      }
-    }
-    return this.mappedContents(item, index)
-  }
-
-  phrase = (item, index) => {
-    if ('strongs' in item) {
-      return (
-        <StrongsWord onWordPress={this.onWordPress} item={item} index={index} />
-      )
-    }
-    return (
-      <Text
-        style={styles.page__phrase}
-        key={`phrase-${index}`}
-      >{`${item.content} `}</Text>
-    )
-  }
-
-  paragraph = (item, index) => (
-    <React.Fragment key={`paragraph-${index}`}>
-      {this.lineBreak(index)}
-      {this.verseNumber(item, index)}
-      {this.mappedContents(item, index)}
-    </React.Fragment>
-  )
-
-  indentedGroup = (item, index) => (
-    <React.Fragment key={`indent-${index}`}>
-      {this.lineBreak(index)}
-      <Text style={styles.page__phrase}>{'\t\t\t'}</Text>
-      {this.verseNumber(item, index)}
-      {this.mappedContents(item, index)}
-    </React.Fragment>
-  )
-
-  mappedContents = (item, index, multiplier = 100) =>
-    item.contents.map((content, innerIndex) =>
-      this.renderItem(content, index + innerIndex * multiplier)
-    )
-
-  verseNumber = (item, index) => {
-    if (!('numbering' in item)) return
-    const verseNum = item?.numbering?.normalizedVerseIsStarting
-    if (verseNum === this.targetVerseNum) {
-      return (
-        <React.Fragment key={`verse-search-${index}`}>
-          <View
-            ref={ref => (this.targetVerseRef = ref)}
-            style={styles.page__verseNumberMarkerForSearch}
-            key={`verse-marker-${index}`}
-          />
-          {this.verseNumberText(verseNum, index)}
-        </React.Fragment>
-      )
-    }
-    return this.verseNumberText(verseNum, index)
-  }
-
-  verseNumberText = (verseNum, index) => (
-    <Text style={styles.page__verseNum} key={`verse-num-${verseNum}-${index}`}>
-      {`${verseNum} `}
-    </Text>
-  )
-
-  lineBreak = index => (
-    <Text key={`line-break-${index}`} style={styles.page__break}>
-      {'\n'}
-    </Text>
-  )
 
   onWordPress = strongsNumbers => {
     this.setState({ ...this.state, strongsNumbers, popoverIsVisible: true })
@@ -254,9 +156,10 @@ export default class ReadingScreen extends React.Component<any, any> {
             dataProvider={bibleStore.dataProvider}
             renderFooter={this.renderFooter}
             rowRenderer={(type, data) => (
-              <Text style={styles.page__section} selectable>
-                {this.bibleSection(data.section, 0)}
-              </Text>
+              <BibleSection
+                section={data.section}
+                onWordPress={this.onWordPress}
+              />
             )}
           />
         ) : null}
@@ -275,42 +178,6 @@ const styles = StyleSheet.create({
   },
   page__container: {
     paddingTop: Margin.MEDIUM,
-  },
-  page__section: {
-    fontSize: FontSize.SMALL,
-    paddingLeft: Margin.LARGE,
-    paddingRight: Margin.LARGE,
-    paddingBottom: Margin.SMALL,
-  },
-  page__section__title: {
-    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
-    fontSize: FontSize.EXTRA_SMALL,
-    lineHeight: LINE_HEIGHT,
-  },
-  page__break: {
-    fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.SMALL,
-    lineHeight: LINE_HEIGHT,
-  },
-  page__phrase: {
-    fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.SMALL,
-    lineHeight: LINE_HEIGHT,
-  },
-  page__strongs: {
-    fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.SMALL,
-    color: Color.TYNDALE_BLUE,
-    lineHeight: LINE_HEIGHT,
-  },
-  page__verseNumberMarkerForSearch: {
-    height: 10,
-    width: 0,
-  },
-  page__verseNum: {
-    fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
-    fontSize: FontSize.SMALL,
-    lineHeight: LINE_HEIGHT,
   },
   page__popover: {
     overflow: 'hidden',

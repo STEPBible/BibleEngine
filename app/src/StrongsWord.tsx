@@ -1,8 +1,11 @@
 import React from 'react'
 import { Text, StyleSheet } from 'react-native'
 import { FontFamily, FontSize, Color } from './Constants'
+import { observer } from 'mobx-react/native'
+import bibleStore from './BibleStore'
 
-export default class StrongsWord extends React.PureComponent<any, any> {
+@observer
+export default class StrongsWord extends React.Component<any, any> {
   state = {
     pressed: false,
   }
@@ -10,7 +13,7 @@ export default class StrongsWord extends React.PureComponent<any, any> {
   onStartShouldSetResponder = () => {
     setTimeout(() => {
       this.setState({ pressed: false })
-    }, 100);
+    }, 100)
     this.setState({ pressed: true })
   }
 
@@ -19,23 +22,18 @@ export default class StrongsWord extends React.PureComponent<any, any> {
     this.setState({ pressed: false })
   }
 
-  onResponderGrant = () => {
-    this.setState({ pressed: true })
-  }
-
   render() {
     return (
       <Text
         selectable={false}
         onPress={this.onPress}
-        onResponderGrant={this.onResponderGrant}
         onStartShouldSetResponder={this.onStartShouldSetResponder}
         onResponderRelease={this.onResponderRelease}
-        style={
+        style={bibleStore.scaledFontSize(
           this.state.pressed
             ? styles['page__strongs--selected']
             : styles.page__strongs
-        }
+        )}
         selectionColor={'#C5D8EA'}
         key={`strongs-${this.props.index}`}
       >
