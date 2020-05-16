@@ -10,24 +10,45 @@ export default class StrongsWord extends React.Component<any, any> {
     pressed: false,
   }
 
-  onStartShouldSetResponder = () => {
+  onResponderRelease = () => {
+    this.props.onWordPress(this.props.item.strongs)
     setTimeout(() => {
       this.setState({ pressed: false })
-    }, 100)
+    }, 200)
+  }
+
+  onPress = () => {
     this.setState({ pressed: true })
   }
 
-  onResponderRelease = () => {
-    this.props.onWordPress(this.props.item.strongs)
+  onResponderMove = () => {
     this.setState({ pressed: false })
+  }
+
+  onResponderTerminate = () => {
+    this.setState({ pressed: false })
+  }
+
+  padWidthIfWordIsTooSmallToTap = word => {
+    const MIN_TAPPABLE_WIDTH = 5
+    const difference = MIN_TAPPABLE_WIDTH - word.length
+    if (difference > 0) {
+      const numSpaces = Math.ceil(difference / 2)
+      const THIN_SPACE = ' '
+      return `${THIN_SPACE.repeat(numSpaces)}${word} ${THIN_SPACE.repeat(
+        numSpaces
+      )}`
+    }
+    return `${word} `
   }
 
   render() {
     return (
       <Text
-        selectable={false}
         onPress={this.onPress}
-        onStartShouldSetResponder={this.onStartShouldSetResponder}
+        onLongPress={this.onLongPress}
+        onResponderMove={this.onResponderMove}
+        onResponderTerminate={this.onResponderTerminate}
         onResponderRelease={this.onResponderRelease}
         style={bibleStore.scaledFontSize(
           this.state.pressed
@@ -37,7 +58,7 @@ export default class StrongsWord extends React.Component<any, any> {
         selectionColor={'#C5D8EA'}
         key={`strongs-${this.props.index}`}
       >
-        {`${this.props.item.content} `}
+        {this.padWidthIfWordIsTooSmallToTap(this.props.item.content)}
       </Text>
     )
   }
@@ -45,18 +66,21 @@ export default class StrongsWord extends React.Component<any, any> {
 
 const LINE_HEIGHT = 27
 
+const BASE_STYLE = {
+  fontFamily: FontFamily.CARDO,
+  fontSize: FontSize.SMALL,
+  color: Color.TYNDALE_BLUE,
+  lineHeight: LINE_HEIGHT,
+  textAlign: 'center',
+  minWidth: 200,
+}
+
 const styles = StyleSheet.create({
   page__strongs: {
-    fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.SMALL,
-    color: Color.TYNDALE_BLUE,
-    lineHeight: LINE_HEIGHT,
+    ...BASE_STYLE,
   },
   'page__strongs--selected': {
     backgroundColor: '#CBDDEC',
-    fontFamily: FontFamily.CARDO,
-    fontSize: FontSize.SMALL,
-    color: Color.TYNDALE_BLUE,
-    lineHeight: LINE_HEIGHT,
+    ...BASE_STYLE,
   },
 })
