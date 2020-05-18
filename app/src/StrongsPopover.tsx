@@ -45,17 +45,26 @@ export default class StrongsPopover extends React.Component<Props, State> {
     loading: true,
     loadingMessage: 'Rummaging around...',
   }
+  mounted: boolean = false
 
   async componentDidMount() {
+    this.mounted = true
     if (this.props.strongs) {
       await this.initialize()
     }
+  }
+
+  async componentWillUnmount() {
+    this.mounted = false
   }
 
   initialize = async () => {
     const definitions = await this.getDictionaryEntries(this.props.strongs)
     this.setState({ ...this.state, definitions, loading: false })
     setTimeout(() => {
+      if (this.mounted === false) {
+        return
+      }
       this.setState({
         ...this.state,
         loadingMessage: 'Sorry, this is taking longer than usual...',
