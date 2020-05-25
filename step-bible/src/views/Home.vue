@@ -5,9 +5,11 @@
                 <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
             <div class="v-toolbar__content__picker">
-                <v-btn outlined class="picker__option picker__ref">
-                    Genesis 1
-                </v-btn>
+                <router-link to="/references" class="picker__option picker__ref">
+                    <v-btn outlined>
+                        Genesis 1
+                    </v-btn>
+                </router-link>
                 <v-spacer />
                 <v-btn outlined class="picker__option picker__version">
                     ESV
