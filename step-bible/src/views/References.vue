@@ -20,7 +20,14 @@
         <v-content>
             <v-tabs-items v-model="tab">
                 <v-tab-item>
-                    {{ books }}
+                    <v-card ripple v-for="(book, index) in books" :key="`book-${index}`">
+                        <v-card-title>
+                            {{ book.abbreviation }}
+                        </v-card-title>
+                        <v-card-subtitle>
+                            {{ book.title }}
+                        </v-card-subtitle>
+                    </v-card>
                 </v-tab-item>
                 <v-tab-item>
                     Chapters
@@ -42,3 +49,13 @@ export default {
     }
 };
 </script>
+<style>
+.v-window-item {
+    display: flex;
+    flex-wrap: wrap;
+}
+.v-card {
+    flex: 1;
+    min-width: 120px;
+}
+</style>
