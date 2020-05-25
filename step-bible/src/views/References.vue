@@ -20,7 +20,13 @@
         <v-content>
             <v-tabs-items v-model="tab">
                 <v-tab-item>
-                    <v-card ripple v-for="(book, index) in books" :key="`book-${index}`">
+                    <v-card
+                        ripple
+                        v-for="(book, index) in books"
+                        :key="`book-${index}`"
+                        class="book-card"
+                        @click="onBookSelect(book)"
+                    >
                         <v-card-title>
                             {{ book.abbreviation }}
                         </v-card-title>
@@ -30,7 +36,16 @@
                     </v-card>
                 </v-tab-item>
                 <v-tab-item>
-                    Chapters
+                    <v-card
+                        class="chapter-card"
+                        ripple
+                        v-for="chapterNumber in chapterNumbers"
+                        :key="`chapter-${chapterNumber}`"
+                    >
+                        <v-card-title class="chapter-card__title">
+                            {{ chapterNumber }}
+                        </v-card-title>
+                    </v-card>
                 </v-tab-item>
             </v-tabs-items>
         </v-content>
@@ -41,11 +56,21 @@ import { mapState } from 'vuex';
 export default {
     data() {
         return {
-            tab: null
+            tab: null,
+            selectedBook: null
         };
     },
     computed: {
-        ...mapState(['books'])
+        ...mapState(['books']),
+        chapterNumbers() {
+            return [...Array(this.selectedBook?.chaptersCount.length + 1 || 0).keys()].slice(1);
+        }
+    },
+    methods: {
+        onBookSelect(book) {
+            this.selectedBook = book;
+            this.tab = 1;
+        }
     }
 };
 </script>
@@ -56,6 +81,16 @@ export default {
 }
 .v-card {
     flex: 1;
+}
+.book-card {
     min-width: 120px;
+}
+.chapter-card {
+    min-width: 80px;
+}
+.chapter-card__title {
+    align-items: center;
+    display: flex;
+    justify-content: center;
 }
 </style>
