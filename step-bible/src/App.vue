@@ -1,14 +1,21 @@
 <template>
     <v-app>
-        <v-app-bar app collapsable>
-            <div class="app__nav">
-                <v-btn icon class="app__nav__left">
-                    <v-icon>mdi-dots-vertical</v-icon>
+        <v-app-bar app collapsable inline-flex>
+            <v-btn icon>
+                <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+            <div class="v-toolbar__content__picker">
+                <v-btn outlined class="picker__option picker__ref">
+                    Genesis 1
                 </v-btn>
-                <v-btn icon class="app__nav__right">
-                    <v-icon>mdi-magnify</v-icon>
+                <v-spacer />
+                <v-btn outlined class="picker__option picker__version">
+                    ESV
                 </v-btn>
             </div>
+            <v-btn icon>
+                <v-icon>mdi-magnify</v-icon>
+            </v-btn>
         </v-app-bar>
         <v-content>
             <HelloWorld />
@@ -32,25 +39,21 @@ export default Vue.extend({
     })
 });
 </script>
-<style scoped>
-.app__nav {
+<style>
+.v-toolbar__content {
     align-items: center;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: space-between;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 2px;
-    bottom: 0;
 }
-.app__nav__left {
-    position: absolute;
+.v-toolbar__content__picker {
+    display: flex;
+    width: 195px;
 }
-.app__nav__right {
-    position: absolute;
-    right: 0;
-    top: 2px;
-    bottom: 0;
+.picker__ref {
+    margin-left: 8px;
+    min-width: 120px;
+}
+.picker__version {
+    min-width: 60px;
 }
 </style>
