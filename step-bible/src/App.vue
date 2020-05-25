@@ -1,34 +1,15 @@
 <template>
     <v-app>
-        <v-app-bar app color="primary" dark>
-            <div class="d-flex align-center">
-                <v-img
-                    alt="Vuetify Logo"
-                    class="shrink mr-2"
-                    contain
-                    src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-                    transition="scale-transition"
-                    width="40"
-                />
-
-                <v-img
-                    alt="Vuetify Name"
-                    class="shrink mt-1 hidden-sm-and-down"
-                    contain
-                    min-width="100"
-                    src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-                    width="100"
-                />
+        <v-app-bar app collapsable>
+            <div class="app__nav">
+                <v-btn icon class="app__nav__left">
+                    <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+                <v-btn icon class="app__nav__right">
+                    <v-icon>mdi-magnify</v-icon>
+                </v-btn>
             </div>
-
-            <v-spacer></v-spacer>
-
-            <v-btn href="https://github.com/vuetifyjs/vuetify/releases/latest" target="_blank" text>
-                <span class="mr-2">Latest Release</span>
-                <v-icon>mdi-open-in-new</v-icon>
-            </v-btn>
         </v-app-bar>
-
         <v-content>
             <HelloWorld />
         </v-content>
@@ -51,3 +32,25 @@ export default Vue.extend({
     })
 });
 </script>
+<style scoped>
+.app__nav {
+    align-items: center;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 2px;
+    bottom: 0;
+}
+.app__nav__left {
+    position: absolute;
+}
+.app__nav__right {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    bottom: 0;
+}
+</style>
