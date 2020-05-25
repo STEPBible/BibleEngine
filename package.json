@@ -14,6 +14,7 @@
     "workspaces": {
         "packages": [
             "core",
+            "step-bible",
             "importers",
             "server",
             "client"
