@@ -1,37 +1,26 @@
 <template>
-    <v-app>
-        <v-app-bar app collapsable inline-flex>
-            <v-btn icon>
-                <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
-            <div class="v-toolbar__content__picker">
-                <v-btn outlined class="picker__option picker__ref">
-                    Genesis 1
-                </v-btn>
-                <v-spacer />
-                <v-btn outlined class="picker__option picker__version">
-                    ESV
-                </v-btn>
-            </div>
-            <v-btn icon>
-                <v-icon>mdi-magnify</v-icon>
-            </v-btn>
-        </v-app-bar>
-        <v-content>
-            <HelloWorld />
-        </v-content>
-    </v-app>
+    <div id="app">
+        <div id="nav">
+            <router-link to="/">Home</router-link> |
+            <router-link to="/about">About</router-link>
+        </div>
+        <router-view />
+    </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import { mapActions } from 'vuex';
 
 export default Vue.extend({
     name: 'App',
 
-    components: {
-        HelloWorld
+    methods: {
+        ...mapActions(['getBooks'])
+    },
+
+    mounted() {
+        this.getBooks();
     },
 
     data: () => ({
