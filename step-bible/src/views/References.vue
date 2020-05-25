@@ -1,7 +1,7 @@
 <template>
     <v-app>
         <v-app-bar app>
-            <v-btn icon>
+            <v-btn @click="goBack" icon>
                 <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
             <v-toolbar-title>References</v-toolbar-title>
@@ -41,6 +41,7 @@
                         ripple
                         v-for="chapterNumber in chapterNumbers"
                         :key="`chapter-${chapterNumber}`"
+                        @click="onChapterSelect(chapterNumber)"
                     >
                         <v-card-title class="chapter-card__title">
                             {{ chapterNumber }}
@@ -70,6 +71,12 @@ export default {
         onBookSelect(book) {
             this.selectedBook = book;
             this.tab = 1;
+        },
+        onChapterSelect(chapterNumber) {
+            console.log('onChapterSelect', chapterNumber);
+        },
+        goBack() {
+            this.$router.go(-1);
         }
     }
 };
