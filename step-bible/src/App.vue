@@ -24,21 +24,3 @@ export default Vue.extend({
     })
 });
 </script>
-<style>
-.v-toolbar__content {
-    align-items: center;
-    flex-direction: row;
-    justify-content: space-between;
-}
-.v-toolbar__content__picker {
-    display: flex;
-    width: 195px;
-}
-.picker__ref {
-    margin-left: 8px;
-    min-width: 120px;
-}
-.picker__version {
-    min-width: 60px;
-}
-</style>

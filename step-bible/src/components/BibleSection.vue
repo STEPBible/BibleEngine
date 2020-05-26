@@ -27,5 +27,6 @@ export default {
 }
 .section__title {
     font-size: 17px;
+    margin-bottom: 4px;
 }
 </style>

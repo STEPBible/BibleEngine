@@ -1,14 +1,12 @@
 <template>
     <v-app>
-        <v-app-bar app collapse-on-scrolls>
+        <v-app-bar app hide-on-scroll>
             <v-btn icon>
                 <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
             <div class="v-toolbar__content__picker">
                 <router-link to="/references" class="picker__option picker__ref">
-                    <v-btn outlined>
-                        Genesis 1
-                    </v-btn>
+                    <v-btn outlined> {{ bookAndChapterReference }} </v-btn>
                 </router-link>
                 <v-spacer />
                 <v-btn outlined class="picker__option picker__version">
@@ -43,7 +41,10 @@ export default Vue.extend({
         BibleSection
     },
     computed: {
-        ...mapState(['chapterContent'])
+        ...mapState(['chapterContent', 'versionChapterNum', 'book']),
+        bookAndChapterReference() {
+            return `${this.book?.title} ${this.versionChapterNum}`;
+        }
     },
     methods: {
         ...mapActions(['getBooks'])
@@ -66,10 +67,9 @@ export default Vue.extend({
 }
 .v-toolbar__content__picker {
     display: flex;
-    width: 195px;
+    width: auto;
 }
 .picker__ref {
-    margin-left: 8px;
     min-width: 120px;
 }
 .picker__version {

@@ -74,9 +74,8 @@ export default {
             this.tab = 1;
         },
         async onChapterSelect(versionChapterNum) {
-            const bookOsisId = this.selectedBook.osisId;
             this.goBack();
-            await this.getChapter({ bookOsisId, versionChapterNum });
+            await this.getChapter({ book: this.selectedBook, versionChapterNum });
         },
         goBack() {
             this.$router.go(-1);

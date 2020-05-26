@@ -10,7 +10,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
         books: [],
-        bookOsisId: 'Gen',
+        book: null,
         chapterContent: null,
         versionChapterNum: 1,
         versionUid: 'ESV'
@@ -19,8 +19,8 @@ export default new Vuex.Store({
         [SET_BOOKS](state, books) {
             state.books = books;
         },
-        [SET_CHAPTER](state, { bookOsisId, versionChapterNum, chapterContent }) {
-            state.bookOsisId = bookOsisId;
+        [SET_CHAPTER](state, { book, versionChapterNum, chapterContent }) {
+            state.book = book;
             state.versionChapterNum = versionChapterNum;
             state.chapterContent = chapterContent;
         }
@@ -30,9 +30,9 @@ export default new Vuex.Store({
             const books = await BibleApi.getBooks();
             commit(SET_BOOKS, books);
         },
-        async getChapter({ commit }, { bookOsisId, versionChapterNum }) {
-            const chapterContent = await BibleApi.getChapter(bookOsisId, versionChapterNum);
-            commit(SET_CHAPTER, { bookOsisId, versionChapterNum, chapterContent });
+        async getChapter({ commit }, { book, versionChapterNum }) {
+            const chapterContent = await BibleApi.getChapter(book.osisId, versionChapterNum);
+            commit(SET_CHAPTER, { book, versionChapterNum, chapterContent });
         }
     }
 });
