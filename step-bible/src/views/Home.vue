@@ -20,7 +20,15 @@
             </v-btn>
         </v-app-bar>
         <v-content>
-            {{ chapterContent }}
+            <body class="page">
+                <template v-if="chapterContent">
+                    <BibleSection
+                        v-for="(section, index) in chapterContent"
+                        :key="index"
+                        :section="section"
+                    />
+                </template>
+            </body>
         </v-content>
     </v-app>
 </template>
@@ -28,9 +36,12 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapActions, mapState } from 'vuex';
-
+import BibleSection from '../components/BibleSection.vue';
 export default Vue.extend({
     name: 'Home',
+    components: {
+        BibleSection
+    },
     computed: {
         ...mapState(['chapterContent'])
     },
@@ -63,5 +74,13 @@ export default Vue.extend({
 }
 .picker__version {
     min-width: 60px;
+}
+.v-content__wrap {
+    display: flex;
+    justify-content: center;
+}
+.page {
+    padding-top: 24px;
+    max-width: 800px;
 }
 </style>

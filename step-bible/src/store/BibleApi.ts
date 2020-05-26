@@ -10,9 +10,7 @@ export default class BibleApi {
     }
     static async getChapter(bookOsisId: string, versionChapterNum: number) {
         const url = `${BASE_URL}/ref/ESV/${bookOsisId}/${versionChapterNum}`;
-        const {
-            data: { content }
-        } = await axios.get(url);
-        return content;
+        const { data } = await axios.get(url);
+        return data.content.contents;
     }
 }
