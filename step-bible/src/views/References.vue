@@ -53,7 +53,7 @@
     </v-app>
 </template>
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 export default {
     data() {
         return {
@@ -68,12 +68,15 @@ export default {
         }
     },
     methods: {
+        ...mapActions(['getChapter']),
         onBookSelect(book) {
             this.selectedBook = book;
             this.tab = 1;
         },
-        onChapterSelect(chapterNumber) {
-            console.log('onChapterSelect', chapterNumber);
+        async onChapterSelect(versionChapterNum) {
+            const bookOsisId = this.selectedBook.osisId;
+            this.goBack();
+            await this.getChapter({ bookOsisId, versionChapterNum });
         },
         goBack() {
             this.$router.go(-1);

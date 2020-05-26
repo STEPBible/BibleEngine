@@ -19,17 +19,21 @@
                 <v-icon>mdi-magnify</v-icon>
             </v-btn>
         </v-app-bar>
-        <v-content> </v-content>
+        <v-content>
+            {{ chapterContent }}
+        </v-content>
     </v-app>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 
 export default Vue.extend({
     name: 'Home',
-
+    computed: {
+        ...mapState(['chapterContent'])
+    },
     methods: {
         ...mapActions(['getBooks'])
     },
