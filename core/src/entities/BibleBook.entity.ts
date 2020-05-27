@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, AfterLoad } from 'typeorm';
 import { IBibleBookEntity, DocumentRoot } from '../models';
 
 @Entity('bible_book')
@@ -38,20 +38,14 @@ export class BibleBookEntity implements IBibleBookEntity {
         if (!this.dataLocation) this.dataLocation = 'db';
     }
 
-    // @AfterLoad()
-    // parse() {
-    //     if (this.chaptersMetaJson) this.chaptersCount = JSON.parse(this.chaptersMetaJson);
-    //     if (this.introductionJson) this.introduction = JSON.parse(this.introductionJson);
-    // }
-
-    // @BeforeInsert()
-    // @BeforeUpdate()
-    // async prepare() {
-    //     if (this.chaptersCount) this.chaptersMetaJson = JSON.stringify(this.chaptersCount);
-    //     if (this.introduction) this.introductionJson = JSON.stringify(this.introduction);
-    // }
+    @AfterLoad()
+    parse() {
+        // typeorm converts values in `simple-array` to strings, we convert it
+        // back here and also guard if for empty values here (legacy / typeorm bugs)
+        this.chaptersCount = this.chaptersCount && this.chaptersCount.length ? this.chaptersCount.map(n => +n) : [];
+    }
 
     getChapterVerseCount(chapterNumber: number) {
-        return this.chaptersCount[chapterNumber - 1];
+        return this.chaptersCount[chapterNumber - 1] || 0;
     }
 }

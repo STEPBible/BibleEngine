@@ -167,11 +167,12 @@ export class BibleEngine {
         // if we have pre-generated normalized numbers as well as chapter counts we don't need to
         // generate the bible plaintext structure
         let textData = new Map();
-        if (!contentHasNormalizedNumbers || !bookInput.book.chaptersCount) {
+        let chaptersCount = bookInput.book.chaptersCount;
+        if (!contentHasNormalizedNumbers || !chaptersCount || !chaptersCount.length) {
             textData = convertBibleInputToBookPlaintext(bookInput.contents);
-            bookInput.book.chaptersCount = [];
+            chaptersCount = [];
             for (const verses of textData.values()) {
-                bookInput.book.chaptersCount.push(verses.size);
+                chaptersCount.push(verses.size);
             }
         }
 
@@ -184,6 +185,7 @@ export class BibleEngine {
                 bookEntity = await this.addBook(
                     {
                         ...bookInput.book,
+                        chaptersCount,
                         versionId: version.id,
                         dataLocation: 'importing'
                     },
@@ -221,6 +223,7 @@ export class BibleEngine {
                     bookEntity = await this.addBook(
                         {
                             ...bookInput.book,
+                            chaptersCount: chaptersCount!,
                             versionId: version.id,
                             dataLocation: 'importing'
                         },
@@ -1376,7 +1379,8 @@ export class BibleEngine {
             where: {
                 sourceRefId: Raw(col =>
                     generateReferenceIdSql(generateNormalizedRangeFromVersionRange(range), col)
-                )
+                ),
+                actionId: 2
             },
             order: { id: 'ASC' }
         });

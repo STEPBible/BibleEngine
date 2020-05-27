@@ -140,8 +140,8 @@ export const generateReferenceIdSql = (range: IBibleReferenceRangeNormalized, co
         bookOsisId: range.bookOsisId,
         normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
         normalizedVerseNum:
-            range.normalizedVerseEndNum ||
-            (range.normalizedVerseNum && !range.normalizedChapterEndNum)
+        range.normalizedVerseEndNum ? range.normalizedVerseEndNum :
+        (range.normalizedVerseNum && !range.normalizedChapterEndNum)
                 ? range.normalizedVerseNum
                 : 999,
         normalizedSubverseNum: range.normalizedSubverseEndNum || 99

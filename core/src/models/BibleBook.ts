@@ -14,4 +14,5 @@ export interface IBibleBook {
 
 export interface IBibleBookEntity extends IBibleBook {
     versionId: number;
+    chaptersCount: number[];
 }
