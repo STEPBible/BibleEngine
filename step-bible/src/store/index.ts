@@ -4,6 +4,8 @@ import BibleApi from './BibleApi';
 
 const SET_BOOKS = 'SET_BOOKS';
 const SET_CHAPTER = 'SET_CHAPTER';
+const SET_STRONGS = 'SET_STRONGS';
+const SET_STRONGS_MODAL = 'SET_STRONGS_MODAL';
 
 Vue.use(Vuex);
 
@@ -12,6 +14,8 @@ export default new Vuex.Store({
         books: [],
         book: null,
         chapterContent: null,
+        strongsDefinitions: null,
+        strongsModal: false,
         versionChapterNum: 1,
         versionUid: 'ESV'
     },
@@ -23,6 +27,12 @@ export default new Vuex.Store({
             state.book = book;
             state.versionChapterNum = versionChapterNum;
             state.chapterContent = chapterContent;
+        },
+        [SET_STRONGS](state, { definitions }) {
+            state.strongsDefinitions = definitions;
+        },
+        [SET_STRONGS_MODAL](state, strongsModal) {
+            state.strongsModal = strongsModal;
         }
     },
     actions: {
@@ -33,6 +43,14 @@ export default new Vuex.Store({
         async getChapter({ commit }, { book, versionChapterNum }) {
             const chapterContent = await BibleApi.getChapter(book.osisId, versionChapterNum);
             commit(SET_CHAPTER, { book, versionChapterNum, chapterContent });
+        },
+        async getStrongsDefinition({ commit }, strongsTags: string[]) {
+            const definitions = await BibleApi.getStrongsDefinitions(strongsTags);
+            commit(SET_STRONGS, { definitions });
+            commit(SET_STRONGS_MODAL, true);
+        },
+        async setStrongsModal({ commit }, { strongsModal }) {
+            commit(SET_STRONGS_MODAL, strongsModal);
         }
     }
 });

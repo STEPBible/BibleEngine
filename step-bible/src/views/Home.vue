@@ -28,6 +28,7 @@
                 </template>
             </body>
         </v-content>
+        <strongs-modal />
     </v-app>
 </template>
 
@@ -35,9 +36,11 @@
 import Vue from 'vue';
 import { mapActions, mapState } from 'vuex';
 import BibleSection from '../components/BibleSection.vue';
+import StrongsModal from '../components/StrongsModal.vue';
 export default Vue.extend({
     name: 'Home',
     components: {
+        StrongsModal,
         BibleSection
     },
     computed: {

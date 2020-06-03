@@ -7,7 +7,11 @@
                 :content="child"
             />
         </p>
-        <strong v-else-if="content.strongs" @click="onStrongsClick(content.strongs)">
+        <strong
+            class="strongs"
+            v-else-if="content.strongs"
+            @click="onStrongsClick(content.strongs)"
+        >
             {{ `${content.content} ` }}
         </strong>
         <template v-else-if="!('type' in content)">{{ `${content.content} ` }}</template>
@@ -17,6 +21,7 @@
     </span>
 </template>
 <script>
+import { mapActions } from 'vuex';
 export default {
     name: 'BibleContent',
     props: {
@@ -29,15 +34,16 @@ export default {
         return {};
     },
     methods: {
-        onStrongsClick(strongs) {
+        ...mapActions(['getStrongsDefinition']),
+        async onStrongsClick(strongs) {
+            await this.getStrongsDefinition(strongs);
             console.log(strongs);
-            this.$modal.show('hello-world');
         }
     }
 };
 </script>
 <style>
 .strongs {
-    color: #38748c;
+    color: white;
 }
 </style>
