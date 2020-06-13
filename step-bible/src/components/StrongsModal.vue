@@ -1,18 +1,30 @@
 <template>
     <v-dialog :value="strongsModal" @input="onStrongsModalUpdate">
-        <v-card class="">
-            <v-card-title>
-                {{ strongsDefinition }}
-            </v-card-title>
-            <v-card-subtitle>
-                asdkfjkajfdjf
-            </v-card-subtitle>
+        <v-card>
+            <div
+                v-for="(definition, index) in strongsDefinitions"
+                :key="`strongs-${index}`"
+                class="definition"
+            >
+                <v-card-title>{{ strongsTitle(definition) }}</v-card-title>
+                <v-card-subtitle>
+                    <strongs-content
+                        v-for="(item, index) in definition.content.contents"
+                        :item="item"
+                        :key="`strongs-${index}`"
+                    />
+                </v-card-subtitle>
+            </div>
         </v-card>
     </v-dialog>
 </template>
 <script lang="ts">
 import { mapState, mapActions } from 'vuex';
+import StrongsContent from './StrongsContent.vue';
 export default {
+    components: {
+        StrongsContent
+    },
     data() {
         return {
             dialog: true
@@ -22,10 +34,13 @@ export default {
         ...mapActions(['setStrongsModal']),
         onStrongsModalUpdate(value: boolean) {
             this.setStrongsModal(value);
+        },
+        strongsTitle(definition: any) {
+            return `'${definition?.gloss}' (${definition.transliteration} - ${definition.lemma})`;
         }
     },
     computed: {
-        ...mapState(['strongsModal', 'strongsDefinition'])
+        ...mapState(['strongsModal', 'strongsDefinitions'])
     }
 };
 </script>
