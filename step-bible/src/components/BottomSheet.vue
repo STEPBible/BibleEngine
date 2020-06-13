@@ -1,5 +1,5 @@
 <template>
-    <v-card class="settings center">
+    <v-card class="settings center outlined">
         <div class="settings__font-size">
             <div class="font-size__buttons center">
                 <v-card
@@ -20,7 +20,7 @@
                 </v-card>
             </div>
         </div>
-        <v-btn class="settings__feedback" text>
+        <v-btn class="settings__feedback" text :href="feedbackEmail">
             <v-icon left>mdi-pencil</v-icon>Send Feedback
         </v-btn>
     </v-card>
@@ -31,6 +31,14 @@ import { mapActions } from 'vuex';
 export default Vue.extend({
     data() {
         return {};
+    },
+    computed: {
+        feedbackEmail() {
+            const EMAIL = 'TyndaleSTEP@gmail.com';
+            const SUBJECT = 'STEP Bible App Feedback';
+            const BODY = '';
+            return `mailto:${EMAIL}?subject=${SUBJECT}&body=${BODY}`;
+        }
     },
     methods: {
         ...mapActions(['decreaseFontSize', 'increaseFontSize'])

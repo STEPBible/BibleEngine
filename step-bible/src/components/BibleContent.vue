@@ -46,6 +46,6 @@ export default {
     font-size: 1.2em;
 }
 .strongs {
-    color: white;
+    font-weight: bold;
 }
 </style>
