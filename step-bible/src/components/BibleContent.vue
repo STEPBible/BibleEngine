@@ -1,5 +1,5 @@
 <template>
-    <span>
+    <span :style="fontScaleStyle">
         <p v-if="content.groupType">
             <bible-content
                 v-for="(child, index) in content.contents"
@@ -13,15 +13,10 @@
             @click="onStrongsClick(content.strongs)"
         >{{ `${content.content} ` }}</strong>
         <template v-else-if="!('type' in content)">{{ `${content.content} ` }}</template>
-        <template style="background: red; height: 100px; width: 100px;" v-else>
-            {{
-            content
-            }}
-        </template>
     </span>
 </template>
-<script>
-import { mapActions } from 'vuex';
+<script lang="ts">
+import { mapActions, mapGetters } from 'vuex';
 export default {
     name: 'BibleContent',
     props: {
@@ -35,14 +30,21 @@ export default {
     },
     methods: {
         ...mapActions(['getStrongsDefinition']),
-        async onStrongsClick(strongs) {
+        async onStrongsClick(strongs: any) {
             await this.getStrongsDefinition(strongs);
             console.log(strongs);
         }
+    },
+    computed: {
+        ...mapGetters(['fontScaleStyle'])
     }
 };
 </script>
 <style>
+.content {
+    background: red;
+    font-size: 1.2em;
+}
 .strongs {
     color: white;
 }

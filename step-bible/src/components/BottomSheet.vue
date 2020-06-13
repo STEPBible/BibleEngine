@@ -2,10 +2,20 @@
     <v-card class="settings center">
         <div class="settings__font-size">
             <div class="font-size__buttons center">
-                <v-card class="font-size__buttons__tile center" ripple outlined>
+                <v-card
+                    class="font-size__buttons__tile center"
+                    ripple
+                    outlined
+                    @click="decreaseFontSize"
+                >
                     <h2>A-</h2>
                 </v-card>
-                <v-card class="font-size__buttons__tile center" ripple outlined>
+                <v-card
+                    class="font-size__buttons__tile center"
+                    ripple
+                    outlined
+                    @click="increaseFontSize"
+                >
                     <h1>A+</h1>
                 </v-card>
             </div>
@@ -17,9 +27,13 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
+import { mapActions } from 'vuex';
 export default Vue.extend({
     data() {
         return {};
+    },
+    methods: {
+        ...mapActions(['decreaseFontSize', 'increaseFontSize'])
     }
 });
 </script>

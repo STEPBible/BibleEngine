@@ -1,6 +1,6 @@
 <template>
-    <v-dialog :value="strongsModal" @input="onStrongsModalUpdate">
-        <v-card>
+    <v-dialog :value="strongsModal" @input="onStrongsModalUpdate" class="dialog">
+        <v-card class="modal">
             <div
                 v-for="(definition, index) in strongsDefinitions"
                 :key="`strongs-${index}`"
@@ -45,6 +45,10 @@ export default {
 };
 </script>
 <style>
-.dialog {
+.v-dialog:not(.v-dialog--fullscreen) {
+    max-height: 50% !important;
+}
+.modal {
+    height: 50%;
 }
 </style>

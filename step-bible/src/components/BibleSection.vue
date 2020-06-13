@@ -1,13 +1,14 @@
 <template>
     <div class="section">
-        <h3 v-if="section.title" class="section__title">{{ section.title }}</h3>
+        <h3 v-if="section.title" class="section__title" :style="fontScaleStyle">{{ section.title }}</h3>
         <div v-for="(content, index) in section.contents" :key="`section-content-${index}`">
             <bible-content :content="content" />
         </div>
     </div>
 </template>
-<script>
-import BibleContent from './BibleContent';
+<script lang="ts">
+import BibleContent from './BibleContent.vue';
+import { mapGetters } from 'vuex';
 export default {
     components: {
         BibleContent
@@ -17,6 +18,9 @@ export default {
             type: Object,
             required: true
         }
+    },
+    computed: {
+        ...mapGetters(['fontScaleStyle'])
     }
 };
 </script>
