@@ -83,7 +83,7 @@ export default Vue.extend({
     justify-content: center;
 }
 .page {
-    padding-top: 72px;
+    padding-top: 24px;
     max-width: 800px;
 }
 </style>

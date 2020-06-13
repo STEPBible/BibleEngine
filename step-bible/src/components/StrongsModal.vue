@@ -44,3 +44,7 @@ export default {
     }
 };
 </script>
+<style>
+.dialog {
+}
+</style>
