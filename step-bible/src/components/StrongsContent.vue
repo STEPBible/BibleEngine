@@ -6,9 +6,7 @@
                 v-for="(phrase, phraseIndex) in childPhrases"
                 :key="`bolded-group-${phraseIndex}`"
                 class="phrase--bold"
-            >
-                {{ phrase }}
-            </span>
+            >{{ phrase }}</span>
         </span>
         <div v-else-if="isGroup">
             <strongs-content

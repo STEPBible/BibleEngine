@@ -1,35 +1,36 @@
 <template>
-    <v-app>
-        <v-app-bar app hide-on-scroll>
-            <v-btn icon>
-                <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
-            <div class="v-toolbar__content__picker">
-                <router-link to="/references" class="picker__option picker__ref">
-                    <v-btn outlined> {{ bookAndChapterReference }} </v-btn>
-                </router-link>
-                <v-spacer />
-                <v-btn outlined class="picker__option picker__version">
-                    ESV
-                </v-btn>
-            </div>
-            <v-btn icon>
-                <v-icon>mdi-magnify</v-icon>
-            </v-btn>
-        </v-app-bar>
-        <v-content>
-            <body class="page">
-                <template v-if="chapterContent">
-                    <BibleSection
-                        v-for="(section, index) in chapterContent"
-                        :key="index"
-                        :section="section"
-                    />
-                </template>
-            </body>
-        </v-content>
-        <strongs-modal />
-    </v-app>
+<v-app>
+    <v-app-bar app hide-on-scroll>
+        <v-btn icon @click="showBottomSheet = !showBottomSheet">
+            <v-icon>mdi-dots-vertical</v-icon>
+        </v-btn>
+        <div class="v-toolbar__content__picker">
+            <router-link to="/references" class="picker__option picker__ref">
+                <v-btn outlined>{{ bookAndChapterReference }}</v-btn>
+            </router-link>
+            <v-spacer />
+            <v-btn outlined class="picker__option picker__version">ESV</v-btn>
+        </div>
+        <v-btn icon>
+            <v-icon>mdi-magnify</v-icon>
+        </v-btn>
+    </v-app-bar>
+    <v-content>
+        <body class="page">
+            <template v-if="chapterContent">
+                <BibleSection
+                    v-for="(section, index) in chapterContent"
+                    :key="index"
+                    :section="section"
+                />
+            </template>
+        </body>
+    </v-content>
+    <strongs-modal />
+    <v-bottom-sheet v-model="showBottomSheet" inset>
+        <bottom-sheet />
+    </v-bottom-sheet>
+</v-app>
 </template>
 
 <script lang="ts">
@@ -37,11 +38,13 @@ import Vue from 'vue';
 import { mapActions, mapState } from 'vuex';
 import BibleSection from '../components/BibleSection.vue';
 import StrongsModal from '../components/StrongsModal.vue';
+import BottomSheet from '../components/BottomSheet.vue';
 export default Vue.extend({
     name: 'Home',
     components: {
         StrongsModal,
-        BibleSection
+        BibleSection,
+        BottomSheet
     },
     computed: {
         ...mapState(['chapterContent', 'versionChapterNum', 'book']),
@@ -58,7 +61,7 @@ export default Vue.extend({
     },
 
     data: () => ({
-        //
+        showBottomSheet: false
     })
 });
 </script>

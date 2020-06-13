@@ -8,12 +8,8 @@
             <v-spacer></v-spacer>
             <template v-slot:extension>
                 <v-tabs v-model="tab" dark centered grow>
-                    <v-tab>
-                        Books
-                    </v-tab>
-                    <v-tab>
-                        Chapters
-                    </v-tab>
+                    <v-tab>Books</v-tab>
+                    <v-tab>Chapters</v-tab>
                 </v-tabs>
             </template>
         </v-app-bar>
@@ -27,12 +23,8 @@
                         class="book-card"
                         @click="onBookSelect(book)"
                     >
-                        <v-card-title>
-                            {{ book.abbreviation }}
-                        </v-card-title>
-                        <v-card-subtitle>
-                            {{ book.title }}
-                        </v-card-subtitle>
+                        <v-card-title>{{ book.abbreviation }}</v-card-title>
+                        <v-card-subtitle>{{ book.title }}</v-card-subtitle>
                     </v-card>
                 </v-tab-item>
                 <v-tab-item>
@@ -43,9 +35,7 @@
                         :key="`chapter-${chapterNumber}`"
                         @click="onChapterSelect(chapterNumber)"
                     >
-                        <v-card-title class="chapter-card__title">
-                            {{ chapterNumber }}
-                        </v-card-title>
+                        <v-card-title class="chapter-card__title">{{ chapterNumber }}</v-card-title>
                     </v-card>
                 </v-tab-item>
             </v-tabs-items>

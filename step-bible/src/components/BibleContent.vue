@@ -11,13 +11,13 @@
             class="strongs"
             v-else-if="content.strongs"
             @click="onStrongsClick(content.strongs)"
-        >
-            {{ `${content.content} ` }}
-        </strong>
+        >{{ `${content.content} ` }}</strong>
         <template v-else-if="!('type' in content)">{{ `${content.content} ` }}</template>
-        <template style="background: red; height: 100px; width: 100px;" v-else>{{
+        <template style="background: red; height: 100px; width: 100px;" v-else>
+            {{
             content
-        }}</template>
+            }}
+        </template>
     </span>
 </template>
 <script>
