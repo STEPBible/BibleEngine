@@ -7,7 +7,7 @@
             <v-toolbar-title>References</v-toolbar-title>
             <v-spacer></v-spacer>
             <template v-slot:extension>
-                <v-tabs v-model="tab" dark centered grow>
+                <v-tabs v-model="tab" centered grow>
                     <v-tab>Books</v-tab>
                     <v-tab>Chapters</v-tab>
                 </v-tabs>

@@ -20,6 +20,18 @@
                 </v-card>
             </div>
         </div>
+        <v-card class="center settings__colors" outlined>
+            <div outlined class="center colors__circle" @click="disableDarkMode">
+                <v-icon v-if="darkModeEnabled === false">mdi-check</v-icon>
+            </div>
+            <div
+                outlined
+                class="center colors__circle colors__circle--dark"
+                @click="enabledDarkMode"
+            >
+                <v-icon v-if="darkModeEnabled">mdi-check</v-icon>
+            </div>
+        </v-card>
         <v-btn class="settings__feedback" text :href="feedbackEmail">
             <v-icon left>mdi-pencil</v-icon>Send Feedback
         </v-btn>
@@ -33,6 +45,9 @@ export default Vue.extend({
         return {};
     },
     computed: {
+        darkModeEnabled() {
+            return this.$vuetify.theme.dark;
+        },
         feedbackEmail() {
             const EMAIL = 'TyndaleSTEP@gmail.com';
             const SUBJECT = 'STEP Bible App Feedback';
@@ -41,11 +56,17 @@ export default Vue.extend({
         }
     },
     methods: {
-        ...mapActions(['decreaseFontSize', 'increaseFontSize'])
+        ...mapActions(['decreaseFontSize', 'increaseFontSize']),
+        disableDarkMode() {
+            this.$vuetify.theme.dark = false;
+        },
+        enabledDarkMode() {
+            this.$vuetify.theme.dark = true;
+        }
     }
 });
 </script>
-<style scoped>
+<style>
 .center {
     align-items: center;
     display: flex;
@@ -56,12 +77,23 @@ export default Vue.extend({
     padding: 24px;
 }
 .font-size__buttons__tile {
-    height: 100px;
+    height: 60px;
     margin: 8px;
     width: 120px;
     user-select: none;
 }
+.colors__circle {
+    background: white;
+    border: 1px solid gray;
+    border-radius: 25px !important;
+    height: 50px;
+    margin: 8px;
+    width: 50px;
+}
+.colors__circle--dark {
+    background: black;
+}
 .settings__feedback {
-    margin-top: 24px;
+    margin-top: 16px;
 }
 </style>
