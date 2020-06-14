@@ -7,11 +7,11 @@
                 :content="child"
             />
         </p>
-        <strong
+        <span
             class="strongs"
             v-else-if="content.strongs"
             @click="onStrongsClick(content.strongs)"
-        >{{ `${content.content} ` }}</strong>
+        >{{ `${content.content} ` }}</span>
         <template v-else-if="!('type' in content)">{{ `${content.content} ` }}</template>
     </span>
 </template>
@@ -50,5 +50,11 @@ export default {
 }
 .strongs:active {
     background: #2196f3;
+}
+.theme--dark.v-application {
+    color: #bdbdbd !important;
+}
+.theme--light.v-application {
+    color: #212121 !important;
 }
 </style>
