@@ -8,7 +8,6 @@
             <router-link to="/references" class="picker__option picker__ref">
                 <v-btn outlined>{{ bookAndChapterReference }}</v-btn>
             </router-link>
-            <v-spacer />
             <v-btn outlined class="picker__option picker__version">ESV</v-btn>
         </div>
         <v-btn icon>

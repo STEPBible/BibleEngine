@@ -48,4 +48,7 @@ export default {
 .strongs {
     font-weight: bold;
 }
+.strongs:active {
+    background: #2196f3;
+}
 </style>

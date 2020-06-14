@@ -13,7 +13,10 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
         books: [],
-        book: null,
+        book: {
+            title: 'Genesis',
+            osisId: 'Gen'
+        },
         chapterContent: null,
         fontScale: 1,
         strongsDefinitions: null,

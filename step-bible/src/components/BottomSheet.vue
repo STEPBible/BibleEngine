@@ -76,6 +76,9 @@ export default Vue.extend({
     flex-direction: column;
     padding: 24px;
 }
+.settings__font-size {
+    margin-bottom: 8px;
+}
 .font-size__buttons__tile {
     height: 60px;
     margin: 8px;

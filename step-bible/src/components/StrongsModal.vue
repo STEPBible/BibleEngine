@@ -1,6 +1,6 @@
 <template>
     <v-dialog :value="strongsModal" @input="onStrongsModalUpdate" class="dialog">
-        <v-card class="modal">
+        <v-card class="modal" outlined>
             <div
                 v-for="(definition, index) in strongsDefinitions"
                 :key="`strongs-${index}`"
