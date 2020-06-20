@@ -65,6 +65,9 @@ export default Vue.extend({
 });
 </script>
 <style>
+a {
+    text-decoration: none;
+}
 .v-toolbar__content {
     align-items: center;
     flex-direction: row;
