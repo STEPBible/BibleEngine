@@ -46,6 +46,7 @@ export default {
     font-size: 1.2em;
 }
 .strongs {
+    cursor: pointer;
     font-weight: bold;
 }
 .strongs:active {
