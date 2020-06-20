@@ -6,7 +6,10 @@
         </v-btn>
         <div class="v-toolbar__content__picker">
             <router-link to="/references" class="picker__option picker__ref">
-                <v-btn outlined>{{ bookAndChapterReference }}</v-btn>
+                <v-btn outlined>
+                    <span class="ref__book">{{ bookName }}</span>
+                    {{ versionChapterNum }}
+                </v-btn>
             </router-link>
             <v-btn outlined class="picker__option picker__version">ESV</v-btn>
         </div>
@@ -47,8 +50,8 @@ export default Vue.extend({
     },
     computed: {
         ...mapState(['chapterContent', 'versionChapterNum', 'book']),
-        bookAndChapterReference() {
-            return `${this.book?.title} ${this.versionChapterNum}`;
+        bookName() {
+            return this.book?.title;
         }
     },
     methods: {
@@ -79,6 +82,14 @@ a {
 }
 .picker__ref {
     min-width: 120px;
+    margin-right: 8px;
+}
+.ref__book {
+    margin-right: 4px;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .picker__version {
     min-width: 60px;
