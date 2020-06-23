@@ -7,6 +7,11 @@
                 :content="child"
             />
         </p>
+        <span v-if="content.numbering" class="verse-number">
+            {{
+            content.numbering.versionVerseIsStarting
+            }}
+        </span>
         <span
             class="strongs"
             v-else-if="content.strongs"
@@ -51,6 +56,11 @@ export default {
 }
 .strongs:active {
     background: #2196f3;
+}
+.verse-number {
+    font-size: 0.8em;
+    font-weight: 500;
+    vertical-align: super;
 }
 .theme--dark.v-application {
     color: #bdbdbd !important;
