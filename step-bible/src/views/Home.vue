@@ -1,19 +1,18 @@
 <template>
 <v-app>
     <v-app-bar app hide-on-scroll>
-        <v-btn icon @click="showBottomSheet = !showBottomSheet">
+        <v-btn class="icon--left" icon @click="showBottomSheet = !showBottomSheet">
             <v-icon>mdi-dots-vertical</v-icon>
         </v-btn>
         <div class="v-toolbar__content__picker">
-            <router-link to="/references" class="picker__option picker__ref">
+            <router-link to="/references">
                 <v-btn outlined>
-                    <span class="ref__book">{{ bookName }}</span>
-                    {{ versionChapterNum }}
+                    <span class="v-toolbar__content__picker__ref">{{ bookAndChapterReference }}</span>
                 </v-btn>
             </router-link>
             <v-btn outlined class="picker__option picker__version">ESV</v-btn>
         </div>
-        <v-btn icon>
+        <v-btn class="icon--right" icon>
             <v-icon>mdi-magnify</v-icon>
         </v-btn>
     </v-app-bar>
@@ -29,7 +28,7 @@
         </body>
     </v-content>
     <strongs-modal />
-    <v-bottom-sheet v-model="showBottomSheet" inset>
+    <v-bottom-sheet v-model="showBottomSheet" inset scrollable>
         <bottom-sheet />
     </v-bottom-sheet>
 </v-app>
@@ -50,8 +49,11 @@ export default Vue.extend({
     },
     computed: {
         ...mapState(['chapterContent', 'versionChapterNum', 'book']),
+        bookAndChapterReference() {
+            return `${this.book?.osisId} ${this.versionChapterNum}`;
+        },
         bookName() {
-            return this.book?.title;
+            return this.book?.osisId;
         }
     },
     methods: {
@@ -71,6 +73,14 @@ export default Vue.extend({
 a {
     text-decoration: none;
 }
+.icon--left {
+    position: absolute;
+    left: 16px;
+}
+.icon--right {
+    position: absolute;
+    right: 16px;
+}
 .v-toolbar__content {
     align-items: center;
     flex-direction: row;
@@ -78,21 +88,13 @@ a {
 }
 .v-toolbar__content__picker {
     display: flex;
-    width: auto;
-}
-.picker__ref {
-    min-width: 120px;
-    margin-right: 8px;
-}
-.ref__book {
-    margin-right: 4px;
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    justify-content: center;
+    left: 56px;
+    position: absolute;
+    right: 56px;
 }
 .picker__version {
-    min-width: 60px;
+    margin-left: 4px;
 }
 .v-content__wrap {
     display: flex;
