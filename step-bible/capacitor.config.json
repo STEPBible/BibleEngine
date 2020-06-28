@@ -3,7 +3,7 @@
   "appName": "step-bible",
   "bundledWebRuntime": false,
   "npmClient": "yarn",
-  "webDir": "public",
+  "webDir": "dist",
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 0
