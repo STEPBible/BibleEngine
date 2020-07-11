@@ -1,0 +1,78 @@
+<template>
+  <q-layout view="lHh lpr lFf" class="shadow-2 rounded-borders">
+    <q-header reveal>
+      <q-toolbar style="display: flex;">
+        <span
+          style="display: flex; justify-content: space-between; left: 8px; right: 8px; position: absolute;"
+        >
+          <q-btn flat round dense icon="more_vert" />
+          <span class="v-toolbar__content__picker">
+            <router-link to="/references">
+              <q-btn outline class="picker__option">
+                <span class="v-toolbar__content__picker__ref">{{ bookAndChapterReference }}</span>
+              </q-btn>
+            </router-link>
+            <q-btn outline class="picker__option picker__version">ESV</q-btn>
+          </span>
+          <q-btn flat round dense icon="search" />
+        </span>
+      </q-toolbar>
+    </q-header>
+    <q-page-container>
+      <template v-if="chapterContent">
+        <BibleSection v-for="(section, index) in chapterContent" :key="index" :section="section" />
+      </template>
+    </q-page-container>
+  </q-layout>
+</template>
+
+<script lang="ts">
+import Vue from 'vue';
+import { mapActions, mapState } from 'vuex';
+import BibleSection from '../components/BibleSection.vue';
+export default Vue.extend({
+  name: 'Home',
+  components: { BibleSection },
+  computed: {
+    ...mapState(['chapterContent', 'versionChapterNum', 'book']),
+    bookAndChapterReference() {
+      return `${this.book?.osisId} ${this.versionChapterNum}`;
+    },
+    bookName() {
+      return this.book?.osisId;
+    }
+  },
+  methods: {
+    ...mapActions(['getBooks', 'getChapter'])
+  },
+  mounted() {
+    this.getBooks();
+  },
+  data: () => ({
+    showBottomSheet: false
+  })
+});
+</script>
+<style>
+a {
+  text-decoration: none;
+}
+.icon--left {
+  position: absolute;
+  left: 16px;
+}
+.icon--right {
+  position: absolute;
+  right: 16px;
+}
+.picker__option {
+  color: white;
+}
+.picker__version {
+  margin-left: 4px;
+}
+.page {
+  padding-top: 24px;
+  max-width: 800px;
+}
+</style>

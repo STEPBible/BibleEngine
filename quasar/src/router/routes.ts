@@ -1,14 +1,20 @@
 import { RouteConfig } from 'vue-router';
+import Home from '../pages/Home.vue'
 
 const routes: RouteConfig[] = [
   {
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      { path: '', component: () => import('pages/Index.vue') }
-    ]
+    name: 'Home',
+    component: Home
   },
-
+  {
+    path: '/references',
+    name: 'References',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import('../pages/References.vue')
+  },
   // Always leave this as last one,
   // but you can also remove it
   {
