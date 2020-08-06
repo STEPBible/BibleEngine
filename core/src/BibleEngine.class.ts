@@ -1321,7 +1321,7 @@ export class BibleEngine {
             )
             .getRawOne();
 
-        if (!phraseIdStart) throw new Error(`can't get normalized refrence: version data missing`);
+        if (!phraseIdStart) throw new Error(`can't get normalized reference start for ${inputRange.versionUid} ${inputRange.versionId} ${inputRange.bookOsisId} ${inputRange.versionChapterNum}:${inputRange.versionVerseNum}-${inputRange.versionChapterEndNum}:${inputRange.versionVerseEndNum} - version data missing`);
         const phraseStart = parsePhraseId(phraseIdStart);
 
         const normRange: IBibleReferenceRangeNormalized = {
@@ -1360,7 +1360,7 @@ export class BibleEngine {
                 .getRawOne();
 
             if (!phraseIdEnd)
-                throw new Error(`can't get normalized refrence: version data missing`);
+                throw new Error(`can't get normalized end reference for ${inputRange.versionUid} ${inputRange.versionId} ${inputRange.bookOsisId} ${inputRange.versionChapterNum}:${inputRange.versionVerseNum}-${inputRange.versionChapterEndNum}:${inputRange.versionVerseEndNum} - version data missing`);
             const phraseEnd = parsePhraseId(phraseIdEnd);
 
             normRange.normalizedChapterEndNum = phraseEnd.normalizedChapterNum;
