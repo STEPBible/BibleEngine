@@ -11,7 +11,7 @@
     },
     "dependencies": {
         "@koa/cors": "^2.2.3",
-        "class-transformer": "^0.2.3",
+        "class-transformer": "^0.3.1",
         "class-validator": "^0.10.1",
         "isomorphic-fetch": "^2.2.1",
         "koa": "^2.6.2",
