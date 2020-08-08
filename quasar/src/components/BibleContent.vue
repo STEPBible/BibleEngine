@@ -1,34 +1,45 @@
 <template>
   <span :style="fontScaleStyle">
-    <p v-if="content.groupType">
+    <p v-if="content.groupType" class="paragraph">
       <bible-content
-        v-for="(child, index) in content.contents"
-        :key="`paragraph-${index}`"
+        v-for="(child, childIndex) in content.contents"
+        :key="`paragraph-${index}-${childIndex}`"
         :content="child"
+        :index="childIndex * 1000"
       />
     </p>
-    <span v-if="content.numbering" class="verse-number">
+    <div v-if="content.numbering" class="verse-number">
       {{
       content.numbering.versionVerseIsStarting
       }}
-    </span>
-    <span
-      class="strongs"
-      v-else-if="content.strongs"
-      @click="onStrongsClick(content.strongs)"
-    >{{ `${content.content} ` }}</span>
-    <template v-else-if="!('type' in content)">{{ `${content.content} ` }}</template>
+    </div>
+    <tippy v-else-if="content.strongs" :arrow="true" trigger="click">
+      <template v-slot:trigger>
+        <span
+          @click="onStrongsClick(content.strongs)"
+          class="phrase phrase--strongs"
+        >{{ `${content.content} ` }}</span>
+      </template>
+      <strongs-modal />
+    </tippy>
+    <div class="phrase" v-else-if="!('type' in content)">{{ `${content.content} ` }}</div>
   </span>
 </template>
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
+import StrongsModal from '../components/StrongsModal.vue';
 export default {
   name: 'BibleContent',
+  components: { StrongsModal },
   props: {
     content: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
+    index: {
+      type: Number,
+      required: true,
+    },
   },
   data() {
     return {};
@@ -36,23 +47,31 @@ export default {
   methods: {
     ...mapActions(['getStrongsDefinition']),
     async onStrongsClick(strongs: any) {
+      console.log('onStrongsClick');
       await this.getStrongsDefinition(strongs);
       console.log(strongs);
-    }
+    },
   },
   computed: {
-    ...mapGetters(['fontScaleStyle'])
-  }
+    ...mapGetters(['fontScaleStyle']),
+  },
 };
 </script>
 <style>
+.paragraph {
+  display: flex;
+  flex-wrap: wrap;
+}
 .content {
   background: red;
   font-size: 1.2em;
 }
-.strongs {
+.phrase {
+  margin-right: 0.3em;
+}
+.phrase--strongs {
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 500;
 }
 .strongs:active {
   background: #2196f3;
@@ -60,6 +79,7 @@ export default {
 .verse-number {
   font-size: 0.8em;
   font-weight: 500;
+  margin-right: 0.2em;
   vertical-align: super;
 }
 .theme--dark.v-application {

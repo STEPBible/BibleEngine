@@ -14,7 +14,8 @@
     "@vue/composition-api": "^0.6.4",
     "axios": "^0.18.1",
     "core-js": "^3.6.5",
-    "quasar": "^1.0.0"
+    "quasar": "^1.0.0",
+    "vue-tippy": "^4.5.1"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

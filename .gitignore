@@ -30,3 +30,4 @@ importers/scripts/data
 importers/src/bible/NEUE/data
 be-v11n-unsupported.log
 importers/src/stepdata/v11n-rules/data/backup
+step-bible/*

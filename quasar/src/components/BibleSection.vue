@@ -2,7 +2,7 @@
   <div class="section">
     <h3 v-if="section.title" class="section__title" :style="fontScaleStyle">{{ section.title }}</h3>
     <div v-for="(content, index) in section.contents" :key="`section-content-${index}`">
-      <bible-content :content="content" />
+      <bible-content :content="content" :index="index" />
     </div>
   </div>
 </template>

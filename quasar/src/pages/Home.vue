@@ -34,23 +34,28 @@ export default Vue.extend({
   name: 'Home',
   components: { BibleSection },
   computed: {
-    ...mapState(['chapterContent', 'versionChapterNum', 'book']),
+    ...mapState([
+      'chapterContent',
+      'versionChapterNum',
+      'book',
+      'strongsDefinitions',
+    ]),
     bookAndChapterReference() {
       return `${this.book?.osisId} ${this.versionChapterNum}`;
     },
     bookName() {
       return this.book?.osisId;
-    }
+    },
   },
   methods: {
-    ...mapActions(['getBooks', 'getChapter'])
+    ...mapActions(['getBooks', 'getChapter']),
   },
   mounted() {
     this.getBooks();
   },
   data: () => ({
-    showBottomSheet: false
-  })
+    showBottomSheet: false,
+  }),
 });
 </script>
 <style>
@@ -74,5 +79,9 @@ a {
 .page {
   padding-top: 24px;
   max-width: 800px;
+}
+.tippy-tooltip {
+  background: black;
+  padding: 8px;
 }
 </style>
