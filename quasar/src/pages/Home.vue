@@ -14,7 +14,7 @@
             </router-link>
             <q-btn outline class="picker__option picker__version">ESV</q-btn>
           </span>
-          <q-btn flat round dense icon="search" />
+          <q-btn flat round dense icon="search" @click="goToSearch" />
         </span>
       </q-toolbar>
     </q-header>
@@ -51,6 +51,9 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions(['getBooks', 'getChapter']),
+    goToSearch() {
+      this.$router.push('/search');
+    },
   },
   mounted() {
     this.getBooks();

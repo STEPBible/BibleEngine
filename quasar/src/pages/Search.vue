@@ -3,7 +3,7 @@
     <q-header reveal class="bg-white">
       <q-toolbar class="text-primary flex-grow">
         <q-input :value="input" @input="onInput" clearable borderless autofocus>
-          <q-btn slot="prepend" flat round dense icon="arrow_back" />
+          <q-btn slot="prepend" flat round dense icon="arrow_back" @click="goToHome" />
         </q-input>
       </q-toolbar>
     </q-header>
@@ -47,6 +47,9 @@ export default Vue.extend({
           versionChapterNum: this.index?.documentStore?.docs[ref].c,
           bookOsisId: this.index?.documentStore?.docs[ref].b,
         }));
+    },
+    goToHome() {
+      this.$router.go(-1);
     },
   },
   async mounted() {
