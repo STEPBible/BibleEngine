@@ -8,7 +8,7 @@
       </q-toolbar>
     </q-header>
     <q-page-container>
-      <div class="result" v-for="result in results" :key="result.ref">
+      <div class="result" v-for="result in results" :key="result.ref" v-ripple>
         <q-icon class="result__icon" name="search" />
         <div class="result__content">
           <div class="result__content__body">{{ result.verseContent }}</div>
