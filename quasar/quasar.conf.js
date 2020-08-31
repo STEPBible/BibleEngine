@@ -79,6 +79,10 @@ module.exports = configure(function (ctx) {
             exclude: /node_modules/
           })
         }
+        cfg.plugins = cfg.plugins.filter(plugin => {
+          if (plugin.constructor.name === 'ForkTsCheckerWebpackPlugin') return false;
+          return true;
+        });
       },
     },
 
