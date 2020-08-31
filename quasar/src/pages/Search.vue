@@ -2,7 +2,7 @@
   <q-layout>
     <q-header reveal class="bg-white">
       <q-toolbar class="text-primary flex-grow">
-        <q-input :value="input" @input="onInput" clearable borderless>
+        <q-input :value="input" @input="onInput" clearable borderless autofocus>
           <q-btn slot="prepend" flat round dense icon="arrow_back" />
         </q-input>
       </q-toolbar>
