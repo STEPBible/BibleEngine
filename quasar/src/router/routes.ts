@@ -1,11 +1,10 @@
 import { RouteConfig } from 'vue-router';
-import Home from '../pages/Home.vue'
 
 const routes: RouteConfig[] = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: () => import('../pages/Home.vue')
   },
   {
     path: '/references',
@@ -14,6 +13,11 @@ const routes: RouteConfig[] = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import('../pages/References.vue')
+  },
+  {
+    path: '/search',
+    name: 'Search',
+    component: () => import('../pages/Search.vue')
   },
   // Always leave this as last one,
   // but you can also remove it
