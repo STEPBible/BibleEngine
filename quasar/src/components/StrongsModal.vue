@@ -1,20 +1,20 @@
 <template>
-  <q-card class="modal strongs-modal" outlined>
-    <div
-      v-for="(definition, index) in strongsDefinitions"
-      :key="`strongs-${index}`"
-      class="definition"
-    >
-      <div>{{ strongsTitle(definition) }}</div>
-      <div>
+  <q-dialog :value="strongsModal" @input="onStrongsModalUpdate">
+    <q-card class="modal strongs-modal" outlined>
+      <div
+        v-for="(definition, index) in strongsDefinitions"
+        :key="`strongs-${index}`"
+        class="definition"
+      >
+        <span class="text-h6">{{ strongsTitle(definition) }}</span>
         <strongs-content
           v-for="(item, index) in definition.content.contents"
           :item="item"
           :key="`strongs-${index}`"
         />
       </div>
-    </div>
-  </q-card>
+    </q-card>
+  </q-dialog>
 </template>
 <script lang="ts">
 import { mapState, mapActions } from 'vuex';
@@ -43,11 +43,16 @@ export default {
 };
 </script>
 <style>
-.v-dialog:not(.v-dialog--fullscreen) {
-  max-height: 50% !important;
+.definition {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.text-h6 {
+  text-align: left;
 }
 .modal {
-  background: black;
   height: 50%;
+  padding: 16px;
 }
 </style>

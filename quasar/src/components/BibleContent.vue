@@ -13,24 +13,18 @@
       content.numbering.versionVerseIsStarting
       }}
     </div>
-    <tippy v-else-if="content.strongs" :arrow="true" trigger="click">
-      <template v-slot:trigger>
-        <span
-          @click="onStrongsClick(content.strongs)"
-          class="phrase phrase--strongs"
-        >{{ `${content.content} ` }}</span>
-      </template>
-      <strongs-modal />
-    </tippy>
+    <span
+      v-else-if="content.strongs"
+      @click="onStrongsClick(content.strongs)"
+      class="phrase phrase--strongs"
+    >{{ `${content.content} ` }}</span>
     <div class="phrase" v-else-if="!('type' in content)">{{ `${content.content} ` }}</div>
   </span>
 </template>
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
-import StrongsModal from '../components/StrongsModal.vue';
 export default {
   name: 'BibleContent',
-  components: { StrongsModal },
   props: {
     content: {
       type: Object,
@@ -45,9 +39,10 @@ export default {
     return {};
   },
   methods: {
-    ...mapActions(['getStrongsDefinition']),
+    ...mapActions(['getStrongsDefinition', 'setStrongsModal']),
     async onStrongsClick(strongs: any) {
       console.log('onStrongsClick');
+      this.setStrongsModal(true);
       await this.getStrongsDefinition(strongs);
       console.log(strongs);
     },

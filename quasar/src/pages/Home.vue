@@ -19,6 +19,7 @@
       </q-toolbar>
     </q-header>
     <q-page-container>
+      <strongs-modal />
       <template v-if="chapterContent">
         <BibleSection v-for="(section, index) in chapterContent" :key="index" :section="section" />
       </template>
@@ -29,10 +30,11 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapActions, mapState } from 'vuex';
-import BibleSection from '../components/BibleSection.vue';
+import BibleSection from 'components/BibleSection.vue';
+import StrongsModal from 'components/StrongsModal.vue';
 export default Vue.extend({
   name: 'Home',
-  components: { BibleSection },
+  components: { BibleSection, StrongsModal },
   computed: {
     ...mapState([
       'chapterContent',
