@@ -1,14 +1,15 @@
 import { store } from 'quasar/wrappers';
 import Vuex from 'vuex';
 import BibleApi from './BibleApi';
+import { IBibleBook, IBibleContent } from '@bible-engine/core';
 
 export interface StoreInterface {
-  books: any[];
+  books: IBibleBook[];
   book: {
     title: string,
     osisId: string
   },
-  chapterContent?: any,
+  chapterContent?: IBibleContent,
   fontScale: number,
   strongsDefinitions: any,
   strongsModal: boolean,
