@@ -6,6 +6,7 @@
   "author": "Daniel Bennett <danbenn@umich.edu>",
   "private": true,
   "scripts": {
+    "build": "quasar build",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "test": "echo \"No test specified\" && exit 0"
   },
@@ -15,6 +16,7 @@
     "axios": "^0.18.1",
     "core-js": "^3.6.5",
     "elasticlunr": "^0.9.5",
+    "flexsearch": "^0.6.32",
     "quasar": "^1.0.0",
     "vue-tippy": "^4.5.1"
   },

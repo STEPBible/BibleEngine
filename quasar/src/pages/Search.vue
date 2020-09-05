@@ -20,41 +20,57 @@
 </template>
 <script lang="ts">
 import Vue from 'vue';
-const index = import('src/assets/esvSearchIndex.json');
-import * as elasticlunr from 'elasticlunr';
+const index = import('src/assets/verses.json');
+const FlexSearch = require('flexsearch');
 export default Vue.extend({
   data: () => ({
     index: null,
     input: '',
-    lunrSearchEngine: null,
+    flexSearch: new FlexSearch(),
+    loading: true,
     results: [],
+    versesToContent: {},
   }),
   methods: {
-    onInput(input: string) {
-      if (!this.lunrSearchEngine) {
+    async onInput(input: string) {
+      this.input = input;
+      if (!input) {
+        this.results = [];
+      }
+      if (this.loading) {
         return;
       }
-      this.input = input;
       const MAX_NUM_RESULTS = 10;
-      this.results = this.lunrSearchEngine
-        ?.search(input, {})
-        .slice(0, MAX_NUM_RESULTS)
-        .map((result: any) => result.ref)
-        .map((ref: any) => ({
+      await this.flexSearch.search(input, MAX_NUM_RESULTS, (results: any[]) => {
+        this.results = results.map((ref: string) => ({
           reference: ref,
-          verseContent: this.index?.documentStore?.docs[ref].vc[0],
-          verseNum: this.index?.documentStore?.docs[ref].v,
-          versionChapterNum: this.index?.documentStore?.docs[ref].c,
-          bookOsisId: this.index?.documentStore?.docs[ref].b,
+          verseContent: this.versesToContent[ref],
         }));
+      });
     },
     goToHome() {
       this.$router.go(-1);
     },
   },
   async mounted() {
-    this.index = await index;
-    this.lunrSearchEngine = elasticlunr.Index.load(this.index);
+    this.loading = true;
+    const { verses } = await index;
+    this.flexSearch = new FlexSearch({
+      suggest: true,
+      threshold: 0,
+      resolution: 1,
+      async: true,
+      worker: 4,
+    });
+    await Promise.all(
+      verses.map(async (verse: any[]) => {
+        const ref = verse[0];
+        const content = verse[1];
+        this.versesToContent[ref] = content;
+        await this.flexSearch.add(ref, content);
+      })
+    );
+    this.loading = false;
   },
 });
 </script>
