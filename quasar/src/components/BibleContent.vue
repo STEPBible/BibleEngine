@@ -8,11 +8,7 @@
         :index="childIndex * 1000"
       />
     </p>
-    <div v-if="content.numbering" class="verse-number">
-      {{
-      content.numbering.versionVerseIsStarting
-      }}
-    </div>
+    <div v-if="content.numbering" class="verse-number" :id="verseId">{{ verseNumber }}</div>
     <span
       v-else-if="content.strongs"
       @click="onStrongsClick(content.strongs)"
@@ -22,7 +18,7 @@
   </span>
 </template>
 <script lang="ts">
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 export default {
   name: 'BibleContent',
   props: {
@@ -49,6 +45,13 @@ export default {
   },
   computed: {
     ...mapGetters(['fontScaleStyle']),
+    ...mapState(['book', 'versionChapterNum']),
+    verseNumber() {
+      return this.content.numbering?.versionVerseIsStarting;
+    },
+    verseId() {
+      return `${this.book?.osisId}-${this.versionChapterNum}:${this.verseNumber}`;
+    },
   },
 };
 </script>
