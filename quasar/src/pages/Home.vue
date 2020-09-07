@@ -1,10 +1,8 @@
 <template>
   <q-layout view="lHh lpr lFf" class="shadow-2 rounded-borders">
     <q-header reveal>
-      <q-toolbar style="display: flex;">
-        <span
-          style="display: flex; justify-content: space-between; left: 8px; right: 8px; position: absolute;"
-        >
+      <q-toolbar class="flex">
+        <span class="toolbar__content">
           <q-btn flat round dense icon="more_vert" />
           <span class="v-toolbar__content__picker">
             <router-link to="/references">
@@ -84,6 +82,13 @@ export default Vue.extend({
 <style>
 a {
   text-decoration: none;
+}
+.toolbar__content {
+  display: flex;
+  justify-content: space-between;
+  left: 8px;
+  right: 8px;
+  position: absolute;
 }
 .icon--left {
   position: absolute;
