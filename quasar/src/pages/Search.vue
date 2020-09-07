@@ -8,11 +8,11 @@
       </q-toolbar>
     </q-header>
     <q-page-container>
-      <a
+      <div
         class="result"
         v-for="result in results"
         :key="result.ref"
-        :href="searchResultHref(result)"
+        @click="onResultClick(result.reference)"
         v-ripple
       >
         <q-icon class="result__icon" name="search" />
@@ -20,7 +20,7 @@
           <div class="result__content__body">{{ result.verseContent }}</div>
           <div class="result__content__reference">{{ `${result.reference}` }}</div>
         </div>
-      </a>
+      </div>
     </q-page-container>
   </q-layout>
 </template>
@@ -55,11 +55,15 @@ export default Vue.extend({
         }));
       });
     },
-    searchResultHref(result: any) {
-      console.log(result.reference);
-      const { book, chapter, verse } = PassageUrl.parse(result.reference);
+    searchResultUrl(reference: string) {
+      console.log(reference);
+      const { book, chapter, verse } = PassageUrl.parse(reference);
       const url = PassageUrl.build(book, chapter, verse);
       return `/${url}`;
+    },
+    onResultClick(reference: string) {
+      const url = this.searchResultUrl(reference);
+      this.$router.push(url);
     },
     goToHome() {
       this.$router.go(-1);
