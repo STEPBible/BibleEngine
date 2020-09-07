@@ -72,6 +72,9 @@ export default Vue.extend({
       book: { osisId: book },
       versionChapterNum: chapter,
     });
+    const verseId = `${book}-${chapter}:${verse}`;
+    const element = document.getElementById(verseId);
+    element?.scrollIntoView();
     this.getBooks();
   },
   data: () => ({
