@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh lpr lFf" class="shadow-2 rounded-borders">
+  <q-layout>
     <q-header reveal>
       <q-toolbar class="flex">
         <span class="toolbar__content">
@@ -82,6 +82,17 @@ export default Vue.extend({
 <style>
 a {
   text-decoration: none;
+}
+html {
+  overflow: scroll;
+  overflow-x: hidden;
+}
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+.q-layout__section--marginal {
+  background-color: #121212;
 }
 .toolbar__content {
   display: flex;
