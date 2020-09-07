@@ -80,6 +80,7 @@ export default store(function ({ Vue }) {
         commit(SET_BOOKS, books);
       },
       async getChapter({ commit }, { book, versionChapterNum }) {
+        commit(SET_CHAPTER, { book, versionChapterNum, chapterContent: [] });
         const chapterContent = await BibleApi.getChapter(book.osisId, versionChapterNum);
         commit(SET_CHAPTER, { book, versionChapterNum, chapterContent });
       },
