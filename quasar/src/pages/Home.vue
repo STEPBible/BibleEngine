@@ -63,6 +63,9 @@ export default Vue.extend({
     },
   },
   async mounted() {
+    if (!this.passage) {
+      window.location.href = '/Gen+1';
+    }
     const url = PassageUrl.parse(this.passage);
     await this.getChapter({
       book: { osisId: url.book },
