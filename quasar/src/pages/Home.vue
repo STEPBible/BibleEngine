@@ -63,7 +63,7 @@ export default Vue.extend({
     },
   },
   async mounted() {
-    const url = new PassageUrl(this.passage);
+    const url = PassageUrl.parse(this.passage);
     await this.getChapter({
       book: { osisId: url.book },
       versionChapterNum: url.chapter,

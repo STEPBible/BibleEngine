@@ -7,7 +7,7 @@ describe('PassageUrl', () => {
     it('accurately breaks up book and chapter and verse', () => {
         const SEPARATOR = '+'
         const PASSAGE = `${BOOK}${SEPARATOR}${CHAPTER}:${VERSE}`
-        const { book, chapter, verse } = new PassageUrl(PASSAGE)
+        const { book, chapter, verse } = PassageUrl.parse(PASSAGE)
         expect(book).toBe(BOOK)
         expect(chapter).toBe(CHAPTER)
         expect(verse).toBe(VERSE)
@@ -15,7 +15,7 @@ describe('PassageUrl', () => {
     it(`Supports spaces as a separator, too`, () => {
         const SEPARATOR = ' '
         const PASSAGE = `${BOOK}${SEPARATOR}${CHAPTER}:${VERSE}`
-        const { book, chapter, verse } = new PassageUrl(PASSAGE)
+        const { book, chapter, verse } = PassageUrl.parse(PASSAGE)
         expect(book).toBe(BOOK)
         expect(chapter).toBe(CHAPTER)
         expect(verse).toBe(VERSE)
@@ -28,6 +28,6 @@ describe('build', () => {
         const CHAPTER = '5'
         const VERSE = '10'
         const url = PassageUrl.build(BOOK, CHAPTER, VERSE)
-        expect(url).toBe(`${BOOK}+${CHAPTER}+${VERSE}`)
+        expect(url).toBe(`${BOOK}+${CHAPTER}:${VERSE}`)
     })
 })
