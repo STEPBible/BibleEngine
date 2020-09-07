@@ -1,6 +1,6 @@
 <template>
   <q-layout>
-    <q-header reveal class="bg-white">
+    <q-header reveal>
       <q-toolbar class="text-primary flex-grow">
         <q-input :value="input" @input="onInput" clearable borderless autofocus>
           <q-btn slot="prepend" flat round dense icon="arrow_back" @click="goToHome" />
@@ -97,7 +97,7 @@ export default Vue.extend({
   width: 100%;
 }
 .q-toolbar {
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid gray;
 }
 .result {
   align-items: center;
