@@ -8,18 +8,25 @@
       </q-toolbar>
     </q-header>
     <q-page-container>
-      <div class="result" v-for="result in results" :key="result.ref" v-ripple>
+      <a
+        class="result"
+        v-for="result in results"
+        :key="result.ref"
+        :href="searchResultHref(result)"
+        v-ripple
+      >
         <q-icon class="result__icon" name="search" />
         <div class="result__content">
           <div class="result__content__body">{{ result.verseContent }}</div>
           <div class="result__content__reference">{{ `${result.reference}` }}</div>
         </div>
-      </div>
+      </a>
     </q-page-container>
   </q-layout>
 </template>
 <script lang="ts">
 import Vue from 'vue';
+import { PassageUrl } from 'src/models/PassageUrl';
 const index = import('src/assets/verses.json');
 const FlexSearch = require('flexsearch');
 export default Vue.extend({
@@ -47,6 +54,12 @@ export default Vue.extend({
           verseContent: this.versesToContent[ref],
         }));
       });
+    },
+    searchResultHref(result: any) {
+      console.log(result.reference);
+      const { book, chapter, verse } = PassageUrl.parse(result.reference);
+      const url = PassageUrl.build(book, chapter, verse);
+      return `/${url}`;
     },
     goToHome() {
       this.$router.go(-1);
