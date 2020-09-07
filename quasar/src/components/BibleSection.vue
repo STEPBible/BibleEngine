@@ -11,17 +11,17 @@ import BibleContent from './BibleContent.vue';
 import { mapGetters } from 'vuex';
 export default {
   components: {
-    BibleContent
+    BibleContent,
   },
   props: {
     section: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
   computed: {
-    ...mapGetters(['fontScaleStyle'])
-  }
+    ...mapGetters(['fontScaleStyle']),
+  },
 };
 </script>
 <style scoped>

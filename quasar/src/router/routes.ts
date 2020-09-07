@@ -22,8 +22,10 @@ const routes: RouteConfig[] = [
   // Always leave this as last one,
   // but you can also remove it
   {
-    path: '*',
-    component: () => import('pages/Error404.vue')
+    path: '/:passage',
+    name: 'Bible',
+    component: () => import('../pages/Home.vue'),
+    props: true
   }
 ];
 

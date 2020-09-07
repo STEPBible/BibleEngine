@@ -35,6 +35,12 @@ import StrongsModal from 'components/StrongsModal.vue';
 export default Vue.extend({
   name: 'Home',
   components: { BibleSection, StrongsModal },
+  props: {
+    passage: {
+      type: String,
+      default: () => '',
+    },
+  },
   computed: {
     ...mapState([
       'chapterContent',
@@ -55,7 +61,17 @@ export default Vue.extend({
       this.$router.push('/search');
     },
   },
-  mounted() {
+  async mounted() {
+    console.log('mounted: ', this.passage);
+    const bookAndChapter = this.passage.split(':')[0];
+    const verse = this.passage.split(':')?.[1];
+    const pieces = bookAndChapter.split('+');
+    const book = pieces.slice(0, pieces.length - 1);
+    const chapter = pieces[pieces.length - 1];
+    await this.getChapter({
+      book: { osisId: book },
+      versionChapterNum: chapter,
+    });
     this.getBooks();
   },
   data: () => ({
