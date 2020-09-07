@@ -32,6 +32,7 @@ import Vue from 'vue';
 import { mapActions, mapState } from 'vuex';
 import BibleSection from 'components/BibleSection.vue';
 import StrongsModal from 'components/StrongsModal.vue';
+import { PassageUrl } from 'src/models/PassageUrl';
 export default Vue.extend({
   name: 'Home',
   components: { BibleSection, StrongsModal },
@@ -62,17 +63,12 @@ export default Vue.extend({
     },
   },
   async mounted() {
-    console.log('mounted: ', this.passage);
-    const bookAndChapter = this.passage.split(':')[0];
-    const verse = this.passage.split(':')?.[1];
-    const pieces = bookAndChapter.split('+');
-    const book = pieces.slice(0, pieces.length - 1);
-    const chapter = pieces[pieces.length - 1];
+    const url = new PassageUrl(this.passage);
     await this.getChapter({
-      book: { osisId: book },
-      versionChapterNum: chapter,
+      book: { osisId: url.book },
+      versionChapterNum: url.chapter,
     });
-    const verseId = `${book}-${chapter}:${verse}`;
+    const verseId = `${url.book}-${url.chapter}:${url.verse}`;
     const element = document.getElementById(verseId);
     element?.scrollIntoView();
     this.getBooks();
