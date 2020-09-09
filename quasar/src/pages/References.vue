@@ -48,16 +48,16 @@ export default {
   data() {
     return {
       tab: 'books',
-      selectedBook: null
+      selectedBook: null,
     };
   },
   computed: {
     ...mapState(['books']),
     chapterNumbers() {
       return [
-        ...Array(this.selectedBook?.chaptersCount.length + 1 || 0).keys()
+        ...Array(this.selectedBook?.chaptersCount.length + 1 || 0).keys(),
       ].slice(1);
-    }
+    },
   },
   mounted() {
     this.getBooks();
@@ -69,13 +69,12 @@ export default {
       this.tab = 'chapters';
     },
     async onChapterSelect(versionChapterNum) {
-      this.goBack();
-      await this.getChapter({ book: this.selectedBook, versionChapterNum });
+      this.$router.push(`/${this.selectedBook.osisId}+${versionChapterNum}`);
     },
     goBack() {
       this.$router.go(-1);
-    }
-  }
+    },
+  },
 };
 </script>
 <style>
