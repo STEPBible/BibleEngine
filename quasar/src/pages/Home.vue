@@ -18,7 +18,12 @@
     </q-header>
     <q-page-container>
       <strongs-modal />
-      <bottom-sheet ref="swipeableBottomSheet"></bottom-sheet>
+      <bottom-sheet ref="swipeableBottomSheet">
+        <div class="font-size center">
+          <q-btn class="font-size__button font-size__button--decrease center">A-</q-btn>
+          <q-btn class="font-size__button font-size__button--increase center">A+</q-btn>
+        </div>
+      </bottom-sheet>
       <template v-if="chapterContent">
         <BibleSection v-for="(section, index) in chapterContent" :key="index" :section="section" />
       </template>
@@ -81,13 +86,18 @@ export default Vue.extend({
   }),
 });
 </script>
-<style>
+<style lang="scss">
 a {
   text-decoration: none;
 }
 html {
   overflow: scroll;
   overflow-x: hidden;
+}
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 ::-webkit-scrollbar {
   width: 0px;
@@ -124,5 +134,24 @@ html {
 .tippy-tooltip {
   background: black;
   padding: 8px;
+}
+.font-size {
+  font-size: 2rem;
+  height: 4rem;
+  padding-top: 2rem;
+}
+.font-size__button {
+  background: #747474;
+  border-radius: 0.1em;
+  font-size: 1.5rem;
+  height: 4rem;
+  width: 8rem;
+
+  &--decrease {
+    margin-right: 1em;
+  }
+  &--increase {
+    font-size: 2rem;
+  }
 }
 </style>
