@@ -20,8 +20,14 @@
       <strongs-modal />
       <bottom-sheet ref="swipeableBottomSheet">
         <div class="font-size center">
-          <q-btn class="font-size__button font-size__button--decrease center">A-</q-btn>
-          <q-btn class="font-size__button font-size__button--increase center">A+</q-btn>
+          <q-btn
+            @click="decreaseFontSize"
+            class="font-size__button font-size__button--decrease center"
+          >A-</q-btn>
+          <q-btn
+            @click="increaseFontSize"
+            class="font-size__button font-size__button--increase center"
+          >A+</q-btn>
         </div>
       </bottom-sheet>
       <template v-if="chapterContent">
@@ -62,7 +68,12 @@ export default Vue.extend({
     },
   },
   methods: {
-    ...mapActions(['getBooks', 'getChapter']),
+    ...mapActions([
+      'getBooks',
+      'getChapter',
+      'decreaseFontSize',
+      'increaseFontSize',
+    ]),
     goToSearch() {
       this.$router.push('/search');
     },
