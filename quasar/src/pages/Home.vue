@@ -3,7 +3,7 @@
     <q-header reveal>
       <q-toolbar class="flex">
         <span class="toolbar__content">
-          <q-btn flat round dense icon="more_vert" />
+          <q-btn flat round dense icon="more_vert" @click="openBottomSheet" />
           <span class="v-toolbar__content__picker">
             <router-link to="/references">
               <q-btn outline class="picker__option">
@@ -18,6 +18,7 @@
     </q-header>
     <q-page-container>
       <strongs-modal />
+      <bottom-sheet ref="swipeableBottomSheet"></bottom-sheet>
       <template v-if="chapterContent">
         <BibleSection v-for="(section, index) in chapterContent" :key="index" :section="section" />
       </template>
@@ -28,12 +29,13 @@
 <script lang="ts">
 import Vue from 'vue';
 import { mapActions, mapState } from 'vuex';
+import BottomSheet from 'components/BottomSheet.vue';
 import BibleSection from 'components/BibleSection.vue';
 import StrongsModal from 'components/StrongsModal.vue';
 import { PassageUrl } from 'src/models/PassageUrl';
 export default Vue.extend({
   name: 'Home',
-  components: { BibleSection, StrongsModal },
+  components: { BibleSection, StrongsModal, BottomSheet },
   props: {
     passage: {
       type: String,
@@ -58,6 +60,9 @@ export default Vue.extend({
     ...mapActions(['getBooks', 'getChapter']),
     goToSearch() {
       this.$router.push('/search');
+    },
+    openBottomSheet() {
+      this.$refs.swipeableBottomSheet.setState('half');
     },
   },
   async mounted() {
