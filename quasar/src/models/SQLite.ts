@@ -1,4 +1,7 @@
 export class SQLite {
+    static isAvailable() {
+        return !!window.plugins?.sqlDB
+    }
     static async copy(filename: string) {
         return new Promise((resolve, reject) => {
             window.plugins.sqlDB.copy(

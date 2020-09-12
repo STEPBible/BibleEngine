@@ -2,9 +2,7 @@ import { store } from 'quasar/wrappers';
 import Vuex from 'vuex';
 import { BibleEngineClient } from '@bible-engine/client';
 import { IBibleBook, IBibleContent } from '@bible-engine/core';
-import BibleApi from './BibleApi';
 import { SQLite } from './../models/SQLite';
-import { PassageUrl } from './../models/PassageUrl';
 import StrongsNumber from 'src/models/StrongsNumber';
 import StrongsDefinition from 'src/models/StrongsDefinition';
 
@@ -57,13 +55,16 @@ export default store(function ({ Vue }) {
     },
     mutations: {
       [SET_CLIENT](state) {
-        state.client = new BibleEngineClient({
-          bibleEngineOptions: {
+        const bibleEngineOptions =
+          SQLite.isAvailable() ? {
             type: 'cordova',
             location: 'default',
             database: BIBLE_DATABASE_NAME,
             synchronize: false,
-          }
+          } : undefined
+        state.client = new BibleEngineClient({
+          bibleEngineOptions,
+          apiBaseUrl: process.env.REMOTE_BIBLE_ENGINE_URL
         })
       },
       [SET_BOOKS](state, books) {
@@ -86,10 +87,12 @@ export default store(function ({ Vue }) {
     },
     actions: {
       async loadDatabase({ commit, dispatch }, { book, chapter, verse }) {
-        try {
-          await SQLite.copy(BIBLE_DATABASE_NAME);
-        } catch (error) {
-          console.error('Failed to copy sqlite db: ', error);
+        if (SQLite.isAvailable()) {
+          try {
+            await SQLite.copy(BIBLE_DATABASE_NAME);
+          } catch (error) {
+            console.error('Failed to copy sqlite db: ', error);
+          }
         }
         commit(SET_CLIENT)
         await dispatch('getChapter', {
@@ -112,14 +115,14 @@ export default store(function ({ Vue }) {
         commit(SET_FONT_SCALE, state.fontScale + 0.1)
       },
       async getBooks({ commit, state }) {
-        const books = await state.client?.localBibleEngine.getBooksForVersionUid(
+        const books = await state.client?.getBooksForVersion(
           state.versionUid
         );
         commit(SET_BOOKS, books);
       },
       async getChapter({ commit, state }, { book, versionChapterNum }) {
         commit(SET_CHAPTER, { book, versionChapterNum, chapterContent: [] });
-        const content = await state.client?.localBibleEngine.getFullDataForReferenceRange({
+        const content = await state.client?.getFullDataForReferenceRange({
           bookOsisId: book.osisId, versionChapterNum, versionUid: state.versionUid
         })
         commit(SET_CHAPTER, {
@@ -138,10 +141,10 @@ export default store(function ({ Vue }) {
           normalizedStrongs.map(strong =>
             Promise.all(
               dictionaries.map(async dictionary => {
-                const entries = await state.client?.localBibleEngine.getDictionaryEntries(
+                const entries = await state.client?.getDictionaryEntry(
                   strong.id, dictionary
                 );
-                return entries?.[0]
+                return entries
               })
             )
           )
