@@ -11,6 +11,8 @@
     "test": "yarn jest --runInBand"
   },
   "dependencies": {
+    "@bible-engine/client": "file:../client",
+    "@bible-engine/core": "file:../core",
     "@quasar/extras": "^1.0.0",
     "@vue/composition-api": "^0.6.4",
     "axios": "^0.18.1",
@@ -19,6 +21,7 @@
     "flexsearch": "^0.6.32",
     "hammerjs": "^2.0.8",
     "quasar": "^1.0.0",
+    "react-native-sqlite-storage": "file:./src/shims/react-native-sqlite-storage",
     "vue-tippy": "^4.5.1"
   },
   "devDependencies": {

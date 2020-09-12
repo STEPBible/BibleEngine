@@ -1,7 +1,9 @@
 import { store } from 'quasar/wrappers';
 import Vuex from 'vuex';
-import BibleApi from './BibleApi';
+import { BibleEngineClient } from '@bible-engine/client';
 import { IBibleBook, IBibleContent } from '@bible-engine/core';
+import BibleApi from './BibleApi';
+import { SQLite } from './../models/SQLite';
 
 export interface StoreInterface {
   books: IBibleBook[];
@@ -10,6 +12,7 @@ export interface StoreInterface {
     osisId: string
   },
   chapterContent?: IBibleContent,
+  client?: BibleEngineClient
   fontScale: number,
   strongsDefinitions: any,
   strongsModal: boolean,
@@ -22,6 +25,9 @@ const SET_CHAPTER = 'SET_CHAPTER';
 const SET_FONT_SCALE = 'SET_FONT_SCALE';
 const SET_STRONGS = 'SET_STRONGS';
 const SET_STRONGS_MODAL = 'SET_STRONGS_MODAL';
+const SET_CLIENT = 'SET_CLIENT'
+
+const BIBLE_DATABASE_NAME = 'bibles.db';
 
 export default store(function ({ Vue }) {
   Vue.use(Vuex);
@@ -34,6 +40,7 @@ export default store(function ({ Vue }) {
         osisId: 'Gen'
       },
       chapterContent: undefined,
+      client: undefined,
       fontScale: 1,
       strongsDefinitions: null,
       strongsModal: false,
@@ -46,6 +53,16 @@ export default store(function ({ Vue }) {
       )
     },
     mutations: {
+      [SET_CLIENT](state) {
+        state.client = new BibleEngineClient({
+          bibleEngineOptions: {
+            type: 'cordova',
+            location: 'default',
+            database: BIBLE_DATABASE_NAME,
+            synchronize: false,
+          }
+        })
+      },
       [SET_BOOKS](state, books) {
         state.books = books;
       },
@@ -65,6 +82,14 @@ export default store(function ({ Vue }) {
       }
     },
     actions: {
+      async loadDatabase({ commit }) {
+        try {
+          await SQLite.copy(BIBLE_DATABASE_NAME);
+        } catch (error) {
+          console.error('Failed to copy sqlite db: ', error);
+        }
+        commit(SET_CLIENT)
+      },
       decreaseFontSize({ commit, state }) {
         const SMALLEST_FONT_SCALE = 0.5
         if (state.fontScale < SMALLEST_FONT_SCALE) return

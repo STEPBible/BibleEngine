@@ -72,6 +72,7 @@ export default Vue.extend({
       'getBooks',
       'getChapter',
       'decreaseFontSize',
+      'loadDatabase',
       'increaseFontSize',
     ]),
     goToSearch() {
@@ -82,6 +83,7 @@ export default Vue.extend({
     },
   },
   async mounted() {
+    this.loadDatabase();
     const url = PassageUrl.parse(this.passage);
     await this.getChapter({
       book: { osisId: url.book },
