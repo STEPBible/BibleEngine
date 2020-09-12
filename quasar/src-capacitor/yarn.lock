@@ -106,6 +106,22 @@ compare-versions@^3.1.0:
   resolved "https://registry.yarnpkg.com/compare-versions/-/compare-versions-3.6.0.tgz#1a5689913685e5a87637b8d3ffca75514ec41d62"
   integrity sha512-W6Af2Iw1z4CB7q4uU4hv646dW9GQuBM+YpC0UvUCWSD8w90SJjp+ujJuXaEMtAXBtSqGfMPuFOVn4/+FlaqfBA==
 
+"cordova-plugin-dbcopy-capacitor@https://github.com/chriswep/cordova-plugin-dbcopy-capacitor.git":
+  version "1.0.0"
+  resolved "https://github.com/chriswep/cordova-plugin-dbcopy-capacitor.git#a92599cc0d45a86a3caf29c49fcc084b4274a22b"
+
+cordova-sqlite-storage-dependencies@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/cordova-sqlite-storage-dependencies/-/cordova-sqlite-storage-dependencies-2.1.2.tgz#2377b538e4afe8695efeea16003d8ee7b5fc6043"
+  integrity sha512-YwtdPe8gkExhFZRHzJeUgBTPtpiRbRZK6HG4MyMtFmpF3NAXUI+8N/AyaC6gbjsQm0CB2Sv6x9UwqQq8BaPk2w==
+
+cordova-sqlite-storage@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/cordova-sqlite-storage/-/cordova-sqlite-storage-5.0.1.tgz#591e2abbd0ea5d0725981c1f81f02024bc6a1c1d"
+  integrity sha512-uyRUcs2UCAi/LYRlrZ7ykcyOINzwClgWc45Myi4UxF//GFC3EP7qRZbVp/JWFVWs8a8QActNNQBBEe8pz3VTNw==
+  dependencies:
+    cordova-sqlite-storage-dependencies "2.1.2"
+
 escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
