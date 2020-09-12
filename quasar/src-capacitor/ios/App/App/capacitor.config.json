@@ -1,0 +1,7 @@
+{
+  "appId": "com.tyndale.stepbible",
+  "appName": "Quasar App",
+  "bundledWebRuntime": false,
+  "npmClient": "yarn",
+  "webDir": "www"
+}
