@@ -4,6 +4,9 @@ import { BibleEngineClient } from '@bible-engine/client';
 import { IBibleBook, IBibleContent } from '@bible-engine/core';
 import BibleApi from './BibleApi';
 import { SQLite } from './../models/SQLite';
+import { PassageUrl } from './../models/PassageUrl';
+import StrongsNumber from 'src/models/StrongsNumber';
+import StrongsDefinition from 'src/models/StrongsDefinition';
 
 export interface StoreInterface {
   books: IBibleBook[];
@@ -27,7 +30,7 @@ const SET_STRONGS = 'SET_STRONGS';
 const SET_STRONGS_MODAL = 'SET_STRONGS_MODAL';
 const SET_CLIENT = 'SET_CLIENT'
 
-const BIBLE_DATABASE_NAME = 'bibles.db';
+const BIBLE_DATABASE_NAME = 'bibles_v1.db';
 
 export default store(function ({ Vue }) {
   Vue.use(Vuex);
@@ -82,13 +85,21 @@ export default store(function ({ Vue }) {
       }
     },
     actions: {
-      async loadDatabase({ commit }) {
+      async loadDatabase({ commit, dispatch }, { book, chapter, verse }) {
         try {
           await SQLite.copy(BIBLE_DATABASE_NAME);
         } catch (error) {
           console.error('Failed to copy sqlite db: ', error);
         }
         commit(SET_CLIENT)
+        await dispatch('getChapter', {
+          book: { osisId: book },
+          versionChapterNum: chapter,
+        });
+        await dispatch('getBooks')
+        const verseId = `${book}-${chapter}:${verse}`;
+        const element = document.getElementById(verseId);
+        element?.scrollIntoView();
       },
       decreaseFontSize({ commit, state }) {
         const SMALLEST_FONT_SCALE = 0.5
@@ -100,17 +111,42 @@ export default store(function ({ Vue }) {
         if (state.fontScale > LARGEST_FONT_SCALE) return
         commit(SET_FONT_SCALE, state.fontScale + 0.1)
       },
-      async getBooks({ commit }) {
-        const books = await BibleApi.getBooks();
+      async getBooks({ commit, state }) {
+        const books = await state.client?.localBibleEngine.getBooksForVersionUid(
+          state.versionUid
+        );
         commit(SET_BOOKS, books);
       },
-      async getChapter({ commit }, { book, versionChapterNum }) {
+      async getChapter({ commit, state }, { book, versionChapterNum }) {
         commit(SET_CHAPTER, { book, versionChapterNum, chapterContent: [] });
-        const chapterContent = await BibleApi.getChapter(book.osisId, versionChapterNum);
-        commit(SET_CHAPTER, { book, versionChapterNum, chapterContent });
+        const content = await state.client?.localBibleEngine.getFullDataForReferenceRange({
+          bookOsisId: book.osisId, versionChapterNum, versionUid: state.versionUid
+        })
+        commit(SET_CHAPTER, {
+          book,
+          versionChapterNum,
+          chapterContent: content?.content.contents
+        });
       },
-      async getStrongsDefinition({ commit }, strongsTags: string[]) {
-        const definitions = await BibleApi.getStrongsDefinitions(strongsTags);
+      async getStrongsDefinition({ commit, state }, strongsTags: string[]) {
+        const normalizedStrongs = strongsTags.map(strong => new StrongsNumber(strong));
+        const isHebrewStrongs = normalizedStrongs[0].id.startsWith('H');
+        const dictionaries = isHebrewStrongs
+          ? ['@BdbMedDef']
+          : ['@MounceShortDef', '@MounceMedDef'];
+        const requests = await Promise.all(
+          normalizedStrongs.map(strong =>
+            Promise.all(
+              dictionaries.map(async dictionary => {
+                const entries = await state.client?.localBibleEngine.getDictionaryEntries(
+                  strong.id, dictionary
+                );
+                return entries?.[0]
+              })
+            )
+          )
+        );
+        const definitions = requests.map(request => StrongsDefinition.merge(request));
         commit(SET_STRONGS, { definitions });
         commit(SET_STRONGS_MODAL, true);
       },

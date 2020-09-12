@@ -59,8 +59,8 @@ export default {
       ].slice(1);
     },
   },
-  mounted() {
-    this.getBooks();
+  async mounted() {
+    await this.getBooks();
   },
   methods: {
     ...mapActions(['getChapter', 'getBooks']),
@@ -69,6 +69,7 @@ export default {
       this.tab = 'chapters';
     },
     async onChapterSelect(versionChapterNum) {
+      this.getChapter({ book: this.selectedBook, versionChapterNum });
       this.$router.push(`/${this.selectedBook.osisId}+${versionChapterNum}`);
     },
     goBack() {

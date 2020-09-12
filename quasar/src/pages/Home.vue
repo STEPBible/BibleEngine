@@ -38,13 +38,12 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
 import { mapActions, mapState } from 'vuex';
 import BottomSheet from 'components/BottomSheet.vue';
 import BibleSection from 'components/BibleSection.vue';
 import StrongsModal from 'components/StrongsModal.vue';
-import { PassageUrl } from 'src/models/PassageUrl';
-export default Vue.extend({
+import { PassageUrl } from '../models/PassageUrl';
+export default {
   name: 'Home',
   components: { BibleSection, StrongsModal, BottomSheet },
   props: {
@@ -83,21 +82,13 @@ export default Vue.extend({
     },
   },
   async mounted() {
-    this.loadDatabase();
     const url = PassageUrl.parse(this.passage);
-    await this.getChapter({
-      book: { osisId: url.book },
-      versionChapterNum: url.chapter,
-    });
-    const verseId = `${url.book}-${url.chapter}:${url.verse}`;
-    const element = document.getElementById(verseId);
-    element?.scrollIntoView();
-    this.getBooks();
+    await this.loadDatabase(url);
   },
   data: () => ({
     showBottomSheet: false,
   }),
-});
+};
 </script>
 <style lang="scss">
 a {
