@@ -55,7 +55,7 @@ export default {
   },
 };
 </script>
-<style>
+<style lang="scss">
 .paragraph {
   display: flex;
   flex-wrap: wrap;
@@ -65,14 +65,17 @@ export default {
   font-size: 1.2em;
 }
 .phrase {
+  color: #dedede;
   margin-right: 0.3em;
 }
 .phrase--strongs {
   cursor: pointer;
-  font-weight: 500;
 }
-.strongs:active {
-  background: #2196f3;
+.phrase--strongs:hover {
+  background: #252525;
+}
+.phrase--strongs:active {
+  background: #787878;
 }
 .verse-number {
   font-size: 0.8em;
