@@ -25,7 +25,7 @@
         >A+</q-btn>
       </div>
     </bottom-sheet>
-    <q-scroll-area :visible="true" class="body" v-if="chapterContent">
+    <q-scroll-area class="body">
       <BibleSection v-for="(section, index) in chapterContent" :key="index" :section="section" />
     </q-scroll-area>
   </div>
@@ -94,6 +94,13 @@ html {
 }
 body.body--dark {
   color: #e1e1e1;
+}
+.body {
+  height: 100vh;
+  margin-top: 48px;
+}
+.q-scrollarea__thumb {
+  visibility: hidden;
 }
 .center {
   display: flex;
