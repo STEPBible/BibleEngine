@@ -1,40 +1,34 @@
 <template>
-  <q-layout>
-    <q-header reveal>
-      <q-toolbar class="flex">
-        <span class="toolbar__content">
-          <q-btn flat round dense icon="more_vert" @click="openBottomSheet" />
-          <span class="v-toolbar__content__picker">
-            <router-link to="/references">
-              <q-btn outline class="picker__option">
-                <span class="v-toolbar__content__picker__ref">{{ bookAndChapterReference }}</span>
-              </q-btn>
-            </router-link>
-            <q-btn outline class="picker__option picker__version">ESV</q-btn>
-          </span>
-          <q-btn flat round dense icon="search" @click="goToSearch" />
-        </span>
-      </q-toolbar>
-    </q-header>
-    <q-page-container>
-      <strongs-modal />
-      <bottom-sheet ref="swipeableBottomSheet">
-        <div class="font-size center">
-          <q-btn
-            @click="decreaseFontSize"
-            class="font-size__button font-size__button--decrease center"
-          >A-</q-btn>
-          <q-btn
-            @click="increaseFontSize"
-            class="font-size__button font-size__button--increase center"
-          >A+</q-btn>
-        </div>
-      </bottom-sheet>
-      <template v-if="chapterContent">
-        <BibleSection v-for="(section, index) in chapterContent" :key="index" :section="section" />
-      </template>
-    </q-page-container>
-  </q-layout>
+  <div>
+    <span :class="['toolbar__content', { 'toolbar__content--dark': $q.dark.isActive }]">
+      <q-btn flat round dense icon="more_vert" @click="openBottomSheet" />
+      <span class="v-toolbar__content__picker">
+        <router-link to="/references">
+          <q-btn outline class="picker__option">
+            <span class="v-toolbar__content__picker__ref">{{ bookAndChapterReference }}</span>
+          </q-btn>
+        </router-link>
+        <q-btn outline class="picker__option picker__version">ESV</q-btn>
+      </span>
+      <q-btn flat round dense icon="search" @click="goToSearch" />
+    </span>
+    <strongs-modal />
+    <bottom-sheet ref="swipeableBottomSheet">
+      <div class="font-size center">
+        <q-btn
+          @click="decreaseFontSize"
+          class="font-size__button font-size__button--decrease center"
+        >A-</q-btn>
+        <q-btn
+          @click="increaseFontSize"
+          class="font-size__button font-size__button--increase center"
+        >A+</q-btn>
+      </div>
+    </bottom-sheet>
+    <q-scroll-area :visible="true" class="body" v-if="chapterContent">
+      <BibleSection v-for="(section, index) in chapterContent" :key="index" :section="section" />
+    </q-scroll-area>
+  </div>
 </template>
 
 <script lang="ts">
@@ -98,6 +92,9 @@ html {
   overflow: scroll;
   overflow-x: hidden;
 }
+body.body--dark {
+  color: #e1e1e1;
+}
 .center {
   display: flex;
   justify-content: center;
@@ -113,9 +110,14 @@ html {
 .toolbar__content {
   display: flex;
   justify-content: space-between;
-  left: 8px;
-  right: 8px;
-  position: absolute;
+  left: 0;
+  padding: 0.5rem;
+  right: 0;
+  position: fixed;
+  top: 0;
+}
+.toolbar__content--dark {
+  background: #1f1f1f;
 }
 .icon--left {
   position: absolute;
