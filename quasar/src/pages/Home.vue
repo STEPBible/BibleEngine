@@ -26,7 +26,7 @@
       </div>
     </bottom-sheet>
     <q-scroll-area class="body">
-      <BibleSection v-for="(section, index) in chapterContent" :key="index" :section="section" />
+      <bible-section v-for="(section, index) in chapterContent" :key="index" :section="section" />
     </q-scroll-area>
   </div>
 </template>
@@ -122,6 +122,7 @@ body.body--dark {
   right: 0;
   position: fixed;
   top: 0;
+  z-index: 3;
 }
 .toolbar__content--dark {
   background: #1f1f1f;

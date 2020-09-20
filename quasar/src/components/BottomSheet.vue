@@ -134,6 +134,7 @@ export default {
   border-radius: 10px 10px 0 0;
   box-shadow: 0 -3px 4px rgba(0, 0, 0, 0.1);
   left: 0;
+  z-index: 2;
 }
 
 .card[data-state='half'],
