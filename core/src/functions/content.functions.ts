@@ -1087,8 +1087,8 @@ export const stripUnnecessaryDataFromBibleContextData = (
 export const stripUnnecessaryDataFromBibleReferenceRange = (
     rangeNormalized: IBibleReferenceRangeNormalized
 ) => {
-    delete rangeNormalized.versionId;
-    delete rangeNormalized.isNormalized;
+    delete (rangeNormalized as any).versionId;
+    delete (rangeNormalized as any).isNormalized;
 };
 
 export const stripUnnecessaryDataFromBibleVersion = (
@@ -1100,7 +1100,7 @@ export const stripUnnecessaryDataFromBibleVersion = (
         title: versionEntity.title,
         language: versionEntity.language,
         chapterVerseSeparator: versionEntity.chapterVerseSeparator,
-        lastUpdate: versionEntity.lastUpdate
+        lastUpdate: versionEntity.lastUpdate,
     };
     if (versionEntity.copyrightLong && !stripDocuments)
         version.copyrightLong = versionEntity.copyrightLong;
@@ -1108,5 +1108,6 @@ export const stripUnnecessaryDataFromBibleVersion = (
         version.description = versionEntity.description;
     if (versionEntity.copyrightShort) version.copyrightShort = versionEntity.copyrightShort;
     if (versionEntity.hasStrongs) version.hasStrongs = versionEntity.hasStrongs;
+    if (versionEntity.type) version.type = versionEntity.type;
     return version;
 };

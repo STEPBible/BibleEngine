@@ -1,6 +1,6 @@
 import { JsonController, Post, Body, Get, Param } from 'routing-controllers';
 import { Inject } from 'typedi';
-import { BibleEngine, IBibleReferenceRangeQuery } from '@bible-engine/core';
+import { BibleEngine, IBibleBook, IBibleReferenceRangeQuery, IBibleVersion, stripUnnecessaryDataFromBibleBook, stripUnnecessaryDataFromBibleVersion } from '@bible-engine/core';
 
 @JsonController('/bible')
 export class BibleController {
@@ -32,7 +32,7 @@ export class BibleController {
             {
                 versionUid,
                 bookOsisId: osisId,
-                versionChapterNum: chapterNr
+                versionChapterNum: chapterNr,
             },
             true
         );
@@ -51,7 +51,7 @@ export class BibleController {
                 bookOsisId: osisId,
                 versionChapterNum: chapterNr,
                 versionVerseNum: verseNr,
-                skipPartialWrappingSectionsInDocument: true
+                skipPartialWrappingSectionsInDocument: true,
             },
             true
         );
@@ -72,7 +72,7 @@ export class BibleController {
                 versionChapterNum: chapterNr,
                 versionVerseNum: verseNr,
                 versionVerseEndNum: verseEndNr,
-                skipPartialWrappingSectionsInDocument: true
+                skipPartialWrappingSectionsInDocument: true,
             },
             true
         );
@@ -95,6 +95,56 @@ export class BibleController {
     ) {
         return this.bibleEngine
             .getDictionaryEntries(strongNum, dictionaryId)
-            .then(entries => (entries.length ? entries[0] : undefined));
+            .then((entries) => (entries.length ? entries[0] : undefined));
+    }
+
+    @Post('/versions/:lang')
+    async syncVersions(
+        @Param('lang') lang: string,
+        @Body({ required: true })
+        clientVersions: {
+            [index: string]: {
+                lastUpdate: string | Date;
+                dataLocation: Required<IBibleVersion>['dataLocation'];
+            };
+        }
+    ) {
+        // fetch all versions for the given language
+        const langVersions = await this.bibleEngine.getVersions(lang);
+
+        // filter versions to all versions missing on the client or remote-only
+        // versions that have been updated
+        const remoteUpdates: {
+            uid: string;
+            meta?: IBibleVersion;
+            books?: IBibleBook[];
+            change: 'deleted' | 'updated' | 'new';
+        }[] = [];
+
+        for (const version of langVersions) {
+            if (
+                !clientVersions[version.uid] ||
+                (clientVersions[version.uid].dataLocation === 'remote' &&
+                    new Date(clientVersions[version.uid].lastUpdate) < version.lastUpdate)
+            ) {
+                const versionBooks = await this.bibleEngine.getBooksForVersion(version.id);
+                remoteUpdates.push({
+                    uid: version.uid,
+                    meta: stripUnnecessaryDataFromBibleVersion(version),
+                    change: !clientVersions[version.uid] ? 'new' : 'updated',
+                    books: versionBooks.map((book) => stripUnnecessaryDataFromBibleBook(book)),
+                });
+            }
+        }
+
+        // check if a version has been deleted on the server
+        for (const clientVersionUid of Object.keys(clientVersions)) {
+            if (
+                clientVersions[clientVersionUid].dataLocation === 'remote' &&
+                !langVersions.find((version) => version.uid === clientVersionUid)
+            )
+                remoteUpdates.push({ uid: clientVersionUid, change: 'deleted' });
+        }
+        return remoteUpdates;
     }
 }

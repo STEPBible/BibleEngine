@@ -1,6 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, Index } from 'typeorm';
-import { BiblePhraseEntity } from './BiblePhrase.entity';
-import { IBibleNote, DocumentRoot } from '../models';
+import { IBibleNote, DocumentRoot, IBiblePhraseWithNumbers } from '../models';
 
 @Entity('bible_note')
 export class BibleNoteEntity implements IBibleNote {
@@ -20,8 +19,9 @@ export class BibleNoteEntity implements IBibleNote {
     @Index()
     phraseId: number;
 
-    @ManyToOne(() => BiblePhraseEntity, phrase => phrase.notes)
-    phrase: BiblePhraseEntity;
+        // using string notation here to prevent circular reference
+    @ManyToOne('BiblePhraseEntity', 'notes')
+    phrase: IBiblePhraseWithNumbers;
 
     constructor(initializer: IBibleNote, phraseId?: number) {
         Object.assign(this, initializer);

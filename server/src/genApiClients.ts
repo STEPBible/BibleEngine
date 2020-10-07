@@ -60,13 +60,15 @@ function genApiClient(
                 ${param.name}${param.required ? '' : '?'}: ${ArgumentType};`;
             }
         }
-        if (bodyTs)
-            ts += `
-            ${bodyTs}`;
+
         if (paramsTs)
             ts += `
             params: {${paramsTs}
-            }`;
+            },`;
+        
+        if (bodyTs)
+            ts += `
+            ${bodyTs}`;
 
         ts += `
         ) {

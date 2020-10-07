@@ -23,7 +23,7 @@
         getVersion(
             params: {
                 versionUid: FirstArgument<BibleController['getVersion']>;
-            }
+            },
         ) {
             let path = '/bible/versions/:versionUid';
         
@@ -40,7 +40,7 @@
         getBooksForVersion(
             params: {
                 versionUid: FirstArgument<BibleController['getBooksForVersion']>;
-            }
+            },
         ) {
             let path = '/bible/versions/:versionUid/books';
         
@@ -59,7 +59,7 @@
                 versionUid: FirstArgument<BibleController['getChapter']>;
                 osisId: SecondArgument<BibleController['getChapter']>;
                 chapterNr: ThirdArgument<BibleController['getChapter']>;
-            }
+            },
         ) {
             let path = '/bible/ref/:versionUid/:osisId/:chapterNr';
         
@@ -81,7 +81,7 @@
                 osisId: SecondArgument<BibleController['getVerse']>;
                 chapterNr: ThirdArgument<BibleController['getVerse']>;
                 verseNr: FourthArgument<BibleController['getVerse']>;
-            }
+            },
         ) {
             let path = '/bible/ref/:versionUid/:osisId/:chapterNr/:verseNr';
         
@@ -105,7 +105,7 @@
                 chapterNr: ThirdArgument<BibleController['getVerses']>;
                 verseNr: FourthArgument<BibleController['getVerses']>;
                 verseEndNr: FifthArgument<BibleController['getVerses']>;
-            }
+            },
         ) {
             let path = '/bible/ref/:versionUid/:osisId/:chapterNr/:verseNr-:verseEndNr';
         
@@ -141,7 +141,7 @@
         getDefinitions(
             params: {
                 strongNum: FirstArgument<BibleController['getDefinitions']>;
-            }
+            },
         ) {
             let path = '/bible/definitions/:strongNum';
         
@@ -159,7 +159,7 @@
             params: {
                 strongNum: FirstArgument<BibleController['getDefinition']>;
                 dictionaryId: SecondArgument<BibleController['getDefinition']>;
-            }
+            },
         ) {
             let path = '/bible/definitions/:strongNum/:dictionaryId';
         
@@ -171,6 +171,25 @@
             >({
                 url: this.apiBaseUrl + path,
                 method: 'GET',
+            });
+        }
+        
+        syncVersions(
+            params: {
+                lang: FirstArgument<BibleController['syncVersions']>;
+            },
+            data: SecondArgument<BibleController['syncVersions']>,
+        ) {
+            let path = '/bible/versions/:lang';
+        
+            path = path.replace(':lang', params.lang+'');
+            
+            return apiRequest<
+                ThenArg<ReturnType<BibleController['syncVersions']>>
+            >({
+                url: this.apiBaseUrl + path,
+                method: 'POST',
+                data: data,
             });
         }
         

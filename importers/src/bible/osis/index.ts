@@ -133,7 +133,6 @@ export class OsisImporter extends BibleEngineImporter {
                 context.currentBook = {
                     osisId: tag.attributes.osisID!,
                     type: bookNr < 40 ? 'ot' : 'nt',
-                    number: bookNr,
                     ...bookMeta
                 };
 
@@ -304,7 +303,13 @@ export class OsisImporter extends BibleEngineImporter {
                     case OsisXmlNodeType.NEWLINE:
                     case OsisXmlNodeType.NEWLINE_POETRY:
                         const phrase = this.getCurrentPhrase(context);
-                        if (!phrase) throw new Error(`linebreak failed: can't find phrase`);
+                        if (!phrase)
+                            throw new Error(
+                                this.getErrorMessageWithContext(
+                                    `linebreak failed: can't find phrase`,
+                                    context
+                                )
+                            );
                         phrase.linebreak = true;
                         break;
                     default:
@@ -930,7 +935,7 @@ export class OsisImporter extends BibleEngineImporter {
 
     getCurrentPhrase(context: ParserContext, createIfMissing = false) {
         const currentContainer = this.getCurrentContainer(context);
-        if (currentContainer.type === 'section' || currentContainer.type === 'group') {
+        if (currentContainer.type === 'section' || currentContainer.type === 'group' || currentContainer.type === 'root') {
             let lastContent = currentContainer.contents[currentContainer.contents.length - 1];
             if (!lastContent) {
                 if (createIfMissing) {

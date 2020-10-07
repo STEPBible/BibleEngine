@@ -13,8 +13,7 @@ import {
     parseReferenceId,
     isReferenceNormalized
 } from '../functions/reference.functions';
-import { IBibleReferenceRangeNormalized, IBibleCrossReference } from '../models';
-import { BiblePhraseEntity, BibleSectionEntity } from '../entities';
+import { IBibleReferenceRangeNormalized, IBibleCrossReference, IBiblePhraseWithNumbers, IBibleSectionEntity } from '../models';
 
 @Entity('bible_cross_reference')
 export class BibleCrossReferenceEntity implements IBibleCrossReference {
@@ -57,15 +56,17 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
     @Column({ nullable: true })
     @Index()
     phraseId?: number;
-    @ManyToOne(() => BiblePhraseEntity, phrase => phrase.crossReferences)
-    phrase?: BiblePhraseEntity;
+        // using string notation here to prevent circular reference
+    @ManyToOne('BiblePhraseEntity', 'crossReferences')
+    phrase?: IBiblePhraseWithNumbers;
 
     @Column({ nullable: true })
     @Index()
     sectionId?: number;
 
-    @ManyToOne(() => BibleSectionEntity, section => section.crossReferences)
-    section?: BibleSectionEntity;
+        // using string notation here to prevent circular reference
+    @ManyToOne('BibleSectionEntity', 'crossReferences')
+    section?: IBibleSectionEntity;
 
     constructor(
         crossRef: IBibleCrossReference,

@@ -5,7 +5,7 @@ import {
     EntityManager,
     Between,
     FindConditions,
-    DatabaseType
+    DatabaseType, Like
 } from 'typeorm';
 
 import {
@@ -80,7 +80,7 @@ export class NoDbConnectionError extends Error {
 export class BibleVersionRemoteOnlyError extends Error {
     constructor() {
         super('accessing content of a bible version that is only remote');
-        this.name = 'BibleBookContentNotImportedError';
+        this.name = 'BibleVersionRemoteOnlyError';
     }
 }
 
@@ -577,10 +577,19 @@ export class BibleEngine {
         return db.findOne(BibleVersionEntity, { uid: versionUid });
     }
 
-    async getVersions() {
+    async getVersionLocalId(versionUid: string) {
+        const db = await this.pDB;
+        const version = await db.findOne(BibleVersionEntity, {
+            where: { uid: versionUid },
+            select: ['id']
+        });
+        return version?.id;
+    }
+
+    async getVersions(lang?: string) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        return db.find(BibleVersionEntity);
+        return lang ? db.find(BibleVersionEntity,{language: Like(`${lang}%`)}): db.find(BibleVersionEntity);
     }
 
     async updateBook(

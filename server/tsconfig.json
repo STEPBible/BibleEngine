@@ -20,7 +20,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "downlevelIteration": true,
-        "declaration": true
+        "declaration": true,
     },
     "exclude": ["node_modules"]
 }

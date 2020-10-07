@@ -9,7 +9,7 @@ import { BibleApi } from './Bible.api';
 
 export class BibleEngineClient {
     remoteApi?: BibleApi;
-    localBibleEngine: BibleEngine;
+    localBibleEngine?: BibleEngine;
 
     constructor({
         bibleEngineOptions,
@@ -48,9 +48,20 @@ export class BibleEngineClient {
         forceRemote = false,
         stripUnnecessaryData = false
     ) {
+        // RADAR: coming back to this again (while fixing a bug) this way of
+        // handling remote versions looks like an anti-pattern. The reason for
+        // this is probably to safe one query to the version-table. However one
+        // could argue that readability and maintainability is more important
+        // than this small optimization. However this method is called very
+        // often. Another way to solve this would be to refactor the return type
+        // of `getFullDataForReferenceRange` to include the "remote-only"
+        // information however this would break all code that is currently using
+        // this method.
         if (this.localBibleEngine && !forceRemote) {
             try {
-                return this.localBibleEngine.getFullDataForReferenceRange(
+                // we need the await, otherwise errors are not caught by `try ..
+                // catch`
+                return await this.localBibleEngine.getFullDataForReferenceRange(
                     rangeQuery,
                     stripUnnecessaryData
                 );

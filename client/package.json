@@ -3,12 +3,13 @@
     "version": "0.1.0",
     "main": "lib/index.js",
     "scripts": {
-        "build": "rimraf ./lib && tsc",
+        "build": "rimraf ./lib && tsc && npm run buildES6",
+        "buildES6": "rimraf ./lib-es6 && tsc --target ES6 --module ES6 --outDir ./lib-es6",
         "test": "yarn jest"
     },
     "dependencies": {
         "cross-fetch": "^3.0.4",
-        "typeorm": "0.2.24",
+        "typeorm": "0.2.28",
         "whatwg-fetch": "^3.0.0"
     },
     "devDependencies": {
@@ -16,6 +17,6 @@
         "jest": "^24.9.0",
         "rimraf": "^2.6.3",
         "ts-jest": "^24.1.0",
-        "typescript": "3.8.3"
+        "typescript": "4.0.3"
     }
 }

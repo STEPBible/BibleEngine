@@ -61,6 +61,7 @@ export class NeueImporter extends BibleEngineImporter {
             description,
             chapterVerseSeparator: ',',
             language: 'de-DE',
+            type: 'dynamic',
             hasStrongs: false
         });
 

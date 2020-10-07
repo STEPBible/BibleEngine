@@ -31,6 +31,7 @@ export enum OsisXmlNodeType {
     NEWLINE = 'x-newLine',
     NEWLINE_POETRY = 'x-newPoetryLine',
     PARAGRAPH = 'paragraph',
+    PARALLEL = 'parallel',
     PSALM = 'psalm',
     SECTION = 'section',
     SECTION_MAJOR = 'majorSection',
