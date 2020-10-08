@@ -86,7 +86,10 @@ export default store(function ({ Vue }) {
       }
     },
     actions: {
-      async loadDatabase({ commit, dispatch }, { book, chapter, verse }) {
+      async loadDatabase({ commit, dispatch, state }, { book, chapter, verse }) {
+        if (state.client) {
+          return
+        }
         if (SQLite.isAvailable()) {
           try {
             await SQLite.copy(BIBLE_DATABASE_NAME);
