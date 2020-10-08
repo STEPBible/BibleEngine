@@ -1,11 +1,18 @@
 <template>
   <div>
-    <span :class="['toolbar__content', { 'toolbar__content--dark': $q.dark.isActive }]">
+    <span
+      :class="[
+        'toolbar__content',
+        { 'toolbar__content--dark': $q.dark.isActive },
+      ]"
+    >
       <q-btn flat round dense icon="more_vert" @click="openBottomSheet" />
       <span class="v-toolbar__content__picker">
         <router-link to="/references">
           <q-btn outline class="picker__option">
-            <span class="v-toolbar__content__picker__ref">{{ bookAndChapterReference }}</span>
+            <span class="v-toolbar__content__picker__ref">{{
+              bookAndChapterReference
+            }}</span>
           </q-btn>
         </router-link>
         <q-btn outline class="picker__option picker__version">ESV</q-btn>
@@ -18,15 +25,21 @@
         <q-btn
           @click="decreaseFontSize"
           class="font-size__button font-size__button--decrease center"
-        >A-</q-btn>
+          >A-</q-btn
+        >
         <q-btn
           @click="increaseFontSize"
           class="font-size__button font-size__button--increase center"
-        >A+</q-btn>
+          >A+</q-btn
+        >
       </div>
     </bottom-sheet>
     <q-scroll-area class="body">
-      <bible-section v-for="(section, index) in chapterContent" :key="index" :section="section" />
+      <bible-section
+        v-for="(section, index) in chapterContent"
+        :key="index"
+        :section="section"
+      />
     </q-scroll-area>
   </div>
 </template>
