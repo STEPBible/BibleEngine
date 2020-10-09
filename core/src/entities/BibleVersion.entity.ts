@@ -49,7 +49,7 @@ export class BibleVersionEntity implements IBibleVersion {
     lastUpdate: Date;
 
     @Column({ type: 'varchar' })
-    dataLocation?: 'db' | 'file' | 'remote';
+    dataLocation?: IBibleVersion['dataLocation'];
 
     constructor(initializer: IBibleVersion) {
         Object.assign(this, initializer);

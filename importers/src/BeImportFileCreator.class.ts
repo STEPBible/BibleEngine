@@ -35,6 +35,7 @@ export class BeImportFileCreator {
                     language: versionEntity.language,
                     chapterVerseSeparator: versionEntity.chapterVerseSeparator,
                     hasStrongs: versionEntity.hasStrongs,
+                    type: versionEntity.type,
                     lastUpdate: versionEntity.lastUpdate
                 },
                 file: await this.createVersionFile(versionEntity.uid, options)
@@ -89,7 +90,8 @@ export class BeImportFileCreator {
     async createVersionFile(versionUid: string, options?: BeFileCreatorOptions) {
         const versionData = await this.bibleEngine.getVersionFullData(versionUid);
         const targetDir = this.destinationPath + '/' + versionData.version.uid;
-        const targetFile = `${this.destinationPath}/${versionData.version.uid}.bef`;
+        const targetFile = `${versionData.version.uid}.bef`;
+        const targetPath = `${this.destinationPath}/${targetFile}`;
 
         const p = new Promise<string>((pResolve, pReject) => {
             // create version directory
@@ -135,10 +137,10 @@ export class BeImportFileCreator {
                 }
             });
 
-            const output = createWriteStream(targetFile);
+            const output = createWriteStream(targetPath);
             output.on('close', function() {
                 const bytes = zipArchive.pointer();
-                console.log(`${targetFile} was successfully created with ${bytes} total bytes`);
+                console.log(`${targetPath} was successfully created with ${bytes} total bytes`);
                 rmDirRecSync(targetDir);
                 pResolve(targetFile);
             });

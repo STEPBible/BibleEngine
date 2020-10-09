@@ -178,7 +178,7 @@
             params: {
                 lang: FirstArgument<BibleController['syncVersions']>;
             },
-            data: SecondArgument<BibleController['syncVersions']>,
+            data?: SecondArgument<BibleController['syncVersions']>,
         ) {
             let path = '/bible/versions/:lang';
         

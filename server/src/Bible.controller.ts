@@ -101,8 +101,8 @@ export class BibleController {
     @Post('/versions/:lang')
     async syncVersions(
         @Param('lang') lang: string,
-        @Body({ required: true })
-        clientVersions: {
+        @Body()
+        clientVersions?: {
             [index: string]: {
                 lastUpdate: string | Date;
                 dataLocation: Required<IBibleVersion>['dataLocation'];
@@ -123,7 +123,7 @@ export class BibleController {
 
         for (const version of langVersions) {
             if (
-                !clientVersions[version.uid] ||
+                !clientVersions?.[version.uid] ||
                 (clientVersions[version.uid].dataLocation === 'remote' &&
                     new Date(clientVersions[version.uid].lastUpdate) < version.lastUpdate)
             ) {
@@ -131,16 +131,16 @@ export class BibleController {
                 remoteUpdates.push({
                     uid: version.uid,
                     meta: stripUnnecessaryDataFromBibleVersion(version),
-                    change: !clientVersions[version.uid] ? 'new' : 'updated',
+                    change: !clientVersions?.[version.uid] ? 'new' : 'updated',
                     books: versionBooks.map((book) => stripUnnecessaryDataFromBibleBook(book)),
                 });
             }
         }
 
         // check if a version has been deleted on the server
-        for (const clientVersionUid of Object.keys(clientVersions)) {
+        for (const clientVersionUid of Object.keys(clientVersions || {})) {
             if (
-                clientVersions[clientVersionUid].dataLocation === 'remote' &&
+                clientVersions?.[clientVersionUid].dataLocation === 'remote' &&
                 !langVersions.find((version) => version.uid === clientVersionUid)
             )
                 remoteUpdates.push({ uid: clientVersionUid, change: 'deleted' });

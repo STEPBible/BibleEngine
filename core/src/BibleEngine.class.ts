@@ -194,7 +194,7 @@ export class BibleEngine {
             } else {
                 bookEntity = await this.updateBook(
                     bookEntity,
-                    { dataLocation: 'importing' },
+                    { ...bookInput.book, dataLocation: 'importing' },
                     options.entityManager
                 );
             }
@@ -232,7 +232,7 @@ export class BibleEngine {
                 } else {
                     bookEntity = await this.updateBook(
                         bookEntity,
-                        { dataLocation: 'importing' },
+                        { ...bookInput.book, dataLocation: 'importing' },
                         transactionEntityManger
                     );
                 }
