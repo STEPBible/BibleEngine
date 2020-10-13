@@ -3,7 +3,7 @@ import { BibleEngineImporter, IBibleEngineImporter, IImporterOptions } from './s
 import { BibleEngine } from '@bible-engine/core';
 
 export class BeDatabaseCreator {
-    private bibleEngine: BibleEngine;
+    bibleEngine: BibleEngine;
     private importers: BibleEngineImporter[] = [];
 
     constructor(dbConfig: ConnectionOptions) {
