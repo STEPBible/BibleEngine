@@ -91,6 +91,13 @@ export class BibleBookContentNotImportedError extends Error {
     }
 }
 
+export class BibleBookContentImportingError extends Error {
+    constructor() {
+        super('accessing content of a bible book that is being imported');
+        this.name = 'BibleBookContentImportingError';
+    }
+}
+
 export class BibleEngineRemoteError extends Error {
     constructor(message: string) {
         super(`Error from BibleEngine server: ${message}`);
@@ -349,6 +356,7 @@ export class BibleEngine {
 
         if (!bookEntity) throw new Error(`can't get formatted text: invalid book`);
         if (bookEntity.dataLocation === 'file') throw new BibleBookContentNotImportedError();
+        if (bookEntity.dataLocation === 'importing') throw new BibleBookContentImportingError();
 
         const bookAbbreviations = await db
             .find(BibleBookEntity, {

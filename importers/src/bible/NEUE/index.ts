@@ -55,6 +55,7 @@ export class NeueImporter extends BibleEngineImporter {
 
         const version = await this.bibleEngine.addVersion({
             uid: versionUid,
+            abbreviation: 'NeÜ',
             title: 'Neue evangelistische Übersetzung',
             copyrightShort: '© Karl-Heinz Vanheiden',
             copyrightLong,

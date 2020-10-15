@@ -1109,5 +1109,6 @@ export const stripUnnecessaryDataFromBibleVersion = (
     if (versionEntity.copyrightShort) version.copyrightShort = versionEntity.copyrightShort;
     if (versionEntity.hasStrongs) version.hasStrongs = versionEntity.hasStrongs;
     if (versionEntity.type) version.type = versionEntity.type;
+    if (versionEntity.abbreviation) version.abbreviation = versionEntity.abbreviation;
     return version;
 };

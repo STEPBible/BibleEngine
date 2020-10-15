@@ -18,6 +18,9 @@ export class BibleVersionEntity implements IBibleVersion {
     @Column()
     uid: string;
 
+    @Column({nullable: true})
+    abbreviation?: string;
+
     @Column()
     title: string;
 

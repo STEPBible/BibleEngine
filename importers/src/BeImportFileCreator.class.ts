@@ -30,6 +30,7 @@ export class BeImportFileCreator {
             createdVersions.push({
                 version: {
                     uid: versionEntity.uid,
+                    abbreviation: versionEntity.abbreviation,
                     title: versionEntity.title,
                     copyrightShort: versionEntity.copyrightShort,
                     language: versionEntity.language,
