@@ -116,20 +116,42 @@ export const generatePhraseId = (reference: IBiblePhraseRef): number => {
 };
 
 /**
+ * local method to generate an integer reference from osisId, chapter, verse and
+ * subverse
+ * @param bookNumber 
+ * @param chapter 
+ * @param verse 
+ * @param subverse 
+ * @returns {number}
+ */
+const _generateReferenceId = (osisId: string, chapter?: number, verse?: number, subverse?: number) => {
+    let refId = pad(getBookGenericIdFromOsisId(osisId), 2);
+    if (chapter) refId += '' + pad(chapter, 3);
+    else refId += '000';
+    if (verse) refId += '' + pad(verse, 3);
+    else refId += '000';
+    if (subverse) refId += '' + pad(subverse, 2);
+    else refId += '00';
+    return +refId;
+}
+
+/**
  * encodes a normalized reference object into an integer to use in database operations
  * @param {IBibleReferenceNormalized} reference
  * @returns {number}
  */
 export const generateReferenceId = (reference: IBibleReferenceNormalized): number => {
-    let refId = pad(getBookGenericIdFromOsisId(reference.bookOsisId), 2);
-    if (reference.normalizedChapterNum) refId += '' + pad(reference.normalizedChapterNum, 3);
-    else refId += '000';
-    if (reference.normalizedVerseNum) refId += '' + pad(reference.normalizedVerseNum, 3);
-    else refId += '000';
-    if (reference.normalizedSubverseNum) refId += '' + pad(reference.normalizedSubverseNum, 2);
-    else refId += '00';
-    return +refId;
+    return _generateReferenceId(reference.bookOsisId, reference.normalizedChapterNum, reference.normalizedVerseNum, reference.normalizedSubverseNum);
 };
+
+/**
+ * encodes a version reference object into an integer to use in database operations
+ * @param {IBibleReferenceVersion} reference 
+ * @returns {number}
+ */
+export const generateVersionReferenceId = (reference: IBibleReference): number => {
+    return _generateReferenceId(reference.bookOsisId, reference.versionChapterNum, reference.versionVerseNum, reference.versionSubverseNum);
+}
 
 /**
  * Generates a range object from two phrase ids

@@ -1,7 +1,7 @@
 export interface OsisXmlNode {
     attributes: {
         annotateRef?: string;
-        canonical?: 'true';
+        canonical?: 'true' | 'false';
         eID?: string;
         lemma?: string;
         level?: string;
@@ -53,24 +53,33 @@ export enum Indentation {
 export enum OsisXmlNodeName {
     CATCH_WORD = 'catchWord',
     CHAPTER = 'chapter',
+    DATE = 'date',
+    DESCRIPTION = 'description',
     DIVINE_NAME = 'divineName',
     DIVISION = 'div',
     FOREIGN_WORD = 'foreign',
     HIGHLIGHT = 'hi',
     IDENTIFIER = 'identifier',
+    LANGUAGE = 'language',
     LINEBREAK = 'lb',
     LINE = 'l',
     LINE_GROUP = 'lg',
     MILESTONE = 'milestone',
+    NAME = 'name',
     NOTE = 'note',
     OSIS_HEADER = 'header',
     OSIS_ROOT = 'osisText',
     PARAGRAPH = 'p',
+    PUBLISHER = 'publisher',
     QUOTE = 'q',
     REF_SYSTEM = 'refSystem',
     REFERENCE = 'reference',
+    REVISION_DESC = 'revisionDesc',
+    RIGHTS = 'rights',
     VERSION_SCOPE = 'scope',
     TITLE = 'title',
+    TRANS_CHANGE = 'transChange',
+    TYPE = 'type',
     VERSE = 'verse',
     WORD = 'w',
     WORD_SEGMENT = 'seg',

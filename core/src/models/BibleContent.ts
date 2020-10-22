@@ -22,11 +22,18 @@ export interface IBibleNumbering {
         versionChapterIsStartingInRange?: number;
         versionVerseIsStarting?: number;
         versionSubverseIsStarting?: number;
+        joinToRefId?: number;
+        joinToVersionRefId?: number;
     };
 }
 export interface IBibleContentSection extends IBibleSectionBase {
     readonly type: 'section';
     contents: IBibleContent[];
+    /**
+     * In the UI we show chapter numbers after the section heading, which is
+     * determined by the `numbering` attribute. `numberingInteral` indicates the
+     * "real" start of a chapter/verse
+     */
     numberingInternal?: IBibleNumbering['numbering'];
 }
 

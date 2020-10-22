@@ -155,6 +155,8 @@ export const generateBibleDocument = (
         versionChapter: number;
         versionVerse: number;
         versionSubverse?: number;
+        joinToRefId?: number;
+        joinToVersionRefId?: number;
     } = {
         normalizedChapter: 0,
         normalizedVerse: -1, // we have zero-verses (psalms in some versions)
@@ -576,6 +578,10 @@ export const generateBibleDocument = (
                 phrase.normalizedReference.normalizedSubverseNum;
             currentNumbering.normalizedSubverse = phrase.normalizedReference.normalizedSubverseNum;
         }
+        if(phrase.joinToRefId) {
+            numbering.joinToRefId = phrase.joinToRefId;
+            currentNumbering.joinToRefId = phrase.joinToRefId;
+        }
 
         if (currentNumbering.versionChapter !== phrase.versionChapterNum) {
             // psalms can have verse number zero
@@ -591,6 +597,10 @@ export const generateBibleDocument = (
         if (currentNumbering.versionSubverse !== phrase.versionSubverseNum) {
             numbering.versionSubverseIsStarting = phrase.versionSubverseNum;
             currentNumbering.versionSubverse = phrase.versionSubverseNum;
+        }
+        if(phrase.joinToVersionRefId) {
+            numbering.joinToVersionRefId = phrase.joinToVersionRefId;
+            currentNumbering.joinToVersionRefId = phrase.joinToVersionRefId;
         }
 
         const outputPhrase: IBibleContentGeneratorPhrase = {

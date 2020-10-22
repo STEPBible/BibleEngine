@@ -22,6 +22,7 @@ export interface IBiblePhraseWithNumbers extends IBiblePhrase, IBibleReferenceVe
      * fetched instead and the verse indicator needs to show a verse-span instead of a single number
      */
     joinToRefId?: number;
+    joinToVersionRefId?: number;
 
     versionChapterNum?: number; // has to be set
     versionVerseNum?: number; // has to be set

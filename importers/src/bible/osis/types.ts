@@ -6,7 +6,8 @@ import {
     ContentGroupType,
     IBibleContentGroup,
     IBibleContent,
-    IBibleCrossReference
+    IBibleCrossReference,
+    IBibleReference
 } from '@bible-engine/core';
 import { OsisXmlNodeName, OsisXmlNodeType, OsisXmlNode } from '../../shared/osisTypes';
 
@@ -31,6 +32,7 @@ export type ParserContext = {
         | IBibleContentGroup<ContentGroupType>
     )[];
     hierarchicalTagStack: ITagWithType[];
+    currentVerseJoinToVersionRef?: IBibleReference;
     openedSelfClosingTag?: ITagWithType;
     skipClosingTags: TagType[];
     sectionStack: (

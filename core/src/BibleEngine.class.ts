@@ -635,6 +635,7 @@ export class BibleEngine {
             currentVersionChapter: number;
             currentVersionVerse: number;
             currentVersionSubverse?: number;
+            currentJoinToVersionRefId?: number;
             currentPhraseNum: number;
             currentNormalizedReference?: IBibleReferenceNormalized;
             currentSourceTypeId?: number;
@@ -683,9 +684,8 @@ export class BibleEngine {
                         content.numbering.versionChapterIsStartingInRange;
                 if (content.numbering.versionVerseIsStarting)
                     globalState.currentVersionVerse = content.numbering.versionVerseIsStarting;
-                if (content.numbering.versionSubverseIsStarting)
-                    globalState.currentVersionSubverse =
-                        content.numbering.versionSubverseIsStarting;
+                globalState.currentVersionSubverse = content.numbering.versionSubverseIsStarting;
+                globalState.currentJoinToVersionRefId = content.numbering.joinToVersionRefId;
             } else if (
                 (content.type === 'phrase' || !content.type) &&
                 content.versionChapterNum &&
@@ -700,6 +700,7 @@ export class BibleEngine {
                 globalState.currentVersionChapter = content.versionChapterNum;
                 globalState.currentVersionVerse = content.versionVerseNum;
                 globalState.currentVersionSubverse = content.versionSubverseNum;
+                globalState.currentJoinToVersionRefId = content.joinToVersionRefId;
             }
 
             // if the input uses the `numbering` object, most of the phrases won't have the
@@ -985,6 +986,7 @@ export class BibleEngine {
                     content.versionChapterNum = globalState.currentVersionChapter;
                     content.versionVerseNum = globalState.currentVersionVerse;
                     content.versionSubverseNum = globalState.currentVersionSubverse;
+                    content.joinToVersionRefId = globalState.currentJoinToVersionRefId;
                 }
 
                 if (content.notes) {

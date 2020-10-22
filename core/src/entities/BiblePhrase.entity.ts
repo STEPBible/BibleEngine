@@ -26,6 +26,8 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
 
     @Column({ type: 'bigint', nullable: true })
     joinToRefId?: number;
+    @Column({ nullable: true })
+    joinToVersionRefId?: number;
 
     @Column()
     @Index()
