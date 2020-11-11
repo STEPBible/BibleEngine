@@ -4,6 +4,16 @@ import { ChapterXML } from '../src/types';
 describe('OsisParser', () => {
     const psalmsXML: ChapterXML = require('./Psa23EsvXmlResult.json');
 
+    const createSingleVerseXmlObject = (text: string): ChapterXML[] => ([
+        {
+            intro: '',
+            verses: [{
+                text,
+                verse: 1
+            }]
+        }
+    ])
+
     test('footnote associated with phrase that comes before, not after', async () => {
         const psalm23verse2 = [psalmsXML.verses[1]];
         const bookJson = getBibleEngineInputFromXML([{ intro: '', verses: psalm23verse2 }]);
@@ -43,4 +53,27 @@ describe('OsisParser', () => {
             expect(bookJson.length).toBeGreaterThan(0);
         });
     });
-});
+
+    it(`Correctly parses multiple strongs numbers`, () => {
+        const VERSE = `
+            <w lemma="strong:H0168 strong:H0413 strong:H9033 strong:H9006">
+                tent
+            </w>
+        `
+        const XML = createSingleVerseXmlObject(VERSE)
+        const json: any = getBibleEngineInputFromXML(XML)
+        const strongs = json[0].contents[0].strongs
+        expect(strongs).toStrictEqual(['H0168', 'H0413', 'H9033', 'H9006'])
+    })
+    it(`Correctly parses a single strongs number`, () => {
+        const VERSE = `
+            <w lemma="strong:H0168">
+                tent
+            </w>
+        `
+        const XML = createSingleVerseXmlObject(VERSE)
+        const json: any = getBibleEngineInputFromXML(XML)
+        const strongs = json[0].contents[0].strongs
+        expect(strongs).toStrictEqual(['H0168'])
+    })
+})

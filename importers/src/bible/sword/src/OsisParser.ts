@@ -475,9 +475,9 @@ function getStrongsNumbers(context: ParserContext): string[] {
         return [];
     }
     const lemma = context.currentNode!.attributes.lemma!;
-    const strongsNumbersString = lemma.replace(' ', '').replace('!', '');
+    const strongsNumbersString = lemma.split('strong:').join('')
     const strongsNumbers = strongsNumbersString
-        .split('strong:')
+        .split(' ')
         .filter(element => element)
         .map(strongsNum => normalizeStrongsNum(strongsNum));
     return strongsNumbers;
