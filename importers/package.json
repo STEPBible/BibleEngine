@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "main": "lib/index.js",
     "scripts": {
-        "test": "yarn jest",
+        "test": "yarn jest --runInBand",
         "build": "rimraf ./lib && tsc && copyup './src/**/data/*' ./lib"
     },
     "dependencies": {
