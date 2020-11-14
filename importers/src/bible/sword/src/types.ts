@@ -72,14 +72,13 @@ export type ParserContext = {
     currentCrossRefNode?: OsisXmlNode;
     crossRefs: IBibleCrossReference[];
     divineNameNode?: OsisXmlNode;
-    quoteNode?: OsisXmlNode;
     verseNum: number;
     notes: IBibleNote[];
     noteText: string;
     osisRef: string;
     psalmTitle?: OsisXmlNode;
     psalmTitleContents: IBibleContentPhrase[];
-    phrases: any;
+    phrases: any[];
     paragraph?: IBibleContentGroup<'paragraph'>;
     noteCount: number;
     title?: OsisXmlNode;
