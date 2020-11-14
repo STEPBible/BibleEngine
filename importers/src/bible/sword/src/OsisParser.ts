@@ -31,7 +31,6 @@ export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContent
         currentCrossRefNode: undefined,
         crossRefs: [],
         divineNameNode: undefined,
-        quoteNode: undefined,
         verseNum: 0,
         noteText: '',
         osisRef: '',
@@ -100,6 +99,13 @@ export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContent
 function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
     context.currentNode = node;
     switch (node.name) {
+        case OsisXmlNodeName.XML:
+        case OsisXmlNodeName.WORD:
+        case OsisXmlNodeName.CATCH_WORD:
+        case OsisXmlNodeName.REFERENCE:
+        case OsisXmlNodeName.WORK: {
+            break;
+        }
         case OsisXmlNodeName.NOTE: {
             context.currentNoteNode = node;
             break;
@@ -157,8 +163,14 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
             }
             break;
         }
+        case OsisXmlNodeName.QUOTE: {
+            if (!node.attributes.marker) return
+            const quote = getQuotePhrase(node, context)
+            context.phrases.push(quote)
+            break;
+        }
         default: {
-            // console.log(`unrecognized osis xml tag: ${node.name}`)
+            throw new Error(`unrecognized osis xml tag: ${node.name}`)
         }
     }
 }
@@ -217,10 +229,6 @@ function parseTextNode(text: string, context: ParserContext) {
         const { phrases } = context;
         phrases[phrases.length - 1].content += formattedText[0];
         formattedText = formattedText.slice(1).trim();
-    }
-    if (context.quoteNode) {
-        parseQuote(formattedText, context);
-        return;
     }
     if (node) {
         switch (node.name) {
@@ -287,16 +295,6 @@ function parseClosingTag(tagName: string, context: ParserContext) {
             context.currentCrossRefNode = undefined;
             break;
         }
-        case OsisXmlNodeName.QUOTE: {
-            const isClosingQuotationMark = node && node.isSelfClosing && node.attributes.marker;
-            if (isClosingQuotationMark) {
-                // Add this to phrase: node.attributes.marker;
-            }
-            if (!node) {
-                context.quoteNode = undefined;
-            }
-            break;
-        }
         case OsisXmlNodeName.LINE_GROUP: {
             if (node!.attributes.sID) {
                 context.paragraph! = getNewParagraph();
@@ -329,6 +327,25 @@ function getPhrase(content: string, context: ParserContext): IBibleContentPhrase
         context.crossRefs = [];
     }
     return phrase;
+}
+
+function getQuotePhrase(node: OsisXmlNode, context: ParserContext): IBibleContentPhrase {
+    if (!node.attributes.marker) {
+        throw new Error('Invalid quote marker found');
+    }
+    const quote: IBibleContentPhrase = {
+        type: 'phrase',
+        content: node.attributes.marker,
+        versionChapterNum: context.chapterNum,
+        versionVerseNum: context.verseNum,
+    }
+    const isClosingQuote = node.attributes.eID
+    if (isClosingQuote) {
+        quote.skipSpace = 'before'
+        return quote
+    }
+    quote.skipSpace = 'after'
+    return quote
 }
 
 function getCrossReference(context: ParserContext): IBibleCrossReference {
@@ -432,18 +449,6 @@ function getPhraseWithHighlighting(phrase: string, context: ParserContext) {
             return `"${phrase}"`;
     }
     return phrase;
-}
-
-function parseQuote(text: string, context: ParserContext) {
-    const strongsNumbers = getStrongsNumbers(context);
-    if (context.quoteNode!.attributes.who === 'Jesus' && text) {
-        // `$redLetter=${text}`]);
-        return;
-    }
-    // push [text]);
-    if (strongsNumbers) {
-        // push(strongsNumbers);
-    }
 }
 
 function getPsalmTitle(context: ParserContext) {
