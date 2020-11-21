@@ -17,6 +17,7 @@ import {
     IBibleContentGroup
 } from '@bible-engine/core';
 
+const prettifyXML = require('xml-formatter');
 const sax = require('sax');
 
 const DEBUG_OUTPUT_ENABLED = false;
@@ -65,13 +66,16 @@ export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContent
             );
 
             if (DEBUG_OUTPUT_ENABLED) {
-                const prettifyXML = require('xml-formatter');
                 console.log(prettifyXML(textWithoutUnusedTags));
                 console.log('********************************************');
             }
-
-            parser.write(textWithoutUnusedTags);
-            parser.close();
+            try {
+                parser.write(textWithoutUnusedTags);
+                parser.close();
+            } catch (error) {
+                console.error('Failed to parse this XML: ', prettifyXML(textWithoutUnusedTags))
+                throw error
+            }
         });
     }
 
