@@ -103,7 +103,11 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
         case OsisXmlNodeName.WORD:
         case OsisXmlNodeName.CATCH_WORD:
         case OsisXmlNodeName.REFERENCE:
-        case OsisXmlNodeName.WORK: {
+        case OsisXmlNodeName.HIGHLIGHT:
+        case OsisXmlNodeName.LINE_GROUP:
+        case OsisXmlNodeName.WORK:
+        case OsisXmlNodeName.CHAPTER: {
+            // handled in parseTextNode or parseClosingTag, or ignored
             break;
         }
         case OsisXmlNodeName.NOTE: {
