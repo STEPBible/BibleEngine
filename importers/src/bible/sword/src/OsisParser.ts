@@ -103,14 +103,32 @@ export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContent
 function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
     context.currentNode = node;
     switch (node.name) {
-        case OsisXmlNodeName.XML:
-        case OsisXmlNodeName.WORD:
         case OsisXmlNodeName.CATCH_WORD:
-        case OsisXmlNodeName.REFERENCE:
+        case OsisXmlNodeName.FOREIGN_WORD:
         case OsisXmlNodeName.HIGHLIGHT:
+        case OsisXmlNodeName.LEMMA:
         case OsisXmlNodeName.LINE_GROUP:
         case OsisXmlNodeName.WORK:
-        case OsisXmlNodeName.CHAPTER: {
+        case OsisXmlNodeName.CHAPTER:
+        case OsisXmlNodeName.DATE:
+        case OsisXmlNodeName.DESCRIPTION:
+        case OsisXmlNodeName.DIVISION:
+        case OsisXmlNodeName.IDENTIFIER:
+        case OsisXmlNodeName.LANGUAGE:
+        case OsisXmlNodeName.MILESTONE:
+        case OsisXmlNodeName.NAME:
+        case OsisXmlNodeName.OSIS_HEADER:
+        case OsisXmlNodeName.PUBLISHER:
+        case OsisXmlNodeName.REF_SYSTEM:
+        case OsisXmlNodeName.REFERENCE:
+        case OsisXmlNodeName.REVISION_DESC:
+        case OsisXmlNodeName.RIGHTS:
+        case OsisXmlNodeName.TYPE:
+        case OsisXmlNodeName.VERSION_SCOPE:
+        case OsisXmlNodeName.WORD:
+        case OsisXmlNodeName.WORD_SEGMENT:
+        case OsisXmlNodeName.XML:
+        case OsisXmlNodeName.XML_ROOT: {
             // handled in parseTextNode or parseClosingTag, or ignored
             break;
         }

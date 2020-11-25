@@ -61,6 +61,7 @@ export enum OsisXmlNodeName {
     HIGHLIGHT = 'hi',
     IDENTIFIER = 'identifier',
     LANGUAGE = 'language',
+    LEMMA = 'lemma',
     LINEBREAK = 'lb',
     LINE = 'l',
     LINE_GROUP = 'lg',
