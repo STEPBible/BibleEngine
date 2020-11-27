@@ -129,14 +129,7 @@ describe('OsisParser', () => {
                         },
                         {
                             type: 'phrase',
-                            content: '“',
-                            skipSpace: 'after',
-                            versionChapterNum: 1,
-                            versionVerseNum: 1
-                        },
-                        {
-                            type: 'phrase',
-                            content: 'Let there',
+                            content: '“Let there',
                             versionChapterNum: 1,
                             versionVerseNum: 1
                         },
@@ -151,19 +144,12 @@ describe('OsisParser', () => {
                         },
                         {
                             type: 'phrase',
-                            content: 'light,',
+                            content: 'light,”',
                             versionChapterNum: 1,
                             versionVerseNum: 1,
                             strongs: [
                                 'H0216'
                             ]
-                        },
-                        {
-                            type: 'phrase',
-                            content: '”',
-                            skipSpace: 'before',
-                            versionChapterNum: 1,
-                            versionVerseNum: 1
                         },
                         {
                             type: 'phrase',

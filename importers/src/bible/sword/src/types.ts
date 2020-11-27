@@ -81,6 +81,7 @@ export type ParserContext = {
     phrases: any[];
     paragraph?: IBibleContentGroup<'paragraph'>;
     noteCount: number;
+    quoteNode?: OsisXmlNode;
     title?: OsisXmlNode;
     titleSection: IBibleContentSection;
     titleSections: IBibleContentSection[];
