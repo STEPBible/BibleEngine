@@ -39,6 +39,7 @@ export function getBibleEngineInputFromXML(bookXML: ChapterXML[]): IBibleContent
         noteCount: 0,
         psalmTitle: undefined,
         psalmTitleContents: [],
+        quoteNode: undefined,
         titleSections: [],
         phrases: [],
         titleSection: { type: 'section', contents: [] },
@@ -112,7 +113,6 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
         case OsisXmlNodeName.CHAPTER:
         case OsisXmlNodeName.DATE:
         case OsisXmlNodeName.DESCRIPTION:
-        case OsisXmlNodeName.DIVISION:
         case OsisXmlNodeName.IDENTIFIER:
         case OsisXmlNodeName.LANGUAGE:
         case OsisXmlNodeName.MILESTONE:
@@ -120,7 +120,6 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
         case OsisXmlNodeName.OSIS_HEADER:
         case OsisXmlNodeName.PUBLISHER:
         case OsisXmlNodeName.REF_SYSTEM:
-        case OsisXmlNodeName.REFERENCE:
         case OsisXmlNodeName.REVISION_DESC:
         case OsisXmlNodeName.RIGHTS:
         case OsisXmlNodeName.TYPE:
@@ -191,8 +190,12 @@ function parseOpeningTag(node: OsisXmlNode, context: ParserContext) {
         }
         case OsisXmlNodeName.QUOTE: {
             if (!node.attributes.marker) return
-            const quote = getQuotePhrase(node, context)
-            context.phrases.push(quote)
+            const isClosingQuote = node.attributes.eID
+            if (isClosingQuote) {
+                context.phrases[context.phrases.length - 1].content += node.attributes.marker
+                break;
+            }
+            context.quoteNode = node
             break;
         }
         default: {
@@ -217,6 +220,10 @@ function parseTextNode(text: string, context: ParserContext) {
     }
     if (node && node.name === OsisXmlNodeName.HIGHLIGHT) {
         formattedText = getPhraseWithHighlighting(formattedText, context);
+    }
+    if (context.quoteNode) {
+        formattedText = context.quoteNode?.attributes.marker + formattedText
+        context.quoteNode = undefined
     }
     if (isFootnote(context.currentNoteNode)) {
         context.currentNoteNum =
@@ -353,25 +360,6 @@ function getPhrase(content: string, context: ParserContext): IBibleContentPhrase
         context.crossRefs = [];
     }
     return phrase;
-}
-
-function getQuotePhrase(node: OsisXmlNode, context: ParserContext): IBibleContentPhrase {
-    if (!node.attributes.marker) {
-        throw new Error('Invalid quote marker found');
-    }
-    const quote: IBibleContentPhrase = {
-        type: 'phrase',
-        content: node.attributes.marker,
-        versionChapterNum: context.chapterNum,
-        versionVerseNum: context.verseNum,
-    }
-    const isClosingQuote = node.attributes.eID
-    if (isClosingQuote) {
-        quote.skipSpace = 'before'
-        return quote
-    }
-    quote.skipSpace = 'after'
-    return quote
 }
 
 function getCrossReference(context: ParserContext): IBibleCrossReference {
