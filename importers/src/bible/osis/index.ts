@@ -43,7 +43,7 @@ export class OsisImporter extends BibleEngineImporter {
         const pParsing = new Promise<ParserContext>((resolve) => {
             const xmlStream = parser(STRICT_MODE_ENABLED);
 
-            const context: ParserContext = {
+            const initialContext: ParserContext = {
                 hierarchicalTagStack: [],
                 books: [],
                 contentContainerStack: [],
@@ -51,13 +51,16 @@ export class OsisImporter extends BibleEngineImporter {
                 sectionStack: [],
             };
 
-            xmlStream.ontext = (text: string) => this.parseTextNode(text, context);
-            xmlStream.onopentag = (tag: any) => this.parseOpeningTag(tag, context);
+            xmlStream.ontext = (text: string) => this.parseTextNode(text, initialContext);
+            xmlStream.onopentag = (tag: any) => this.parseOpeningTag(tag, initialContext);
             xmlStream.onclosetag = (tagName: OsisXmlNodeName) =>
-                this.parseClosingTag(tagName, context);
-            xmlStream.onerror = () => xmlStream.resume();
+                this.parseClosingTag(tagName, initialContext);
+            xmlStream.onerror = (error) => {
+                xmlStream.close()
+                reject(error);
+            }
             xmlStream.onend = () => {
-                resolve(context);
+                resolve(initialContext);
             };
             xmlStream.write(xml);
             xmlStream.close();
