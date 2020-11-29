@@ -5,17 +5,20 @@ export interface IImporterOptions {
     sourcePath?: string;
     sourceEncoding?: string;
     versionMeta?: Partial<IBibleVersion>;
-    bookMeta?: Map<string, { abbreviation: string; title: string; number: number }>;
+    bookMeta?: ImporterBookMetadata;
 }
+export type ImporterBookMetadata = Map<string, {
+    abbreviation: string; title: string; number: number
+}>
 
 export interface IBibleEngineImporter {
-    new (bibleEngine: BibleEngine, options: IImporterOptions): BibleEngineImporter;
+    new(bibleEngine: BibleEngine, options: IImporterOptions): BibleEngineImporter;
 }
 
 export class BibleEngineImporter {
-    constructor(protected bibleEngine: BibleEngine, protected options: IImporterOptions = {}) {}
+    constructor(protected bibleEngine: BibleEngine, protected options: IImporterOptions = {}) { }
 
-    import() {}
+    import() { }
 
     async run() {
         await this.bibleEngine.pDB;
