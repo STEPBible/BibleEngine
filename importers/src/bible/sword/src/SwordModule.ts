@@ -4,6 +4,7 @@ import VerseScheme from './VerseScheme';
 const verseKey = require('./VerseMetadata');
 import BlobReader from './BlobReader';
 import { ChapterPosition, ChapterXML, BookXML, VerseXML } from './types';
+import { ImporterBookMetadata } from '../../../shared/Importer.interface';
 
 /**
  * Set of files which encapsulates a Bible version.
@@ -78,6 +79,21 @@ export default class SwordModule {
             };
         });
         return versionXML;
+    }
+
+    getBookMetadata(): ImporterBookMetadata {
+        const { versification } = this.config;
+        const bookOsisNames = VerseScheme.getAllBookOsisNames(versification);
+        const bookFullNames = VerseScheme.getAllBookFullNames(versification);
+        const map: ImporterBookMetadata = new Map()
+        bookOsisNames.forEach((osisId, index) => {
+            map.set(osisId, {
+                abbreviation: osisId,
+                number: index,
+                title: bookFullNames[index]
+            })
+        })
+        return map
     }
 
     getSingleXMLDocumentForBook(verseRange: string): string {
