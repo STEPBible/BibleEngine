@@ -40,7 +40,7 @@ export class OsisImporter extends BibleEngineImporter {
                 : readFileSync(sourcePath, 'utf8');
         }
 
-        const pParsing = new Promise<ParserContext>((resolve) => {
+        const pParsing = new Promise<ParserContext>((resolve, reject) => {
             const xmlStream = parser(STRICT_MODE_ENABLED);
 
             const initialContext: ParserContext = {
