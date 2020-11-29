@@ -106,7 +106,7 @@ export default class SwordModule {
         for (let chapterNum = 1; chapterNum <= maxChapter; chapterNum += 1) {
             const chapter: ChapterXML = this.getXMLforChapter(`${book} ${chapterNum}`);
             const versesXML = chapter.verses.map(
-                (verse: VerseXML) => `<verse osisID="${verse.verse}">${verse.text}</verse>`
+                (verse: VerseXML) => `<verse osisID="${book}.${chapterNum}.${verse.verse}">${verse.text}</verse>`
             );
             const combinedVersesXML = versesXML.reduce(
                 (combinedXML: string, verseXML: string) => combinedXML + verseXML,
