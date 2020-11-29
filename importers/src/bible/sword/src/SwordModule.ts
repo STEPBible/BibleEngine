@@ -96,32 +96,30 @@ export default class SwordModule {
         return map
     }
 
-    getSingleXMLDocumentForBook(verseRange: string): string {
-        const verseList = verseKey.parseVerseList(verseRange, this.config.versification);
-        const book = verseList[0].book;
+    getSingleXMLDocumentForBook(osisId: string): string {
         const verseScheme = this.config.versification;
-        const bookNum = VerseScheme.getBookNum(book, verseScheme);
+        const bookNum = VerseScheme.getBookNum(osisId, verseScheme);
         const maxChapter = VerseScheme.getChapterMax(bookNum, verseScheme);
         let combinedChapterXML = '';
         for (let chapterNum = 1; chapterNum <= maxChapter; chapterNum += 1) {
-            const chapter: ChapterXML = this.getXMLforChapter(`${book} ${chapterNum}`);
+            const chapter: ChapterXML = this.getXMLforChapter(`${osisId} ${chapterNum}`);
             const versesXML = chapter.verses.map(
-                (verse: VerseXML) => `<verse osisID="${book}.${chapterNum}.${verse.verse}">${verse.text}</verse>`
+                (verse: VerseXML) => `<verse osisID="${osisId}.${chapterNum}.${verse.verse}">${verse.text}</verse>`
             );
             const combinedVersesXML = versesXML.reduce(
                 (combinedXML: string, verseXML: string) => combinedXML + verseXML,
                 ''
             );
-            const chapterXML = `<chapter osisID="${book}.${chapterNum}">${combinedVersesXML}</chapter>`;
+            const chapterXML = `<chapter osisID="${osisId}.${chapterNum}">${combinedVersesXML}</chapter>`;
             combinedChapterXML += chapterXML;
         }
-        const bookXML = `<div type="book" osisID="${book}">${combinedChapterXML}</div>`;
+        const bookXML = `<div type="book" osisID="${osisId}">${combinedChapterXML}</div>`;
         return bookXML;
     }
 
     getSingleXMLDocumentForVersion(): string {
         const { versification } = this.config;
-        const bookOsisNames = VerseScheme.getAllBookOsisNames(versification).slice(0, 1);
+        const bookOsisNames = VerseScheme.getAllBookOsisNames(versification);
         const combinedBookXml = bookOsisNames.map(
             osisId => this.getSingleXMLDocumentForBook(osisId)
         ).join('')
