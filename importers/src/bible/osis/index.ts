@@ -33,10 +33,10 @@ export class OsisImporter extends BibleEngineImporter {
                 path.resolve(__dirname) + '/data/osis.xml';
             xml = this.options.sourceEncoding
                 ? await streamToString(
-                      createReadStream(sourcePath)
-                          .pipe(decodeStream(this.options.sourceEncoding))
-                          .pipe(encodeStream('utf8'))
-                  )
+                    createReadStream(sourcePath)
+                        .pipe(decodeStream(this.options.sourceEncoding))
+                        .pipe(encodeStream('utf8'))
+                )
                 : readFileSync(sourcePath, 'utf8');
         }
 
@@ -1100,8 +1100,7 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     getErrorMessageWithContext(msg: string, context: ParserContext) {
-        return `${msg}  in ${context.currentBook && context.currentBook.osisId} ${
-            context.currentChapter
-        }:${context.currentVerse}`;
+        return `${msg}  in ${context.currentBook && context.currentBook.osisId} ${context.currentChapter
+            }:${context.currentVerse}`;
     }
 }
