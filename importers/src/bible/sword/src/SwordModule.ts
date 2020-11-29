@@ -118,4 +118,17 @@ export default class SwordModule {
         const bookXML = `<div type="book" osisID="${book}">${combinedChapterXML}</div>`;
         return bookXML;
     }
+
+    getSingleXMLDocumentForVersion(): string {
+        const { versification } = this.config;
+        const bookOsisNames = VerseScheme.getAllBookOsisNames(versification).slice(0, 1);
+        const combinedBookXml = bookOsisNames.map(
+            osisId => this.getSingleXMLDocumentForBook(osisId)
+        ).join('')
+        return `
+            <osisText osisIDWork="${this.config.moduleName}" xml:lang="${this.config.language}">
+                ${combinedBookXml}
+            </osisText>
+        `
+    }
 }
