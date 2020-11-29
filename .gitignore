@@ -33,3 +33,4 @@ importers/src/stepdata/v11n-rules/data/backup
 client/lib-es6
 core/lib-es6
 temp.sqlite
+mobile/
