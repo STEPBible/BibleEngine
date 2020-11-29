@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import * as path from 'path';
 import { readFileSync, createReadStream, writeFileSync } from 'fs';
 import { decodeStream, encodeStream } from 'iconv-lite';
 import { parser } from 'sax';
@@ -29,7 +29,8 @@ export class OsisImporter extends BibleEngineImporter {
         let xml: string;
         if (this.options.sourceData) xml = this.options.sourceData;
         else {
-            const sourcePath = this.options.sourcePath || resolve(__dirname) + '/data/osis.xml';
+            const sourcePath = this.options.sourcePath ||
+                path.resolve(__dirname) + '/data/osis.xml';
             xml = this.options.sourceEncoding
                 ? await streamToString(
                       createReadStream(sourcePath)
