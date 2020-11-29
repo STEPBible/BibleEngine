@@ -3,24 +3,18 @@
  * Documentation: https://wiki.crosswire.org/DevTools:conf_Files
  */
 
-enum SwordMetadataKey {
-  DESCRIPTION = 'Description',
-  ENCODING = 'Encoding',
-  IN_DEPTH_DESCRIPTION = 'About',
-  LANGUAGE = 'Lang',
-  OPTION_FILTER = 'GlobalOptionFilter',
-  SOURCE_TYPE = 'SourceType',
-  VERSIFICATION = 'Versification'
-}
+import { SwordMetadataKey, SwordFilterOptions } from './types';
 
 export default class ModuleConfig {
-  about: string
-  description: string
+  about: string;
+  description: string;
   encoding: string;
   globalOptionFilters: string[];
-  language: string
-  license: string
+  hasStrongs: boolean;
+  language: string;
+  license: string;
   moduleName: string;
+  shortCopyright: string;
   versification: string;
 
   constructor(config: string) {
@@ -37,6 +31,9 @@ export default class ModuleConfig {
       switch (key) {
         case SwordMetadataKey.OPTION_FILTER: {
           this.globalOptionFilters.push(value);
+          if (value === SwordFilterOptions.OSIS_STRONGS) {
+            this.hasStrongs = true
+          }
           break;
         }
         case SwordMetadataKey.VERSIFICATION: {
@@ -44,7 +41,7 @@ export default class ModuleConfig {
           break;
         }
         case SwordMetadataKey.ENCODING: {
-          this.encoding = value
+          this.encoding = value;
           break;
         }
         case SwordMetadataKey.LANGUAGE: {
@@ -52,7 +49,15 @@ export default class ModuleConfig {
           break;
         }
         case SwordMetadataKey.IN_DEPTH_DESCRIPTION: {
-          this.about = value
+          this.about = value;
+          break;
+        }
+        case SwordMetadataKey.SHORT_COPYRIGHT: {
+          this.shortCopyright = value;
+          break;
+        }
+        case SwordMetadataKey.DESCRIPTION: {
+          this.description = value;
         }
       }
     });

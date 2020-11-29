@@ -77,7 +77,7 @@ export enum OsisXmlNodeName {
     REFERENCE = 'reference',
     REVISION_DESC = 'revisionDesc',
     RIGHTS = 'rights',
-    VERSION_SCOPE = 'scope',
+    SWORD_MILESTONE = 'x-milestone',
     TITLE = 'title',
     TRANS_CHANGE = 'transChange',
     TYPE = 'type',
@@ -85,6 +85,7 @@ export enum OsisXmlNodeName {
     WORD = 'w',
     WORD_SEGMENT = 'seg',
     WORK = 'work',
+    VERSION_SCOPE = 'scope',
     XML = 'xml',
     XML_ROOT = 'osis'
 }

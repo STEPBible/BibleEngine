@@ -87,3 +87,18 @@ export type ParserContext = {
     titleSections: IBibleContentSection[];
     titleText: string;
 };
+
+export enum SwordMetadataKey {
+    DESCRIPTION = 'Description',
+    ENCODING = 'Encoding',
+    IN_DEPTH_DESCRIPTION = 'About',
+    LANGUAGE = 'Lang',
+    OPTION_FILTER = 'GlobalOptionFilter',
+    SHORT_COPYRIGHT = 'ShortCopyright',
+    SOURCE_TYPE = 'SourceType',
+    VERSIFICATION = 'Versification'
+}
+
+export enum SwordFilterOptions {
+    OSIS_STRONGS = 'OSISStrongs'
+}
