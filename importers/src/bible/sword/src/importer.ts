@@ -1,61 +1,42 @@
 import { readFileSync } from 'fs';
 
-import { BibleVersionEntity, IBibleVersion } from '@bible-engine/core';
 import { BibleEngineImporter } from '../../../shared/Importer.interface';
-
 import SwordModule from './SwordModule';
 import ModuleIndex from './ModuleIndex';
-import { BookXML } from './types';
-import { getBibleEngineInputFromXML } from './OsisParser';
-
-function getXmlFromModule(filename: string): BookXML[] {
-    const contents = readFileSync(filename);
-    const fileIndex = ModuleIndex.fromNodeBuffer(contents);
-    const swordModule = new SwordModule(fileIndex);
-    const booksXML = swordModule.getXMLForVersion();
-    return booksXML;
-}
+import { OsisImporter } from './../../osis/index';
 
 export class SwordImporter extends BibleEngineImporter {
     async import() {
-        if (!this.options.sourcePath)
-            throw new Error(
-                `you need to set a sourcePath (2nd paramemter when using BeDatabaseCreator.addImporter)`
-            );
+        try {
+            if (!this.options.sourcePath) {
+                throw new Error(
+                    `you need to set a sourcePath (2nd parameter when using BeDatabaseCreator.addImporter)`
+                );
+            }
+            const contents = readFileSync(this.options.sourcePath);
+            const fileIndex = ModuleIndex.fromNodeBuffer(contents);
+            const swordModule = new SwordModule(fileIndex);
+            const xml = swordModule.getSingleXMLDocumentForVersion()
 
-        const versionMeta: Partial<IBibleVersion> = this.options.versionMeta || {};
-        const version = await this.bibleEngine.addVersion(
-            new BibleVersionEntity({
-                uid: 'ESV',
-                title: 'English Standard Version',
-                copyrightShort: '2001 by Crossway Bibles',
-                language: 'en-US',
-                chapterVerseSeparator: ':',
-                hasStrongs: true,
-                isPlaintext: true,
-                ...versionMeta
-            })
-        );
-
-        console.log(`importing version ${version.uid}`);
-
-        const books = getXmlFromModule(this.options.sourcePath);
-
-        for (const book of books) {
-            // console.log(book.osisId);
-            const bookJson = getBibleEngineInputFromXML(book.chapters);
-            await this.bibleEngine.addBookWithContent(version, {
-                book: {
-                    number: book.bookNum,
-                    osisId: book.osisId,
-                    abbreviation: book.osisId,
-                    title: book.fullName,
-                    type: book.bookNum < 40 ? 'ot' : 'nt'
-                },
-                contents: bookJson
-            });
+            const importer = new OsisImporter(
+                this.bibleEngine,
+                {
+                    sourceData: xml,
+                    versionMeta: {
+                        uid: swordModule.config.moduleName,
+                        hasStrongs: swordModule.config.hasStrongs,
+                        abbreviation: swordModule.config.moduleName,
+                        title: swordModule.config.description,
+                        language: swordModule.config.language,
+                        copyrightShort: swordModule.config.shortCopyright,
+                    },
+                    bookMeta: swordModule.getBookMetadata()
+                }
+            )
+            await importer.run()
+        } catch (error) {
+            console.log(`${this.toString()} failed`, error)
         }
-        return this.bibleEngine.finalizeVersion(version.id);
     }
 
     toString() {
