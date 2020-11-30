@@ -1012,13 +1012,7 @@ export class OsisImporter extends BibleEngineImporter {
         const paragraph = this.getCurrentContainer(context);
         if (!paragraph || paragraph.type !== 'group' || paragraph.groupType !== 'paragraph') {
             const errorMsg = `can't close paragraph: no paragraph on end of stack`;
-            if (errorOnFailure) {
-                if (DEBUG_OUTPUT_ENABLED) console.log(context);
-                throw new Error(errorMsg);
-            } else if (DEBUG_OUTPUT_ENABLED) {
-                console.log(errorMsg);
-                console.dir(context, { depth: 7 });
-            }
+            throw new Error(errorMsg);
         } else {
             context.contentContainerStack.pop();
         }
