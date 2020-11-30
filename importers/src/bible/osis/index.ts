@@ -972,9 +972,7 @@ export class OsisImporter extends BibleEngineImporter {
         }
 
         if (!context.currentChapter || !context.currentVerse) {
-            throw new Error(
-                this.getErrorMessageWithContext(`phrase without chapter or verse: ${text}`, context)
-            );
+            throw this.getError(`phrase without chapter or verse: ${text}`, context);
         }
 
         const phrase: IBibleContentPhrase = {
@@ -1024,7 +1022,7 @@ export class OsisImporter extends BibleEngineImporter {
 
     getCurrentContainer(context: ParserContext) {
         if (!context.contentContainerStack.length) {
-            throw new Error(this.getErrorMessageWithContext(`missing root container`, context));
+            throw this.getError(`missing root container`, context);
         }
         return context.contentContainerStack[context.contentContainerStack.length - 1];
     }
@@ -1051,11 +1049,9 @@ export class OsisImporter extends BibleEngineImporter {
                     currentContainer.contents.push(emptyPhrase);
                     return emptyPhrase;
                 } else {
-                    throw new Error(
-                        this.getErrorMessageWithContext(
-                            `looking for phrase in an empty container`,
-                            context
-                        )
+                    throw this.getError(
+                        `looking for phrase in an empty container`,
+                        context
                     );
                 }
             }
@@ -1073,7 +1069,11 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     getErrorMessageWithContext(msg: string, context: ParserContext) {
-        return `${msg}  in ${context.currentBook && context.currentBook.osisId} ${context.currentChapter
+        return `${msg} in ${context.currentBook && context.currentBook.osisId} ${context.currentChapter
             }:${context.currentVerse}`;
+    }
+
+    getError(msg: string, context: ParserContext) {
+        return new Error(this.getErrorMessageWithContext(msg, context))
     }
 }
