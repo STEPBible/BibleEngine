@@ -3,7 +3,7 @@ import { getBibleEngineInputFromXML } from '../src/OsisParser';
 import { ChapterXML } from '../src/types';
 
 describe('OsisParser', () => {
-    const psalmsXML: ChapterXML = require('./Psa23EsvXmlResult.json');
+    const psalmsXML: ChapterXML = require('./fixtures/Psa23EsvXmlResult.json');
 
     const createSingleVerseXmlObject = (text: string): ChapterXML[] => ([
         {
@@ -48,7 +48,7 @@ describe('OsisParser', () => {
     });
 
     describe('Chinese Union Version Simplified with Strongs', () => {
-        const genesisXml: ChapterXML = require('./Gen1CuvXmlResult.json');
+        const genesisXml: ChapterXML = require('./fixtures/Gen1CuvXmlResult.json');
         test('nonempty content returned', () => {
             const bookJson = getBibleEngineInputFromXML([{ intro: '', verses: genesisXml.verses }]);
             expect(bookJson.length).toBeGreaterThan(0);

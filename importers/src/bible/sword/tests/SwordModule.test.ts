@@ -11,7 +11,7 @@ test('XML extraction is correct for Psalms', () => {
     const swordModule = new SwordModule(fileIndex);
     const xmlResult = swordModule.getXMLforChapter('Psa 23');
     const expectedResult = JSON.parse(
-        fs.readFileSync(path.join(__dirname, '../tests/Psa23KjvXmlResult.json'))
+        fs.readFileSync(path.join(__dirname, '../tests/fixtures/Psa23KjvXmlResult.json'))
     );
     expect(xmlResult).toEqual(expectedResult);
 });
