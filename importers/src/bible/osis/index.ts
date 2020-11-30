@@ -720,7 +720,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.PARAGRAPH:
             case OsisXmlNodeType.PARAGRAPH: {
-                this.closeCurrentParagraph(context);
+                this.closeCurrentParagraph(currentTag, context);
                 break;
             }
             case OsisXmlNodeName.LINE: {
@@ -1006,11 +1006,18 @@ export class OsisImporter extends BibleEngineImporter {
         context.contentContainerStack.push(paragraph);
     }
 
-    closeCurrentParagraph(context: ParserContext) {
+    closeCurrentParagraph(currentTag: ITagWithType, context: ParserContext) {
         const paragraph = this.getCurrentContainer(context);
         if (!paragraph || paragraph.type !== 'group' || paragraph.groupType !== 'paragraph') {
-            const errorMsg = `can't close paragraph: no paragraph on end of stack`;
-            throw new Error(errorMsg);
+            const errorMsg = `
+                can't close paragraph: no paragraph on end of stack.
+                end-of-stack type: ${paragraph.type}
+                end-of-stack groupType: ${(paragraph as any).groupType}
+                --
+                paragraph ending tag: ${currentTag.name}
+                paragraph attributes: ${JSON.stringify(currentTag.attributes)}
+            `;
+            throw this.getError(errorMsg, context);
         } else {
             context.contentContainerStack.pop();
         }
