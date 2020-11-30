@@ -965,10 +965,10 @@ export class OsisImporter extends BibleEngineImporter {
                 return false;
             }) === -1
         ) {
-            console.dir(context.contentContainerStack, { depth: 7 });
-            throw new Error(
+            Logger.error(
                 this.getErrorMessageWithContext(`text outside of paragraph: "${text}"`, context)
-            );
+            )
+            this.startNewParagraph(context)
         }
 
         if (!context.currentChapter || !context.currentVerse) {
