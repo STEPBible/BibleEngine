@@ -19,7 +19,8 @@
         "random-words": "^1.1.0",
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
-        "typeorm": "0.2.28"
+        "typeorm": "0.2.28",
+        "winston": "^3.3.3"
     },
     "devDependencies": {
         "@types/archiver": "^2.1.2",
