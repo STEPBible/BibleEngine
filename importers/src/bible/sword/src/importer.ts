@@ -36,6 +36,7 @@ export class SwordImporter extends BibleEngineImporter {
             await importer.run()
         } catch (error) {
             console.log(`${this.toString()} failed`, error)
+            throw error
         }
     }
 
