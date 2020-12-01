@@ -1,11 +1,24 @@
-import { JsonController, Post, Body, Get, Param } from 'routing-controllers';
+import { JsonController, Post, Body, Get, Param, HttpError } from 'routing-controllers';
 import { Inject } from 'typedi';
 import { BibleEngine, IBibleBook, IBibleReferenceRangeQuery, IBibleVersion, stripUnnecessaryDataFromBibleBook, stripUnnecessaryDataFromBibleVersion } from '@bible-engine/core';
+
+class BibleEngineHttpError extends HttpError {
+    constructor(bibleEngineError: Error & {httpCode?: number}) {
+        super(bibleEngineError.httpCode || 400, bibleEngineError.message);
+        this.name = bibleEngineError.name;
+    }
+}
 
 @JsonController('/bible')
 export class BibleController {
     @Inject('bibleEngine')
     private bibleEngine: BibleEngine;
+
+    private getReference(ref: IBibleReferenceRangeQuery) {
+        return this.bibleEngine.getFullDataForReferenceRange(ref, true).catch(error => {
+            throw new BibleEngineHttpError(error);
+        });
+    }
 
     @Get('/versions')
     getVersions() {
@@ -28,13 +41,12 @@ export class BibleController {
         @Param('osisId') osisId: string,
         @Param('chapterNr') chapterNr: number
     ) {
-        return this.bibleEngine.getFullDataForReferenceRange(
+        return this.getReference(
             {
                 versionUid,
                 bookOsisId: osisId,
                 versionChapterNum: chapterNr,
-            },
-            true
+            }
         );
     }
 
@@ -45,15 +57,14 @@ export class BibleController {
         @Param('chapterNr') chapterNr: number,
         @Param('verseNr') verseNr: number
     ) {
-        return this.bibleEngine.getFullDataForReferenceRange(
+        return this.getReference(
             {
                 versionUid,
                 bookOsisId: osisId,
                 versionChapterNum: chapterNr,
                 versionVerseNum: verseNr,
                 skipPartialWrappingSectionsInDocument: true,
-            },
-            true
+            }
         );
     }
 
@@ -65,7 +76,7 @@ export class BibleController {
         @Param('verseNr') verseNr: number,
         @Param('verseEndNr') verseEndNr: number
     ) {
-        return this.bibleEngine.getFullDataForReferenceRange(
+        return this.getReference(
             {
                 versionUid,
                 bookOsisId: osisId,
@@ -73,14 +84,13 @@ export class BibleController {
                 versionVerseNum: verseNr,
                 versionVerseEndNum: verseEndNr,
                 skipPartialWrappingSectionsInDocument: true,
-            },
-            true
+            }
         );
     }
 
     @Post('/ref')
     getReferenceRange(@Body() ref: IBibleReferenceRangeQuery) {
-        return this.bibleEngine.getFullDataForReferenceRange(ref, true);
+        return this.getReference(ref);
     }
 
     @Get('/definitions/:strongNum')

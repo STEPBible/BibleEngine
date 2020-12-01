@@ -77,6 +77,15 @@ export class NoDbConnectionError extends Error {
     }
 }
 
+export class BibleVersionInvalidError extends Error {
+    httpCode: number;
+    constructor() {
+        super('accessing an invalid bible version');
+        this.name = 'BibleVersionInvalidError'
+        this.httpCode = 404;
+    }
+}
+
 export class BibleVersionRemoteOnlyError extends Error {
     constructor() {
         super('accessing content of a bible version that is only remote');
@@ -348,7 +357,7 @@ export class BibleEngine {
             where: { uid: rangeQuery.versionUid }
         });
 
-        if (!versionEntity) throw new Error(`can't get formatted text: invalid version`);
+        if (!versionEntity) throw new BibleVersionInvalidError();
         if (versionEntity.dataLocation === 'remote') throw new BibleVersionRemoteOnlyError();
 
         const range = { ...rangeQuery, versionId: versionEntity.id };

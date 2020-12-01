@@ -51,13 +51,16 @@ export interface IApiResponseError {
 }
 
 export class BibleEngineRemoteError extends Error {
+    statusCode: number;
+    error: any;
+
     constructor(response: IApiResponseError) {
         super(
-            `Error ${response.statusCode} from BibleEngine server: ${JSON.stringify(
-                response.error
-            )}`
+            `Error ${response.statusCode} from BibleEngine server`
         );
         this.name = 'BibleEngineRemoteError';
+        this.statusCode = response.statusCode;
+        this.error = response.error;
     }
 }
 
