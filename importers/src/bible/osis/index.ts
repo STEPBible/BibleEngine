@@ -65,7 +65,13 @@ export class OsisImporter extends BibleEngineImporter {
             xmlStream.close();
         });
 
-        const context = await pParsing;
+        let context;
+        try {
+            context = await pParsing;
+        } catch (error) {
+            console.error('Parsing failed', error.message)
+            process.exit(1)
+        }
 
         if (!context.version) throw new Error(`can't find version id`);
 
