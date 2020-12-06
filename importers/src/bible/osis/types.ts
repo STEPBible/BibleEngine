@@ -26,6 +26,7 @@ export type ParserContext = {
         key: string;
         refs: IBibleCrossReference[];
     };
+    strongsBuffer?: string[]
     contentContainerStack: (
         | { type: 'root'; contents: IBibleContent[] }
         | IBibleContentSection

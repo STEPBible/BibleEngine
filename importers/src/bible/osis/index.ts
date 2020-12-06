@@ -78,7 +78,7 @@ export class OsisImporter extends BibleEngineImporter {
         try {
             context = await pParsing;
         } catch (error) {
-            console.error('Parsing failed: ', error.message)
+            console.error('Parsing failed: ', error)
             process.exit(1)
         }
 
@@ -400,6 +400,22 @@ export class OsisImporter extends BibleEngineImporter {
                     key: tag.attributes.n,
                     refs: [],
                 };
+                break;
+            }
+            case OsisXmlNodeName.WORD: {
+                if (context.strongsBuffer) {
+                    throw this.getError(
+                        `
+                        Strongs reference buffer was not cleared.
+                        existing contents: ${JSON.stringify(context.strongsBuffer)}
+                        new strongs tag: ${JSON.stringify(tag.attributes)}
+                        `,
+                    )
+                }
+                if (!tag.attributes.lemma) {
+                    throw this.getError('No strongs numbers found on tag')
+                }
+                context.strongsBuffer = this.parseStrongsNums(tag)
                 break;
             }
             case OsisXmlNodeName.TITLE: {
@@ -987,6 +1003,10 @@ export class OsisImporter extends BibleEngineImporter {
             phrase.crossReferences = context.crossRefBuffer.refs;
             delete context.crossRefBuffer;
         }
+        if (context.strongsBuffer) {
+            phrase.strongs = context.strongsBuffer
+            delete context.strongsBuffer
+        }
         if (context.currentVerseJoinToVersionRef) {
             phrase.joinToVersionRefId = generateVersionReferenceId(
                 context.currentVerseJoinToVersionRef
@@ -1015,6 +1035,31 @@ export class OsisImporter extends BibleEngineImporter {
         } else {
             context.contentContainerStack.pop();
         }
+    }
+
+    parseStrongsNums(tag: OsisXmlNode) {
+        const lemma = tag.attributes!.lemma!.replace(/\!/g, '')
+        const strongsNumbersString = lemma.split('strong:').join('')
+        const strongsNumbers = strongsNumbersString
+            .split(' ')
+            .filter(element => element)
+            .map(strongsNum => this.normalizeStrongsNum(strongsNum));
+        return strongsNumbers
+    }
+
+    normalizeStrongsNum(strongsNum: string): string {
+        const lastCharacter = strongsNum[strongsNum.length - 1];
+        const startingletter = strongsNum[0].toUpperCase();
+        const numberPortion = this.isNumeric(lastCharacter)
+            ? strongsNum.substring(1)
+            : strongsNum.substring(1, strongsNum.length - 1);
+        const endingLetter = this.isNumeric(lastCharacter) ? '' : lastCharacter.toLowerCase();
+        const paddedNumber = String('0000' + numberPortion).slice(-4);
+        return startingletter + paddedNumber + endingLetter;
+    }
+
+    isNumeric(num: any): num is number {
+        return !isNaN(num);
     }
 
     getCurrentTag(context: ParserContext) {
