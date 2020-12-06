@@ -761,6 +761,9 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 // we handle the cross ref in parseTextNode
+                if (context.crossRefBuffer?.refs?.length === 0) {
+                    this.logError('Cross reference block found with no actual references')
+                }
                 break;
             }
             case OsisXmlNodeName.TITLE: {
