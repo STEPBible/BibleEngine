@@ -3,12 +3,13 @@ import { BibleBookPlaintext } from '../models';
 /**
  * @description OSIS book ID with chapter/verse statistics and English names
  */
-export const BOOK_DATA: {
+export type BookData = {
     [key: string]: { genericId: number; names: { [key: string]: string[] } };
-} = {
+}
+export const BOOK_DATA: BookData = {
     /*
-	 Old Testament
-	*/
+     Old Testament
+    */
     Gen: {
         genericId: 1,
         names: { en: ['Genesis', 'Ge', 'Gen'] }
@@ -234,8 +235,8 @@ export const BOOK_DATA: {
     },
 
     /*
-	 New Testament
-	*/
+     New Testament
+    */
 
     Matt: {
         genericId: 40,
@@ -465,8 +466,8 @@ export const BOOK_DATA: {
     },
 
     /*
-	 Apocrypha
-	*/
+     Apocrypha
+    */
 
     Tob: {
         genericId: 70,
