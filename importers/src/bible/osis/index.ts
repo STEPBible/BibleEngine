@@ -23,7 +23,17 @@ import Logger from './Logger'
 const DEBUG_OUTPUT_JSON_FILE: string | false = false;
 const STRICT_MODE_ENABLED = true;
 
+
+
 export class OsisImporter extends BibleEngineImporter {
+    context: ParserContext = {
+        hierarchicalTagStack: [],
+        books: [],
+        contentContainerStack: [],
+        skipClosingTags: [],
+        sectionStack: [],
+    }
+
     async import() {
         let xml: string;
         if (this.options.sourceData) xml = this.options.sourceData;
@@ -42,24 +52,23 @@ export class OsisImporter extends BibleEngineImporter {
         const pParsing = new Promise<ParserContext>((resolve, reject) => {
             const xmlStream = parser(STRICT_MODE_ENABLED);
 
-            const initialContext: ParserContext = {
+            this.context = {
                 hierarchicalTagStack: [],
                 books: [],
                 contentContainerStack: [],
                 skipClosingTags: [],
                 sectionStack: [],
             };
-
-            xmlStream.ontext = (text: string) => this.parseTextNode(text, initialContext);
-            xmlStream.onopentag = (tag: any) => this.parseOpeningTag(tag, initialContext);
+            xmlStream.ontext = (text: string) => this.parseTextNode(text, this.context);
+            xmlStream.onopentag = (tag: any) => this.parseOpeningTag(tag, this.context);
             xmlStream.onclosetag = (tagName: OsisXmlNodeName) =>
-                this.parseClosingTag(tagName, initialContext);
+                this.parseClosingTag(tagName, this.context);
             xmlStream.onerror = (error) => {
                 xmlStream.close()
                 reject(error);
             }
             xmlStream.onend = () => {
-                resolve(initialContext);
+                resolve(this.context);
             };
             xmlStream.write(xml);
             xmlStream.close();
@@ -69,11 +78,11 @@ export class OsisImporter extends BibleEngineImporter {
         try {
             context = await pParsing;
         } catch (error) {
-            console.error('Parsing failed', error.message)
+            console.error('Parsing failed: ', error.message)
             process.exit(1)
         }
 
-        if (!context.version) throw new Error(`can't find version id`);
+        if (!context.version) throw this.getError(`can't find version id`);
 
         if (DEBUG_OUTPUT_JSON_FILE) {
             writeFileSync(DEBUG_OUTPUT_JSON_FILE, JSON.stringify(context.books.slice(18, 19)));
@@ -119,7 +128,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.OSIS_ROOT: {
                 if (!tag.attributes.osisIDWork || !tag.attributes['xml:lang'])
-                    throw new Error(`missing osisIDWork or xml:lang attribute`);
+                    throw this.getError(`missing osisIDWork or xml:lang attribute`);
                 context.version = {
                     uid: tag.attributes.osisIDWork,
                     language: tag.attributes['xml:lang'],
@@ -137,7 +146,7 @@ export class OsisImporter extends BibleEngineImporter {
                 // currently we force bookMeta to be provided by the user (since the osis
                 // file we are currently working on doesn't have the data in the file)
                 if (!bookMeta)
-                    throw new Error(`book metadata missing for ${tag.attributes.osisID}`);
+                    throw this.getError(`book metadata missing for ${tag.attributes.osisID}`);
 
                 const bookNr = context.books.length + 1;
 
@@ -155,27 +164,23 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.CHAPTER: {
                 if (typeof context.currentChapter !== 'number')
-                    throw new Error(`chapter outside a book`);
+                    throw this.getError(`chapter outside a book`);
                 if (!tag.attributes.osisID)
-                    throw new Error(
-                        this.getErrorMessageWithContext('chapter tag without osisID', context)
-                    );
+                    throw this.getError('chapter tag without osisID')
                 const numbers = tag.attributes.osisID.split('.');
                 context.currentChapter++;
                 if (+numbers[1] !== context.currentChapter)
-                    throw new Error(`chapter number mismatch ${tag.attributes.osisID}`);
+                    throw this.getError(`chapter number mismatch ${tag.attributes.osisID}`);
                 // sometimes there is a verse 1 tag, sometimes not
                 context.currentVerse = 1;
                 break;
             }
             case OsisXmlNodeName.VERSE: {
                 if (typeof context.currentVerse !== 'number') {
-                    throw new Error(`verse outside a chapter`);
+                    throw this.getError(`verse outside a chapter`);
                 }
                 if (!tag.attributes.osisID)
-                    throw new Error(
-                        this.getErrorMessageWithContext('verse tag without osisID', context)
-                    );
+                    throw this.getError('verse tag without osisID');
 
                 const refs = tag.attributes.osisID.split(' ');
                 const numbers = refs[0].split('.');
@@ -189,12 +194,12 @@ export class OsisImporter extends BibleEngineImporter {
                 if (context.currentVerse + 1 === +numbers[2]) context.currentVerse++;
 
                 if (+numbers[1] !== context.currentChapter || +numbers[2] !== context.currentVerse)
-                    throw new Error(`numbering mismatch: ${tag.attributes.osisID}`);
+                    throw this.getError(`numbering mismatch: ${tag.attributes.osisID}`);
 
                 if (refs.length > 1) {
                     const numbersEnd = refs[refs.length - 1].split('.');
                     if (+numbersEnd[1] !== context.currentChapter)
-                        throw new Error(
+                        throw this.getError(
                             `verse spans across chapters is currently not supported: ${tag.attributes.osisID}`
                         );
 
@@ -253,7 +258,7 @@ export class OsisImporter extends BibleEngineImporter {
                 }
 
                 if (currentContainer.type !== 'root' && currentContainer.type !== 'section')
-                    throw new Error(`sections can only start within sections or at root`);
+                    throw this.getError(`sections can only start within sections or at root`);
 
                 const section: IBibleContentSection = {
                     type: 'section',
@@ -329,22 +334,19 @@ export class OsisImporter extends BibleEngineImporter {
                     case OsisXmlNodeType.NEWLINE_POETRY:
                         const phrase = this.getCurrentPhrase(context);
                         if (!phrase)
-                            throw new Error(
-                                this.getErrorMessageWithContext(
-                                    `linebreak failed: can't find phrase`,
-                                    context
-                                )
+                            throw this.getError(
+                                `linebreak failed: can't find phrase`,
                             );
                         phrase.linebreak = true;
                         break;
                     default:
-                        throw new Error(`unknown lb-tag type: ${tag.attributes.type}`);
+                        throw this.getError(`unknown lb-tag type: ${tag.attributes.type}`);
                 }
                 break;
             }
             case OsisXmlNodeType.BOOK_INTRODUCTION: {
                 if (!context.currentBook || context.currentBook.introduction)
-                    throw new Error(
+                    throw this.getError(
                         `can't add book introduction: no book or duplicate introduction`
                     );
                 const content: DocumentRoot = { type: 'root', contents: [] };
@@ -366,12 +368,9 @@ export class OsisImporter extends BibleEngineImporter {
                 } else {
                     const currentPhrase = this.getCurrentPhrase(context, true);
                     if (!currentPhrase) {
-                        throw new Error(
-                            this.getErrorMessageWithContext(
-                                'note without a phrase',
-                                context
-                            )
-                        );
+                        throw this.logError(
+                            'note without a phrase',
+                        )
                     }
                     const note: IBibleNote = {
                         key: tag.attributes.n,
@@ -384,17 +383,18 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 if (context.crossRefBuffer) {
-                    throw new Error(
-                        this.getErrorMessageWithContext(
-                            `cross reference buffer was not cleared`,
-                            context
-                        )
+                    throw this.getError(
+                        `
+                        cross reference buffer was not cleared.
+                        existing key: ${context.crossRefBuffer.key}
+                        existing refs: ${JSON.stringify(context.crossRefBuffer.refs)}
+                        ---
+                        attributes of new cross ref tag: ${JSON.stringify(tag.attributes)}
+                        `,
                     );
                 }
                 if (!tag.attributes.n)
-                    throw new Error(
-                        this.getErrorMessageWithContext('crossRef without index key', context)
-                    );
+                    throw this.logError('crossRef without index key')
 
                 context.crossRefBuffer = {
                     key: tag.attributes.n,
@@ -539,7 +539,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             default: {
                 if (!elementType)
-                    Logger.error(`unrecognized osis xml tag: ${elementType}`);
+                    this.logError(`unrecognized osis xml tag: ${elementType}`);
             }
         }
     }
@@ -554,7 +554,7 @@ export class OsisImporter extends BibleEngineImporter {
         let currentTag: ITagWithType | undefined;
         if (context.openedSelfClosingTag) {
             if (context.openedSelfClosingTag.name !== tagName) {
-                throw new Error(`invalid self closing end tag`);
+                throw this.getError(`invalid self closing end tag`);
             }
             currentTag = context.openedSelfClosingTag;
             delete context.openedSelfClosingTag;
@@ -564,7 +564,7 @@ export class OsisImporter extends BibleEngineImporter {
             currentTag = context.hierarchicalTagStack.pop();
         }
 
-        if (!currentTag) throw new Error(`can't find matching tag for closing tag ${tagName}`);
+        if (!currentTag) throw this.getError(`can't find matching tag for closing tag ${tagName}`);
 
         let closeTagsAtEnd: OsisXmlNodeName[] = [];
         let startTagsAtEnd: OsisXmlNode[] = [];
@@ -585,16 +585,13 @@ export class OsisImporter extends BibleEngineImporter {
                     quoteContainer.type !== 'group' ||
                     quoteContainer.groupType !== 'quote'
                 )
-                    throw new Error(
-                        this.getErrorMessageWithContext(
-                            `expected quote group on top of stack`,
-                            context
-                        )
+                    throw this.getError(
+                        `expected quote group on top of stack`,
                     );
 
                 const outerTag = context.hierarchicalTagStack.pop();
                 if (!outerTag || outerTag.name !== tagName)
-                    throw new Error(`invalid closing tag: ${tagName} (after second level)`);
+                    throw this.getError(`invalid closing tag: ${tagName} (after second level)`);
 
                 const outerContainer =
                     context.contentContainerStack[context.contentContainerStack.length - 2];
@@ -655,15 +652,15 @@ export class OsisImporter extends BibleEngineImporter {
 
                 context.skipClosingTags.push(currentTag.name);
             } else {
-                throw new Error(`invalid closing tag: ${tagName}`);
+                throw this.getError(`invalid closing tag: ${tagName}`);
             }
         }
 
         switch (currentTag.type) {
             case OsisXmlNodeType.BOOK: {
-                if (!context.currentBook) throw new Error(`can't close a book: data missing`);
+                if (!context.currentBook) throw this.getError(`can't close a book: data missing`);
                 const rootContainer = context.contentContainerStack[0];
-                if (rootContainer.type !== 'root') throw new Error(`book content has no root`);
+                if (rootContainer.type !== 'root') throw this.getError(`book content has no root`);
 
                 context.books.push({
                     book: context.currentBook,
@@ -678,12 +675,7 @@ export class OsisImporter extends BibleEngineImporter {
                         !context.currentVerseJoinToVersionRef.versionVerseNum ||
                         !context.currentVerse
                     )
-                        throw new Error(
-                            this.getErrorMessageWithContext(
-                                `can't create verse span, verse number missing`,
-                                context
-                            )
-                        );
+                        throw this.getError(`can't create verse span, verse number missing`)
 
                     const currentContainer = this.getCurrentContainer(context);
                     for (
@@ -726,27 +718,29 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.PARAGRAPH:
             case OsisXmlNodeType.PARAGRAPH: {
-                this.closeCurrentParagraph(currentTag, context);
+                this.closeCurrentParagraph(context);
                 break;
             }
             case OsisXmlNodeName.LINE: {
                 const lineGroup = context.contentContainerStack.pop();
                 if (!lineGroup || lineGroup.type !== 'group' || lineGroup.groupType !== 'line') {
-                    throw new Error(`unclean container stack while closing line`);
+                    throw this.getError(`unclean container stack while closing line`);
                 }
                 break;
             }
             case OsisXmlNodeName.LINE_GROUP: {
                 const lineGroup = context.contentContainerStack.pop();
                 if (!lineGroup || lineGroup.type !== 'group' || lineGroup.groupType !== 'lineGroup')
-                    throw new Error(`unclean container stack while closing lineGroup`);
+                    throw this.getError(`unclean container stack while closing lineGroup`);
                 break;
             }
             case OsisXmlNodeType.BOOK_INTRODUCTION:
             case OsisXmlNodeName.NOTE: {
                 const note = context.contentContainerStack.pop();
                 if (!note || note.type !== 'root')
-                    throw new Error(`unclean container stack while closing note or introduction`);
+                    throw this.getError(
+                        `unclean container stack while closing note or introduction`,
+                    );
                 break;
             }
             case OsisXmlNodeType.CROSS_REFERENCE: {
@@ -757,7 +751,7 @@ export class OsisImporter extends BibleEngineImporter {
                 if (currentTag.attributes.canonical === 'true') {
                     const title = context.contentContainerStack.pop();
                     if (!title || title.type !== 'group' || title.groupType !== 'title') {
-                        throw new Error(`unclean container stack while closing title`);
+                        throw this.getError(`unclean container stack while closing title`);
                     }
                 }
                 break;
@@ -777,7 +771,7 @@ export class OsisImporter extends BibleEngineImporter {
                 //     quoteGroup.groupType !== 'quote'
                 // ) {
                 //     if (DEBUG_OUTPUT_ENABLED) console.log(context, quoteGroup);
-                //     throw new Error(`unclean container stack while closing quote`);
+                //     throw this.getError(`unclean container stack while closing quote`);
                 // }
 
                 const currentContainer = this.getCurrentContainer(context);
@@ -798,7 +792,9 @@ export class OsisImporter extends BibleEngineImporter {
                     italicGroup.type !== 'group' ||
                     italicGroup.groupType !== 'italic'
                 )
-                    throw new Error(`unclean container stack while closing "foreign" group`);
+                    throw this.getError(
+                        `unclean container stack while closing "foreign" group`,
+                    );
                 break;
             }
             case OsisXmlNodeName.TRANS_CHANGE: {
@@ -808,7 +804,9 @@ export class OsisImporter extends BibleEngineImporter {
                     groupTransChange.type !== 'group' ||
                     groupTransChange.groupType !== 'translationChange'
                 )
-                    throw new Error(`unclean container stack while closing "transChange" group`);
+                    throw this.getError(
+                        `unclean container stack while closing "transChange" group`,
+                    );
                 break;
             }
             case OsisXmlNodeName.HIGHLIGHT: {
@@ -818,7 +816,7 @@ export class OsisImporter extends BibleEngineImporter {
                     emphasisGroup.type !== 'group' ||
                     emphasisGroup.groupType !== 'emphasis'
                 )
-                    throw new Error(`unclean container stack while closing emphasis group`);
+                    throw this.getError(`unclean container stack while closing emphasis group`);
                 break;
             }
             case OsisXmlNodeName.DIVINE_NAME: {
@@ -833,7 +831,9 @@ export class OsisImporter extends BibleEngineImporter {
                         divineNameGroup.type !== 'group' ||
                         divineNameGroup.groupType !== 'divineName'
                     )
-                        throw new Error(`unclean container stack while closing divineName group`);
+                        throw this.getError(
+                            `unclean container stack while closing divineName group`
+                        );
                 }
                 break;
             }
@@ -868,7 +868,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             default: {
-                Logger.error(`unrecognized closing osis xml tag: ${currentTag.type}`);
+                this.logError(`unrecognized closing osis xml tag: ${currentTag.type}`);
             }
         }
 
@@ -896,7 +896,7 @@ export class OsisImporter extends BibleEngineImporter {
         } else if (context.hierarchicalTagStack.find((tag) => tag.name === OsisXmlNodeName.WORK)) {
             if (currentTag.name === OsisXmlNodeName.TITLE) {
                 if (!context.version)
-                    throw new Error(`can't add version title: version meta missing`);
+                    throw this.getError(`can't add version title: version meta missing`);
                 context.version.title = text;
             }
             return;
@@ -938,11 +938,8 @@ export class OsisImporter extends BibleEngineImporter {
             )
         ) {
             if (currentContainer.type !== 'section') {
-                throw new Error(
-                    this.getErrorMessageWithContext(
-                        `can't set title to section: no section`,
-                        context
-                    )
+                throw this.logError(
+                    `can't set title to section: no section`,
                 );
             }
             if (currentTag.attributes.type === OsisXmlNodeType.TEXTUAL_NOTE) {
@@ -971,14 +968,12 @@ export class OsisImporter extends BibleEngineImporter {
                 return false;
             }) === -1
         ) {
-            Logger.error(
-                this.getErrorMessageWithContext(`text outside of paragraph: "${text}"`, context)
-            )
+            this.logError(`text outside of paragraph: "${text}"`)
             this.startNewParagraph(context)
         }
 
         if (!context.currentChapter || !context.currentVerse) {
-            throw this.getError(`phrase without chapter or verse: ${text}`, context);
+            throw this.getError(`phrase without chapter or verse: ${text}`);
         }
 
         const phrase: IBibleContentPhrase = {
@@ -1012,18 +1007,11 @@ export class OsisImporter extends BibleEngineImporter {
         context.contentContainerStack.push(paragraph);
     }
 
-    closeCurrentParagraph(currentTag: ITagWithType, context: ParserContext) {
+    closeCurrentParagraph(context: ParserContext) {
         const paragraph = this.getCurrentContainer(context);
         if (!paragraph || paragraph.type !== 'group' || paragraph.groupType !== 'paragraph') {
-            const errorMsg = `
-                can't close paragraph: no paragraph on end of stack.
-                end-of-stack type: ${paragraph.type}
-                end-of-stack groupType: ${(paragraph as any).groupType}
-                --
-                paragraph ending tag: ${currentTag.name}
-                paragraph attributes: ${JSON.stringify(currentTag.attributes)}
-            `;
-            throw this.getError(errorMsg, context);
+            const errorMsg = `can't close paragraph: no paragraph on end of stack`;
+            this.logError(errorMsg);
         } else {
             context.contentContainerStack.pop();
         }
@@ -1035,7 +1023,7 @@ export class OsisImporter extends BibleEngineImporter {
 
     getCurrentContainer(context: ParserContext) {
         if (!context.contentContainerStack.length) {
-            throw this.getError(`missing root container`, context);
+            throw this.getError(`missing root container`);
         }
         return context.contentContainerStack[context.contentContainerStack.length - 1];
     }
@@ -1062,10 +1050,7 @@ export class OsisImporter extends BibleEngineImporter {
                     currentContainer.contents.push(emptyPhrase);
                     return emptyPhrase;
                 } else {
-                    throw this.getError(
-                        `looking for phrase in an empty container`,
-                        context
-                    );
+                    throw this.getError(`looking for phrase in an empty container`);
                 }
             }
             while (
@@ -1081,12 +1066,16 @@ export class OsisImporter extends BibleEngineImporter {
         return false;
     }
 
+    getError(msg: string) {
+        throw new Error(this.getErrorMessageWithContext(msg, this.context))
+    }
+
+    logError(msg: string) {
+        Logger.error(this.getErrorMessageWithContext(msg, this.context))
+    }
+
     getErrorMessageWithContext(msg: string, context: ParserContext) {
         return `${msg} in ${context.currentBook && context.currentBook.osisId} ${context.currentChapter
             }:${context.currentVerse}`;
-    }
-
-    getError(msg: string, context: ParserContext) {
-        return new Error(this.getErrorMessageWithContext(msg, context))
     }
 }
