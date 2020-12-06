@@ -909,18 +909,24 @@ export class OsisImporter extends BibleEngineImporter {
             context.hierarchicalTagStack.find((tag) => tag.name === OsisXmlNodeName.REVISION_DESC)
         ) {
             return;
-        } else if (context.hierarchicalTagStack.find((tag) => tag.name === OsisXmlNodeName.WORK)) {
+        }
+        if (context.hierarchicalTagStack.find((tag) => tag.name === OsisXmlNodeName.WORK)) {
             if (currentTag.name === OsisXmlNodeName.TITLE) {
                 if (!context.version)
                     throw this.getError(`can't add version title: version meta missing`);
                 context.version.title = text;
             }
             return;
-        } else if (
+        }
+        if (
             currentTag.type === OsisXmlNodeType.CROSS_REFERENCE ||
             currentTag.name === OsisXmlNodeName.REFERENCE
         ) {
-            // TODO: parse cross ref and add to buffer
+            // Can ignore text inside. only need xml attributes
+            return;
+        }
+        if (currentTag.attributes.type === OsisXmlNodeType.PSALM_BOOK_TITLE) {
+            // ignore psalm book titles for now
             return;
         }
 

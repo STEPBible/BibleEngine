@@ -33,6 +33,7 @@ export enum OsisXmlNodeType {
     PARAGRAPH = 'paragraph',
     PARALLEL = 'parallel',
     PSALM = 'psalm',
+    PSALM_BOOK_TITLE = 'x-psalm-book',
     SECTION = 'section',
     SECTION_MAJOR = 'majorSection',
     SECTION_SUB = 'subSection',
