@@ -901,6 +901,9 @@ export class OsisImporter extends BibleEngineImporter {
     parseTextNode(text: string, context: ParserContext) {
         const trimmedText = text.trim();
         if (!trimmedText) {
+            // Some strongs tags have empty content, since they represent
+            // original-language words not present in the translation
+            delete context.strongsBuffer
             return;
         }
         const currentTag = this.getCurrentTag(context);
