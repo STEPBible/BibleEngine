@@ -19,6 +19,7 @@ import { startsWithPunctuationChar, streamToString } from '../../shared/helpers.
 import { OsisXmlNode, OsisXmlNodeType, OsisXmlNodeName } from '../../shared/osisTypes';
 import { ParserContext, ITagWithType, TagType } from './types';
 import Logger from './Logger'
+import { getOsisReferenceEntities } from '../functions/helpers.functions'
 
 const DEBUG_OUTPUT_JSON_FILE: string | false = false;
 const STRICT_MODE_ENABLED = true;
@@ -121,9 +122,32 @@ export class OsisImporter extends BibleEngineImporter {
 
         switch (elementType) {
             case OsisXmlNodeName.CATCH_WORD:
-            case OsisXmlNodeName.REFERENCE:
             case OsisXmlNodeName.WORK: {
                 // is handled in parseTextNode
+                break;
+            }
+            case OsisXmlNodeName.REFERENCE: {
+                if (!tag.attributes.osisRef) {
+                    return this.logError('Invalid cross reference verse found')
+                }
+                if (!context.crossRefBuffer) {
+                    return this.logError('Reference found outside cross ref block')
+                }
+                if (!context.crossRefBuffer.key || !context.crossRefBuffer.refs) {
+                    return this.logError(`Corrupted cross ref buffer found: ${JSON.stringify(context.crossRefBuffer)}`)
+                }
+                const osisRef = getOsisReferenceEntities(
+                    tag.attributes.osisRef
+                );
+                const crossRef: IBibleCrossReference = {
+                    key: context.crossRefBuffer?.key,
+                    range: {
+                        bookOsisId: osisRef.bookOsisId,
+                        versionChapterNum: osisRef.versionChapterNum,
+                        versionVerseNum: osisRef.versionVerseNum,
+                    }
+                };
+                context.crossRefBuffer.refs.push(crossRef)
                 break;
             }
             case OsisXmlNodeName.OSIS_ROOT: {
@@ -386,7 +410,6 @@ export class OsisImporter extends BibleEngineImporter {
                     throw this.getError(
                         `
                         cross reference buffer was not cleared.
-                        existing key: ${context.crossRefBuffer.key}
                         existing refs: ${JSON.stringify(context.crossRefBuffer.refs)}
                         ---
                         attributes of new cross ref tag: ${JSON.stringify(tag.attributes)}
