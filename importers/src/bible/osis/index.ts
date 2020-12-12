@@ -7,6 +7,7 @@ import {
     IBibleContentSection,
     IBibleContentGroup,
     IBibleContentPhrase,
+    IBibleCrossReference,
     IBibleNote,
     DocumentRoot,
     DocumentPhrase,
@@ -19,12 +20,10 @@ import { startsWithPunctuationChar, streamToString } from '../../shared/helpers.
 import { OsisXmlNode, OsisXmlNodeType, OsisXmlNodeName } from '../../shared/osisTypes';
 import { ParserContext, ITagWithType, TagType } from './types';
 import Logger from './Logger'
-import { getOsisReferenceEntities } from '../functions/helpers.functions'
+import { getOsisReferenceEntities } from './functions/helpers.functions'
 
 const DEBUG_OUTPUT_JSON_FILE: string | false = false;
 const STRICT_MODE_ENABLED = true;
-
-
 
 export class OsisImporter extends BibleEngineImporter {
     context: ParserContext = {
