@@ -140,11 +140,7 @@ export class OsisImporter extends BibleEngineImporter {
                 );
                 const crossRef: IBibleCrossReference = {
                     key: context.crossRefBuffer?.key,
-                    range: {
-                        bookOsisId: osisRef.bookOsisId,
-                        versionChapterNum: osisRef.versionChapterNum,
-                        versionVerseNum: osisRef.versionVerseNum,
-                    }
+                    range: osisRef,
                 };
                 context.crossRefBuffer.refs.push(crossRef)
                 break;
