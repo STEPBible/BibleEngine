@@ -21,6 +21,7 @@ import { OsisXmlNode, OsisXmlNodeType, OsisXmlNodeName } from '../../shared/osis
 import { ParserContext, ITagWithType, TagType } from './types';
 import Logger from '../../shared/Logger'
 import { getParsedBookChapterVerseRef } from './functions/helpers.functions'
+import { parseStrongsNums } from './functions/strongs.functions';
 
 const DEBUG_OUTPUT_JSON_FILE: string | false = false;
 const STRICT_MODE_ENABLED = true;
@@ -397,7 +398,7 @@ export class OsisImporter extends BibleEngineImporter {
                 } else {
                     const currentPhrase = this.getCurrentPhrase(context, true);
                     if (!currentPhrase) {
-                        throw this.logError(
+                        throw this.getError(
                             'note without a phrase',
                         )
                     }
@@ -416,13 +417,13 @@ export class OsisImporter extends BibleEngineImporter {
                         `
                         cross reference buffer was not cleared.
                         existing refs: ${JSON.stringify(context.crossRefBuffer.refs)}
-                        ---
-                        attributes of new cross ref tag: ${JSON.stringify(tag.attributes)}
+                        new refs found: ${JSON.stringify(tag.attributes)}
                         `,
                     );
                 }
-                if (!tag.attributes.n)
-                    throw this.logError('crossRef without index key')
+                if (!tag.attributes.n) {
+                    throw this.getError('crossRef without index key')
+                }
 
                 context.crossRefBuffer = {
                     key: tag.attributes.n,
@@ -443,8 +444,7 @@ export class OsisImporter extends BibleEngineImporter {
                 if (!tag.attributes.lemma) {
                     throw this.getError('No strongs numbers found on tag')
                 }
-                if (!tag)
-                    context.strongsBuffer = this.parseStrongsNums(tag)
+                context.strongsBuffer = parseStrongsNums(tag.attributes.lemma)
                 break;
             }
             case OsisXmlNodeName.TITLE: {
@@ -583,8 +583,10 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             default: {
-                if (!elementType)
-                    this.logError(`unrecognized osis xml tag: ${elementType}`);
+                if (!elementType) {
+                    throw this.getError(`unrecognized osis xml tag: ${elementType}`);
+                }
+
             }
         }
     }
@@ -775,7 +777,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.NOTE: {
                 const note = context.contentContainerStack.pop();
                 if (!note || note.type !== 'root') {
-                    this.logError(
+                    throw this.getError(
                         `
                         unclean container stack while closing note or introduction.
                         Found this node type on top of stack: ${JSON.stringify(note)}
@@ -790,7 +792,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 // we handle the cross ref in parseTextNode
                 if (context.crossRefBuffer?.refs?.length === 0) {
-                    // this.logError('Cross reference block found with no actual references')
+                    this.logError('Cross reference block found with no actual references')
                 }
                 break;
             }
@@ -960,7 +962,7 @@ export class OsisImporter extends BibleEngineImporter {
             return;
         }
         if (currentTag.attributes.type === OsisXmlNodeType.PSALM_BOOK_TITLE) {
-            // ignore psalm book titles for now
+            // ignore psalm book titles for now, e.g., 'Book One'
             return;
         }
 
@@ -1071,7 +1073,7 @@ export class OsisImporter extends BibleEngineImporter {
         const paragraph = this.getCurrentContainer(context);
         if (!paragraph || paragraph.type !== 'group' || paragraph.groupType !== 'paragraph') {
             const errorMsg = `can't close paragraph: no paragraph on end of stack`;
-            this.logError(errorMsg);
+            throw this.getError(errorMsg);
         } else {
             context.contentContainerStack.pop();
         }
@@ -1089,31 +1091,6 @@ export class OsisImporter extends BibleEngineImporter {
             contents: rootContainer.contents,
         });
         delete context.currentBook
-    }
-
-    parseStrongsNums(tag: OsisXmlNode) {
-        const lemma = tag.attributes!.lemma!.replace(/\!/g, '')
-        const strongsNumbersString = lemma.split('strong:').join('')
-        const strongsNumbers = strongsNumbersString
-            .split(' ')
-            .filter(element => element)
-            .map(strongsNum => this.normalizeStrongsNum(strongsNum));
-        return strongsNumbers
-    }
-
-    normalizeStrongsNum(strongsNum: string): string {
-        const lastCharacter = strongsNum[strongsNum.length - 1];
-        const startingletter = strongsNum[0].toUpperCase();
-        const numberPortion = this.isNumeric(lastCharacter)
-            ? strongsNum.substring(1)
-            : strongsNum.substring(1, strongsNum.length - 1);
-        const endingLetter = this.isNumeric(lastCharacter) ? '' : lastCharacter.toLowerCase();
-        const paddedNumber = String('0000' + numberPortion).slice(-4);
-        return startingletter + paddedNumber + endingLetter;
-    }
-
-    isNumeric(num: any): num is number {
-        return !isNaN(num);
     }
 
     getCurrentTag(context: ParserContext) {
