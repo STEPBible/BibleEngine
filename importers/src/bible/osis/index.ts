@@ -82,7 +82,7 @@ export class OsisImporter extends BibleEngineImporter {
             process.exit(1)
         }
 
-        if (!context.version) throw this.getError(`can't find version id`);
+        if (!context.version) throw new Error(`can't find version id`);
 
         if (DEBUG_OUTPUT_JSON_FILE) {
             writeFileSync(DEBUG_OUTPUT_JSON_FILE, JSON.stringify(context.books.slice(18, 19)));
