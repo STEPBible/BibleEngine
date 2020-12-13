@@ -78,8 +78,7 @@ export class OsisImporter extends BibleEngineImporter {
         try {
             context = await pParsing;
         } catch (error) {
-            console.error(error)
-            console.error('Current verse: ', this.getCurrentVerse(this.context))
+            console.error(error, this.getCurrentVerse(this.context))
             process.exit(1)
         }
 
