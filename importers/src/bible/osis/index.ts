@@ -79,6 +79,7 @@ export class OsisImporter extends BibleEngineImporter {
             context = await pParsing;
         } catch (error) {
             console.error(error)
+            console.error('Current verse: ', this.getCurrentVerse(this.context))
             process.exit(1)
         }
 
@@ -1179,8 +1180,12 @@ export class OsisImporter extends BibleEngineImporter {
         Logger.error(this.getErrorMessageWithContext(msg, this.context))
     }
 
+    getCurrentVerse(context: ParserContext) {
+        return `${context.currentBook && context.currentBook.osisId} ${context.currentChapter
+            }:${context.currentVerse}`
+    }
+
     getErrorMessageWithContext(msg: string, context: ParserContext) {
-        return `${msg} in ${context.currentBook && context.currentBook.osisId} ${context.currentChapter
-            }:${context.currentVerse}`;
+        return `${msg} in ${this.getCurrentVerse(context)}`;
     }
 }
