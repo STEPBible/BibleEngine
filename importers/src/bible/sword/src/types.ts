@@ -1,12 +1,3 @@
-import {
-    IBibleCrossReference,
-    IBibleNote,
-    IBibleContentPhrase,
-    IBibleContentGroup,
-    IBibleContentSection
-} from '@bible-engine/core';
-import { OsisXmlNode } from '../../../shared/osisTypes';
-
 export interface VerseMetadata {
     book: string;
     bookNum: number;
@@ -63,30 +54,6 @@ export interface BookXML {
     bookNum: number;
     chapters: ChapterXML[];
 }
-
-export type ParserContext = {
-    chapterNum: number;
-    currentNode?: OsisXmlNode;
-    currentNoteNode?: OsisXmlNode;
-    currentNoteNum: number;
-    currentCrossRefNode?: OsisXmlNode;
-    crossRefs: IBibleCrossReference[];
-    divineNameNode?: OsisXmlNode;
-    verseNum: number;
-    notes: IBibleNote[];
-    noteText: string;
-    osisRef: string;
-    psalmTitle?: OsisXmlNode;
-    psalmTitleContents: IBibleContentPhrase[];
-    phrases: any[];
-    paragraph?: IBibleContentGroup<'paragraph'>;
-    noteCount: number;
-    quoteNode?: OsisXmlNode;
-    title?: OsisXmlNode;
-    titleSection: IBibleContentSection;
-    titleSections: IBibleContentSection[];
-    titleText: string;
-};
 
 export enum SwordMetadataKey {
     DESCRIPTION = 'Description',
