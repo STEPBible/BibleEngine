@@ -1,9 +1,11 @@
 import { readFileSync, writeFileSync } from 'fs'
 const prettifyXML = require('xml-formatter');
 
-const PATH = 'src/bible/osis/data/ESV2016_OSIS+Strongs.xml'
-const xmlString = readFileSync(PATH).toString()
+if (!process.env.XML_PATH) {
+    throw new Error('Missing required XML_PATH argment')
+}
+const xmlString = readFileSync(process.env.XML_PATH).toString()
 console.log('Finished reading file, prettifying XML...')
 const prettifiedXml = prettifyXML(xmlString)
-console.log('Finished prettifying XML! Saving under the same name...')
-writeFileSync(PATH, prettifiedXml)
+console.log('Finished prettifying XML, saving under the same name...')
+writeFileSync(process.env.XML_PATH, prettifiedXml)
