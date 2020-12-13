@@ -170,8 +170,13 @@ export class OsisImporter extends BibleEngineImporter {
                         this.options.bookMeta.get(tag.attributes.osisID);
                     // currently we force bookMeta to be provided by the user (since the osis
                     // file we are currently working on doesn't have the data in the file)
-                    if (!bookMeta)
+                    if (!bookMeta) {
                         throw this.getError(`book metadata missing for ${tag.attributes.osisID}`);
+                    }
+
+                    if (context.books.find(book => book.book.abbreviation === tag.attributes.osisID)) {
+                        throw this.getError(`Duplicate book: book already exists in stack: ${tag.attributes.osisID}`)
+                    }
 
                     const bookNr = context.books.length + 1;
 
