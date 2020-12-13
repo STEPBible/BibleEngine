@@ -20,7 +20,7 @@ import { startsWithPunctuationChar, streamToString } from '../../shared/helpers.
 import { OsisXmlNode, OsisXmlNodeType, OsisXmlNodeName } from '../../shared/osisTypes';
 import { ParserContext, ITagWithType, TagType } from './types';
 import Logger from '../../shared/Logger'
-import { getOsisReferenceEntities } from './functions/helpers.functions'
+import { getParsedBookChapterVerseRef } from './functions/helpers.functions'
 
 const DEBUG_OUTPUT_JSON_FILE: string | false = false;
 const STRICT_MODE_ENABLED = true;
@@ -137,7 +137,7 @@ export class OsisImporter extends BibleEngineImporter {
                     if (!context.crossRefBuffer.key || !context.crossRefBuffer.refs) {
                         return this.logError(`Corrupted cross ref buffer found: ${JSON.stringify(context.crossRefBuffer)}`)
                     }
-                    const osisRef = getOsisReferenceEntities(
+                    const osisRef = getParsedBookChapterVerseRef(
                         tag.attributes.osisRef
                     );
                     const crossRef: IBibleCrossReference = {

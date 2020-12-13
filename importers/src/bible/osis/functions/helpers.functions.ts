@@ -1,6 +1,6 @@
 import { IBibleReferenceRange } from "@bible-engine/core";
 
-export function getOsisReferenceEntities(osisRef: string): IBibleReferenceRange {
+export function getParsedBookChapterVerseRef(osisRef: string): IBibleReferenceRange {
     const firstVerse = osisRef.split('-')[0].split('.');
     const bookOsisId = firstVerse[0];
     const versionChapterNum = Number(firstVerse[1]);
