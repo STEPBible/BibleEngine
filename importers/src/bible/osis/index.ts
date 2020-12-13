@@ -19,7 +19,7 @@ import { BibleEngineImporter } from '../../shared/Importer.interface';
 import { startsWithPunctuationChar, streamToString } from '../../shared/helpers.functions';
 import { OsisXmlNode, OsisXmlNodeType, OsisXmlNodeName } from '../../shared/osisTypes';
 import { ParserContext, ITagWithType, TagType } from './types';
-import Logger from './Logger'
+import Logger from '../../shared/Logger'
 import { getOsisReferenceEntities } from './functions/helpers.functions'
 
 const DEBUG_OUTPUT_JSON_FILE: string | false = false;
