@@ -178,6 +178,11 @@ export class OsisImporter extends BibleEngineImporter {
                         throw this.getError(`Duplicate book: book already exists in stack: ${tag.attributes.osisID}`)
                     }
 
+                    if (context.currentBook) {
+                        Logger.verbose(`Manually closing book: ${context.currentBook.abbreviation}`)
+                        this.closeCurrentBook(context, tag)
+                    }
+
                     const bookNr = context.books.length + 1;
 
                     context.currentBook = {
@@ -710,15 +715,7 @@ export class OsisImporter extends BibleEngineImporter {
 
             switch (currentTag.type) {
                 case OsisXmlNodeType.BOOK: {
-                    if (!context.currentBook) throw this.getError(`can't close a book: data missing`);
-                    const rootContainer = context.contentContainerStack[0];
-                    if (rootContainer.type !== 'root') throw this.getError(`book content has no root`);
-
-                    context.books.push({
-                        book: context.currentBook,
-                        contents: rootContainer.contents,
-                    });
-
+                    this.closeCurrentBook(context, currentTag)
                     break;
                 }
                 case OsisXmlNodeName.VERSE: {
@@ -1101,6 +1098,20 @@ export class OsisImporter extends BibleEngineImporter {
         } else {
             context.contentContainerStack.pop();
         }
+    }
+
+    closeCurrentBook(context: ParserContext, bookTag: OsisXmlNode) {
+        if (!context.currentBook) {
+            this.logError(`can't close book: no content. Triggered by tag: ${JSON.stringify(bookTag?.attributes)}`);
+            return
+        }
+        const rootContainer = context.contentContainerStack[0];
+        if (rootContainer.type !== 'root') throw this.getError(`book content has no root`);
+        context.books.push({
+            book: context.currentBook,
+            contents: rootContainer.contents,
+        });
+        delete context.currentBook
     }
 
     parseStrongsNums(tag: OsisXmlNode) {
