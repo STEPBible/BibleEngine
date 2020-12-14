@@ -1026,8 +1026,7 @@ export class OsisImporter extends BibleEngineImporter {
                 return false;
             }) === -1
         ) {
-            this.logError(`text outside of paragraph: "${text}"`)
-            this.startNewParagraph(context)
+            throw this.getError(`text outside of paragraph: "${text}"`)
         }
 
         if (!context.currentChapter || !context.currentVerse) {
