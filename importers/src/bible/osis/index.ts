@@ -584,7 +584,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             default: {
                 if (!elementType) {
-                    throw this.getError(`unrecognized osis xml tag: ${elementType}`);
+                    Logger.warning(`unrecognized osis xml tag: ${elementType}`);
                 }
 
             }
@@ -792,7 +792,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 // we handle the cross ref in parseTextNode
                 if (context.crossRefBuffer?.refs?.length === 0) {
-                    this.logError('Cross reference block found with no actual references')
+                    throw this.getError('Cross reference block found with no actual references')
                 }
                 break;
             }
@@ -917,7 +917,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             default: {
-                this.logError(`unrecognized closing osis xml tag: ${currentTag.type}`);
+                Logger.warning(`unrecognized closing osis xml tag: ${currentTag.type}`);
             }
         }
 
@@ -1143,7 +1143,7 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     getError(msg: string) {
-        throw new Error(this.getErrorMessageWithContext(msg, this.context))
+        return new Error(this.getErrorMessageWithContext(msg, this.context))
     }
 
     logError(msg: string) {
