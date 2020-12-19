@@ -1,11 +1,12 @@
 {
     "extends": "../tsconfig.json",
     "compilerOptions": {
-        "declaration": true, 
+        "declaration": true,
         "outDir": "./lib",
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "scripts/initBibleDatabase.ts"
     ],
     "exclude": [
         "node_modules",

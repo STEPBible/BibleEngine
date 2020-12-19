@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
     postgres-db:
         image: mdillon/postgis:10-alpine
@@ -8,13 +8,13 @@ services:
             - POSTGRES_PASSWORD=password
             - POSTGRES_DB=test
         healthcheck:
-            test: ['CMD-SHELL', 'pg_isready -U postgres']
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
             timeout: 20s
             retries: 10
         volumes:
             - ./db-dump/:/docker-entrypoint-initdb.d
         ports:
-            - '5555:5432'
+            - "5555:5432"
     mysql-db:
         image: mysql:5.7.29
         container_name: bibleengine_mysql
@@ -23,8 +23,8 @@ services:
             - MYSQL_ROOT_PASSWORD=password
             - MYSQL_DATABASE=bibleengine
         healthcheck:
-            test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-ppassword']
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ppassword"]
             timeout: 20s
             retries: 10
         ports:
-            - '3306:3306'
+            - "3306:3306"

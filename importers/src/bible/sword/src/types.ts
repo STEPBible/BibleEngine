@@ -1,12 +1,3 @@
-import {
-    IBibleCrossReference,
-    IBibleNote,
-    IBibleContentPhrase,
-    IBibleContentGroup,
-    IBibleContentSection
-} from '@bible-engine/core';
-import { OsisXmlNode } from '../../../shared/osisTypes';
-
 export interface VerseMetadata {
     book: string;
     bookNum: number;
@@ -64,26 +55,17 @@ export interface BookXML {
     chapters: ChapterXML[];
 }
 
-export type ParserContext = {
-    chapterNum: number;
-    currentNode?: OsisXmlNode;
-    currentNoteNode?: OsisXmlNode;
-    currentNoteNum: number;
-    currentCrossRefNode?: OsisXmlNode;
-    crossRefs: IBibleCrossReference[];
-    divineNameNode?: OsisXmlNode;
-    quoteNode?: OsisXmlNode;
-    verseNum: number;
-    notes: IBibleNote[];
-    noteText: string;
-    osisRef: string;
-    psalmTitle?: OsisXmlNode;
-    psalmTitleContents: IBibleContentPhrase[];
-    phrases: any;
-    paragraph?: IBibleContentGroup<'paragraph'>;
-    noteCount: number;
-    title?: OsisXmlNode;
-    titleSection: IBibleContentSection;
-    titleSections: IBibleContentSection[];
-    titleText: string;
-};
+export enum SwordMetadataKey {
+    DESCRIPTION = 'Description',
+    ENCODING = 'Encoding',
+    IN_DEPTH_DESCRIPTION = 'About',
+    LANGUAGE = 'Lang',
+    OPTION_FILTER = 'GlobalOptionFilter',
+    SHORT_COPYRIGHT = 'ShortCopyright',
+    SOURCE_TYPE = 'SourceType',
+    VERSIFICATION = 'Versification'
+}
+
+export enum SwordFilterOptions {
+    OSIS_STRONGS = 'OSISStrongs'
+}

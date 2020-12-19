@@ -1,6 +1,6 @@
 set -e
 # Yarn requires a modern version of Node, >8
-source /opt/circleci/.nvm/nvm.sh && nvm install 13.5.0 && nvm use 13.5.0
+source /opt/circleci/.nvm/nvm.sh && nvm install 14.15.3 && nvm use 14.15.3
 # Run existing migrations
 yarn typeorm migration:run --connection sqlite
 # Check if any additional migrations are needed

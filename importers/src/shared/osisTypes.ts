@@ -33,6 +33,7 @@ export enum OsisXmlNodeType {
     PARAGRAPH = 'paragraph',
     PARALLEL = 'parallel',
     PSALM = 'psalm',
+    PSALM_BOOK_TITLE = 'x-psalm-book',
     SECTION = 'section',
     SECTION_MAJOR = 'majorSection',
     SECTION_SUB = 'subSection',
@@ -61,6 +62,7 @@ export enum OsisXmlNodeName {
     HIGHLIGHT = 'hi',
     IDENTIFIER = 'identifier',
     LANGUAGE = 'language',
+    LEMMA = 'lemma',
     LINEBREAK = 'lb',
     LINE = 'l',
     LINE_GROUP = 'lg',
@@ -76,7 +78,7 @@ export enum OsisXmlNodeName {
     REFERENCE = 'reference',
     REVISION_DESC = 'revisionDesc',
     RIGHTS = 'rights',
-    VERSION_SCOPE = 'scope',
+    SWORD_MILESTONE = 'x-milestone',
     TITLE = 'title',
     TRANS_CHANGE = 'transChange',
     TYPE = 'type',
@@ -84,6 +86,7 @@ export enum OsisXmlNodeName {
     WORD = 'w',
     WORD_SEGMENT = 'seg',
     WORK = 'work',
+    VERSION_SCOPE = 'scope',
     XML = 'xml',
     XML_ROOT = 'osis'
 }

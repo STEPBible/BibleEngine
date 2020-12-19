@@ -1,6 +1,6 @@
 set -e
 # Yarn requires a modern version of Node, >8
-source /opt/circleci/.nvm/nvm.sh && nvm install 13.5.0 && nvm use 13.5.0
+source /opt/circleci/.nvm/nvm.sh && nvm install 14.15.3 && nvm use 14.15.3
 # Start mysql docker container and wipe any persisted data
 docker-compose up -d --build --force-recreate --renew-anon-volumes mysql-db
 # Wait until mysql container can accept requests
