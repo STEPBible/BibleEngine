@@ -22,7 +22,7 @@ export class BibleEngineImporter {
 
     async run() {
         await this.bibleEngine.pDB;
-        console.log(`running importer: ${this}`);
+        console.log(`running importer: ${this}: ${this.options?.versionMeta?.uid}`);
         return await this.import();
     }
 
