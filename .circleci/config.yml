@@ -15,21 +15,21 @@ workflows:
             - deploy_expo:
                   context: expo-credentials
                   requires:
-                    - request_deploy_app
-                    - test
-                    - test_migrations
+                      - request_deploy_app
+                      - test
+                      - test_migrations
             - deploy_ios:
                   context: expo-credentials
                   requires:
-                    - deploy_expo
+                      - deploy_expo
             - deploy_android:
                   context: expo-credentials
                   requires:
-                    - deploy_expo
+                      - deploy_expo
 jobs:
     build_yarn:
         docker:
-            - image: circleci/node:13.5.0
+            - image: circleci/node:14.15.3
         steps:
             - checkout
             - restore_cache:
@@ -46,7 +46,7 @@ jobs:
                       - app/node_modules
     test:
         docker:
-            - image: circleci/node:13.5.0
+            - image: circleci/node:14.15.3
         steps:
             - checkout
             - restore_cache:
@@ -71,13 +71,13 @@ jobs:
                   name: Restore Yarn Package Cache
                   keys:
                       - yarn-modules-{{ checksum "yarn.lock" }}
-            - run: nvm use 13.5.0 && yarn install --frozen-lockfile
+            - run: nvm use 14.15.3 && yarn install --frozen-lockfile
+            - run: core/src/tests/sqlite_migration_tests.sh
             - run: core/src/tests/mysql_migration_tests.sh
             - run: core/src/tests/postgres_migration_tests.sh
-            - run: core/src/tests/sqlite_migration_tests.sh
     deploy_expo:
         docker:
-            - image: circleci/node:13.5.0
+            - image: circleci/node:14.15.3
         steps:
             - checkout
             - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
@@ -91,11 +91,11 @@ jobs:
             - run: cd app && yarn install --frozen-lockfile
             - run: yarn global add expo-cli
             - run:
-                command: |
-                    export PATH="$PATH:$( yarn global bin )"
-                    cd app
-                    expo login --non-interactive -u technical@tyndalehouse.com
-                    EXPO_DEBUG=true expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
+                  command: |
+                      export PATH="$PATH:$( yarn global bin )"
+                      cd app
+                      expo login --non-interactive -u technical@tyndalehouse.com
+                      EXPO_DEBUG=true expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
     deploy_android:
         macos:
             xcode: 11.3.0
@@ -104,18 +104,18 @@ jobs:
             - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
             - run: cp ~/step-bible-secrets/android_upload_key_secrets.json ~/secrets.json
             - restore_cache:
-                name: Restore Yarn Mac Package Cache
-                keys:
-                    - yarn-mac-{{ checksum "yarn.lock" }}
+                  name: Restore Yarn Mac Package Cache
+                  keys:
+                      - yarn-mac-{{ checksum "yarn.lock" }}
             - run: yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
             - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
             - run:
-                command: cd app && yarn expo build:android --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
-                no_output_timeout: 30m
+                  command: cd app && yarn expo build:android --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
+                  no_output_timeout: 30m
             - run:
-                command: cd app && yarn expo build:android --non-interactive --no-publish -t app-bundle --release-channel $(git rev-parse --short HEAD)
-                no_output_timeout: 30m
+                  command: cd app && yarn expo build:android --non-interactive --no-publish -t app-bundle --release-channel $(git rev-parse --short HEAD)
+                  no_output_timeout: 30m
             - run: cd app && yarn expo upload:android --non-interactive --key ~/secrets.json
     deploy_ios:
         macos:
@@ -136,6 +136,6 @@ jobs:
                       - app/node_modules
             - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
             - run:
-                command: cd app && yarn expo build:ios --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
-                no_output_timeout: 30m
+                  command: cd app && yarn expo build:ios --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
+                  no_output_timeout: 30m
             - run: cd app && yarn expo upload:ios --non-interactive
