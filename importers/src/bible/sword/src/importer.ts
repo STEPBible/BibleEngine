@@ -4,6 +4,7 @@ import { BibleEngineImporter } from '../../../shared/Importer.interface';
 import SwordModule from './SwordModule';
 import ModuleIndex from './ModuleIndex';
 import { OsisImporter } from './../../osis/index';
+import { OsisXmlNodeName } from '../../../shared/osisTypes'
 
 export class SwordImporter extends BibleEngineImporter {
     async import() {
@@ -29,6 +30,7 @@ export class SwordImporter extends BibleEngineImporter {
                         title: swordModule.config.description,
                         language: swordModule.config.language,
                         copyrightShort: swordModule.config.shortCopyright,
+                        isPlaintext: !xml.includes(`</${OsisXmlNodeName.PARAGRAPH}>`)
                     },
                     bookMeta: swordModule.getBookMetadata()
                 }
