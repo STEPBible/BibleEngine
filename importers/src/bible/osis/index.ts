@@ -585,6 +585,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.RIGHTS:
             case OsisXmlNodeName.SWORD_MILESTONE:
             case OsisXmlNodeName.SWORD_PILCROW:
+            case OsisXmlNodeName.TEXTUAL_VARIATION:
             case OsisXmlNodeName.TYPE:
             case OsisXmlNodeName.REVISION_DESC:
             case OsisXmlNodeName.VERSION_SCOPE:

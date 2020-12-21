@@ -80,6 +80,7 @@ export enum OsisXmlNodeName {
     RIGHTS = 'rights',
     SWORD_MILESTONE = 'x-milestone',
     SWORD_PILCROW = 'x-p',
+    TEXTUAL_VARIATION = 'rdg',
     TITLE = 'title',
     TRANS_CHANGE = 'transChange',
     TYPE = 'type',
