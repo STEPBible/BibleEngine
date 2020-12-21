@@ -1,6 +1,7 @@
 {
     "name": "@bible-engine/importers",
     "version": "0.1.0",
+    "license": "MIT",
     "main": "lib/index.js",
     "scripts": {
         "test": "yarn jest --runInBand",
