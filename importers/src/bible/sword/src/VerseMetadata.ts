@@ -39,21 +39,31 @@ function parseVerseList(inVKey: string, inV11n: string) {
     }
     // check if we have a passage like Mt 3 or Ps 123
   } else if (isNaN(key.verse)) {
-    const bookNum = VerseScheme.getBookNum(key.book, inV11n);
-    if (bookNum < 0) {
-      throw new Error(`Can't find book number for reference: ${inVKey}, in v11n: ${inV11n}`)
-    }
-    const verseMax = VerseScheme.getVersesInChapter(bookNum, key.chapter, inV11n);
-    for (let i = 0; i < verseMax; i += 1) {
-      verseList.push({
-        osis: `${key.book}.${key.chapter}.${i + 1}`, book: key.book, bookNum, chapter: key.chapter, verse: i + 1,
-      });
-    }
+    return getVerseListForChapter(key.book, key.chapter, inV11n)
   } else {
     verseList.push(key);
   }
 
   return verseList;
+}
+
+function getVerseListForChapter(osisBookId: string, chapterNum: number, v11n: string) {
+  const bookNum = VerseScheme.getBookNum(osisBookId, v11n);
+  if (bookNum < 0) {
+    throw new Error(`Can't find book number for reference: ${osisBookId} ${chapterNum}, in v11n: ${v11n}`)
+  }
+  const verseMax = VerseScheme.getVersesInChapter(bookNum, chapterNum, v11n);
+  const verseList: any[] = []
+  for (let verseNum = 0; verseNum < verseMax; verseNum += 1) {
+    verseList.push({
+      osis: `${bookNum}.${chapterNum}.${verseNum + 1}`,
+      book: osisBookId,
+      bookNum,
+      chapter: chapterNum,
+      verse: verseNum + 1,
+    });
+  }
+  return verseList
 }
 
 function next(inVKey: string, inV11n: string) {
@@ -91,6 +101,7 @@ function previous(inVKey: string, inV11n: string) {
 module.exports = {
   parseVkey,
   parseVerseList,
+  getVerseListForChapter,
   next,
   previous,
 };
