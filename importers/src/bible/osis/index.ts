@@ -173,6 +173,11 @@ export class OsisImporter extends BibleEngineImporter {
                     throw this.getError(`Duplicate book: book already exists in stack: ${tag.attributes.osisID}`)
                 }
 
+                if (tag.isSelfClosing) {
+                    // SWORD modules have self-closing book marker tags
+                    return
+                }
+
                 if (context.currentBook) {
                     Logger.verbose(`Manually closing book: ${context.currentBook.abbreviation}`)
                     this.closeCurrentBook(context, tag)
@@ -308,6 +313,10 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.LINE_GROUP: {
+                if (tag.isSelfClosing) {
+                    // Some SWORD modules have self-closing line groups
+                    return;
+                }
                 let currentContainer = this.getCurrentContainer(context);
 
                 const lineGroupGroup: IBibleContentGroup<'lineGroup'> = {
@@ -574,6 +583,8 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.PUBLISHER:
             case OsisXmlNodeName.REF_SYSTEM:
             case OsisXmlNodeName.RIGHTS:
+            case OsisXmlNodeName.SWORD_MILESTONE:
+            case OsisXmlNodeName.SWORD_PILCROW:
             case OsisXmlNodeName.TYPE:
             case OsisXmlNodeName.REVISION_DESC:
             case OsisXmlNodeName.VERSION_SCOPE:
@@ -705,6 +716,10 @@ export class OsisImporter extends BibleEngineImporter {
 
         switch (currentTag.type) {
             case OsisXmlNodeType.BOOK: {
+                if (currentTag.isSelfClosing) {
+                    // SWORD modules have self-closing book marker tags
+                    return;
+                }
                 this.closeCurrentBook(context, currentTag)
                 break;
             }
@@ -768,6 +783,10 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.LINE_GROUP: {
+                if (currentTag.isSelfClosing) {
+                    // Some SWORD modules have self-closing line groups
+                    return;
+                }
                 const lineGroup = context.contentContainerStack.pop();
                 if (!lineGroup || lineGroup.type !== 'group' || lineGroup.groupType !== 'lineGroup')
                     throw this.getError(`unclean container stack while closing lineGroup`);
@@ -908,6 +927,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.REF_SYSTEM:
             case OsisXmlNodeName.RIGHTS:
             case OsisXmlNodeName.SWORD_MILESTONE:
+            case OsisXmlNodeName.SWORD_PILCROW:
             case OsisXmlNodeName.TYPE:
             case OsisXmlNodeName.REVISION_DESC:
             case OsisXmlNodeName.VERSION_SCOPE:
@@ -1026,7 +1046,9 @@ export class OsisImporter extends BibleEngineImporter {
                 return false;
             }) === -1
         ) {
-            throw this.getError(`text outside of paragraph: "${text}"`)
+            if (!context.version?.isPlaintext) {
+                throw this.getError(`text outside of paragraph: "${text}"`)
+            }
         }
 
         if (!context.currentChapter || !context.currentVerse) {
@@ -1147,6 +1169,14 @@ export class OsisImporter extends BibleEngineImporter {
 
     logError(msg: string) {
         Logger.error(this.getErrorMessageWithContext(msg, this.context))
+    }
+
+    logWarning(msg: string) {
+        Logger.warning(this.getErrorMessageWithContext(msg, this.context))
+    }
+
+    logInfo(msg: string) {
+        Logger.info(this.getErrorMessageWithContext(msg, this.context))
     }
 
     getCurrentVerse(context: ParserContext) {

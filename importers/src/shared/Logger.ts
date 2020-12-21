@@ -17,7 +17,7 @@ class Logger {
     }
 
     warning(message: string, ...meta: any[]) {
-        this.logger.warning(message, meta)
+        this.logger.warn(message, meta)
     }
 
     info(message: string, ...meta: any[]) {

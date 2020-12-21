@@ -79,6 +79,7 @@ export enum OsisXmlNodeName {
     REVISION_DESC = 'revisionDesc',
     RIGHTS = 'rights',
     SWORD_MILESTONE = 'x-milestone',
+    SWORD_PILCROW = 'x-p',
     TITLE = 'title',
     TRANS_CHANGE = 'transChange',
     TYPE = 'type',
