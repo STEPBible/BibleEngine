@@ -8,7 +8,7 @@ function parseVkey(inVKey: string, inV11n: string) {
   key.osisRef = bcv.parse(inVKey).osis();
   if (key.osisRef === '') {
     // bcv.parse().osis() returns "" for passages it cannot resolve
-    key.osisRef = 'Matt.1'; // bcv.parse(inVKey + " 1").osis();
+    throw new Error(`verse reference is invalid: ${inVKey}`)
   }
   const split = key.osisRef.split('-')[0].split('.');
 
@@ -40,6 +40,9 @@ function parseVerseList(inVKey: string, inV11n: string) {
     // check if we have a passage like Mt 3 or Ps 123
   } else if (isNaN(key.verse)) {
     const bookNum = VerseScheme.getBookNum(key.book, inV11n);
+    if (bookNum < 0) {
+      throw new Error(`Can't find book number for reference: ${inVKey}, in v11n: ${inV11n}`)
+    }
     const verseMax = VerseScheme.getVersesInChapter(bookNum, key.chapter, inV11n);
     for (let i = 0; i < verseMax; i += 1) {
       verseList.push({
