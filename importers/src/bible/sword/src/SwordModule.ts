@@ -110,10 +110,10 @@ export default class SwordModule {
                 (combinedXML: string, verseXML: string) => combinedXML + verseXML,
                 ''
             );
-            const chapterXML = `<chapter osisID="${osisId}.${chapterNum}">${combinedVersesXML}</chapter>`;
+            const chapterXML = `<chapter osisID="${osisId}.${chapterNum}">${combinedVersesXML}</chapter>\n`;
             combinedChapterXML += chapterXML;
         }
-        const bookXML = `<div type="book" osisID="${osisId}">${combinedChapterXML}</div>`;
+        const bookXML = `<div type="book" osisID="${osisId}">${combinedChapterXML}</div>\n`;
         return bookXML;
     }
 
@@ -124,9 +124,12 @@ export default class SwordModule {
             osisId => this.getSingleXMLDocumentForBook(osisId)
         ).join('')
         return `
-            <osisText osisIDWork="${this.config.moduleName}" xml:lang="${this.config.language}">
-                ${combinedBookXml}
-            </osisText>
+            <?xml version="1.0" encoding="UTF-8"?>
+            <osis>
+                <osisText osisIDWork="${this.config.moduleName}" xml:lang="${this.config.language}">
+                    ${combinedBookXml}
+                </osisText>
+            </osis>
         `
     }
 }
