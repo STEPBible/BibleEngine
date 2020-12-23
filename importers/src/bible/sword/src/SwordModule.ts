@@ -100,7 +100,7 @@ export default class SwordModule {
 
     public getBookMetadata(): ImporterBookMetadata {
         const { versification } = this.config;
-        const bookOsisNames = VerseScheme.getAllBookOsisNames(versification);
+        const bookOsisNames = this.getAvailableOsisBookNames();
         const bookFullNames = VerseScheme.getAllBookFullNames(versification);
         const map: ImporterBookMetadata = new Map()
         bookOsisNames.forEach((osisId, index) => {
@@ -114,6 +114,8 @@ export default class SwordModule {
     }
 
     public getAvailableOsisBookNames(): string[] {
+        // Instead of using versification rules, can pull the actual available books,
+        // that were decompressed from the Sword files
         return [...Object.keys(this.rawPosOT), ...Object.keys(this.rawPosNT)]
     }
 
@@ -139,8 +141,7 @@ export default class SwordModule {
     }
 
     public getSingleXMLDocumentForVersion(): string {
-        const { versification } = this.config;
-        const bookOsisNames = VerseScheme.getAllBookOsisNames(versification);
+        const bookOsisNames = this.getAvailableOsisBookNames();
         const combinedBookXml = bookOsisNames.map(
             osisId => this.getSingleXMLDocumentForBook(osisId)
         ).join('')

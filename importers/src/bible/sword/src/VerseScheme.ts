@@ -76,9 +76,17 @@ function getBook(inBookNum: number, v11n = 'kjv') {
 }
 
 function getAllBookOsisNames(v11n = 'kjv'): string[] {
-    const otNames = versificationMgr[v11n].ot.map((book: any) => book.abbrev);
-    const ntNames = versificationMgr[v11n].nt.map((book: any) => book.abbrev);
+    const otNames = getOTBookOsisNames(v11n);
+    const ntNames = getNTBookOsisNames(v11n);
     return [...otNames, ...ntNames];
+}
+
+function getOTBookOsisNames(v11n = 'kjv'): string[] {
+    return versificationMgr[v11n].ot.map((book: any) => book.abbrev);
+}
+
+function getNTBookOsisNames(v11n = 'kjv'): string[] {
+    return versificationMgr[v11n].nt.map((book: any) => book.abbrev);
 }
 
 function getAllBookFullNames(v11n = 'kjv'): string[] {
@@ -98,6 +106,8 @@ function getBookNum(inOsis: string, v11n = 'kjv') {
 export default {
     getAllBookFullNames,
     getAllBookOsisNames,
+    getOTBookOsisNames,
+    getNTBookOsisNames,
     getBooksInOT,
     getBooksInNT,
     getChapterMax,
