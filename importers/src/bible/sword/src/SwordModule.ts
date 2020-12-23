@@ -48,7 +48,11 @@ export default class SwordModule {
             bookPosition = this.rawPosNT[verseList[0].book];
             binaryBlob = this.binaryNT;
         } else {
-            throw new Error('Unable to retrieve book from module');
+            throw new Error(`
+                Unable to retrieve book from module: ${verseList[0].book}
+                available Old Testament books: ${JSON.stringify(Object.keys(this.rawPosOT))}
+                available New Testament books: ${JSON.stringify(Object.keys(this.rawPosNT))}
+            `);
         }
         return BlobReader.getXMLforChapter(
             binaryBlob,
