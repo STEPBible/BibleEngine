@@ -13,13 +13,10 @@ const LOCAL_CACHE_PATH = 'data/step-library'
 const TEMP_DATABASE_PATH = 'temp.db'
 
 const main = async () => {
-    mkdirSync(LOCAL_CACHE_PATH, { recursive: true })
-    for (const bucket of BUCKETS) {
-        const urls = await getSwordModuleDownloadUrls(bucket)
-        console.log(urls)
-        urls.forEach(url => downloadSwordFile(url))
+    if (process.env.SKIP_CACHE) {
+        await downloadAllStepModules()
     }
-    const filenames = readdirSync(LOCAL_CACHE_PATH)
+    const filenames = readdirSync(LOCAL_CACHE_PATH).filter(path => path.includes('abpen-the.zip'))
     const creator = new BeDatabaseCreator({
         type: 'sqlite',
         database: TEMP_DATABASE_PATH
@@ -30,6 +27,15 @@ const main = async () => {
         });
     }
     await creator.createDatabase()
+}
+
+const downloadAllStepModules = async () => {
+    mkdirSync(LOCAL_CACHE_PATH, { recursive: true })
+    for (const bucket of BUCKETS) {
+        const urls = await getSwordModuleDownloadUrls(bucket)
+        console.log(urls)
+        urls.forEach(url => downloadSwordFile(url))
+    }
 }
 
 const downloadSwordFile = (url: string) => {
