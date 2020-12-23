@@ -51,9 +51,13 @@ export default class BlobReader {
     return this.blobToString(blob.slice(verseStart, verseEnd), encoding);
   }
 
-  static getChapterIntro(blob: Uint8Array, startPos: number,
-                         positions: types.ChapterPosition[],
-                         chapter: number, encoding: string) {
+  static getChapterIntro(
+    blob: any,
+    startPos: number,
+    positions: types.ChapterPosition[],
+    chapter: number,
+    encoding: string
+  ) {
     let verseStart = 0;
     const verseEnd = startPos;
     if (chapter !== 1) {
@@ -73,7 +77,10 @@ export default class BlobReader {
     const array = new Uint8Array(blob);
     inflator.push(array, true);
     if (inflator.err) {
-      throw new Error(inflator.err);
+      throw new Error(`Failed to decompress blob, inflator error: ${inflator.err}`);
+    }
+    if (!inflator.result) {
+      throw new Error(`pako failed to decompress blob, invalid result`)
     }
     const decompressedBlob = inflator.result;
     return decompressedBlob;
