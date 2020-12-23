@@ -8,6 +8,10 @@ class Logger {
         const level: LogLevel = (process.env.LOG as LogLevel) || 'warning'
         this.logger = winston.createLogger({
             level,
+            format: winston.format.combine(
+                winston.format.colorize(),
+                winston.format.printf((info) => info.message)
+            ),
             transports: new winston.transports.Console()
         });
     }
