@@ -570,6 +570,7 @@ export class OsisImporter extends BibleEngineImporter {
                 }
                 break;
             }
+            case OsisXmlNodeType.BOOK_GROUP:
             case OsisXmlNodeName.DATE:
             case OsisXmlNodeName.DESCRIPTION:
             case OsisXmlNodeName.DIVISION:
@@ -904,6 +905,7 @@ export class OsisImporter extends BibleEngineImporter {
                 }
                 break;
             }
+            case OsisXmlNodeType.BOOK_GROUP:
             case OsisXmlNodeName.CATCH_WORD:
             case OsisXmlNodeName.REFERENCE:
             case OsisXmlNodeName.WORK: {
@@ -1015,9 +1017,11 @@ export class OsisImporter extends BibleEngineImporter {
             )
         ) {
             if (currentContainer.type !== 'section') {
-                throw this.logError(
-                    `can't set title to section: no section`,
-                );
+                return this.logError(`
+                    can't set title to section: no section
+                    current container type: ${currentContainer.type}
+                    title text: ${text}
+                `);
             }
             if (currentTag.attributes.type === OsisXmlNodeType.TEXTUAL_NOTE) {
                 currentContainer.subTitle = trimmedText;

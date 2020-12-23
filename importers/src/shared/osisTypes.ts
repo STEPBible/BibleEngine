@@ -22,6 +22,7 @@ export interface OsisXmlNode {
 }
 
 export enum OsisXmlNodeType {
+    BOOK_GROUP = 'bookGroup',
     BOLD = 'bold',
     BOOK = 'book',
     BOOK_INTRODUCTION = 'introduction',
