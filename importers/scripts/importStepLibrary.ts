@@ -1,18 +1,22 @@
-import { createWriteStream, readdirSync, unlinkSync } from 'fs'
+import { createWriteStream, readdirSync, mkdirSync } from 'fs'
 import { get } from 'http'
 import { S3 } from '@aws-sdk/client-s3'
 import { BeDatabaseCreator } from '../src';
-import { V11nImporter } from './../src/stepdata/v11n-rules/index';
 import { SwordImporter } from './../src/bible/sword/src/importer';
 
-const PUBLIC_BUCKET_NAME = 'tyndale-house-public'
+const BUCKETS = [
+    'tyndale-house-public',
+    'tyndale-house-private'
+]
 const REGION = 'eu-west-1'
 const LOCAL_CACHE_PATH = 'data/step-library'
 const TEMP_DATABASE_PATH = 'temp.db'
 
 const main = async () => {
-    if (process.env.SKIP_CACHE) {
-        const urls = await getSwordModuleDownloadUrls(PUBLIC_BUCKET_NAME)
+    mkdirSync(LOCAL_CACHE_PATH, { recursive: true })
+    for (const bucket of BUCKETS) {
+        const urls = await getSwordModuleDownloadUrls(bucket)
+        console.log(urls)
         urls.forEach(url => downloadSwordFile(url))
     }
     const filenames = readdirSync(LOCAL_CACHE_PATH)
@@ -20,18 +24,12 @@ const main = async () => {
         type: 'sqlite',
         database: TEMP_DATABASE_PATH
     });
-    creator.addImporter(V11nImporter);
     for (const name of filenames) {
         creator.addImporter(SwordImporter, {
             sourcePath: `${LOCAL_CACHE_PATH}/${name}`
         });
     }
-    try {
-        await creator.createDatabase()
-    } catch (error) {
-        unlinkSync(TEMP_DATABASE_PATH)
-        throw error
-    }
+    await creator.createDatabase()
 }
 
 const downloadSwordFile = (url: string) => {
@@ -47,7 +45,7 @@ const downloadSwordFile = (url: string) => {
 const getSwordModuleDownloadUrls = async (bucketName: string) => {
     const s3 = new S3({ region: REGION });
     const S3_BASE_URL = `http://${bucketName}.s3-${REGION}.amazonaws.com`
-    const { Contents } = await s3.listObjects({ Bucket: PUBLIC_BUCKET_NAME })
+    const { Contents } = await s3.listObjects({ Bucket: bucketName })
     if (!Contents) {
         throw new Error('Bucket has no contents')
     }
