@@ -113,6 +113,10 @@ export default class SwordModule {
         return map
     }
 
+    public getAvailableOsisBookNames(): string[] {
+        return [...Object.keys(this.rawPosOT), ...Object.keys(this.rawPosNT)]
+    }
+
     public getSingleXMLDocumentForBook(osisId: string): string {
         const verseScheme = this.config.versification;
         const bookNum = VerseScheme.getBookNum(osisId, verseScheme);
