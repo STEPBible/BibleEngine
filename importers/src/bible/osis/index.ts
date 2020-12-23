@@ -451,7 +451,9 @@ export class OsisImporter extends BibleEngineImporter {
                     )
                 }
                 if (!tag.attributes.lemma) {
-                    throw this.getError('No strongs numbers found on tag')
+                    // There are some cases where an original language word,
+                    // does not have corresponding strongs tags
+                    return;
                 }
                 context.strongsBuffer = parseStrongsNums(tag.attributes.lemma)
                 break;
@@ -479,10 +481,6 @@ export class OsisImporter extends BibleEngineImporter {
                     context.contentContainerStack.push(titleGroup);
                 }
                 // section title is handled in parseTextNode
-                break;
-            }
-            case OsisXmlNodeName.WORD: {
-                // TODO: implement strongs
                 break;
             }
             // RADAR: currently only styling selah (type "x-selah") in italic
@@ -906,10 +904,6 @@ export class OsisImporter extends BibleEngineImporter {
                 }
                 break;
             }
-            case OsisXmlNodeName.WORD: {
-                // currently not implemented
-                break;
-            }
             case OsisXmlNodeName.CATCH_WORD:
             case OsisXmlNodeName.REFERENCE:
             case OsisXmlNodeName.WORK: {
@@ -929,9 +923,11 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.RIGHTS:
             case OsisXmlNodeName.SWORD_MILESTONE:
             case OsisXmlNodeName.SWORD_PILCROW:
+            case OsisXmlNodeName.TEXTUAL_VARIATION:
             case OsisXmlNodeName.TYPE:
             case OsisXmlNodeName.REVISION_DESC:
             case OsisXmlNodeName.VERSION_SCOPE:
+            case OsisXmlNodeName.WORD:
             case OsisXmlNodeName.WORD_SEGMENT:
             case OsisXmlNodeName.XML_ROOT: {
                 // currently ignored
@@ -1000,6 +996,8 @@ export class OsisImporter extends BibleEngineImporter {
                 type: 'phrase',
                 content: trimmedText,
             };
+            // Strongs numbers inside notes are not supported
+            delete context.strongsBuffer;
             if (currentTag && currentTag.name === OsisXmlNodeName.CATCH_WORD) {
                 const group: DocumentGroup<'bold'> = {
                     type: 'group',
