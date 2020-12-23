@@ -12,10 +12,12 @@ const getSwordModule = (filePath: string) => {
     return new SwordModule(fileIndex);
 }
 
+const kjvBible = getSwordModule('./fixtures/KJV.zip')
+const greekNewTestament = getSwordModule('./fixtures/sblg-the.zip')
+
 describe('getXMLforChapter', () => {
     it('XML extraction is correct for Psalms', () => {
-        const swordModule = getSwordModule('./fixtures/KJV.zip')
-        const xmlResult = swordModule.getXMLforChapter('Psa 23');
+        const xmlResult = kjvBible.getXMLforChapter('Psa 23');
         const expectedResult = JSON.parse(
             fs.readFileSync(path.join(__dirname, '../tests/fixtures/Psa23KjvXmlResult.json'))
         );
@@ -25,9 +27,19 @@ describe('getXMLforChapter', () => {
 
 describe('getAvailableOsisBookNames', () => {
     it('can extract available books, even if its only subset of versification schema', () => {
-        const greekNewTestament = getSwordModule('./fixtures/sblg-the.zip')
         const versificationBookNames = VerseScheme.getNTBookOsisNames()
         const availableNames = greekNewTestament.getAvailableOsisBookNames()
         expect(versificationBookNames).toStrictEqual(availableNames)
+    })
+})
+
+describe('getBookMetadata', () => {
+    it(`maps book names correctly for New Testament-only translations`, () => {
+        const metadata = greekNewTestament.getBookMetadata()
+        expect(metadata.get('Matt')).toEqual({
+            abbreviation: 'Matt',
+            title: 'Matthew',
+            number: 0,
+        })
     })
 })

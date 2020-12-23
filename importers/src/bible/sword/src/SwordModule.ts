@@ -101,13 +101,17 @@ export default class SwordModule {
     public getBookMetadata(): ImporterBookMetadata {
         const { versification } = this.config;
         const bookOsisNames = this.getAvailableOsisBookNames();
-        const bookFullNames = VerseScheme.getAllBookFullNames(versification);
+        const osisToName = VerseScheme.getBookFullNamesIndexedByOsisName(versification);
         const map: ImporterBookMetadata = new Map()
         bookOsisNames.forEach((osisId, index) => {
+            const title = osisToName.get(osisId)
+            if (!title) {
+                throw new Error(`no matching full book name found for OSIS ID: ${osisId}`)
+            }
             map.set(osisId, {
+                title,
                 abbreviation: osisId,
                 number: index,
-                title: bookFullNames[index]
             })
         })
         return map
