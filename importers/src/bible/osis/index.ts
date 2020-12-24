@@ -441,6 +441,11 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.WORD: {
+                if (tag.isSelfClosing) {
+                    // Strongs tags with no inner content are ignored
+                    // For example: <w lemma="strong:H3588"/>
+                    return;
+                }
                 if (context.strongsBuffer) {
                     throw this.getError(
                         `
