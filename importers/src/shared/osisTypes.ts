@@ -95,3 +95,7 @@ export enum OsisXmlNodeName {
     XML = 'xml',
     XML_ROOT = 'osis'
 }
+
+export enum OsisNoteType {
+    EXPLANATION = 'explanation'
+}

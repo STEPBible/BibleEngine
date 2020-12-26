@@ -17,8 +17,13 @@ import {
 
 import { BibleEngineImporter } from '../../shared/Importer.interface';
 import { startsWithPunctuationChar, streamToString } from '../../shared/helpers.functions';
-import { OsisXmlNode, OsisXmlNodeType, OsisXmlNodeName } from '../../shared/osisTypes';
-import { ParserContext, ITagWithType, TagType } from './types';
+import {
+    OsisXmlNode,
+    OsisXmlNodeType,
+    OsisXmlNodeName,
+    OsisNoteType
+} from '../../shared/osisTypes';
+import { ParserContext, ITagWithType, TagType, OsisSection } from './types';
 import Logger from '../../shared/Logger'
 import { getParsedBookChapterVerseRef } from './functions/helpers.functions'
 import { parseStrongsNums } from './functions/strongs.functions';
@@ -346,7 +351,11 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.NOTE: {
                 const content: DocumentRoot = { type: 'root', contents: [] };
                 const currentContainer = this.getCurrentContainer(context);
-                if (currentContainer.type === 'section') {
+                if (
+                    currentContainer.type === OsisXmlNodeType.SECTION &&
+                    tag.attributes !== OsisNoteType.EXPLANATION &&
+                    currentContainer.contents.length === 0
+                ) {
                     this.logInfo('saving note as section description')
                     currentContainer.description = content;
                 } else {
