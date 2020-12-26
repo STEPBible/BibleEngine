@@ -115,3 +115,8 @@ export type OsisTag =
     | IOsisChapter<'milestone'>
     | IOsisChapter<'hierarchical'>
     | IOsisCatchWord;
+
+export type OsisSection =
+    | OsisXmlNodeType.SECTION
+    | OsisXmlNodeType.SECTION_SUB
+    | OsisXmlNodeType.SECTION_MAJOR
