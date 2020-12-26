@@ -131,7 +131,7 @@ export class OsisImporter extends BibleEngineImporter {
                     return this.logError('Invalid cross reference verse found')
                 }
                 if (tag.attributes.osisRef === this.getCurrentOsisVerse(context)) {
-                    Logger.verbose('Ignoring self-referencing cross reference')
+                    this.logVerbose('Ignoring self-referencing cross reference')
                     return;
                 }
                 if (!context.crossRefBuffer) {
@@ -401,12 +401,7 @@ export class OsisImporter extends BibleEngineImporter {
                 const content: DocumentRoot = { type: 'root', contents: [] };
                 const currentContainer = this.getCurrentContainer(context);
                 if (currentContainer.type === 'section') {
-                    Logger.info(
-                        this.getErrorMessageWithContext(
-                            'saving note as section description',
-                            context
-                        )
-                    );
+                    this.logInfo('saving note as section description')
                     currentContainer.description = content;
                 } else {
                     const currentPhrase = this.getCurrentPhrase(context, true);
@@ -601,7 +596,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             default: {
                 if (!elementType) {
-                    Logger.warning(`unrecognized osis xml tag: ${elementType}`);
+                    this.logWarning(`unrecognized osis xml tag: ${elementType}`);
                 }
 
             }
@@ -665,12 +660,7 @@ export class OsisImporter extends BibleEngineImporter {
                     outerContainer.type !== 'group' ||
                     outerContainer.contents[0] !== quoteContainer
                 ) {
-                    Logger.verbose(
-                        this.getErrorMessageWithContext(
-                            'closing and reopening quote group',
-                            context
-                        )
-                    );
+                    this.logVerbose('closing and reopening quote group')
                     // close and restart quote group
                     currentTag = {
                         name: OsisXmlNodeName.QUOTE,
@@ -691,9 +681,7 @@ export class OsisImporter extends BibleEngineImporter {
                         attributes: {},
                     });
                 } else {
-                    Logger.verbose(
-                        this.getErrorMessageWithContext('switching up quote group', context)
-                    );
+                    this.logVerbose('switching up quote group')
                     context.contentContainerStack.pop();
                     context.contentContainerStack.pop();
 
@@ -709,9 +697,7 @@ export class OsisImporter extends BibleEngineImporter {
                 }
             } else if (tagName === OsisXmlNodeName.QUOTE) {
                 // closing a quote group with another group still open?
-                Logger.verbose(
-                    this.getErrorMessageWithContext('manually closing quote group', context)
-                );
+                this.logVerbose('manually closing quote group')
                 closeTagsAtEnd.push(OsisXmlNodeName.QUOTE);
 
                 context.skipClosingTags.push(currentTag.name);
@@ -943,16 +929,16 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             default: {
-                Logger.warning(`unrecognized closing osis xml tag: ${currentTag.type}`);
+                this.logWarning(`unrecognized closing osis xml tag: ${currentTag.type}`);
             }
         }
 
         for (const closeTag of closeTagsAtEnd) {
-            Logger.verbose(`manually closing ${closeTag}`);
+            this.logVerbose(`manually closing ${closeTag}`);
             this.parseClosingTag(closeTag, context);
         }
         for (const startTag of startTagsAtEnd) {
-            Logger.verbose(`manually starting ${startTag.name}`);
+            this.logVerbose(`manually starting ${startTag.name}`);
             this.parseOpeningTag(startTag, context);
         }
     }
@@ -1135,9 +1121,7 @@ export class OsisImporter extends BibleEngineImporter {
             let lastContent = currentContainer.contents[currentContainer.contents.length - 1];
             if (!lastContent) {
                 if (createIfMissing) {
-                    Logger.verbose(
-                        this.getErrorMessageWithContext('creating empty phrase', context)
-                    );
+                    this.logVerbose('creating empty phrase')
                     const emptyPhrase: IBibleContentPhrase = {
                         type: 'phrase',
                         content: '',
