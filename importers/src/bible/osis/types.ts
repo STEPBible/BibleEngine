@@ -23,7 +23,7 @@ export type ParserContext = {
     currentChapter?: number;
     currentVerse?: number;
     crossRefBuffer?: {
-        key: string;
+        key?: string;
         refs: IBibleCrossReference[];
     };
     strongsBuffer?: string[]

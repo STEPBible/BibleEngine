@@ -51,7 +51,7 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
     versionVerseEndNum?: number;
 
     @Column({ nullable: true })
-    key: string;
+    key?: string;
 
     @Column({ nullable: true })
     @Index()

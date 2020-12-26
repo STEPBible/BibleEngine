@@ -1,7 +1,7 @@
 import { IBibleReferenceRange } from './BibleReference';
 
 export interface IBibleCrossReference {
-    key: string;
+    key?: string;
     range: IBibleReferenceRange;
     label?: string;
 }

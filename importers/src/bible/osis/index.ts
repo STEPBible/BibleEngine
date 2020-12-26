@@ -133,7 +133,7 @@ export class OsisImporter extends BibleEngineImporter {
                 if (!context.crossRefBuffer) {
                     return this.logError('Reference found outside cross ref block')
                 }
-                if (!context.crossRefBuffer.key || !context.crossRefBuffer.refs) {
+                if (!context.crossRefBuffer.refs) {
                     return this.logError(`Corrupted cross ref buffer found: ${JSON.stringify(context.crossRefBuffer)}`)
                 }
                 const osisRef = getParsedBookChapterVerseRef(
@@ -430,10 +430,6 @@ export class OsisImporter extends BibleEngineImporter {
                         `,
                     );
                 }
-                if (!tag.attributes.n) {
-                    throw this.getError('crossRef without index key')
-                }
-
                 context.crossRefBuffer = {
                     key: tag.attributes.n,
                     refs: [],
@@ -1185,6 +1181,10 @@ export class OsisImporter extends BibleEngineImporter {
 
     logInfo(msg: string) {
         Logger.info(this.getErrorMessageWithContext(msg, this.context))
+    }
+
+    logVerbose(msg: string) {
+        Logger.verbose(this.getErrorMessageWithContext(msg, this.context))
     }
 
     getCurrentVerse(context: ParserContext) {
