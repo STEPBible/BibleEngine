@@ -23,7 +23,6 @@ import Logger from '../../shared/Logger'
 import { getParsedBookChapterVerseRef } from './functions/helpers.functions'
 import { parseStrongsNums } from './functions/strongs.functions';
 
-const DEBUG_OUTPUT_JSON_FILE: string | false = false;
 const STRICT_MODE_ENABLED = true;
 
 export class OsisImporter extends BibleEngineImporter {
@@ -84,10 +83,6 @@ export class OsisImporter extends BibleEngineImporter {
         }
 
         if (!context.version) throw new Error(`can't find version id`);
-
-        if (DEBUG_OUTPUT_JSON_FILE) {
-            writeFileSync(DEBUG_OUTPUT_JSON_FILE, JSON.stringify(context.books.slice(18, 19)));
-        }
 
         Logger.info(`importing version ${context.version.uid}`);
         const version = await this.bibleEngine.addVersion(context.version);
