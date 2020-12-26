@@ -1127,7 +1127,8 @@ export class OsisImporter extends BibleEngineImporter {
             let lastContent = currentContainer.contents[currentContainer.contents.length - 1];
             if (!lastContent) {
                 if (createIfMissing) {
-                    this.logVerbose('creating empty phrase')
+                    const containerType = (currentContainer as any).groupType || currentContainer.type
+                    this.logVerbose(`creating empty phrase inside ${containerType}`)
                     const emptyPhrase: IBibleContentPhrase = {
                         type: 'phrase',
                         content: '',
