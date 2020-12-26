@@ -132,7 +132,7 @@ export class OsisImporter extends BibleEngineImporter {
                 if (!tag.attributes.osisRef) {
                     return this.logError('Invalid cross reference verse found')
                 }
-                if (tag.attributes.osisRef === this.getCurrentOsisVerse(context)) {
+                if (tag.attributes.osisRef === this.getCurrentOsisVerse()) {
                     this.logVerbose('Ignoring self-referencing cross reference')
                     return;
                 }
@@ -435,6 +435,10 @@ export class OsisImporter extends BibleEngineImporter {
                         currentContainer.contents.push(paragraph);
                     } else currentContainer.contents.push(titleGroup);
                     context.contentContainerStack.push(titleGroup);
+                } else if (!this.hasSectionsInText) {
+                    // Since titles should always be attached to a section,
+                    // versions with titles but not sections need artifical sections
+                    this.startNewSection(context, OsisXmlNodeType.SECTION)
                 }
                 // section title is handled in parseTextNode
                 break;
@@ -510,13 +514,12 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.DIVINE_NAME: {
                 const currentContainer = this.getCurrentContainer(context);
-                if (this.isInsideNonCanonicalTitle()) {
+                if (!this.isInsideNonCanonicalTitle()) {
                     const groupDivineName: IBibleContentGroup<'divineName'> = {
                         type: 'group',
                         groupType: 'divineName',
                         contents: [],
                     };
-
                     currentContainer.contents.push(groupDivineName);
                     context.contentContainerStack.push(groupDivineName);
                 }
@@ -833,7 +836,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.DIVINE_NAME: {
-                if (this.isInsideNonCanonicalTitle()) {
+                if (!this.isInsideNonCanonicalTitle()) {
                     const divineNameGroup = context.contentContainerStack.pop();
                     if (
                         !divineNameGroup ||
@@ -947,16 +950,13 @@ export class OsisImporter extends BibleEngineImporter {
             } else currentContainer.contents.push(phrase);
             return;
         } else if (this.isInsideNonCanonicalTitle()) {
-            // Strongs numbers inside non-canonical tags are not supported
+            // Strongs numbers inside section titles are not supported
             delete context.strongsBuffer;
-            if (!this.hasSectionsInText) {
-                this.startNewSection(context, OsisXmlNodeType.SECTION)
-                currentContainer = this.getCurrentContainer(context);
-            }
             if (currentContainer.type !== OsisXmlNodeType.SECTION) {
+                const group = (currentContainer as any).groupType || ''
                 return this.logError(`
                     can't set title to section: no section
-                    current container type: ${currentContainer.type}
+                    current container type: ${currentContainer.type} ${group}
                     title text: ${text}
                 `);
             }
@@ -1194,8 +1194,8 @@ export class OsisImporter extends BibleEngineImporter {
             }:${context.currentVerse}`
     }
 
-    getCurrentOsisVerse(context: ParserContext) {
-        return `${context.currentBook?.osisId}.${context.currentChapter}.${context.currentVerse}`
+    getCurrentOsisVerse() {
+        return `${this.context.currentBook?.osisId}.${this.context.currentChapter}.${this.context.currentVerse}`
     }
 
     getErrorMessageWithContext(msg: string, context: ParserContext) {
