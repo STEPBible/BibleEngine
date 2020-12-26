@@ -555,11 +555,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.DIVINE_NAME: {
                 const currentContainer = this.getCurrentContainer(context);
-                if (
-                    !context.hierarchicalTagStack.find(
-                        (tag) => tag.name === OsisXmlNodeName.TITLE && !tag.attributes.canonical
-                    )
-                ) {
+                if (this.isInsideNonCanonicalTitle()) {
                     const groupDivineName: IBibleContentGroup<'divineName'> = {
                         type: 'group',
                         groupType: 'divineName',
@@ -882,11 +878,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.DIVINE_NAME: {
-                if (
-                    !context.hierarchicalTagStack.find(
-                        (tag) => tag.name === 'title' && !tag.attributes.canonical
-                    )
-                ) {
+                if (this.isInsideNonCanonicalTitle()) {
                     const divineNameGroup = context.contentContainerStack.pop();
                     if (
                         !divineNameGroup ||
