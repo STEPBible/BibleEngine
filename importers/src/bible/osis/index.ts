@@ -130,6 +130,10 @@ export class OsisImporter extends BibleEngineImporter {
                 if (!tag.attributes.osisRef) {
                     return this.logError('Invalid cross reference verse found')
                 }
+                if (tag.attributes.osisRef === this.getCurrentOsisVerse(context)) {
+                    Logger.verbose('Ignoring self-referencing cross reference')
+                    return;
+                }
                 if (!context.crossRefBuffer) {
                     return this.logError('Reference found outside cross ref block')
                 }
@@ -422,13 +426,14 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 if (context.crossRefBuffer) {
-                    throw this.getError(
+                    this.logVerbose(
                         `
-                        cross reference buffer was not cleared.
+                        cross reference buffer not cleared, combining with next ref
                         existing refs: ${JSON.stringify(context.crossRefBuffer.refs)}
                         new refs found: ${JSON.stringify(tag.attributes)}
                         `,
                     );
+                    break;
                 }
                 context.crossRefBuffer = {
                     key: tag.attributes.n,
@@ -812,7 +817,8 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 // we handle the cross ref in parseTextNode
                 if (context.crossRefBuffer?.refs?.length === 0) {
-                    throw this.getError('Cross reference block found with no actual references')
+                    this.logVerbose('Cross reference block found with no actual references')
+                    delete context.crossRefBuffer
                 }
                 break;
             }
@@ -988,13 +994,7 @@ export class OsisImporter extends BibleEngineImporter {
 
         let currentContainer = this.getCurrentContainer(context);
 
-        if (
-            context.hierarchicalTagStack.find(
-                (tag) =>
-                    tag.name === OsisXmlNodeName.NOTE ||
-                    tag.type === OsisXmlNodeType.BOOK_INTRODUCTION
-            )
-        ) {
+        if (this.isInsideNoteOrIntroduction()) {
             const phrase: DocumentPhrase = {
                 type: 'phrase',
                 content: trimmedText,
@@ -1010,13 +1010,9 @@ export class OsisImporter extends BibleEngineImporter {
                 currentContainer.contents.push(group);
             } else currentContainer.contents.push(phrase);
             return;
-        } else if (
-            context.hierarchicalTagStack.find(
-                (tag) =>
-                    tag.name === OsisXmlNodeName.TITLE &&
-                    (!tag.attributes.canonical || tag.attributes.canonical === 'false')
-            )
-        ) {
+        } else if (this.isInsideNonCanonicalTitle()) {
+            // Strongs numbers inside non-canonical tags are not supported
+            delete context.strongsBuffer;
             if (currentContainer.type !== 'section') {
                 return this.logError(`
                     can't set title to section: no section
@@ -1167,6 +1163,22 @@ export class OsisImporter extends BibleEngineImporter {
         return false;
     }
 
+    isInsideNoteOrIntroduction() {
+        return this.context.hierarchicalTagStack.find(
+            (tag) =>
+                tag.name === OsisXmlNodeName.NOTE ||
+                tag.type === OsisXmlNodeType.BOOK_INTRODUCTION
+        )
+    }
+
+    isInsideNonCanonicalTitle() {
+        return this.context.hierarchicalTagStack.find(
+            (tag) =>
+                tag.name === OsisXmlNodeName.TITLE &&
+                (!tag.attributes.canonical || tag.attributes.canonical === 'false')
+        )
+    }
+
     getError(msg: string) {
         return new Error(this.getErrorMessageWithContext(msg, this.context))
     }
@@ -1190,6 +1202,10 @@ export class OsisImporter extends BibleEngineImporter {
     getCurrentVerse(context: ParserContext) {
         return `${context.currentBook && context.currentBook.osisId} ${context.currentChapter
             }:${context.currentVerse}`
+    }
+
+    getCurrentOsisVerse(context: ParserContext) {
+        return `${context.currentBook?.osisId}.${context.currentChapter}.${context.currentVerse}`
     }
 
     getErrorMessageWithContext(msg: string, context: ParserContext) {
