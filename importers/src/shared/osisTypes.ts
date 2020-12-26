@@ -55,6 +55,7 @@ export enum Indentation {
 export enum OsisXmlNodeName {
     CATCH_WORD = 'catchWord',
     CHAPTER = 'chapter',
+    COLOPHON = 'colophon',
     DATE = 'date',
     DESCRIPTION = 'description',
     DIVINE_NAME = 'divineName',
@@ -62,6 +63,7 @@ export enum OsisXmlNodeName {
     FOREIGN_WORD = 'foreign',
     HIGHLIGHT = 'hi',
     IDENTIFIER = 'identifier',
+    INSCRIPTION = 'inscription',
     LANGUAGE = 'language',
     LEMMA = 'lemma',
     LINEBREAK = 'lb',

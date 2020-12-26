@@ -576,6 +576,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.DESCRIPTION:
             case OsisXmlNodeName.DIVISION:
             case OsisXmlNodeName.IDENTIFIER:
+            case OsisXmlNodeName.INSCRIPTION:
             case OsisXmlNodeName.LANGUAGE:
             case OsisXmlNodeName.MILESTONE:
             case OsisXmlNodeName.NAME:
@@ -900,6 +901,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeType.BOOK_GROUP:
             case OsisXmlNodeName.CATCH_WORD:
+            case OsisXmlNodeName.COLOPHON:
             case OsisXmlNodeName.REFERENCE:
             case OsisXmlNodeName.WORK: {
                 // is handled in parseTextNode
@@ -909,6 +911,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.DESCRIPTION:
             case OsisXmlNodeName.DIVISION:
             case OsisXmlNodeName.IDENTIFIER:
+            case OsisXmlNodeName.INSCRIPTION:
             case OsisXmlNodeName.LANGUAGE:
             case OsisXmlNodeName.MILESTONE:
             case OsisXmlNodeName.NAME:
