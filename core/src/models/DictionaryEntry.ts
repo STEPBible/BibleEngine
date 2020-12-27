@@ -5,6 +5,7 @@ export interface IDictionaryEntry {
     dictionary: string;
     lemma?: string;
     transliteration?: string;
+    pronunciation?: string;
     gloss: string;
     content?: DocumentRoot;
 }

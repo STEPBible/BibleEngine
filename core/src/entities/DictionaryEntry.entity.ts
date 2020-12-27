@@ -15,6 +15,9 @@ export class DictionaryEntryEntity implements IDictionaryEntry {
     @Column({ nullable: true })
     transliteration?: string;
 
+    @Column({ nullable: true })
+    pronunciation?: string;
+
     @Column()
     gloss: string;
 
