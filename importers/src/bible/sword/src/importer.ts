@@ -30,9 +30,10 @@ export class SwordImporter extends BibleEngineImporter {
                         title: swordModule.config.description,
                         language: swordModule.config.language,
                         copyrightShort: swordModule.config.shortCopyright,
-                        isPlaintext: !xml.includes(`</${OsisXmlNodeName.PARAGRAPH}>`)
+                        isPlaintext: !xml.includes(`</${OsisXmlNodeName.PARAGRAPH}>`),
+                        ...this.options.versionMeta,
                     },
-                    bookMeta: swordModule.getBookMetadata()
+                    bookMeta: this.options.bookMeta || swordModule.getBookMetadata()
                 }
             )
             await importer.run()
