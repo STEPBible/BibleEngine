@@ -21,7 +21,6 @@ import {
     OsisXmlNode,
     OsisXmlNodeType,
     OsisXmlNodeName,
-    OsisNoteType
 } from '../../shared/osisTypes';
 import { ParserContext, ITagWithType, TagType, OsisSection } from './types';
 import Logger from '../../shared/Logger'
@@ -322,10 +321,15 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.LINEBREAK: {
+                if (this.isBeginningOfSection()) {
+                    // Ignore unnecessary line breaks at beginning of section,
+                    // that occur immediately after a title
+                    return;
+                }
                 switch (tag.attributes.type) {
                     case undefined:
                     case OsisXmlNodeType.NEWLINE:
-                    case OsisXmlNodeType.NEWLINE_POETRY:
+                    case OsisXmlNodeType.NEWLINE_POETRY: {
                         const phrase = this.getCurrentPhrase(context);
                         if (!phrase)
                             throw this.getError(
@@ -333,6 +337,7 @@ export class OsisImporter extends BibleEngineImporter {
                             );
                         phrase.linebreak = true;
                         break;
+                    }
                     default:
                         throw this.getError(`unknown lb-tag type: ${tag.attributes.type}`);
                 }
@@ -353,7 +358,7 @@ export class OsisImporter extends BibleEngineImporter {
                 const currentContainer = this.getCurrentContainer(context);
                 if (
                     currentContainer.type === OsisXmlNodeType.SECTION &&
-                    tag.attributes !== OsisNoteType.EXPLANATION &&
+                    tag.attributes.type !== OsisXmlNodeType.EXPLANATION &&
                     currentContainer.contents.length === 0
                 ) {
                     this.logInfo('saving note as section description')
@@ -732,7 +737,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.LINE_GROUP: {
                 if (currentTag.isSelfClosing) {
                     // Some SWORD modules have self-closing line groups
-                    return;
+                    break;
                 }
                 const lineGroup = context.contentContainerStack.pop();
                 if (!lineGroup || lineGroup.type !== 'group' || lineGroup.groupType !== 'lineGroup')
@@ -758,7 +763,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 // we handle the cross ref in parseTextNode
                 if (context.crossRefBuffer?.refs?.length === 0) {
-                    this.logVerbose('Cross reference block found with no actual references')
+                    this.logVerbose('Ignoring cross reference block with no actual references')
                     delete context.crossRefBuffer
                 }
                 break;
@@ -1126,8 +1131,8 @@ export class OsisImporter extends BibleEngineImporter {
         ) {
             let lastContent = currentContainer.contents[currentContainer.contents.length - 1];
             if (!lastContent) {
+                const containerType = (currentContainer as any).groupType || currentContainer.type
                 if (createIfMissing) {
-                    const containerType = (currentContainer as any).groupType || currentContainer.type
                     this.logVerbose(`creating empty phrase inside ${containerType}`)
                     const emptyPhrase: IBibleContentPhrase = {
                         type: 'phrase',
@@ -1138,7 +1143,11 @@ export class OsisImporter extends BibleEngineImporter {
                     currentContainer.contents.push(emptyPhrase);
                     return emptyPhrase;
                 } else {
-                    throw this.getError(`looking for phrase in an empty container`);
+                    throw this.getError(`
+                        looking for phrase in an empty ${containerType}
+                        current tag: ${JSON.stringify(this.getCurrentTag(context))}
+                        current container: ${JSON.stringify(this.getCurrentContainer(context).type)}
+                    `);
                 }
             }
             while (
@@ -1168,6 +1177,11 @@ export class OsisImporter extends BibleEngineImporter {
                 tag.name === OsisXmlNodeName.TITLE &&
                 (!tag.attributes.canonical || tag.attributes.canonical === 'false')
         )
+    }
+
+    isBeginningOfSection() {
+        const currentContainer = this.getCurrentContainer(this.context)
+        return currentContainer.type === 'section' && !currentContainer.contents.length
     }
 
     getError(msg: string) {

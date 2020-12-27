@@ -27,6 +27,7 @@ export enum OsisXmlNodeType {
     BOOK = 'book',
     BOOK_INTRODUCTION = 'introduction',
     CROSS_REFERENCE = 'crossReference',
+    EXPLANATION = 'explanation',
     ITALIC = 'italic',
     MILESTONE = 'x-milestone',
     NEWLINE = 'x-newLine',
@@ -94,8 +95,4 @@ export enum OsisXmlNodeName {
     VERSION_SCOPE = 'scope',
     XML = 'xml',
     XML_ROOT = 'osis'
-}
-
-export enum OsisNoteType {
-    EXPLANATION = 'explanation'
 }
