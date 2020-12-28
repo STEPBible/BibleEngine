@@ -1,8 +1,9 @@
-import { createWriteStream, readdirSync, mkdirSync } from 'fs'
+import { createWriteStream, mkdirSync } from 'fs'
 import { get } from 'http'
 import { S3 } from '@aws-sdk/client-s3'
-import { BeDatabaseCreator } from '../src';
+import { BeDatabaseCreator, BeImportFileCreator } from '../src';
 import { SwordImporter } from './../src/bible/sword/src/importer';
+import { ConnectionOptions } from 'typeorm';
 
 const BUCKETS = [
     'tyndale-house-public',
@@ -10,22 +11,44 @@ const BUCKETS = [
 ]
 const REGION = 'eu-west-1'
 const LOCAL_CACHE_PATH = 'data/step-library'
-const TEMP_DATABASE_PATH = 'temp.db'
+
+const CONNECTION_OPTIONS: ConnectionOptions = {
+    type: 'better-sqlite3',
+    database: 'bibles.db'
+}
 
 const main = async () => {
     if (process.env.SKIP_CACHE) {
         await downloadAllStepModules()
     }
-    const filenames = readdirSync(LOCAL_CACHE_PATH).filter(path => path.includes('abpen-the.zip'))
-    const creator = new BeDatabaseCreator({
-        type: 'sqlite',
-        database: TEMP_DATABASE_PATH
+    const creator = new BeDatabaseCreator(CONNECTION_OPTIONS);
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/osmhb.zip`
     });
-    for (const name of filenames) {
-        creator.addImporter(SwordImporter, {
-            sourcePath: `${LOCAL_CACHE_PATH}/${name}`
-        });
-    }
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/sblg-the.zip`
+    });
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/ChiUn.zip`
+    });
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/ChiUns.zip`
+    });
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/esv_th.zip`
+    });
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/hlt2018eb.zip`
+    });
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/KJV.zip`
+    });
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/nasb_th.zip`
+    });
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/spaRV1909eb.zip`
+    });
     await creator.createDatabase()
 }
 
