@@ -1,11 +1,13 @@
 import {
     createConnection,
+    getConnection,
     ConnectionOptions,
     Raw,
     EntityManager,
     Between,
     FindConditions,
-    DatabaseType, Like
+    DatabaseType,
+    Like,
 } from 'typeorm';
 
 import {
@@ -114,19 +116,44 @@ export class BibleEngineRemoteError extends Error {
     }
 }
 
+interface BibleEngineOptions {
+    keepConnectionAlive?: boolean
+}
+
 export class BibleEngine {
     pDB: Promise<EntityManager>;
+    private readonly CONNECTION_NAME = 'bible-engine'
 
-    constructor(dbConfig: ConnectionOptions) {
-        this.pDB = createConnection({
+    constructor(dbConfig: ConnectionOptions, options?: BibleEngineOptions) {
+        if (options?.keepConnectionAlive) {
+            this.pDB = this.findConnection(dbConfig)
+            return
+        }
+        this.pDB = this.createConnection(dbConfig)
+    }
+
+    async findConnection(dbConfig: ConnectionOptions) {
+        try {
+            return getConnection(this.CONNECTION_NAME).manager
+        } catch (error) {
+            if (error.name === 'ConnectionNotFoundError') {
+                return this.createConnection(dbConfig)
+            }
+            throw error
+        }
+    }
+
+    async createConnection(dbConfig: ConnectionOptions) {
+        const connection = await createConnection({
             entities: ENTITIES,
             synchronize: false,
             logging: ['error'],
-            name: 'bible-engine',
+            name: this.CONNECTION_NAME,
             migrations: this.getMigrations(dbConfig.type).migrations,
             migrationsRun: true,
             ...dbConfig
-        }).then(conn => conn.manager);
+        })
+        return connection.manager
     }
 
     getMigrations(type: DatabaseType): any {
@@ -1262,7 +1289,7 @@ export class BibleEngine {
 
         // no mutation
         const range = {...inputRange};
-        
+
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
 
@@ -1278,7 +1305,7 @@ export class BibleEngine {
         // (-range) right away
         if (!range.versionId || !range.versionChapterNum)
             return generateNormalizedRangeFromVersionRange(range);
-        
+
         if(!range.versionVerseNum ) {
             if(!book) {
                 book = await db.findOne(BibleBookEntity, {
@@ -1329,7 +1356,7 @@ export class BibleEngine {
             normalizedSubverseEndNum: standardRefEnd.normalizedSubverseNum
         };
 
-        
+
         // const phraseStart = await entityManager.findOne(BiblePhrase, {
         //     where: {
         //         id: Raw(col => generatePhraseIdSql(pontentialNormalizedRange, col)),
