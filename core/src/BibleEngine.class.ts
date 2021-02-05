@@ -117,7 +117,11 @@ export class BibleEngineRemoteError extends Error {
 }
 
 interface BibleEngineOptions {
-    keepConnectionAlive?: boolean
+    /**
+     * Indicates if an existing database connection will be reused.
+     * This option is useful during debug and development.
+     */
+    checkForExistingConnection?: boolean
 }
 
 export class BibleEngine {
@@ -125,7 +129,7 @@ export class BibleEngine {
     private readonly CONNECTION_NAME = 'bible-engine'
 
     constructor(dbConfig: ConnectionOptions, options?: BibleEngineOptions) {
-        if (options?.keepConnectionAlive) {
+        if (options?.checkForExistingConnection) {
             this.pDB = this.findConnection(dbConfig)
             return
         }
