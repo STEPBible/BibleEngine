@@ -1,9 +1,10 @@
 import { createWriteStream, mkdirSync } from 'fs'
 import { get } from 'http'
 import { S3 } from '@aws-sdk/client-s3'
-import { BeDatabaseCreator, BeImportFileCreator } from '../src';
+import { BeDatabaseCreator, StepLexiconImporter } from '../src';
 import { SwordImporter } from './../src/bible/sword/src/importer';
 import { ConnectionOptions } from 'typeorm';
+import { zhBookMetadata, zhsBookMetadata, esBookMetdata } from './../src/metadata'
 
 const BUCKETS = [
     'tyndale-house-public',
@@ -23,16 +24,18 @@ const main = async () => {
     }
     const creator = new BeDatabaseCreator(CONNECTION_OPTIONS);
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/osmhb.zip`
-    });
-    creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/sblg-the.zip`
     });
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/ChiUn.zip`
+        sourcePath: `${LOCAL_CACHE_PATH}/osmhb.zip`
     });
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/ChiUns.zip`
+        sourcePath: `${LOCAL_CACHE_PATH}/ChiUn.zip`,
+        bookMeta: zhBookMetadata,
+    });
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/ChiUns.zip`,
+        bookMeta: zhsBookMetadata,
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/esv_th.zip`
@@ -47,8 +50,10 @@ const main = async () => {
         sourcePath: `${LOCAL_CACHE_PATH}/nasb_th.zip`
     });
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/spaRV1909eb.zip`
+        sourcePath: `${LOCAL_CACHE_PATH}/spaRV1909eb.zip`,
+        bookMeta: esBookMetdata,
     });
+    creator.addImporter(StepLexiconImporter);
     await creator.createDatabase()
 }
 
