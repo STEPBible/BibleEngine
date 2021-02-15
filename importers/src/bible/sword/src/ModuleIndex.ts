@@ -268,6 +268,9 @@ export default class ModuleIndex {
 
   getIntFromStream(inBuf: Uint8Array) {
     buf = inBuf.subarray(start, start + 4);
+    if (!inBuf) {
+      return [new Uint8Array(), true]
+    }
     isEnd = false;
     start += 4;
     if (buf.length !== 4) { isEnd = true; }
@@ -275,6 +278,9 @@ export default class ModuleIndex {
   }
 
   getShortIntFromStream(inBuf: Uint8Array) {
+    if (!inBuf) {
+      return [new Uint8Array(), true]
+    }
     buf = inBuf.subarray(start, start + 2);
     isEnd = false;
     start += 2;
@@ -283,6 +289,9 @@ export default class ModuleIndex {
   }
 
   getInt48FromStream(inBuf: Uint8Array) {
+    if (!inBuf) {
+      return [new Uint8Array(), true]
+    }
     buf = inBuf.subarray(start, start + 6);
     isEnd = false;
     start += 6;
