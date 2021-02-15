@@ -267,6 +267,9 @@ export default class ModuleIndex {
   }
 
   getIntFromStream(inBuf: Uint8Array) {
+    if (!inBuf) {
+      return [new Uint8Array(), true]
+    }
     buf = inBuf.subarray(start, start + 4);
     if (!inBuf) {
       return [new Uint8Array(), true]
