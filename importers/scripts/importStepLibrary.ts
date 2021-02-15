@@ -27,14 +27,18 @@ const main = async () => {
         sourcePath: `${LOCAL_CACHE_PATH}/OSHB.zip`,
         versionMeta: {
             uid: 'OHB',
-            title: 'Open Scriptures Hebrew Bible'
+            title: 'Open Scriptures Hebrew Bible',
+            isPlaintext: true,
+            hasStrongs: true,
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/sblg-the.zip`,
         versionMeta: {
             uid: 'SBLGNT',
-            title: 'The Greek New Testament: SBLGNT upgraded by Tyndale House'
+            title: 'The Greek New Testament: SBLGNT upgraded by Tyndale House',
+            isPlaintext: true,
+            hasStrongs: true,
         }
     });
     creator.addImporter(SwordImporter, {
@@ -42,7 +46,9 @@ const main = async () => {
         bookMeta: zhBookMetadata,
         versionMeta: {
             uid: '和合本 (繁)',
-            title: '和合本 (繁體字)'
+            title: '和合本 (繁體字)',
+            isPlaintext: true,
+            hasStrongs: true,
         }
     });
     creator.addImporter(SwordImporter, {
@@ -50,35 +56,45 @@ const main = async () => {
         bookMeta: zhsBookMetadata,
         versionMeta: {
             uid: '和合本 (简)',
-            title: '和合本 (简体字)'
+            title: '和合本 (简体字)',
+            isPlaintext: true,
+            hasStrongs: true,
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/esv_th.zip`,
         versionMeta: {
             uid: 'ESV',
-            title: 'English Standard Version'
+            title: 'English Standard Version',
+            isPlaintext: false,
+            hasStrongs: true,
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/hlt2018eb.zip`,
         versionMeta: {
             uid: 'MCSB',
-            title: 'Baibal Olcim'
+            title: 'Baibal Olcim',
+            isPlaintext: true,
+            hasStrongs: true,
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/KJV.zip`,
         versionMeta: {
             uid: 'KJV',
-            title: 'King James Version (1769)'
+            title: 'King James Version (1769)',
+            isPlaintext: true,
+            hasStrongs: true,
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/nasb_th.zip`,
         versionMeta: {
             uid: 'NASB',
-            title: 'New American Standard Bible'
+            title: 'New American Standard Bible',
+            isPlaintext: false,
+            hasStrongs: true,
         }
     });
     creator.addImporter(SwordImporter, {
@@ -86,7 +102,9 @@ const main = async () => {
         bookMeta: esBookMetdata,
         versionMeta: {
             uid: 'RV1909',
-            title: 'Reina-Valera 1909'
+            title: 'Reina-Valera 1909',
+            isPlaintext: true,
+            hasStrongs: true,
         }
     });
     creator.addImporter(StepLexiconImporter);
