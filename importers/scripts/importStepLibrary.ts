@@ -33,52 +33,60 @@ const main = async () => {
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/sblg-the.zip`,
         versionMeta: {
-            uid: 'SBLGNT'
+            uid: 'SBLGNT',
+            title: 'The Greek New Testament: SBLGNT upgraded by Tyndale House'
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/ChiUn.zip`,
         bookMeta: zhBookMetadata,
         versionMeta: {
-            uid: 'CUV'
+            uid: '和合本 (繁)',
+            title: '和合本 (繁體字)'
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/ChiUns.zip`,
         bookMeta: zhsBookMetadata,
         versionMeta: {
-            uid: 'CUVS'
+            uid: '和合本 (简)',
+            title: '和合本 (简体字)'
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/esv_th.zip`,
         versionMeta: {
-            uid: 'ESV'
+            uid: 'ESV',
+            title: 'English Standard Version'
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/hlt2018eb.zip`,
         versionMeta: {
-            uid: 'MCSB'
+            uid: 'MCSB',
+            title: 'Baibal Olcim'
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/KJV.zip`,
         versionMeta: {
-            uid: 'KJV'
+            uid: 'KJV',
+            title: 'King James Version (1769)'
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/nasb_th.zip`,
         versionMeta: {
-            uid: 'NASB'
+            uid: 'NASB',
+            title: 'New American Standard Bible'
         }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/spaRV1909eb.zip`,
         bookMeta: esBookMetdata,
         versionMeta: {
-            uid: 'RVR09'
+            uid: 'RV1909',
+            title: 'Reina-Valera 1909'
         }
     });
     creator.addImporter(StepLexiconImporter);
