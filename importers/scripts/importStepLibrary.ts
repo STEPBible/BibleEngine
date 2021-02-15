@@ -24,34 +24,62 @@ const main = async () => {
     }
     const creator = new BeDatabaseCreator(CONNECTION_OPTIONS);
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/sblg-the.zip`
+        sourcePath: `${LOCAL_CACHE_PATH}/OSHB.zip`,
+        versionMeta: {
+            uid: 'OHB',
+            title: 'Open Scriptures Hebrew Bible'
+        }
     });
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/osmhb.zip`
+        sourcePath: `${LOCAL_CACHE_PATH}/sblg-the.zip`,
+        versionMeta: {
+            uid: 'SBLGNT'
+        }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/ChiUn.zip`,
         bookMeta: zhBookMetadata,
+        versionMeta: {
+            uid: 'CUV'
+        }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/ChiUns.zip`,
         bookMeta: zhsBookMetadata,
+        versionMeta: {
+            uid: 'CUVS'
+        }
     });
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/esv_th.zip`
+        sourcePath: `${LOCAL_CACHE_PATH}/esv_th.zip`,
+        versionMeta: {
+            uid: 'ESV'
+        }
     });
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/hlt2018eb.zip`
+        sourcePath: `${LOCAL_CACHE_PATH}/hlt2018eb.zip`,
+        versionMeta: {
+            uid: 'MCSB'
+        }
     });
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/KJV.zip`
+        sourcePath: `${LOCAL_CACHE_PATH}/KJV.zip`,
+        versionMeta: {
+            uid: 'KJV'
+        }
     });
     creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/nasb_th.zip`
+        sourcePath: `${LOCAL_CACHE_PATH}/nasb_th.zip`,
+        versionMeta: {
+            uid: 'NASB'
+        }
     });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/spaRV1909eb.zip`,
         bookMeta: esBookMetdata,
+        versionMeta: {
+            uid: 'RVR09'
+        }
     });
     creator.addImporter(StepLexiconImporter);
     await creator.createDatabase()
