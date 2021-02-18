@@ -24,7 +24,11 @@ import {
 } from '../../shared/osisTypes';
 import { ParserContext, ITagWithType, TagType, OsisSection } from './types';
 import Logger from '../../shared/Logger'
-import { getParsedBookChapterVerseRef } from './functions/helpers.functions'
+import {
+    getParsedBookChapterVerseRef,
+    getCurrentVerse,
+    getErrorMessageWithContextStackTrace
+} from './functions/helpers.functions'
 import { parseStrongsNums } from './functions/strongs.functions';
 
 const STRICT_MODE_ENABLED = true;
@@ -84,7 +88,7 @@ export class OsisImporter extends BibleEngineImporter {
         try {
             context = await pParsing;
         } catch (error) {
-            console.error(error, this.getCurrentVerse(this.context))
+            console.error(error, getCurrentVerse(this.context))
             process.exit(1)
         }
 
@@ -260,6 +264,16 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeType.SECTION_SUB: {
                 this.startNewSection(context, elementType)
                 break;
+            }
+            case OsisXmlNodeName.SWORD_PILCROW: {
+                if (tag.isSelfClosing && tag.attributes.sID) {
+                    this.startNewParagraph(context)
+                    break;
+                }
+                if (tag.isSelfClosing && tag.attributes.eID) {
+                    this.closeCurrentParagraph(context)
+                    break;
+                }
             }
             case OsisXmlNodeName.PARAGRAPH:
             case OsisXmlNodeType.PARAGRAPH: {
@@ -528,7 +542,6 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.REF_SYSTEM:
             case OsisXmlNodeName.RIGHTS:
             case OsisXmlNodeName.SWORD_MILESTONE:
-            case OsisXmlNodeName.SWORD_PILCROW:
             case OsisXmlNodeName.TEXTUAL_VARIATION:
             case OsisXmlNodeName.TYPE:
             case OsisXmlNodeName.REVISION_DESC:
@@ -974,8 +987,7 @@ export class OsisImporter extends BibleEngineImporter {
             }) === -1
         ) {
             if (!context.version?.isPlaintext) {
-                const stack = context.contentContainerStack.map(container => container.type)
-                throw this.getError(`text outside of paragraph: "${text}". Stack: [${stack}]`)
+                throw this.getError(`text outside of paragraph: "${text}"`)
             }
         }
 
@@ -1198,7 +1210,7 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     getError(msg: string) {
-        return new Error(this.getErrorMessageWithContext(msg, this.context))
+        return new Error(getErrorMessageWithContextStackTrace(msg, this.context))
     }
 
     logError(msg: string) {
@@ -1217,16 +1229,11 @@ export class OsisImporter extends BibleEngineImporter {
         Logger.verbose(this.getErrorMessageWithContext(msg, this.context))
     }
 
-    getCurrentVerse(context: ParserContext) {
-        return `${context.currentBook && context.currentBook.osisId} ${context.currentChapter
-            }:${context.currentVerse}`
-    }
-
     getCurrentOsisVerse() {
         return `${this.context.currentBook?.osisId}.${this.context.currentChapter}.${this.context.currentVerse}`
     }
 
     getErrorMessageWithContext(msg: string, context: ParserContext) {
-        return `${msg} in ${this.getCurrentVerse(context)}`;
+        return `${msg} in ${getCurrentVerse(context)}`;
     }
 }

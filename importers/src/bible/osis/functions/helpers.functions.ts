@@ -30,7 +30,7 @@ export function printFullContainerStack(stack: ParserStackItem[]) {
         const identifier = container.title || container.groupType || container.type;
         trace += `\n${indent}${identifier}`;
     });
-    return trace;
+    return trace + '\n';
 }
 
 export function getErrorMessageWithContextStackTrace(message: string, context: ParserContext) {
