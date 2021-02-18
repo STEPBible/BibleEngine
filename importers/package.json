@@ -19,6 +19,7 @@
         "pako": "^1.0.7",
         "parse5": "^5.1.0",
         "pg": "^7.11.0",
+        "prettier": "^2.2.1",
         "random-words": "^1.1.0",
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
