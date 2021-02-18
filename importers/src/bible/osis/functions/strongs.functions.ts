@@ -1,11 +1,11 @@
 export function parseStrongsNums(tagLemma: string) {
-    const lemma = tagLemma.replace(/\!/g, '')
-    const strongsNumbersString = lemma.split('strong:').join('')
+    const lemma = tagLemma.replace(/\!/g, '');
+    const strongsNumbersString = lemma.split('strong:').join('');
     const strongsNumbers = strongsNumbersString
         .split(' ')
-        .filter(element => element)
-        .map(strongsNum => normalizeStrongsNum(strongsNum));
-    return strongsNumbers
+        .filter((element) => element)
+        .map((strongsNum) => normalizeStrongsNum(strongsNum));
+    return strongsNumbers;
 }
 
 export function normalizeStrongsNum(strongsNum: string): string {
