@@ -1,10 +1,10 @@
 import { createWriteStream, mkdirSync } from 'fs'
 import { get } from 'http'
 import { S3 } from '@aws-sdk/client-s3'
-import { BeDatabaseCreator, StepLexiconImporter } from '../src';
+import { BeDatabaseCreator, OsisImporter, StepLexiconImporter } from '../src';
 import { SwordImporter } from './../src/bible/sword/src/importer';
 import { ConnectionOptions } from 'typeorm';
-import { zhBookMetadata, zhsBookMetadata, esBookMetdata } from './../src/metadata'
+import { zhBookMetadata, zhsBookMetadata, esBookMetdata, enBookMetadata } from './../src/metadata'
 
 const BUCKETS = [
     'tyndale-house-public',
@@ -23,6 +23,16 @@ const main = async () => {
         await downloadAllStepModules()
     }
     const creator = new BeDatabaseCreator(CONNECTION_OPTIONS);
+    creator.addImporter(OsisImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/ESV2016_OSIS+Strongs.xml`,
+        bookMeta: enBookMetadata,
+        versionMeta: {
+            uid: 'ESV',
+            title: 'English Standard Version',
+            isPlaintext: false,
+            hasStrongs: true,
+        }
+    });
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/OSHB.zip`,
         versionMeta: {
@@ -58,15 +68,6 @@ const main = async () => {
             uid: '和合本 (简)',
             title: '和合本 (简体字)',
             isPlaintext: true,
-            hasStrongs: true,
-        }
-    });
-    creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/esv_th.zip`,
-        versionMeta: {
-            uid: 'ESV',
-            title: 'English Standard Version',
-            isPlaintext: false,
             hasStrongs: true,
         }
     });
