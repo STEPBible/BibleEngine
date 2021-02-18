@@ -1,4 +1,5 @@
-import { IBibleReferenceRange } from "@bible-engine/core";
+import { IBibleReferenceRange } from '@bible-engine/core';
+import { ParserContext, ParserStackItem } from '../types';
 
 export function getParsedBookChapterVerseRef(osisRef: string): IBibleReferenceRange {
     const firstVerse = osisRef.split('-')[0].split('.');
@@ -6,7 +7,7 @@ export function getParsedBookChapterVerseRef(osisRef: string): IBibleReferenceRa
     const versionChapterNum = Number(firstVerse[1]);
     const range: IBibleReferenceRange = {
         bookOsisId,
-        versionChapterNum
+        versionChapterNum,
     };
     if (firstVerse[2]) range.versionVerseNum = +firstVerse[2];
     const hasMultipleVerses = osisRef.split('-').length === 2;
@@ -16,4 +17,30 @@ export function getParsedBookChapterVerseRef(osisRef: string): IBibleReferenceRa
         if(secondVerse[2]) range.versionVerseEndNum = Number(secondVerse[2]);
     }
     return range;
+}
+
+export function printCompactContainerStack(stack: ParserStackItem[]) {
+    return stack.map((container) => (container as any).groupType || container.type).join(' > ');
+}
+
+export function printFullContainerStack(stack: ParserStackItem[]) {
+    let trace = '';
+    stack.forEach((container: any, index) => {
+        const indent = ' '.repeat((index + 1) * 2);
+        const identifier = container.title || container.groupType || container.type;
+        trace += `\n${indent}${identifier}`;
+    });
+    return trace;
+}
+
+export function getErrorMessageWithContextStackTrace(message: string, context: ParserContext) {
+    return `${message} in ${getCurrentVerse(context)}
+
+container stack:${printFullContainerStack(context.contentContainerStack)}`;
+}
+
+export function getCurrentVerse(context: ParserContext) {
+    return `${context.currentBook && context.currentBook.osisId} ${context.currentChapter}${
+        context.version?.chapterVerseSeparator || ':'
+    }${context.currentVerse}`;
 }

@@ -27,11 +27,7 @@ export type ParserContext = {
         refs: IBibleCrossReference[];
     };
     strongsBuffer?: string[]
-    contentContainerStack: (
-        | { type: 'root'; contents: IBibleContent[] }
-        | IBibleContentSection
-        | IBibleContentGroup<ContentGroupType>
-    )[];
+    contentContainerStack: ParserStackItem[];
     hierarchicalTagStack: ITagWithType[];
     currentVerseJoinToVersionRef?: IBibleReference;
     openedSelfClosingTag?: ITagWithType;
@@ -42,6 +38,11 @@ export type ParserContext = {
         | OsisXmlNodeType.SECTION_SUB
     )[];
 };
+
+export type ParserStackItem =
+    | { type: 'root'; contents: IBibleContent[] }
+    | IBibleContentSection
+    | IBibleContentGroup<ContentGroupType>
 
 /**
  * The following `IOsis...` interfaces can be used to do type discrimination by using the type
