@@ -24,6 +24,16 @@ const main = async () => {
     }
     const creator = new BeDatabaseCreator(CONNECTION_OPTIONS);
     creator.addImporter(OsisImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/NASB_TH_osis.xml`,
+        bookMeta: enBookMetadata,
+        versionMeta: {
+            uid: 'NASB',
+            title: 'New American Standard Bible',
+            isPlaintext: false,
+            hasStrongs: true,
+        },
+    });
+    creator.addImporter(OsisImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/ESV2016_OSIS+Strongs.xml`,
         bookMeta: enBookMetadata,
         versionMeta: {
@@ -89,15 +99,7 @@ const main = async () => {
             hasStrongs: true,
         }
     });
-    creator.addImporter(SwordImporter, {
-        sourcePath: `${LOCAL_CACHE_PATH}/nasb_th.zip`,
-        versionMeta: {
-            uid: 'NASB',
-            title: 'New American Standard Bible',
-            isPlaintext: false,
-            hasStrongs: true,
-        }
-    });
+
     creator.addImporter(SwordImporter, {
         sourcePath: `${LOCAL_CACHE_PATH}/spaRV1909eb.zip`,
         bookMeta: esBookMetdata,
