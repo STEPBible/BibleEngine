@@ -5,43 +5,11 @@
 			<chapter sID="Gen.1" osisID="Gen.1">
 				<title type="sub" canonical="false">The Creation</title>
 				<verse sID="Gen.1.1" osisID="Gen.1.1"/>
-				<note osisID="Gen.1.1!R1" osisRef="Gen.1.1" type="crossReference" n="a">
-					<reference osisRef="Ps.102.25.">Ps 102:25</reference>; 
-                    
-					<reference osisRef="Isa.40.21.">Is 40:21</reference>; 
-                    
-					<reference osisRef="John.1.1.">John 1:1</reference>, 
-                    
-					<reference osisRef="John.1.2.">2</reference>; 
-                    
-					<reference osisRef="Heb.1.10.">Heb 1:10</reference>
-				</note>
 				<w lemma="strong:H7225">In the beginning</w>
-				<note osisID="Gen.1.1!R2" osisRef="Gen.1.1" type="crossReference" n="b">
-					<reference osisRef="Ps.89.11.">Ps 89:11</reference>;
-                    
-					<reference osisRef="Ps.90.2.">90:2</reference>; 
-                    
-					<reference osisRef="Acts.17.24.">Acts 17:24</reference>; 
-                    
-					<reference osisRef="Rom.1.20.">Rom 1:20</reference>; 
-                    
-					<reference osisRef="Heb.11.3.">Heb 11:3</reference>
-				</note>
 				<w lemma="strong:H0430">God</w>
-				<note osisID="Gen.1.1!R3" osisRef="Gen.1.1" type="crossReference" n="c">
-					<reference osisRef="Job.38.4.">Job 38:4</reference>; 
-                    
-					<reference osisRef="Isa.42.5.">Is 42:5</reference>; 
-                    
-					<reference osisRef="Isa.45.18.">45:18</reference>; 
-                    
-					<reference osisRef="Rev.4.11.">Rev 4:11</reference>
-				</note>
 				<w lemma="strong:H1254 a#=">created</w>
 				<w lemma="strong:H8064">the heavens</w>
 				<w lemma="strong:H0776">and the earth</w>. 
-                
 				<verse eID="Gen.1.1"/>
 			</chapter>
 		</div>
