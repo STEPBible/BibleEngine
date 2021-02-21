@@ -1,4 +1,4 @@
-import * as path from 'path';
+import path from 'path';
 import { readFileSync, createReadStream } from 'fs';
 import { decodeStream, encodeStream } from 'iconv-lite';
 import { parser } from 'sax';
@@ -15,7 +15,7 @@ import {
     generateVersionReferenceId,
 } from '@bible-engine/core';
 
-import { BibleEngineImporter } from '../../shared/Importer.interface';
+import { BibleEngineImporter, IImporterOptions } from '../../shared/Importer.interface';
 import { startsWithPunctuationChar, streamToString } from '../../shared/helpers.functions';
 import {
     OsisXmlNode,
@@ -42,23 +42,34 @@ export class OsisImporter extends BibleEngineImporter {
         sectionStack: [],
     }
     hasSectionsInText: boolean
+    hasParagraphs: boolean
 
     async import() {
-        let xml: string;
-        if (this.options.sourceData) xml = this.options.sourceData;
+        const xml = await this.getXmlFromOptions(this.options)
+        const context = await this.getContextFromXml(xml)
+        return this.saveContextToDatabase(context)
+    }
+
+    async getXmlFromOptions(options: IImporterOptions) {
+        let xml;
+        if (options.sourceData) xml = options.sourceData;
         else {
-            const sourcePath = this.options.sourcePath ||
+            const sourcePath = options.sourcePath ||
                 path.resolve(__dirname) + '/data/osis.xml';
-            xml = this.options.sourceEncoding
+            xml = options.sourceEncoding
                 ? await streamToString(
                     createReadStream(sourcePath)
-                        .pipe(decodeStream(this.options.sourceEncoding))
+                        .pipe(decodeStream(options.sourceEncoding))
                         .pipe(encodeStream('utf8'))
                 )
                 : readFileSync(sourcePath, 'utf8');
         }
-        this.hasSectionsInText = xml.includes(`type="section"`)
+        return xml
+    }
 
+    async getContextFromXml(xml: string): Promise<ParserContext> {
+        this.hasSectionsInText = xml.includes(`type="section"`)
+        this.hasParagraphs = xml.includes('<p>')
         const pParsing = new Promise<ParserContext>((resolve, reject) => {
             const xmlStream = parser(STRICT_MODE_ENABLED);
 
@@ -91,7 +102,10 @@ export class OsisImporter extends BibleEngineImporter {
             console.error(error, getCurrentVerse(this.context))
             process.exit(1)
         }
+        return context
+    }
 
+    async saveContextToDatabase(context: ParserContext) {
         if (!context.version) throw new Error(`can't find version id`);
 
         Logger.info(`importing version ${context.version.uid}`);
@@ -986,7 +1000,7 @@ export class OsisImporter extends BibleEngineImporter {
                 return false;
             }) === -1
         ) {
-            if (!context.version?.isPlaintext) {
+            if (this.hasParagraphs) {
                 throw this.getError(`text outside of paragraph: "${text}"`)
             }
         }
@@ -1099,6 +1113,10 @@ export class OsisImporter extends BibleEngineImporter {
         context.sectionStack.push(elementType);
         currentContainer.contents.push(section);
         context.contentContainerStack.push(section);
+
+        if (!this.hasParagraphs) {
+            this.startNewParagraph(context)
+        }
     }
 
     startNewParagraph(context: ParserContext) {
