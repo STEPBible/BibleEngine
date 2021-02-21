@@ -46,7 +46,8 @@ describe('getContainerStackTrace', () => {
             `
   root
     The Creation of the World
-      paragraph`
+      paragraph
+`
         );
     });
 });
@@ -60,7 +61,8 @@ describe('getErrorMessageWithContextStackTrace', () => {
 container stack:
   root
     The Creation of the World
-      paragraph`
+      paragraph
+`
         );
     });
 });
