@@ -7,11 +7,11 @@ export function validateGroup(
     groupName: ContentGroupType,
     context: ParserContext
 ) {
+    const type: string = ((topStackItem as any)?.groupType || topStackItem?.type)
     if (
-        !topStackItem ||
-        topStackItem.type !== 'group' ||
-        topStackItem.groupType !== groupName
+        !type ||
+        type !== groupName
     ) {
-        throw new OsisParseError(`unclean container stack while closing "${groupName}" group`, context)
+        throw new OsisParseError(`unclean container stack while closing "${groupName}" group. Found "${type}"`, context)
     }
 }
