@@ -962,22 +962,8 @@ export class OsisImporter extends BibleEngineImporter {
             return;
         }
 
-        if (
-            context.contentContainerStack.findIndex((container) => {
-                if (container.type === 'group' && container.groupType === 'paragraph') return true;
-
-                if (container !== currentContainer) {
-                    const lastContent = container.contents[container.contents.length - 1];
-                    if (lastContent.type === 'group' && lastContent.groupType === 'paragraph')
-                        return true;
-                }
-
-                return false;
-            }) === -1
-        ) {
-            if (this.hasParagraphs) {
-                throw this.getError(`text outside of paragraph: "${text}"`)
-            }
+        if (!stackHasParagraph(context, currentContainer)) {
+            throw this.getError(`text outside of paragraph: "${text}"`)
         }
 
         if (!context.currentChapter || !context.currentVerse) {
