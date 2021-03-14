@@ -2,8 +2,8 @@ import {
     printCompactContainerStack,
     printFullContainerStack,
     getErrorMessageWithContextStackTrace,
-} from '../functions/helpers.functions';
-import { ParserContext } from '../types';
+} from '../../functions/helpers.functions';
+import { ParserContext } from '../../types';
 
 const CONTEXT: ParserContext = {
     books: [],
