@@ -30,6 +30,7 @@ import {
     getErrorMessageWithContextStackTrace
 } from './functions/helpers.functions'
 import { parseStrongsNums } from './functions/strongs.functions';
+import { validateGroup } from './functions/validators.functions'
 
 const STRICT_MODE_ENABLED = true;
 
@@ -817,49 +818,23 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.FOREIGN_WORD: {
                 const italicGroup = context.contentContainerStack.pop();
-                if (
-                    !italicGroup ||
-                    italicGroup.type !== 'group' ||
-                    italicGroup.groupType !== 'italic'
-                )
-                    throw this.getError(
-                        `unclean container stack while closing "foreign" group`,
-                    );
+                validateGroup(italicGroup, 'italic', context)
                 break;
             }
             case OsisXmlNodeName.TRANS_CHANGE: {
                 const groupTransChange = context.contentContainerStack.pop();
-                if (
-                    !groupTransChange ||
-                    groupTransChange.type !== 'group' ||
-                    groupTransChange.groupType !== 'translationChange'
-                )
-                    throw this.getError(
-                        `unclean container stack while closing "transChange" group`,
-                    );
+                validateGroup(groupTransChange, 'translationChange', context)
                 break;
             }
             case OsisXmlNodeName.HIGHLIGHT: {
                 const emphasisGroup = context.contentContainerStack.pop();
-                if (
-                    !emphasisGroup ||
-                    emphasisGroup.type !== 'group' ||
-                    emphasisGroup.groupType !== 'emphasis'
-                )
-                    throw this.getError(`unclean container stack while closing emphasis group`);
+                validateGroup(emphasisGroup, 'emphasis', context)
                 break;
             }
             case OsisXmlNodeName.DIVINE_NAME: {
                 if (!this.isInsideNonCanonicalTitle()) {
                     const divineNameGroup = context.contentContainerStack.pop();
-                    if (
-                        !divineNameGroup ||
-                        divineNameGroup.type !== 'group' ||
-                        divineNameGroup.groupType !== 'divineName'
-                    )
-                        throw this.getError(
-                            `unclean container stack while closing divineName group`
-                        );
+                    validateGroup(divineNameGroup, 'divineName', context)
                 }
                 break;
             }
