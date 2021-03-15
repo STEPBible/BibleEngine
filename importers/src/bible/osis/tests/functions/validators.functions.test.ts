@@ -1,16 +1,6 @@
 import { IBibleContentGroup } from '@bible-engine/core';
+import { ParserContext } from '../../entities/ParserContext';
 import { validateGroup, stackHasParagraph } from '../../functions/validators.functions'
-import { ParserContext, ParserStackItem } from '../../types';
-
-const generateContext = (stack: ParserStackItem[]): ParserContext => {
-    return {
-        hierarchicalTagStack: [],
-        books: [],
-        contentContainerStack: stack,
-        skipClosingTags: [],
-        sectionStack: [],
-    }
-}
 
 describe('validateGroup', () => {
     const TOP_STACK_ITEM: IBibleContentGroup<'lineGroup'> = {
@@ -35,7 +25,8 @@ describe('stackHasParagraph', () => {
             groupType: 'paragraph',
             contents: [],
         };
-        const context = generateContext([PARAGRAPH])
+        const context = new ParserContext()
+        context.contentContainerStack.push(PARAGRAPH)
         expect(stackHasParagraph(context, PARAGRAPH)).toBe(true)
     })
     it('finds a paragraph when one is in the stack', () => {
@@ -44,7 +35,7 @@ describe('stackHasParagraph', () => {
             groupType: 'paragraph',
             contents: [],
         };
-        const context = generateContext([])
+        const context = new ParserContext()
         expect(stackHasParagraph(context, PARAGRAPH)).toBe(false)
     })
 })

@@ -16,29 +16,6 @@ export interface ITagWithType extends OsisXmlNode {
     type: TagType;
 }
 
-export type ParserContext = {
-    version?: IBibleVersion;
-    books: BookWithContentForInput[];
-    currentBook?: IBibleBook;
-    currentChapter?: number;
-    currentVerse?: number;
-    crossRefBuffer?: {
-        key?: string;
-        refs: IBibleCrossReference[];
-    };
-    strongsBuffer?: string[]
-    contentContainerStack: ParserStackItem[];
-    hierarchicalTagStack: ITagWithType[];
-    currentVerseJoinToVersionRef?: IBibleReference;
-    openedSelfClosingTag?: ITagWithType;
-    skipClosingTags: TagType[];
-    sectionStack: (
-        | OsisXmlNodeType.SECTION_MAJOR
-        | OsisXmlNodeType.SECTION
-        | OsisXmlNodeType.SECTION_SUB
-    )[];
-};
-
 export type ParserStackItem =
     | { type: 'root'; contents: IBibleContent[] }
     | IBibleContentSection

@@ -1,6 +1,7 @@
 import { ContentGroupType } from '@bible-engine/core';
+import { ParserContext } from '../entities/ParserContext';
 import { OsisParseError } from '../errors/OsisParseError';
-import { ParserContext, ParserStackItem } from '../types';
+import { ParserStackItem } from '../types';
 
 export function validateGroup(
     topStackItem: ParserStackItem | undefined,

@@ -1,5 +1,6 @@
 import { IBibleReferenceRange } from '@bible-engine/core';
-import { ParserContext, ParserStackItem } from '../types';
+import { ParserContext } from '../entities/ParserContext';
+import { ParserStackItem } from '../types';
 
 export function getParsedBookChapterVerseRef(osisRef: string): IBibleReferenceRange {
     const firstVerse = osisRef.split('-')[0].split('.');
