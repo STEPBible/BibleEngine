@@ -1,18 +1,8 @@
-import { IBibleContentSection, IBibleContentGroup } from '@bible-engine/core'
 import { OsisXmlNodeName, OsisXmlNodeType } from '../../../../shared/osisTypes'
 import { ParserContext } from '../../entities/ParserContext'
 import { updateContextWithTitleText } from '../../functions/titles.functions'
+import { getEmptyParagraph, getEmptySection } from '../utils';
 
-const SECTION: IBibleContentSection = {
-    type: 'section',
-    level: 0,
-    contents: [],
-};
-const PARAGRAPH: IBibleContentGroup<'paragraph'> = {
-    type: 'group',
-    groupType: 'paragraph',
-    contents: [],
-};
 const TITLE_TEXT = 'some text'
 
 describe('updateContextWithTitleText', () => {
@@ -22,7 +12,7 @@ describe('updateContextWithTitleText', () => {
         context.strongsBuffer = [];
         updateContextWithTitleText(
             context,
-            SECTION,
+            getEmptySection(),
             OsisXmlNodeType.TEXTUAL_NOTE,
             ''
         );
@@ -33,14 +23,14 @@ describe('updateContextWithTitleText', () => {
         expect(() => {
             updateContextWithTitleText(
                 context,
-                PARAGRAPH,
+                getEmptyParagraph(),
                 OsisXmlNodeType.TEXTUAL_NOTE,
                 ''
             )
         }).toThrowError()
     })
     it('parses textual notes as section subtitles', () => {
-        const currentContainer = { ...SECTION }
+        const currentContainer = getEmptySection()
         const context = new ParserContext();
         updateContextWithTitleText(
             context,
@@ -51,7 +41,7 @@ describe('updateContextWithTitleText', () => {
         expect(currentContainer.subTitle).toBe(TITLE_TEXT)
     })
     it('capitalizes text if it is a divine name', () => {
-        const currentContainer = { ...SECTION }
+        const currentContainer = getEmptySection()
         const context = new ParserContext();
         updateContextWithTitleText(
             context,
@@ -62,7 +52,7 @@ describe('updateContextWithTitleText', () => {
         expect(currentContainer.title).toBe('LORD')
     })
     it('adds a space for subsequent words', () => {
-        const currentContainer = { ...SECTION }
+        const currentContainer = getEmptySection()
         currentContainer.title = 'Save Me'
         const context = new ParserContext();
         updateContextWithTitleText(

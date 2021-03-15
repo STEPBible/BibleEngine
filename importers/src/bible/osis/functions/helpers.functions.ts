@@ -27,3 +27,12 @@ export function getCurrentContainer(context: ParserContext) {
     return context.contentContainerStack[context.contentContainerStack.length - 1];
 }
 
+export function isInsideEmptyParagraph(context: ParserContext) {
+    const currentContainer: any = getCurrentContainer(context)
+    return currentContainer?.groupType === 'paragraph' && !currentContainer?.contents?.length
+}
+
+export function isBeginningOfSection(context: ParserContext) {
+    const currentContainer = getCurrentContainer(context)
+    return currentContainer.type === 'section' && !currentContainer.contents.length
+}
