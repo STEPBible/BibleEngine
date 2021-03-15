@@ -3,7 +3,7 @@ import {
     printCompactContainerStack,
     printFullContainerStack,
     getErrorMessageWithContextStackTrace,
-} from '../../functions/helpers.functions';
+} from '../../functions/logging.functions';
 
 const CONTEXT: ParserContext = {
     books: [],

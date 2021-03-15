@@ -1,6 +1,6 @@
 import { IBibleReferenceRange } from '@bible-engine/core';
 import { ParserContext } from '../entities/ParserContext';
-import { ParserStackItem } from '../types';
+import { OsisParseError } from '../errors/OsisParseError';
 
 export function getParsedBookChapterVerseRef(osisRef: string): IBibleReferenceRange {
     const firstVerse = osisRef.split('-')[0].split('.');
@@ -20,28 +20,10 @@ export function getParsedBookChapterVerseRef(osisRef: string): IBibleReferenceRa
     return range;
 }
 
-export function printCompactContainerStack(stack: ParserStackItem[]) {
-    return stack.map((container) => (container as any).groupType || container.type).join(' > ');
+export function getCurrentContainer(context: ParserContext) {
+    if (!context.contentContainerStack.length) {
+        throw new OsisParseError(`missing root container`, context);
+    }
+    return context.contentContainerStack[context.contentContainerStack.length - 1];
 }
 
-export function printFullContainerStack(stack: ParserStackItem[]) {
-    let trace = '';
-    stack.forEach((container: any, index) => {
-        const indent = ' '.repeat((index + 1) * 2);
-        const identifier = container.title || container.groupType || container.type;
-        trace += `\n${indent}${identifier}`;
-    });
-    return trace + '\n';
-}
-
-export function getErrorMessageWithContextStackTrace(message: string, context: ParserContext) {
-    return `${message} in ${getCurrentVerse(context)}
-
-container stack:${printFullContainerStack(context.contentContainerStack)}`;
-}
-
-export function getCurrentVerse(context: ParserContext) {
-    return `${context.currentBook && context.currentBook.osisId} ${context.currentChapter}${
-        context.version?.chapterVerseSeparator || ':'
-    }${context.currentVerse}`;
-}
