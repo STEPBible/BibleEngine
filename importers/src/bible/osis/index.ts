@@ -22,26 +22,22 @@ import {
     OsisXmlNodeType,
     OsisXmlNodeName,
 } from '../../shared/osisTypes';
-import { ParserContext, ITagWithType, TagType, OsisSection } from './types';
+import { ITagWithType, TagType, OsisSection } from './types';
 import Logger from '../../shared/Logger'
+import { ParserContext } from './entities/ParserContext'
 import {
     getParsedBookChapterVerseRef,
     getCurrentVerse,
     getErrorMessageWithContextStackTrace
 } from './functions/helpers.functions'
 import { parseStrongsNums } from './functions/strongs.functions';
-import { validateGroup } from './functions/validators.functions'
+import { stackHasParagraph, validateGroup } from './functions/validators.functions'
+import { updateContextWithTitleText } from './functions/titles.functions';
 
 const STRICT_MODE_ENABLED = true;
 
 export class OsisImporter extends BibleEngineImporter {
-    context: ParserContext = {
-        hierarchicalTagStack: [],
-        books: [],
-        contentContainerStack: [],
-        skipClosingTags: [],
-        sectionStack: [],
-    }
+    context = new ParserContext()
     hasSectionsInText: boolean
     hasParagraphs: boolean
 
@@ -74,13 +70,7 @@ export class OsisImporter extends BibleEngineImporter {
         const pParsing = new Promise<ParserContext>((resolve, reject) => {
             const xmlStream = parser(STRICT_MODE_ENABLED);
 
-            this.context = {
-                hierarchicalTagStack: [],
-                books: [],
-                contentContainerStack: [],
-                skipClosingTags: [],
-                sectionStack: [],
-            };
+            this.context = new ParserContext()
             xmlStream.ontext = (text: string) => this.parseTextNode(text, this.context);
             xmlStream.onopentag = (tag: any) => this.parseOpeningTag(tag, this.context);
             xmlStream.onclosetag = (tagName: OsisXmlNodeName) =>
@@ -938,27 +928,10 @@ export class OsisImporter extends BibleEngineImporter {
                 currentContainer.contents.push(group);
             } else currentContainer.contents.push(phrase);
             return;
-        } else if (this.isInsideNonCanonicalTitle()) {
-            // Strongs numbers inside section titles are not supported
-            delete context.strongsBuffer;
-            if (currentContainer.type !== OsisXmlNodeType.SECTION) {
-                const group = (currentContainer as any).groupType || ''
-                return this.logError(`
-                    can't set title to section: no section
-                    current container type: ${currentContainer.type} ${group}
-                    title text: ${text}
-                `);
-            }
-            if (currentTag.attributes.type === OsisXmlNodeType.TEXTUAL_NOTE) {
-                currentContainer.subTitle = trimmedText;
-            } else {
-                const styledText =
-                    currentTag.type === OsisXmlNodeName.DIVINE_NAME
-                        ? trimmedText.toUpperCase()
-                        : trimmedText;
-                if (currentContainer.title) currentContainer.title += ' ' + styledText;
-                else currentContainer.title = styledText;
-            }
+        }
+
+        if (this.isInsideNonCanonicalTitle()) {
+            updateContextWithTitleText(context, currentContainer, currentTag.type, trimmedText)
             return;
         }
 
