@@ -1,4 +1,4 @@
-import { getErrorMessageWithContextStackTrace } from '../functions/helpers.functions';
+import { getErrorMessageWithContextStackTrace } from '../functions/logging.functions';
 import { ParserContext } from './../entities/ParserContext';
 
 export class OsisParseError extends Error {

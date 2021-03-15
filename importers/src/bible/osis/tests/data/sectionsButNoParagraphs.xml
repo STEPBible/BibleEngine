@@ -12,6 +12,19 @@
 				<w lemma="strong:H0776">and the earth</w>. 
 				<verse eID="Gen.1.1"/>
 			</chapter>
+			<chapter sID="Gen.2" osisID="Gen.2">
+				<title type="sub" canonical="false">Descendants of Benjamin</title>
+				<lb/>
+				<verse sID="Gen.2.1" osisID="Gen.2.1"/>
+				<transChange>The sons of</transChange>
+				<w lemma="strong:H1144">Benjamin</w>
+				<transChange>were</transChange>
+				<w lemma="strong:H7969">three</w>: 
+				<w lemma="strong:H1106 a#=">Bela</w>
+				<w lemma="strong:H1071">and Becher</w>
+				<w lemma="strong:H3043">and Jediael</w>. 
+				<verse eID="Gen.2.1"/>
+			</chapter>
 		</div>
 	</osisText>
 </osis>

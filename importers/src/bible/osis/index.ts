@@ -27,12 +27,14 @@ import Logger from '../../shared/Logger'
 import { ParserContext } from './entities/ParserContext'
 import {
     getParsedBookChapterVerseRef,
-    getCurrentVerse,
-    getErrorMessageWithContextStackTrace
+    getCurrentContainer,
+    isBeginningOfSection,
+    isBeginningOfParagraph,
 } from './functions/helpers.functions'
 import { parseStrongsNums } from './functions/strongs.functions';
 import { stackHasParagraph, validateGroup } from './functions/validators.functions'
 import { updateContextWithTitleText } from './functions/titles.functions';
+import { getErrorMessageWithContextStackTrace, getCurrentVerse } from './functions/logging.functions';
 
 const STRICT_MODE_ENABLED = true;
 
@@ -298,7 +300,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.LINE: {
-                let currentContainer = this.getCurrentContainer(context);
+                let currentContainer = getCurrentContainer(context);
                 let lineNr =
                     currentContainer.type === 'group' && currentContainer.groupType === 'lineGroup'
                         ? currentContainer.contents.length + 1
@@ -324,7 +326,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.LINEBREAK: {
-                if (this.isBeginningOfSection()) {
+                if (isBeginningOfSection(context) || isBeginningOfParagraph(context)) {
                     // Ignore unnecessary line breaks at beginning of section,
                     // that occur immediately after a title
                     return;
@@ -358,7 +360,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.NOTE: {
                 const content: DocumentRoot = { type: 'root', contents: [] };
-                const currentContainer = this.getCurrentContainer(context);
+                const currentContainer = getCurrentContainer(context);
                 if (
                     currentContainer.type === OsisXmlNodeType.SECTION &&
                     tag.attributes.type !== OsisXmlNodeType.EXPLANATION &&
@@ -429,7 +431,7 @@ export class OsisImporter extends BibleEngineImporter {
                         groupType: 'title',
                         contents: [],
                     };
-                    const currentContainer = this.getCurrentContainer(context);
+                    const currentContainer = getCurrentContainer(context);
                     if (
                         currentContainer.type !== 'group' ||
                         currentContainer.groupType !== 'paragraph'
@@ -453,7 +455,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             // RADAR: currently only styling selah (type "x-selah") in italic
             case OsisXmlNodeName.FOREIGN_WORD: {
-                const currentContainer = this.getCurrentContainer(context);
+                const currentContainer = getCurrentContainer(context);
 
                 const groupItalic: IBibleContentGroup<'italic'> = {
                     type: 'group',
@@ -466,7 +468,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.TRANS_CHANGE: {
-                const currentContainer = this.getCurrentContainer(context);
+                const currentContainer = getCurrentContainer(context);
                 const groupTransChange: IBibleContentGroup<'translationChange'> = {
                     type: 'group',
                     groupType: 'translationChange',
@@ -478,7 +480,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.QUOTE: {
                 if (tag.attributes.marker) {
-                    const currentContainer = this.getCurrentContainer(context);
+                    const currentContainer = getCurrentContainer(context);
                     const markerPhrase: IBibleContentPhrase = {
                         type: 'phrase',
                         content: tag.attributes.marker,
@@ -508,7 +510,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.HIGHLIGHT: {
-                const currentContainer = this.getCurrentContainer(context);
+                const currentContainer = getCurrentContainer(context);
 
                 const groupEmphasis: IBibleContentGroup<'emphasis'> = {
                     type: 'group',
@@ -521,7 +523,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.DIVINE_NAME: {
-                const currentContainer = this.getCurrentContainer(context);
+                const currentContainer = getCurrentContainer(context);
                 if (!this.isInsideNonCanonicalTitle()) {
                     const groupDivineName: IBibleContentGroup<'divineName'> = {
                         type: 'group',
@@ -600,7 +602,7 @@ export class OsisImporter extends BibleEngineImporter {
             //     semantic information in BibleEngine) we leave this code here
             //     in case this can be implemented properly at a later stage
             if (currentTag.name === OsisXmlNodeName.QUOTE) {
-                const quoteContainer = this.getCurrentContainer(context);
+                const quoteContainer = getCurrentContainer(context);
                 if (
                     !quoteContainer ||
                     quoteContainer.type !== 'group' ||
@@ -685,7 +687,7 @@ export class OsisImporter extends BibleEngineImporter {
                     )
                         throw this.getError(`can't create verse span, verse number missing`)
 
-                    const currentContainer = this.getCurrentContainer(context);
+                    const currentContainer = getCurrentContainer(context);
                     for (
                         let emptyVerse = context.currentVerse + 1;
                         emptyVerse <= context.currentVerseJoinToVersionRef.versionVerseNum;
@@ -775,6 +777,9 @@ export class OsisImporter extends BibleEngineImporter {
                         throw this.getError(`unclean container stack while closing title`);
                     }
                 }
+                if (!this.hasParagraphs) {
+                    this.startNewParagraph(this.context)
+                }
                 break;
             }
             case OsisXmlNodeName.QUOTE: {
@@ -795,7 +800,7 @@ export class OsisImporter extends BibleEngineImporter {
                 //     throw this.getError(`unclean container stack while closing quote`);
                 // }
 
-                const currentContainer = this.getCurrentContainer(context);
+                const currentContainer = getCurrentContainer(context);
                 if (currentTag.attributes.marker)
                     currentContainer.contents.push({
                         type: 'phrase',
@@ -910,7 +915,7 @@ export class OsisImporter extends BibleEngineImporter {
             return;
         }
 
-        let currentContainer = this.getCurrentContainer(context);
+        let currentContainer = getCurrentContainer(context);
 
         if (this.isInsideNoteOrIntroduction()) {
             const phrase: DocumentPhrase = {
@@ -968,7 +973,7 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     startNewLineGroup() {
-        let currentContainer = this.getCurrentContainer(this.context);
+        let currentContainer = getCurrentContainer(this.context);
 
         const lineGroupGroup: IBibleContentGroup<'lineGroup'> = {
             type: 'group',
@@ -1002,14 +1007,14 @@ export class OsisImporter extends BibleEngineImporter {
         // close sections when the next one is started - this leads to this rather
         // complicated code where we look which kind of section is currently open in order
         // to determine if we close the section(s)
-        let currentContainer = this.getCurrentContainer(context);
+        let currentContainer = getCurrentContainer(context);
 
         // if a section starts, we close all still open groups (even if the file
         // isn't buggy, this can happen, since we sometimes auto open certain
         // groups)
         while (currentContainer.type !== 'section' && currentContainer.type !== 'root') {
             context.contentContainerStack.pop();
-            currentContainer = this.getCurrentContainer(context);
+            currentContainer = getCurrentContainer(context);
         }
         // => currentContainer is now either a section or the root node
         if (context.sectionStack.length) {
@@ -1031,7 +1036,7 @@ export class OsisImporter extends BibleEngineImporter {
                 );
 
                 context.contentContainerStack.pop();
-                currentContainer = this.getCurrentContainer(context);
+                currentContainer = getCurrentContainer(context);
             }
         }
 
@@ -1047,14 +1052,10 @@ export class OsisImporter extends BibleEngineImporter {
         context.sectionStack.push(elementType);
         currentContainer.contents.push(section);
         context.contentContainerStack.push(section);
-
-        if (!this.hasParagraphs) {
-            this.startNewParagraph(context)
-        }
     }
 
     startNewParagraph(context: ParserContext) {
-        let currentContainer = this.getCurrentContainer(context);
+        let currentContainer = getCurrentContainer(context);
         const paragraph: IBibleContentGroup<'paragraph'> = {
             type: 'group',
             groupType: 'paragraph',
@@ -1065,7 +1066,7 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     closeCurrentParagraph(context: ParserContext) {
-        const paragraph = this.getCurrentContainer(context);
+        const paragraph = getCurrentContainer(context);
         if (!paragraph || paragraph.type !== 'group' || paragraph.groupType !== 'paragraph') {
             const errorMsg = `can't close paragraph: no paragraph on end of stack`;
             throw this.getError(errorMsg);
@@ -1092,15 +1093,10 @@ export class OsisImporter extends BibleEngineImporter {
         return context.hierarchicalTagStack[context.hierarchicalTagStack.length - 1];
     }
 
-    getCurrentContainer(context: ParserContext) {
-        if (!context.contentContainerStack.length) {
-            throw this.getError(`missing root container`);
-        }
-        return context.contentContainerStack[context.contentContainerStack.length - 1];
-    }
+
 
     getCurrentPhrase(context: ParserContext, createIfMissing = false) {
-        const currentContainer = this.getCurrentContainer(context);
+        const currentContainer = getCurrentContainer(context);
         if (
             currentContainer.type === 'section' ||
             currentContainer.type === 'group' ||
@@ -1123,7 +1119,7 @@ export class OsisImporter extends BibleEngineImporter {
                     throw this.getError(`
                         looking for phrase in an empty ${containerType}
                         current tag: ${JSON.stringify(this.getCurrentTag(context))}
-                        current container: ${JSON.stringify(this.getCurrentContainer(context).type)}
+                        current container: ${JSON.stringify(getCurrentContainer(context).type)}
                     `);
                 }
             }
@@ -1156,10 +1152,7 @@ export class OsisImporter extends BibleEngineImporter {
         )
     }
 
-    isBeginningOfSection() {
-        const currentContainer = this.getCurrentContainer(this.context)
-        return currentContainer.type === 'section' && !currentContainer.contents.length
-    }
+
 
     getError(msg: string) {
         return new Error(getErrorMessageWithContextStackTrace(msg, this.context))

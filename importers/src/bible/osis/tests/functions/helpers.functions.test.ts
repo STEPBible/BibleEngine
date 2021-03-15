@@ -1,6 +1,6 @@
 import { getEmptyParagraph, getEmptySection } from './../utils';
 import { ParserContext } from './../../entities/ParserContext';
-import { getCurrentContainer, isInsideEmptyParagraph } from '../../functions/helpers.functions';
+import { getCurrentContainer, isBeginningOfParagraph } from '../../functions/helpers.functions';
 
 describe('getCurrentContainer', () => {
     it('throws error if no valid current container', () => {
@@ -14,10 +14,10 @@ describe('getCurrentContainer', () => {
     })
 })
 
-describe('isInsideEmptyParagraph', () => {
+describe('isBeginningOfParagraph', () => {
     it('identifies empty paragraphs', () => {
         const context = new ParserContext()
         context.contentContainerStack.push(getEmptyParagraph())
-        expect(isInsideEmptyParagraph(context)).toBe(true)
+        expect(isBeginningOfParagraph(context)).toBe(true)
     })
 })
