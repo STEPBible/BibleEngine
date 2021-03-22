@@ -30,6 +30,7 @@ import {
     getCurrentContainer,
     isBeginningOfSection,
     isBeginningOfParagraph,
+    isInsideDocumentHeader,
 } from './functions/helpers.functions'
 import { parseStrongsNums } from './functions/strongs.functions';
 import { stackHasParagraph, validateGroup } from './functions/validators.functions'
@@ -425,6 +426,9 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.TITLE: {
+                if (isInsideDocumentHeader(context)) {
+                    break;
+                }
                 if (tag.attributes.canonical === 'true') {
                     const titleGroup: IBibleContentGroup<'title'> = {
                         type: 'group',
@@ -771,6 +775,9 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.TITLE: {
+                if (isInsideDocumentHeader(context)) {
+                    return
+                }
                 if (currentTag.attributes.canonical === 'true') {
                     const title = context.contentContainerStack.pop();
                     if (!title || title.type !== 'group' || title.groupType !== 'title') {

@@ -1,4 +1,5 @@
 import { IBibleReferenceRange } from '@bible-engine/core';
+import { OsisXmlNodeName } from '../../../shared/osisTypes';
 import { ParserContext } from '../entities/ParserContext';
 import { OsisParseError } from '../errors/OsisParseError';
 
@@ -35,4 +36,8 @@ export function isBeginningOfParagraph(context: ParserContext) {
 export function isBeginningOfSection(context: ParserContext) {
     const currentContainer = getCurrentContainer(context)
     return currentContainer.type === 'section' && !currentContainer.contents.length
+}
+
+export function isInsideDocumentHeader(context: ParserContext) {
+    return context.hierarchicalTagStack.find((tag) => tag.name === OsisXmlNodeName.OSIS_HEADER)
 }

@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <osis>
 	<osisText osisIDWork="NASB_th" osisRefWork="bible" xml:lang="en" canonical="true">
+		<header>
+			<work osisWork="NASB_th">
+				<title>New American Standard Bible (1995) with Strongs Numbers augmented for BDB</title>
+				<publisher>The Lockman Foundation</publisher>
+				<type type="OSIS">Bible</type>
+				<identifier type="OSIS">Bible.en.NASB_th.1995</identifier>
+				<source>Lockman</source>
+				<language type="IETF">en</language>
+				<scope>Gen-Rev</scope>
+				<refSystem>Bible.NRSV</refSystem>
+			</work>
+		</header>
 		<div type="book" osisID="Gen">
 			<chapter sID="Gen.1" osisID="Gen.1">
 				<title type="sub" canonical="false">The Creation</title>
