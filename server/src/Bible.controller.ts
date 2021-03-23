@@ -1,5 +1,5 @@
 import { JsonController, Post, Body, Get, Param, HttpError } from 'routing-controllers';
-import { Inject } from 'typedi';
+import { Inject, Service } from 'typedi';
 import { BibleEngine, IBibleBook, IBibleReferenceRangeQuery, IBibleVersion, stripUnnecessaryDataFromBibleBook, stripUnnecessaryDataFromBibleVersion } from '@bible-engine/core';
 
 class BibleEngineHttpError extends HttpError {
@@ -9,6 +9,7 @@ class BibleEngineHttpError extends HttpError {
     }
 }
 
+@Service()
 @JsonController('/bible')
 export class BibleController {
     @Inject('bibleEngine')

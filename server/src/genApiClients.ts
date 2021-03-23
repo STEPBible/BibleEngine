@@ -3,7 +3,7 @@ import { join } from 'path';
 import { writeFileSync, existsSync, mkdirSync } from 'fs';
 import * as Koa from 'koa';
 import { useKoaServer, getMetadataArgsStorage, MetadataArgsStorage } from 'routing-controllers';
-import { ControllerMetadataArgs } from 'routing-controllers/metadata/args/ControllerMetadataArgs';
+import { ControllerMetadataArgs } from 'routing-controllers/types/metadata/args/ControllerMetadataArgs';
 
 import { BibleController } from './Bible.controller';
 
