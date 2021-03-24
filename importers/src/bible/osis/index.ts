@@ -29,9 +29,12 @@ import {
     getParsedBookChapterVerseRef,
     getCurrentContainer,
     isBeginningOfSection,
-    isBeginningOfParagraph,
     isInsideDocumentHeader,
 } from './functions/helpers.functions'
+import {
+    isBeginningOfParagraph,
+    getEmptyParagraph,
+} from './functions/paragraphs.functions'
 import { parseStrongsNums } from './functions/strongs.functions';
 import { stackHasParagraph, validateGroup } from './functions/validators.functions'
 import { updateContextWithTitleText } from './functions/titles.functions';
@@ -440,11 +443,7 @@ export class OsisImporter extends BibleEngineImporter {
                         currentContainer.type !== 'group' ||
                         currentContainer.groupType !== 'paragraph'
                     ) {
-                        const paragraph: IBibleContentGroup<'paragraph'> = {
-                            type: 'group',
-                            groupType: 'paragraph',
-                            contents: [titleGroup],
-                        };
+                        const paragraph = getEmptyParagraph()
 
                         currentContainer.contents.push(paragraph);
                     } else currentContainer.contents.push(titleGroup);
@@ -992,12 +991,7 @@ export class OsisImporter extends BibleEngineImporter {
             currentContainer.type !== 'group' ||
             currentContainer.groupType !== 'paragraph'
         ) {
-            const paragraph: IBibleContentGroup<'paragraph'> = {
-                type: 'group',
-                groupType: 'paragraph',
-                contents: [lineGroupGroup],
-            };
-
+            const paragraph = getEmptyParagraph()
             currentContainer.contents.push(paragraph);
         } else currentContainer.contents.push(lineGroupGroup);
         this.context.contentContainerStack.push(lineGroupGroup);
@@ -1063,12 +1057,11 @@ export class OsisImporter extends BibleEngineImporter {
 
     startNewParagraph(context: ParserContext) {
         let currentContainer = getCurrentContainer(context);
-        const paragraph: IBibleContentGroup<'paragraph'> = {
-            type: 'group',
-            groupType: 'paragraph',
-            contents: [],
-        };
-        currentContainer.contents.push(paragraph);
+        if (isBeginningOfParagraph(context)) {
+            throw this.getError('Cannot start new paragraph inside a paragraph')
+        }
+        const paragraph = getEmptyParagraph()
+        currentContainer.contents.push(getEmptyParagraph());
         context.contentContainerStack.push(paragraph);
     }
 

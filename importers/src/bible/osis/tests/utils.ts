@@ -1,4 +1,4 @@
-import { BibleEngine, IBibleContentGroup, IBibleContentSection } from '@bible-engine/core';
+import { BibleEngine, IBibleContentSection } from '@bible-engine/core';
 import { ConnectionOptions } from 'typeorm';
 
 const CONNECTION_OPTIONS: ConnectionOptions = {
@@ -15,14 +15,6 @@ export const TEST_BIBLE_VERSION = {
 
 export const getBibleEngineTestInstance = () => {
     return new BibleEngine(CONNECTION_OPTIONS)
-}
-
-export const getEmptyParagraph = (): IBibleContentGroup<'paragraph'> => {
-    return {
-        type: 'group',
-        groupType: 'paragraph',
-        contents: [],
-    };
 }
 
 export const getEmptySection = (): IBibleContentSection => {

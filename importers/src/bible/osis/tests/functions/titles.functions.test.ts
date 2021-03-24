@@ -1,7 +1,8 @@
 import { OsisXmlNodeName, OsisXmlNodeType } from '../../../../shared/osisTypes'
 import { ParserContext } from '../../entities/ParserContext'
 import { updateContextWithTitleText } from '../../functions/titles.functions'
-import { getEmptyParagraph, getEmptySection } from '../utils';
+import { getEmptySection } from '../utils';
+import { getEmptyParagraph } from '../../functions/paragraphs.functions';
 
 const TITLE_TEXT = 'some text'
 
