@@ -11,8 +11,9 @@ export function getParsedBookChapterVerseRef(osisRef: string): IBibleReferenceRa
     if (firstVerse[2]) range.versionVerseNum = +firstVerse[2];
     const hasMultipleVerses = osisRef.split('-').length === 2;
     if (hasMultipleVerses) {
-        const secondVerse = osisRef.split('-')[1];
-        range.versionVerseEndNum = Number(secondVerse.split('.')[2]);
+        const secondVerse = osisRef.split('-')[1].split('.');
+        if(secondVerse[1]) range.versionChapterEndNum = Number(secondVerse[1]);
+        if(secondVerse[2]) range.versionVerseEndNum = Number(secondVerse[2]);
     }
     return range;
 }
