@@ -24,5 +24,5 @@ container stack:${printFullContainerStack(context.contentContainerStack)}`;
 export function getCurrentVerse(context: ParserContext) {
     return `${context.currentBook && context.currentBook.osisId} ${context.currentChapter}${
         context.version?.chapterVerseSeparator || ':'
-    }${context.currentVerse}`;
+    }${context.currentVerse} ${context.version?.uid || ''}`;
 }

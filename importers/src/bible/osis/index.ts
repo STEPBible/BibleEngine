@@ -1,10 +1,10 @@
+import { startNewSection } from './functions/sections.functions';
 import path from 'path';
 import { readFileSync, createReadStream } from 'fs';
 import { decodeStream, encodeStream } from 'iconv-lite';
 import { parser } from 'sax';
 
 import {
-    IBibleContentSection,
     IBibleContentGroup,
     IBibleContentPhrase,
     IBibleCrossReference,
@@ -22,7 +22,7 @@ import {
     OsisXmlNodeType,
     OsisXmlNodeName,
 } from '../../shared/osisTypes';
-import { ITagWithType, TagType, OsisSection } from './types';
+import { ITagWithType, TagType } from './types';
 import Logger from '../../shared/Logger'
 import { ParserContext } from './entities/ParserContext'
 import {
@@ -274,7 +274,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeType.SECTION_MAJOR:
             case OsisXmlNodeType.SECTION:
             case OsisXmlNodeType.SECTION_SUB: {
-                this.startNewSection(context, elementType)
+                startNewSection(context, elementType)
                 break;
             }
             case OsisXmlNodeName.SWORD_PILCROW: {
@@ -452,7 +452,7 @@ export class OsisImporter extends BibleEngineImporter {
                 } else if (!this.hasSectionsInText) {
                     // Since titles should always be attached to a section,
                     // versions with titles but not sections need artifical sections
-                    this.startNewSection(context, OsisXmlNodeType.SECTION)
+                    startNewSection(context, OsisXmlNodeType.SECTION)
                 }
                 // section title is handled in parseTextNode
                 break;
@@ -784,9 +784,6 @@ export class OsisImporter extends BibleEngineImporter {
                         throw this.getError(`unclean container stack while closing title`);
                     }
                 }
-                if (!this.hasParagraphs) {
-                    startNewParagraph(this.context)
-                }
                 break;
             }
             case OsisXmlNodeName.QUOTE: {
@@ -951,7 +948,6 @@ export class OsisImporter extends BibleEngineImporter {
             if (this.hasParagraphs) {
                 throw this.getError(`text outside of paragraph: "${text}"`)
             }
-            startNewParagraph(context)
         }
 
         if (!context.currentChapter || !context.currentVerse) {
@@ -1005,58 +1001,6 @@ export class OsisImporter extends BibleEngineImporter {
         const lineGroup = this.context.contentContainerStack.pop();
         if (!lineGroup || lineGroup.type !== 'group' || lineGroup.groupType !== 'lineGroup')
             throw this.getError(`unclean container stack while closing lineGroup`);
-    }
-
-    startNewSection(context: ParserContext, elementType: OsisSection) {
-        // since we have some osis files where subSections are ended too early, we only
-        // close sections when the next one is started - this leads to this rather
-        // complicated code where we look which kind of section is currently open in order
-        // to determine if we close the section(s)
-        let currentContainer = getCurrentContainer(context);
-
-        // if a section starts, we close all still open groups (even if the file
-        // isn't buggy, this can happen, since we sometimes auto open certain
-        // groups)
-        while (currentContainer.type !== 'section' && currentContainer.type !== 'root') {
-            context.contentContainerStack.pop();
-            currentContainer = getCurrentContainer(context);
-        }
-        // => currentContainer is now either a section or the root node
-        if (context.sectionStack.length) {
-            const sectionOrder = [
-                OsisXmlNodeType.SECTION_MAJOR,
-                OsisXmlNodeType.SECTION,
-                OsisXmlNodeType.SECTION_SUB,
-            ];
-            const elementSectionOsisLevel = sectionOrder.indexOf(elementType);
-            let currentSectionOsisLevel = sectionOrder.indexOf(
-                context.sectionStack[context.sectionStack.length - 1]
-            );
-
-            while (elementSectionOsisLevel <= currentSectionOsisLevel) {
-                context.sectionStack.pop();
-                // also works when sectionStack is empty
-                currentSectionOsisLevel = sectionOrder.indexOf(
-                    context.sectionStack[context.sectionStack.length - 1]
-                );
-
-                context.contentContainerStack.pop();
-                currentContainer = getCurrentContainer(context);
-            }
-        }
-
-        if (currentContainer.type !== 'root' && currentContainer.type !== 'section')
-            throw this.getError(`sections can only start within sections or at root`);
-
-        const section: IBibleContentSection = {
-            type: 'section',
-            level: context.sectionStack.length,
-            contents: [],
-        };
-
-        context.sectionStack.push(elementType);
-        currentContainer.contents.push(section);
-        context.contentContainerStack.push(section);
     }
 
     closeCurrentParagraph(context: ParserContext) {

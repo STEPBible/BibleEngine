@@ -5,12 +5,14 @@ import { getEmptyParagraph } from '../../functions/paragraphs.functions';
 
 describe('getCurrentContainer', () => {
     it('throws error if no valid current container', () => {
-        const context = new ParserContext()
-        expect(() => { getCurrentContainer(context) }).toThrowError()
-    })
+        const context = new ParserContext();
+        expect(() => {
+            getCurrentContainer(context);
+        }).toThrowError();
+    });
     it('grabs the last item on the container stack', () => {
-        const context = new ParserContext()
-        context.contentContainerStack.push(getEmptyParagraph(), getEmptySection())
-        expect(getCurrentContainer(context).type).toBe('section')
-    })
-})
+        const context = new ParserContext();
+        context.contentContainerStack.push(getEmptyParagraph(), getEmptySection());
+        expect(getCurrentContainer(context).type).toBe('section');
+    });
+});

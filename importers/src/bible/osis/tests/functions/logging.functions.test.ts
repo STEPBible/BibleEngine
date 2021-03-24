@@ -56,7 +56,7 @@ describe('getErrorMessageWithContextStackTrace', () => {
     it('prints a message with context and a stack trace', () => {
         const print = getErrorMessageWithContextStackTrace('something cool happened', CONTEXT);
         expect(print).toBe(
-            `something cool happened in Gen 1:1
+            `something cool happened in Gen 1:1 ESV
 
 container stack:
   root
