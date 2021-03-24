@@ -34,6 +34,7 @@ import {
 import {
     isBeginningOfParagraph,
     getEmptyParagraph,
+    startNewParagraph,
 } from './functions/paragraphs.functions'
 import { parseStrongsNums } from './functions/strongs.functions';
 import { stackHasParagraph, validateGroup } from './functions/validators.functions'
@@ -278,7 +279,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.SWORD_PILCROW: {
                 if (tag.isSelfClosing && tag.attributes.sID) {
-                    this.startNewParagraph(context)
+                    startNewParagraph(context)
                     break;
                 }
                 if (tag.isSelfClosing && tag.attributes.eID) {
@@ -288,7 +289,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.PARAGRAPH:
             case OsisXmlNodeType.PARAGRAPH: {
-                this.startNewParagraph(context)
+                startNewParagraph(context)
                 break;
             }
             case OsisXmlNodeName.LINE_GROUP: {
@@ -784,7 +785,7 @@ export class OsisImporter extends BibleEngineImporter {
                     }
                 }
                 if (!this.hasParagraphs) {
-                    this.startNewParagraph(this.context)
+                    startNewParagraph(this.context)
                 }
                 break;
             }
@@ -947,7 +948,10 @@ export class OsisImporter extends BibleEngineImporter {
         }
 
         if (!stackHasParagraph(context, currentContainer)) {
-            throw this.getError(`text outside of paragraph: "${text}"`)
+            if (this.hasParagraphs) {
+                throw this.getError(`text outside of paragraph: "${text}"`)
+            }
+            startNewParagraph(context)
         }
 
         if (!context.currentChapter || !context.currentVerse) {
@@ -1055,16 +1059,6 @@ export class OsisImporter extends BibleEngineImporter {
         context.contentContainerStack.push(section);
     }
 
-    startNewParagraph(context: ParserContext) {
-        let currentContainer = getCurrentContainer(context);
-        if (isBeginningOfParagraph(context)) {
-            throw this.getError('Cannot start new paragraph inside a paragraph')
-        }
-        const paragraph = getEmptyParagraph()
-        currentContainer.contents.push(getEmptyParagraph());
-        context.contentContainerStack.push(paragraph);
-    }
-
     closeCurrentParagraph(context: ParserContext) {
         const paragraph = getCurrentContainer(context);
         if (!paragraph || paragraph.type !== 'group' || paragraph.groupType !== 'paragraph') {
@@ -1092,8 +1086,6 @@ export class OsisImporter extends BibleEngineImporter {
     getCurrentTag(context: ParserContext) {
         return context.hierarchicalTagStack[context.hierarchicalTagStack.length - 1];
     }
-
-
 
     getCurrentPhrase(context: ParserContext, createIfMissing = false) {
         const currentContainer = getCurrentContainer(context);
@@ -1151,8 +1143,6 @@ export class OsisImporter extends BibleEngineImporter {
                 (!tag.attributes.canonical || tag.attributes.canonical === 'false')
         )
     }
-
-
 
     getError(msg: string) {
         return new Error(getErrorMessageWithContextStackTrace(msg, this.context))
