@@ -8,27 +8,26 @@ export function validateGroup(
     groupName: ContentGroupType,
     context: ParserContext
 ) {
-    const type: string = ((topStackItem as any)?.groupType || topStackItem?.type)
-    if (
-        !type ||
-        type !== groupName
-    ) {
-        throw new OsisParseError(`unclean container stack while closing "${groupName}" group. Found "${type}"`, context)
+    const type: string = (topStackItem as any)?.groupType || topStackItem?.type;
+    if (!type || type !== groupName) {
+        throw new OsisParseError(
+            `unclean container stack while closing "${groupName}" group. Found "${type}"`,
+            context
+        );
     }
 }
 
-export function stackHasParagraph(
-    context: ParserContext,
-    currentContainer: ParserStackItem
-) {
-    return context.contentContainerStack.findIndex((container) => {
-        if (container.type === 'group' && container.groupType === 'paragraph') return true;
+export function stackHasParagraph(context: ParserContext, currentContainer: ParserStackItem) {
+    return (
+        context.contentContainerStack.findIndex((container) => {
+            if (container.type === 'group' && container.groupType === 'paragraph') return true;
 
-        if (container !== currentContainer) {
-            const lastContent = container.contents[container.contents.length - 1];
-            if (lastContent.type === 'group' && lastContent.groupType === 'paragraph')
-                return true;
-        }
-        return false;
-    }) !== -1
+            if (container !== currentContainer) {
+                const lastContent = container.contents[container.contents.length - 1];
+                if (lastContent.type === 'group' && lastContent.groupType === 'paragraph')
+                    return true;
+            }
+            return false;
+        }) !== -1
+    );
 }

@@ -18,13 +18,10 @@ export function updateContextWithTitleText(
         currentContainer.subTitle = text;
         return;
     }
-    const styledText =
-    tagType === OsisXmlNodeName.DIVINE_NAME
-            ? text.toUpperCase()
-            : text;
+    const styledText = tagType === OsisXmlNodeName.DIVINE_NAME ? text.toUpperCase() : text;
     if (currentContainer.title) {
         currentContainer.title += ' ' + styledText;
-        return
+        return;
     }
     currentContainer.title = styledText;
 }

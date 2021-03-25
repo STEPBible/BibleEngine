@@ -29,10 +29,10 @@ export function getCurrentContainer(context: ParserContext) {
 }
 
 export function isBeginningOfSection(context: ParserContext) {
-    const currentContainer = getCurrentContainer(context)
-    return currentContainer.type === 'section' && !currentContainer.contents.length
+    const currentContainer = getCurrentContainer(context);
+    return currentContainer.type === 'section' && !currentContainer.contents.length;
 }
 
 export function isInsideDocumentHeader(context: ParserContext) {
-    return context.hierarchicalTagStack.find((tag) => tag.name === OsisXmlNodeName.OSIS_HEADER)
+    return context.hierarchicalTagStack.find((tag) => tag.name === OsisXmlNodeName.OSIS_HEADER);
 }

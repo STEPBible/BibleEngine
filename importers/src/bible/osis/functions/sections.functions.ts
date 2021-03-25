@@ -55,4 +55,4 @@ export const startNewSection = (context: ParserContext, elementType: OsisSection
     context.sectionStack.push(elementType);
     currentContainer.contents.push(section);
     context.contentContainerStack.push(section);
-}
+};
