@@ -68,12 +68,12 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     async getContextFromXml(xml: string): Promise<ParserContext> {
-        this.context.hasSectionsInSourceText = xml.includes(`type="section"`);
-        this.context.hasParagraphsInSourceText = xml.includes('<p>');
         // Since the stream can't be canceled, we need to wrap events in a guard
         let encounteredError = false;
         const pParsing = new Promise<ParserContext>((resolve, reject) => {
             this.context = new ParserContext();
+            this.context.hasSectionsInSourceText = xml.includes(`type="section"`);
+            this.context.hasParagraphsInSourceText = xml.includes('<p>');
             const xmlStream = parser(STRICT_MODE_ENABLED);
             xmlStream.ontext = (text: string) => {
                 if (encounteredError) {

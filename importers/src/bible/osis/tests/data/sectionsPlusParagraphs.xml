@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osis>
+    <osisText osisIDWork="NASB_th" osisRefWork="bible" xml:lang="en" canonical="true">
+        <div type="book" osisID="Gen">
+            <chapter osisID="Gen.1">
+                <div type="section">
+                    <title>The Creation of the World</title>
+                    <p>
+                    In the
+                        <w lemma="strong:H07225">
+                        beginning
+                        </w>
+                    ,
+                        <w lemma="strong:H00430">
+                        God
+                        </w>
+                        <w lemma="strong:H01254">
+                        created
+                        </w>
+                    the
+                        <w lemma="strong:H08064">
+                        heavens
+                        </w>
+                    and the
+                        <w lemma="strong:H00776">
+                        earth
+                        </w>
+                    .
+                    </p>
+                </div>
+            </chapter>
+        </div>
+    </osisText>
+</osis>
