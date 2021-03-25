@@ -70,19 +70,37 @@ export class OsisImporter extends BibleEngineImporter {
     async getContextFromXml(xml: string): Promise<ParserContext> {
         this.context.hasSectionsInSourceText = xml.includes(`type="section"`);
         this.context.hasParagraphsInSourceText = xml.includes('<p>');
+        // Since the stream can't be canceled, we need to wrap events in a guard
+        let encounteredError = false;
         const pParsing = new Promise<ParserContext>((resolve, reject) => {
-            const xmlStream = parser(STRICT_MODE_ENABLED);
-
             this.context = new ParserContext();
-            xmlStream.ontext = (text: string) => this.parseTextNode(text, this.context);
-            xmlStream.onopentag = (tag: any) => this.parseOpeningTag(tag, this.context);
-            xmlStream.onclosetag = (tagName: OsisXmlNodeName) =>
+            const xmlStream = parser(STRICT_MODE_ENABLED);
+            xmlStream.ontext = (text: string) => {
+                if (encounteredError) {
+                    return;
+                }
+                this.parseTextNode(text, this.context);
+            };
+            xmlStream.onopentag = (tag: any) => {
+                if (encounteredError) {
+                    return;
+                }
+                this.parseOpeningTag(tag, this.context);
+            };
+            xmlStream.onclosetag = (tagName: OsisXmlNodeName) => {
+                if (encounteredError) {
+                    return;
+                }
                 this.parseClosingTag(tagName, this.context);
+            };
             xmlStream.onerror = (error) => {
-                xmlStream.close();
+                encounteredError = true;
                 reject(error);
             };
             xmlStream.onend = () => {
+                if (encounteredError) {
+                    return;
+                }
                 resolve(this.context);
             };
             xmlStream.write(xml);
@@ -94,6 +112,7 @@ export class OsisImporter extends BibleEngineImporter {
             context = await pParsing;
             return context;
         } catch (error) {
+            encounteredError = true;
             throw error;
         }
     }
@@ -115,7 +134,7 @@ export class OsisImporter extends BibleEngineImporter {
         return 'OSIS';
     }
 
-    async parseOpeningTag(tag: OsisXmlNode, context: ParserContext) {
+    parseOpeningTag(tag: OsisXmlNode, context: ParserContext) {
         let elementType: TagType = tag.name;
         // the following also means that only `div` tags without a type will
         // have the `DIVISION` type
