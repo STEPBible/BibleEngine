@@ -24,7 +24,7 @@ export function stackHasParagraph(context: ParserContext, currentContainer: Pars
 
             if (container !== currentContainer) {
                 const lastContent = container.contents[container.contents.length - 1];
-                if (lastContent.type === 'group' && lastContent.groupType === 'paragraph')
+                if (lastContent?.type === 'group' && lastContent?.groupType === 'paragraph')
                     return true;
             }
             return false;

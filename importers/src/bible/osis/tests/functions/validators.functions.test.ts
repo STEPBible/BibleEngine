@@ -1,6 +1,8 @@
 import { IBibleContentGroup } from '@bible-engine/core';
 import { ParserContext } from '../../entities/ParserContext';
+import { getEmptyParagraph } from '../../functions/paragraphs.functions';
 import { validateGroup, stackHasParagraph } from '../../functions/validators.functions';
+import { getEmptySection } from '../utils';
 
 describe('validateGroup', () => {
     const TOP_STACK_ITEM: IBibleContentGroup<'lineGroup'> = {
@@ -20,22 +22,20 @@ describe('validateGroup', () => {
 
 describe('stackHasParagraph', () => {
     it('finds a paragraph when one is in the stack', () => {
-        const PARAGRAPH: IBibleContentGroup<'paragraph'> = {
-            type: 'group',
-            groupType: 'paragraph',
-            contents: [],
-        };
+        const PARAGRAPH = getEmptyParagraph();
         const context = new ParserContext();
         context.contentContainerStack.push(PARAGRAPH);
         expect(stackHasParagraph(context, PARAGRAPH)).toBe(true);
     });
     it('finds a paragraph when one is in the stack', () => {
-        const PARAGRAPH: IBibleContentGroup<'paragraph'> = {
-            type: 'group',
-            groupType: 'paragraph',
-            contents: [],
-        };
+        const PARAGRAPH = getEmptyParagraph();
         const context = new ParserContext();
         expect(stackHasParagraph(context, PARAGRAPH)).toBe(false);
+    });
+    it(`safely ignores containers with no children`, () => {
+        const PARAGRAPH = getEmptyParagraph();
+        const context = new ParserContext();
+        context.contentContainerStack = [getEmptySection(), PARAGRAPH];
+        expect(stackHasParagraph(context, PARAGRAPH)).toBe(true);
     });
 });
