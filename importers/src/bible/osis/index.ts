@@ -953,7 +953,7 @@ export class OsisImporter extends BibleEngineImporter {
         }
 
         if (this.isInsideNonCanonicalTitle()) {
-            updateContextWithTitleText(context, currentContainer, currentTag.type, trimmedText);
+            updateContextWithTitleText(context, currentTag.type, trimmedText);
             return;
         }
 

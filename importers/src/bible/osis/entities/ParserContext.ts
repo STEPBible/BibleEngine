@@ -29,4 +29,6 @@ export class ParserContext {
         | OsisXmlNodeType.SECTION
         | OsisXmlNodeType.SECTION_SUB
     )[] = [];
+    hasSectionsInSourceText: boolean
+    hasParagraphsInSourceText: boolean
 }

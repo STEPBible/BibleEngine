@@ -25,8 +25,8 @@
 				<verse eID="Gen.1.1"/>
 			</chapter>
 			<chapter sID="Gen.2" osisID="Gen.2">
-				<title type="sub" canonical="false">Descendants of Benjamin</title>
-				<lb/>
+				<title type="sub" canonical="false">Morning Prayer of Trust in God.</title>
+				<title type="psalm" canonical="true">A Psalm of David, when he fled from Absalom his son.</title>
 				<verse sID="Gen.2.1" osisID="Gen.2.1"/>
 				<transChange>The sons of</transChange>
 				<w lemma="strong:H1144">Benjamin</w>

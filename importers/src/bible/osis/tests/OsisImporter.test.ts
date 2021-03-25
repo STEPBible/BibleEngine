@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 import { getBibleEngineTestInstance, TEST_BIBLE_VERSION } from './utils';
-import { OsisImporter } from '../../../../src';
-import { enBookMetadata } from './../../../metadata/index';
+import { OsisImporter } from '../../..';
+import { enBookMetadata } from '../../../metadata/index';
 import { IBibleContentSection } from '@bible-engine/core';
 
 const bibleEngine = getBibleEngineTestInstance();
@@ -15,14 +15,20 @@ describe('OSIS Parser', () => {
                 bookMeta: enBookMetadata,
                 versionMeta: TEST_BIBLE_VERSION,
             });
-
-            const xml = await importer.getXmlFromOptions({ sourcePath, bookMeta: enBookMetadata });
+            // try {
+            const xml = await importer.getXmlFromOptions({
+                sourcePath,
+                bookMeta: enBookMetadata,
+            });
             const context = await importer.getContextFromXml(xml);
             expect(context.books.length);
             const SECTION = context.books[0].contents[0] as IBibleContentSection;
             expect(SECTION.type).toBe('section');
             const PARAGRAPH: any = SECTION.contents[0];
             expect(PARAGRAPH.groupType).toBe('paragraph');
+            // } catch (error) {
+            //     console.log('caught in jest!');
+            // }
         });
     });
 });

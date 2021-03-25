@@ -1,3 +1,4 @@
+import { startNewParagraph } from './paragraphs.functions';
 import { IBibleContentSection } from '@bible-engine/core';
 import { OsisXmlNodeType } from '../../../shared/osisTypes';
 import { OsisParseError } from '../errors/OsisParseError';
@@ -55,4 +56,17 @@ export const startNewSection = (context: ParserContext, elementType: OsisSection
     context.sectionStack.push(elementType);
     currentContainer.contents.push(section);
     context.contentContainerStack.push(section);
+
+    if (!context.hasParagraphsInSourceText) {
+        startNewParagraph(context);
+    }
+};
+
+export const getCurrentSection = (context: ParserContext) => {
+    return context.contentContainerStack.find((container) => {
+        if (container.type === 'section') {
+            return true;
+        }
+        return false;
+    });
 };
