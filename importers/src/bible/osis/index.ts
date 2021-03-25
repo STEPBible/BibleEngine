@@ -31,6 +31,7 @@ import {
     isBeginningOfParagraph,
     getEmptyParagraph,
     startNewParagraph,
+    sourceTextHasParagraphs,
 } from './functions/paragraphs.functions';
 import { parseStrongsNums } from './functions/strongs.functions';
 import { stackHasParagraph, validateGroup } from './functions/validators.functions';
@@ -73,7 +74,7 @@ export class OsisImporter extends BibleEngineImporter {
         const pParsing = new Promise<ParserContext>((resolve, reject) => {
             this.context = new ParserContext();
             this.context.hasSectionsInSourceText = xml.includes(`type="section"`);
-            this.context.hasParagraphsInSourceText = xml.includes('<p>');
+            this.context.hasParagraphsInSourceText = sourceTextHasParagraphs(xml);
             const xmlStream = parser(STRICT_MODE_ENABLED);
             xmlStream.ontext = (text: string) => {
                 if (encounteredError) {

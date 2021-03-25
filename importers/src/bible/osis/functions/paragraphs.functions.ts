@@ -26,3 +26,7 @@ export const startNewParagraph = (context: ParserContext) => {
     currentContainer.contents.push(getEmptyParagraph());
     context.contentContainerStack.push(paragraph);
 };
+
+export const sourceTextHasParagraphs = (xml: string) => {
+    return xml.includes('<p>');
+};
