@@ -833,7 +833,6 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.TRANS_CHANGE: {
-                console.log('context.contentContainerStack', context.contentContainerStack);
                 const groupTransChange = context.contentContainerStack.pop();
                 validateGroup(groupTransChange, 'translationChange', context);
                 break;
