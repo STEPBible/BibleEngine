@@ -3,6 +3,7 @@ import {
     isBeginningOfParagraph,
     getEmptyParagraph,
     sourceTextHasParagraphs,
+    closeCurrentParagraph,
 } from './../../functions/paragraphs.functions';
 
 describe('isBeginningOfParagraph', () => {
@@ -17,5 +18,12 @@ describe('sourceTextHasParagraphs', () => {
     it('identifies normal paragraph tags', () => {
         const NORMAL_PARAGRAPH = '<p>';
         expect(sourceTextHasParagraphs(NORMAL_PARAGRAPH)).toBe(true);
+    });
+});
+
+describe('closeCurrentParagraph', () => {
+    it('throws an error if there is no paragraph on end of stack', () => {
+        const context = new ParserContext();
+        expect(() => closeCurrentParagraph(context)).toThrowError();
     });
 });

@@ -1,4 +1,5 @@
 import { IBibleContentGroup } from '@bible-engine/core';
+import Logger from '../../../shared/Logger';
 import { ParserContext } from '../entities/ParserContext';
 import { OsisParseError } from '../errors/OsisParseError';
 import { getCurrentContainer } from '../functions/helpers.functions';
@@ -25,6 +26,19 @@ export const startNewParagraph = (context: ParserContext) => {
     const paragraph = getEmptyParagraph();
     currentContainer.contents.push(getEmptyParagraph());
     context.contentContainerStack.push(paragraph);
+    return paragraph;
+};
+
+export const closeCurrentParagraph = (context: ParserContext) => {
+    const paragraph = getCurrentContainer(context);
+    if (!paragraph || paragraph.type !== 'group' || paragraph.groupType !== 'paragraph') {
+        const errorMsg = `can't close paragraph: no paragraph on end of stack`;
+        throw new OsisParseError(errorMsg, context);
+    }
+    if (!paragraph.contents?.length) {
+        Logger.warning('Attempting to close empty paragraph: possibly a parse error?');
+    }
+    return context.contentContainerStack.pop();
 };
 
 export const sourceTextHasParagraphs = (xml: string) => {
