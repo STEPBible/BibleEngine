@@ -1,3 +1,4 @@
+import { OsisXmlNodeName } from './../../../shared/osisTypes';
 import { IBibleContentGroup } from '@bible-engine/core';
 import Logger from '../../../shared/Logger';
 import { ParserContext } from '../entities/ParserContext';
@@ -24,7 +25,7 @@ export const startNewParagraph = (context: ParserContext) => {
         throw new OsisParseError('Cannot start new paragraph inside a paragraph', context);
     }
     const paragraph = getEmptyParagraph();
-    currentContainer.contents.push(getEmptyParagraph());
+    currentContainer.contents.push(paragraph);
     context.contentContainerStack.push(paragraph);
     return paragraph;
 };
@@ -42,5 +43,5 @@ export const closeCurrentParagraph = (context: ParserContext) => {
 };
 
 export const sourceTextHasParagraphs = (xml: string) => {
-    return xml.includes('<p>');
+    return xml.includes(`<${OsisXmlNodeName.PARAGRAPH}>`);
 };
