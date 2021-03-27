@@ -32,6 +32,7 @@ import {
     getEmptyParagraph,
     startNewParagraph,
     sourceTextHasParagraphs,
+    closeCurrentParagraph,
 } from './functions/paragraphs.functions';
 import { parseStrongsNums } from './functions/strongs.functions';
 import { stackHasParagraph, validateGroup } from './functions/validators.functions';
@@ -301,10 +302,7 @@ export class OsisImporter extends BibleEngineImporter {
                     startNewParagraph(context);
                     break;
                 }
-                if (tag.isSelfClosing && tag.attributes.eID) {
-                    this.closeCurrentParagraph(context);
-                    break;
-                }
+                break;
             }
             case OsisXmlNodeName.PARAGRAPH:
             case OsisXmlNodeType.PARAGRAPH: {
@@ -743,7 +741,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.PARAGRAPH:
             case OsisXmlNodeType.PARAGRAPH: {
-                this.closeCurrentParagraph(context);
+                closeCurrentParagraph(context);
                 break;
             }
             case OsisXmlNodeName.LINE: {
@@ -850,6 +848,15 @@ export class OsisImporter extends BibleEngineImporter {
                 }
                 break;
             }
+            case OsisXmlNodeName.SWORD_PILCROW: {
+                const isEndingParagraphMarker =
+                    currentTag.isSelfClosing && currentTag.attributes.eID
+                if (isEndingParagraphMarker) {
+                    closeCurrentParagraph(context);
+                    break;
+                }
+                break;
+            }
             case OsisXmlNodeType.BOOK_GROUP:
             case OsisXmlNodeName.CATCH_WORD:
             case OsisXmlNodeName.COLOPHON:
@@ -871,7 +878,6 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.REF_SYSTEM:
             case OsisXmlNodeName.RIGHTS:
             case OsisXmlNodeName.SWORD_MILESTONE:
-            case OsisXmlNodeName.SWORD_PILCROW:
             case OsisXmlNodeName.TEXTUAL_VARIATION:
             case OsisXmlNodeName.TYPE:
             case OsisXmlNodeName.REVISION_DESC:
@@ -961,6 +967,12 @@ export class OsisImporter extends BibleEngineImporter {
             if (this.context.hasParagraphsInSourceText) {
                 throw this.getError(`text outside of paragraph: "${text}"`);
             }
+            const hasNoStructureMarkup =
+                !this.context.hasParagraphsInSourceText &&
+                !this.context.hasParagraphsInSourceText;
+            if (hasNoStructureMarkup) {
+                currentContainer = startNewParagraph(context);
+            }
         }
 
         if (!context.currentChapter || !context.currentVerse) {
@@ -987,7 +999,6 @@ export class OsisImporter extends BibleEngineImporter {
                 context.currentVerseJoinToVersionRef
             );
         }
-
         currentContainer.contents.push(phrase);
     }
 
@@ -1011,16 +1022,6 @@ export class OsisImporter extends BibleEngineImporter {
         const lineGroup = this.context.contentContainerStack.pop();
         if (!lineGroup || lineGroup.type !== 'group' || lineGroup.groupType !== 'lineGroup')
             throw this.getError(`unclean container stack while closing lineGroup`);
-    }
-
-    closeCurrentParagraph(context: ParserContext) {
-        const paragraph = getCurrentContainer(context);
-        if (!paragraph || paragraph.type !== 'group' || paragraph.groupType !== 'paragraph') {
-            const errorMsg = `can't close paragraph: no paragraph on end of stack`;
-            throw this.getError(errorMsg);
-        } else {
-            context.contentContainerStack.pop();
-        }
     }
 
     closeCurrentBook(context: ParserContext, bookTag: OsisXmlNode) {

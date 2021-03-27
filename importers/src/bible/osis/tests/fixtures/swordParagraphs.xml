@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osis>
+    <osisText osisIDWork="SBLGNT" osisRefWork="bible" xml:lang="en" canonical="true">
+        <div type="book" osisID="Gen">
+            <chapter osisID="Gen.1">
+                <w lemma="strong:G0976" morph="robinson:N-NSF" src="1">
+                    Βίβλος
+                </w>
+                <div eID="gen5" type="x-p"/>
+                <div sID="gen6" type="x-p"/>
+                <w lemma="strong:G0011" morph="robinson:N-NSM-P" src="1">
+                    Ἀβραὰμ
+                </w>
+                <div eID="gen6" type="x-p"/>
+                <div sID="gen7" type="x-p"/>
+                <w lemma="strong:G1138" morph="robinson:N-NSM-P" src="8">
+                    Δαυὶδ
+                </w>
+                <div eID="gen7" type="x-p"/>
+            </chapter>
+        </div>
+    </osisText>
+</osis>
