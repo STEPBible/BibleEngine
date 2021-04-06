@@ -36,3 +36,8 @@ export function isBeginningOfSection(context: ParserContext) {
 export function isInsideDocumentHeader(context: ParserContext) {
     return context.hierarchicalTagStack.find((tag) => tag.name === OsisXmlNodeName.OSIS_HEADER);
 }
+
+export function isInsideIgnoredContent(context: ParserContext) {
+    const IGNORED_METADATA_TAGS = [OsisXmlNodeName.REVISION_DESC];
+    return !!context.hierarchicalTagStack.find((tag) => IGNORED_METADATA_TAGS.includes(tag.name));
+}

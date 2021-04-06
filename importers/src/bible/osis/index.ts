@@ -26,6 +26,7 @@ import {
     getCurrentContainer,
     isBeginningOfSection,
     isInsideDocumentHeader,
+    isInsideIgnoredContent,
 } from './functions/helpers.functions';
 import {
     isBeginningOfParagraph,
@@ -151,6 +152,10 @@ export class OsisImporter extends BibleEngineImporter {
             if (tag.attributes.eID) return;
         } else {
             context.hierarchicalTagStack.push(stackTag);
+        }
+
+        if (isInsideIgnoredContent(context)) {
+            return;
         }
 
         switch (elementType) {
@@ -300,7 +305,6 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.SWORD_PILCROW: {
                 if (tag.isSelfClosing && tag.attributes.sID) {
                     startNewParagraph(context);
-                    break;
                 }
                 break;
             }
@@ -604,6 +608,10 @@ export class OsisImporter extends BibleEngineImporter {
 
         if (!currentTag) throw this.getError(`can't find matching tag for closing tag ${tagName}`);
 
+        if (isInsideIgnoredContent(context)) {
+            return;
+        }
+
         let closeTagsAtEnd: OsisXmlNodeName[] = [];
         let startTagsAtEnd: OsisXmlNode[] = [];
 
@@ -850,7 +858,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeName.SWORD_PILCROW: {
                 const isEndingParagraphMarker =
-                    currentTag.isSelfClosing && currentTag.attributes.eID
+                    currentTag.isSelfClosing && currentTag.attributes.eID;
                 if (isEndingParagraphMarker) {
                     closeCurrentParagraph(context);
                     break;
@@ -904,6 +912,9 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     parseTextNode(text: string, context: ParserContext) {
+        if (isInsideIgnoredContent(context)) {
+            return;
+        }
         const trimmedText = text.trim();
         if (!trimmedText) {
             // Some strongs tags have empty content, since they represent

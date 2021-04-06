@@ -1,23 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <osis>
-    <osisText osisIDWork="SBLGNT" osisRefWork="bible" xml:lang="en" canonical="true">
-        <div type="book" osisID="Gen">
-            <chapter osisID="Gen.1">
-                <w lemma="strong:G0976" morph="robinson:N-NSF" src="1">
+	<osisText osisIDWork="SBLGNT" osisRefWork="bible" xml:lang="en" canonical="true">
+		<header>
+			<work osisWork="Comm.grc.SBLGNT+Apparatus.2010">
+				<title>The Greek New Testament: SBL Edition with Apparatus enhanced by Tyndale House</title>
+				<revisionDesc resp="dt">
+					<date>2014.8.1</date>
+					<p>DIB of Tyndale House Cambridge</p>
+				</revisionDesc>
+				<type type="OSIS">Bible</type>
+				<format type="x-MIME">text/xml</format>
+				<source>sblgthe.xml, 2014-10-18</source>
+				<language type="IETF">grc</language>
+				<rights>Copyright 2010 Logos Bible Software and the Society of Biblical Literature. See SBLGNT.com for license details.</rights>
+				<scope>Matt-Rev</scope>
+				<refSystem>Bible.NRSVA</refSystem>
+			</work>
+		</header>
+		<div type="book" osisID="Gen">
+			<chapter osisID="Gen.1">
+                <div sID="gen5" type="x-p"/>
+				<w lemma="strong:G0976" morph="robinson:N-NSF" src="1">
                     Βίβλος
                 </w>
-                <div eID="gen5" type="x-p"/>
-                <div sID="gen6" type="x-p"/>
-                <w lemma="strong:G0011" morph="robinson:N-NSM-P" src="1">
+				<div eID="gen5" type="x-p"/>
+				<div sID="gen6" type="x-p"/>
+				<w lemma="strong:G0011" morph="robinson:N-NSM-P" src="1">
                     Ἀβραὰμ
                 </w>
-                <div eID="gen6" type="x-p"/>
-                <div sID="gen7" type="x-p"/>
-                <w lemma="strong:G1138" morph="robinson:N-NSM-P" src="8">
+				<div eID="gen6" type="x-p"/>
+				<div sID="gen7" type="x-p"/>
+				<w lemma="strong:G1138" morph="robinson:N-NSM-P" src="8">
                     Δαυὶδ
                 </w>
-                <div eID="gen7" type="x-p"/>
-            </chapter>
-        </div>
-    </osisText>
+				<div eID="gen7" type="x-p"/>
+			</chapter>
+		</div>
+	</osisText>
 </osis>
