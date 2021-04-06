@@ -2,7 +2,7 @@ import { getCurrentContainer } from '../../functions/helpers.functions';
 import { ParserContext } from './../../entities/ParserContext';
 import {
     isBeginningOfParagraph,
-    getEmptyParagraph,
+    createParagraph,
     sourceTextHasParagraphs,
     closeCurrentParagraph,
     startNewParagraph,
@@ -11,7 +11,7 @@ import {
 describe('isBeginningOfParagraph', () => {
     it('identifies empty paragraphs', () => {
         const context = new ParserContext();
-        context.contentContainerStack.push(getEmptyParagraph());
+        context.contentContainerStack.push(createParagraph());
         expect(isBeginningOfParagraph(context)).toBe(true);
     });
 });

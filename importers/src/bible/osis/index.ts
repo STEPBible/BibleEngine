@@ -30,7 +30,7 @@ import {
 } from './functions/helpers.functions';
 import {
     isBeginningOfParagraph,
-    getEmptyParagraph,
+    createParagraph,
     startNewParagraph,
     sourceTextHasParagraphs,
     closeCurrentParagraph,
@@ -460,7 +460,7 @@ export class OsisImporter extends BibleEngineImporter {
                         currentContainer.type !== 'group' ||
                         currentContainer.groupType !== 'paragraph'
                     ) {
-                        const paragraph = getEmptyParagraph();
+                        const paragraph = createParagraph();
 
                         currentContainer.contents.push(paragraph);
                     } else currentContainer.contents.push(titleGroup);
@@ -1023,7 +1023,7 @@ export class OsisImporter extends BibleEngineImporter {
         };
 
         if (currentContainer.type !== 'group' || currentContainer.groupType !== 'paragraph') {
-            const paragraph = getEmptyParagraph();
+            const paragraph = createParagraph();
             currentContainer.contents.push(paragraph);
         } else currentContainer.contents.push(lineGroupGroup);
         this.context.contentContainerStack.push(lineGroupGroup);

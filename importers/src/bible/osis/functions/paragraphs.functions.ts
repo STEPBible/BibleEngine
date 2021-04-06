@@ -11,7 +11,7 @@ export function isBeginningOfParagraph(context: ParserContext) {
     return currentContainer?.groupType === 'paragraph' && !currentContainer?.contents?.length;
 }
 
-export const getEmptyParagraph = (): IBibleContentGroup<'paragraph'> => {
+export const createParagraph = (): IBibleContentGroup<'paragraph'> => {
     return {
         type: 'group',
         groupType: 'paragraph',
@@ -24,7 +24,7 @@ export const startNewParagraph = (context: ParserContext) => {
     if (stackHasParagraph(context, currentContainer)) {
         throw new OsisParseError('Cannot start new paragraph inside a paragraph', context);
     }
-    const paragraph = getEmptyParagraph();
+    const paragraph = createParagraph();
     currentContainer.contents.push(paragraph);
     context.contentContainerStack.push(paragraph);
     return paragraph;

@@ -5,7 +5,8 @@ import {
     getErrorMessageWithContextStackTrace,
 } from '../../functions/logging.functions';
 
-const CONTEXT: ParserContext = {
+const CONTEXT = new ParserContext();
+Object.assign(CONTEXT, {
     books: [],
     sectionStack: [],
     skipClosingTags: [],
@@ -30,7 +31,7 @@ const CONTEXT: ParserContext = {
     },
     currentChapter: 1,
     currentVerse: 1,
-};
+});
 
 describe('getPrintedContainerStack', () => {
     it('prints out the context, including specific group types', () => {
