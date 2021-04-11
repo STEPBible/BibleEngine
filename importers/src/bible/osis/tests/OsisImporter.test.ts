@@ -25,6 +25,6 @@ describe('OSIS Parser', () => {
     it('treates Sword module paragraph markers as normal paragraphs', async () => {
         const sourcePath = resolve(__dirname) + '/fixtures/swordParagraphs.xml';
         const context = await getContextFromSource(sourcePath);
-        expect(context.contentContainerStack).toStrictEqual(PARSED_SWORD_PARAGRAPHS);;
+        expect(context.contentContainerStack).toStrictEqual(PARSED_SWORD_PARAGRAPHS);
     });
 });

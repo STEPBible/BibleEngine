@@ -26,7 +26,7 @@ describe('sourceTextHasParagraphs', () => {
 describe('startNewParagraph', () => {
     it('links the new paragraph to both the container and the content stack', () => {
         const context = new ParserContext();
-        context.contentContainerStack = [{ type: 'root', contents: [] }];;
+        context.contentContainerStack = [{ type: 'root', contents: [] }];
         startNewParagraph(context);
         const currentContainer: any = getCurrentContainer(context);
         expect(isBeginningOfParagraph(context)).toBe(true);

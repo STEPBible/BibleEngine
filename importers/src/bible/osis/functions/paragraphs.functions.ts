@@ -37,7 +37,7 @@ export const closeCurrentParagraph = (context: ParserContext) => {
         throw new OsisParseError(errorMsg, context);
     }
     if (!paragraph.contents?.length) {
-        Logger.warning('Attempting to close empty paragraph: possibly a parse error?');
+        Logger.warning('Attempting to close empty paragraph: possibly a parse error?', context);
     }
     return context.contentContainerStack.pop();
 };

@@ -21,6 +21,10 @@ export function getErrorMessageWithContextStackTrace(message: string, context: P
 container stack:${printFullContainerStack(context.contentContainerStack)}`;
 }
 
+export function getErrorMessageWithContext(msg: string, context: ParserContext) {
+    return `${msg} in ${getCurrentVerse(context)}`;
+}
+
 export function getCurrentVerse(context: ParserContext) {
     return `${context.currentBook && context.currentBook.osisId} ${context.currentChapter}${
         context.version?.chapterVerseSeparator || ':'
