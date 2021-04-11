@@ -1,4 +1,4 @@
-import { getEmptyParagraph } from './../../functions/paragraphs.functions';
+import { createParagraph } from './../../functions/paragraphs.functions';
 import { OsisXmlNodeName, OsisXmlNodeType } from '../../../../shared/osisTypes';
 import { ParserContext } from '../../entities/ParserContext';
 import { updateContextWithTitleText } from '../../functions/titles.functions';
@@ -16,7 +16,7 @@ describe('updateContextWithTitleText', () => {
     });
     it('throws an error if tries to assign title to anything other than a section', () => {
         const context = new ParserContext();
-        context.contentContainerStack = [getEmptyParagraph()];
+        context.contentContainerStack = [createParagraph()];
         expect(() => {
             updateContextWithTitleText(context, OsisXmlNodeType.TEXTUAL_NOTE, '');
         }).toThrowError();
