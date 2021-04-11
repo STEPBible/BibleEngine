@@ -138,7 +138,7 @@ export const esBookMetdata: ImporterBookMetadata = new Map([
     ['Rev', { abbreviation: 'Apocalipsis', title: 'Apocalipsis', number: 66 }],
 ]);
 
-export const frBookMetdata: ImporterBookMetadata = new Map([
+export const frBookMetadata: ImporterBookMetadata = new Map([
     ['Gen', { abbreviation: 'Ge.', title: 'Genèse', number: 1 }],
     ['Exod', { abbreviation: 'Ex.', title: 'Exode', number: 2 }],
     ['Lev', { abbreviation: 'Lé.', title: 'Lévitique', number: 3 }],
