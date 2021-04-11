@@ -7,7 +7,7 @@ import {
     IBibleContentGroup,
     IBibleContent,
     IBibleCrossReference,
-    IBibleReference
+    IBibleReference,
 } from '@bible-engine/core';
 import { OsisXmlNodeName, OsisXmlNodeType, OsisXmlNode } from '../../shared/osisTypes';
 
@@ -19,7 +19,7 @@ export interface ITagWithType extends OsisXmlNode {
 export type ParserStackItem =
     | { type: 'root'; contents: IBibleContent[] }
     | IBibleContentSection
-    | IBibleContentGroup<ContentGroupType>
+    | IBibleContentGroup<ContentGroupType>;
 
 /**
  * The following `IOsis...` interfaces can be used to do type discrimination by using the type
@@ -97,4 +97,4 @@ export type OsisTag =
 export type OsisSection =
     | OsisXmlNodeType.SECTION
     | OsisXmlNodeType.SECTION_SUB
-    | OsisXmlNodeType.SECTION_MAJOR
+    | OsisXmlNodeType.SECTION_MAJOR;

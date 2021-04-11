@@ -3,7 +3,7 @@ import {
     BookWithContentForInput,
     IBibleBook,
     IBibleCrossReference,
-    IBibleReference
+    IBibleReference,
 } from '@bible-engine/core';
 import { OsisXmlNodeType } from '../../../shared/osisTypes';
 import { ParserStackItem, TagType, ITagWithType } from './../types';
@@ -18,9 +18,9 @@ export class ParserContext {
         key?: string;
         refs: IBibleCrossReference[];
     };
-    strongsBuffer?: string[]
+    strongsBuffer?: string[];
     contentContainerStack: ParserStackItem[] = [];
-    hierarchicalTagStack: ITagWithType[] = []
+    hierarchicalTagStack: ITagWithType[] = [];
     currentVerseJoinToVersionRef?: IBibleReference;
     openedSelfClosingTag?: ITagWithType;
     skipClosingTags: TagType[] = [];
@@ -29,6 +29,6 @@ export class ParserContext {
         | OsisXmlNodeType.SECTION
         | OsisXmlNodeType.SECTION_SUB
     )[] = [];
-    hasSectionsInSourceText: boolean
-    hasParagraphsInSourceText: boolean
+    hasSectionsInSourceText: boolean;
+    hasParagraphsInSourceText: boolean;
 }
