@@ -1,13 +1,8 @@
 import {
-    IBibleVersion,
-    IBibleBook,
     IBibleContentSection,
-    BookWithContentForInput,
     ContentGroupType,
     IBibleContentGroup,
     IBibleContent,
-    IBibleCrossReference,
-    IBibleReference,
 } from '@bible-engine/core';
 import { OsisXmlNodeName, OsisXmlNodeType, OsisXmlNode } from '../../shared/osisTypes';
 
