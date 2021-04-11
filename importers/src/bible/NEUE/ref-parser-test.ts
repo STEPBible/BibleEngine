@@ -6,7 +6,7 @@ bcv.set_options({
     punctuation_strategy: 'eu',
     invalid_passage_strategy: 'include',
     invalid_sequence_strategy: 'include',
-    passage_existence_strategy: 'bc'
+    passage_existence_strategy: 'bc',
 });
 const localRefRegEx = /(Kapitel|V\.|Vers) ([0-9,.\-–; ]|(und|bis|Kapitel|V\.|Vers))+/g;
 
@@ -22,7 +22,7 @@ const localChapterNum = 3;
 const references = getReferencesFromText(bcv, testString, {
     bookOsisId: localOsisId,
     chapterNum: localChapterNum,
-    localRefMatcher: localRefRegEx
+    localRefMatcher: localRefRegEx,
 });
 
 console.dir(references, { depth: 10 });

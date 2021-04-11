@@ -13,12 +13,12 @@ import {
     IBibleContentSection,
     IBibleContentPhrase,
     IBibleContent,
-    IBibleContentGroup
+    IBibleContentGroup,
 } from '@bible-engine/core';
 import { startsWithPunctuationChar } from '../../shared/helpers.functions';
 
 export const getAttribute = (node: TreeElement, name: string) => {
-    const attr = node.attrs.find(_attr => _attr.name === name);
+    const attr = node.attrs.find((_attr) => _attr.name === name);
     if (attr) return attr.value;
     else return null;
 };
@@ -33,7 +33,7 @@ export const getTextFromNode = (node: DefaultNode) => {
 };
 
 export const hasAttribute = (node: TreeElement, name: string, value?: string) =>
-    node.attrs.find(attr => attr.name === name && (!value || attr.value === value));
+    node.attrs.find((attr) => attr.name === name && (!value || attr.value === value));
 
 export const visitNode = (
     node: DefaultNode,
@@ -82,7 +82,7 @@ export const visitNode = (
             const newSection: DocumentSection = {
                 type: 'section',
                 title: sectionTitle,
-                contents: []
+                contents: [],
             };
 
             // since sections are not hierarchical in HTML (but only indicated by heading tags), we
@@ -122,7 +122,7 @@ export const visitNode = (
             const newSection: IBibleContentSection = {
                 type: 'section',
                 title: sectionTitle,
-                contents: []
+                contents: [],
             };
 
             // look for a note marker in the section title
@@ -213,7 +213,7 @@ export const visitNode = (
         const newSection: DocumentSection = {
             type: 'section',
             title: getTextFromNode(node),
-            contents: []
+            contents: [],
         };
         localState.currentDocument.push(newSection);
         localState.currentDocument = newSection.contents;
@@ -249,7 +249,7 @@ export const visitNode = (
         const newNote: DocumentRoot = { type: 'root', contents: [] };
         const childState = {
             ...localState,
-            currentDocument: newNote.contents
+            currentDocument: newNote.contents,
         };
         for (const childNode of node.childNodes) visitNode(childNode, globalState, childState);
         const firstContentWithPendingNote = globalState.contentWithPendingNotes
@@ -288,7 +288,7 @@ export const visitNode = (
                 firstContentWithPendingNote.crossReferences.push({
                     key: '*',
                     label: (<DocumentPhrase>newNote.contents[0]).content,
-                    range: (<DocumentPhrase>newNote.contents[0]).bibleReference!
+                    range: (<DocumentPhrase>newNote.contents[0]).bibleReference!,
                 });
             } else {
                 if (!firstContentWithPendingNote.notes) firstContentWithPendingNote.notes = [];
@@ -306,7 +306,7 @@ export const visitNode = (
         if (localState.currentDocument) {
             const newPhrase: DocumentPhrase = {
                 type: 'phrase',
-                content: text
+                content: text,
             };
             if (startsWithPunctuationChar(text)) newPhrase.skipSpace = 'before';
 
@@ -333,7 +333,7 @@ export const visitNode = (
                     ? {
                           bookOsisId: globalState.bookData.book.osisId,
                           chapterNum: globalState.currentChapterNumber,
-                          localRefMatcher: localRefRegex
+                          localRefMatcher: localRefRegex,
                       }
                     : undefined
             );
@@ -362,7 +362,7 @@ export const visitNode = (
                         if (fillText) {
                             const fillPhrase: DocumentPhrase = {
                                 type: 'phrase',
-                                content: fillText
+                                content: fillText,
                             };
                             if (startsWithPunctuationChar(fillText))
                                 fillPhrase.skipSpace = 'before';
@@ -380,7 +380,7 @@ export const visitNode = (
                     const bibleReference: IBibleReferenceRange = {
                         bookOsisId: ref.start.b,
                         versionUid: globalState.versionUid,
-                        versionChapterNum: ref.start.c
+                        versionChapterNum: ref.start.c,
                     };
                     if (
                         ref.type === 'v' ||
@@ -399,7 +399,7 @@ export const visitNode = (
                     const refPhrase: DocumentPhrase = {
                         type: 'phrase',
                         content: refText,
-                        bibleReference
+                        bibleReference,
                     };
                     if (startsWithPunctuationChar(refText)) refPhrase.skipSpace = 'before';
                     localState.currentDocument.push(refPhrase);
@@ -413,7 +413,7 @@ export const visitNode = (
                     if (endText) {
                         const endPhrase: DocumentPhrase = {
                             type: 'phrase',
-                            content: endText
+                            content: endText,
                         };
                         if (startsWithPunctuationChar(endText)) endPhrase.skipSpace = 'before';
                         localState.currentDocument.push(endPhrase);
@@ -427,7 +427,7 @@ export const visitNode = (
                 );
             const numbers = {
                 versionChapterNum: globalState.currentChapterNumber,
-                versionVerseNum: globalState.currentVerseNumber
+                versionVerseNum: globalState.currentVerseNumber,
             };
 
             const textByNotes = text.split('*');
@@ -440,7 +440,7 @@ export const visitNode = (
                             const phrase: IBibleContentPhrase = {
                                 ...numbers,
                                 type: 'phrase',
-                                content: phraseText
+                                content: phraseText,
                             };
                             if (startsWithPunctuationChar(phraseText)) phrase.skipSpace = 'before';
                             localState.currentContentGroup.push(phrase);
@@ -463,7 +463,7 @@ export const visitNode = (
                                 const phrase: IBibleContentPhrase = {
                                     ...numbers,
                                     type: 'phrase',
-                                    content: startingText
+                                    content: startingText,
                                 };
                                 if (startsWithPunctuationChar(startingText))
                                     phrase.skipSpace = 'before';
@@ -474,7 +474,7 @@ export const visitNode = (
                         const phraseWithPendingNote: IBibleContentPhrase = {
                             ...numbers,
                             type: 'phrase',
-                            content: textWithNote
+                            content: textWithNote,
                         };
                         // there are cases when `textWithNote` is an empty string (i.e. when right
                         // after a group node)
@@ -490,7 +490,7 @@ export const visitNode = (
                 const newBiblePhrase: IBibleContentPhrase = {
                     type: 'phrase',
                     content: text,
-                    ...numbers
+                    ...numbers,
                 };
                 if (startsWithPunctuationChar(text)) newBiblePhrase.skipSpace = 'before';
 
@@ -567,7 +567,7 @@ export const visitNode = (
         }
 
         const childState = {
-            ...localState
+            ...localState,
         };
         let newGroup: DocumentGroup<ContentGroupType> | undefined;
         let newBibleGroup: IBibleContentGroup<ContentGroupType> | undefined;
@@ -578,11 +578,11 @@ export const visitNode = (
             newGroup = {
                 type: 'group',
                 groupType,
-                contents: []
+                contents: [],
             };
             newBibleGroup = {
                 ...newGroup,
-                contents: []
+                contents: [],
             };
 
             if (localState.currentDocument) {
@@ -593,7 +593,7 @@ export const visitNode = (
                     const titleBibleGroup: IBibleContentGroup<'title'> = {
                         type: 'group',
                         groupType: 'title',
-                        contents: []
+                        contents: [],
                     };
                     newBibleGroup.contents.push(titleBibleGroup);
                     childState.currentContentGroup = titleBibleGroup.contents;
@@ -601,7 +601,7 @@ export const visitNode = (
                     const lineGroupBibleGroup: IBibleContentGroup<'lineGroup'> = {
                         type: 'group',
                         groupType: 'lineGroup',
-                        contents: []
+                        contents: [],
                     };
                     newBibleGroup.contents.push(lineGroupBibleGroup);
                     childState.currentContentGroup = lineGroupBibleGroup.contents;

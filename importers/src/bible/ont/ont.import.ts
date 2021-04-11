@@ -77,13 +77,13 @@ const bookNum2Osis: Map<number, string> = new Map([
     [63, '2John'],
     [64, '3John'],
     [65, 'Jude'],
-    [66, 'Rev']
+    [66, 'Rev'],
 ]);
 
 const line2Ref: Map<number, string> = new Map();
 const rdIndex = createInterface({ input: createReadStream(resolve(__dirname) + '/index.ont') });
 let lineNr = 1;
-rdIndex.on('line', line => {
+rdIndex.on('line', (line) => {
     line2Ref.set(lineNr, line);
     lineNr++;
 });
@@ -103,22 +103,20 @@ const getReferenceFromLineNr = (nr: number): IBibleReference | false => {
     return {
         bookOsisId,
         versionChapterNum: +chapterNum,
-        versionVerseNum: +verseNum
+        versionVerseNum: +verseNum,
     };
 };
 
 const parseBible = () => {
     let lineNrBible = 1;
     const rdBible = createInterface({
-        input: createReadStream(resolve(__dirname) + '/NeÜ bibel.heute.ont')
+        input: createReadStream(resolve(__dirname) + '/NeÜ bibel.heute.ont'),
     });
-    rdBible.on('line', line => {
+    rdBible.on('line', (line) => {
         const ref = getReferenceFromLineNr(lineNrBible);
         if (ref) {
             console.log(
-                `parsing reference ${ref.bookOsisId} ${ref.versionChapterNum}:${
-                    ref.versionVerseNum
-                }`
+                `parsing reference ${ref.bookOsisId} ${ref.versionChapterNum}:${ref.versionVerseNum}`
             );
         } else {
             console.log(`line is not a reference: ${line}`);

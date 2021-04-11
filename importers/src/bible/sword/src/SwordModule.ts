@@ -68,7 +68,7 @@ export default class SwordModule {
             chapterNum,
             this.config.versification
         );
-        return this.getXMLforVerseList(verseList)
+        return this.getXMLforVerseList(verseList);
     }
 
     public getXMLForBook(bookOsisName: string): ChapterXML[] {
@@ -92,7 +92,7 @@ export default class SwordModule {
                 osisId: bookName,
                 fullName: bookFullNames[i],
                 bookNum: i + 1,
-                chapters: xmlResult
+                chapters: xmlResult,
             };
         });
         return versionXML;
@@ -102,25 +102,25 @@ export default class SwordModule {
         const { versification } = this.config;
         const bookOsisNames = this.getAvailableOsisBookNames();
         const osisToName = VerseScheme.getBookFullNamesIndexedByOsisName(versification);
-        const map: ImporterBookMetadata = new Map()
+        const map: ImporterBookMetadata = new Map();
         bookOsisNames.forEach((osisId, index) => {
-            const title = osisToName.get(osisId)
+            const title = osisToName.get(osisId);
             if (!title) {
-                throw new Error(`no matching full book name found for OSIS ID: ${osisId}`)
+                throw new Error(`no matching full book name found for OSIS ID: ${osisId}`);
             }
             map.set(osisId, {
                 title,
                 abbreviation: osisId,
                 number: index,
-            })
-        })
-        return map
+            });
+        });
+        return map;
     }
 
     public getAvailableOsisBookNames(): string[] {
         // Instead of using versification rules, can pull the actual available books,
         // that were decompressed from the Sword files
-        return [...Object.keys(this.rawPosOT), ...Object.keys(this.rawPosNT)]
+        return [...Object.keys(this.rawPosOT), ...Object.keys(this.rawPosNT)];
     }
 
     public getSingleXMLDocumentForBook(osisId: string): string {
@@ -131,7 +131,8 @@ export default class SwordModule {
         for (let chapterNum = 1; chapterNum <= maxChapter; chapterNum += 1) {
             const chapter: ChapterXML = this.getXMLforChapterOsis(osisId, chapterNum);
             const versesXML = chapter.verses.map(
-                (verse: VerseXML) => `<verse osisID="${osisId}.${chapterNum}.${verse.verse}">${verse.text}</verse>`
+                (verse: VerseXML) =>
+                    `<verse osisID="${osisId}.${chapterNum}.${verse.verse}">${verse.text}</verse>`
             );
             const combinedVersesXML = versesXML.reduce(
                 (combinedXML: string, verseXML: string) => combinedXML + verseXML,
@@ -146,9 +147,9 @@ export default class SwordModule {
 
     public getSingleXMLDocumentForVersion(): string {
         const bookOsisNames = this.getAvailableOsisBookNames();
-        const combinedBookXml = bookOsisNames.map(
-            osisId => this.getSingleXMLDocumentForBook(osisId)
-        ).join('')
+        const combinedBookXml = bookOsisNames
+            .map((osisId) => this.getSingleXMLDocumentForBook(osisId))
+            .join('');
         return `
             <?xml version="1.0" encoding="UTF-8"?>
             <osis>
@@ -156,6 +157,6 @@ export default class SwordModule {
                     ${combinedBookXml}
                 </osisText>
             </osis>
-        `
+        `;
     }
 }

@@ -20,14 +20,14 @@ export class NeueImporter extends BibleEngineImporter {
             punctuation_strategy: 'eu',
             invalid_passage_strategy: 'include',
             invalid_sequence_strategy: 'include',
-            passage_existence_strategy: 'bc'
+            passage_existence_strategy: 'bc',
         });
 
         const versionUid = 'NEUE';
 
         const description: DocumentRoot = {
             type: 'root',
-            contents: []
+            contents: [],
         };
 
         const sourceDir = this.options.sourcePath || resolve(__dirname) + '/data';
@@ -63,7 +63,7 @@ export class NeueImporter extends BibleEngineImporter {
             chapterVerseSeparator: ',',
             language: 'de-DE',
             type: 'dynamic',
-            hasStrongs: false
+            hasStrongs: false,
         });
 
         for (const [bookFile, bookMeta] of bookList.entries()) {
@@ -93,17 +93,17 @@ export class NeueImporter extends BibleEngineImporter {
                     number: bookMeta.bookNum,
                     abbreviation: bookMeta.abbvreviation,
                     title: bookMeta.title,
-                    osisId: bookMeta.osisId
+                    osisId: bookMeta.osisId,
                 },
-                contents: []
+                contents: [],
             };
             const globalState = {
                 versionUid,
                 bookData,
-                refParser: bcv
+                refParser: bcv,
             };
             const localState = {
-                currentContentGroup: bookData.contents
+                currentContentGroup: bookData.contents,
             };
             for (const node of bibleNodes.childNodes) visitNode(node, globalState, localState);
 

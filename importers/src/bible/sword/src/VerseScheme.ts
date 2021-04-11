@@ -96,12 +96,12 @@ function getAllBookFullNames(v11n = 'kjv'): string[] {
 }
 
 function getBookFullNamesIndexedByOsisName(v11n = 'kjv'): Map<string, string> {
-    const osisToBookName = new Map<string, string>()
-    const books = [...versificationMgr[v11n].ot, ...versificationMgr[v11n].nt]
+    const osisToBookName = new Map<string, string>();
+    const books = [...versificationMgr[v11n].ot, ...versificationMgr[v11n].nt];
     for (const book of books) {
-        osisToBookName.set(book.abbrev, book.name)
+        osisToBookName.set(book.abbrev, book.name);
     }
-    return osisToBookName
+    return osisToBookName;
 }
 
 function getBookNum(inOsis: string, v11n = 'kjv') {
@@ -123,5 +123,5 @@ export default {
     getChapterMax,
     getVersesInChapter,
     getBook,
-    getBookNum
+    getBookNum,
 };

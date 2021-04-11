@@ -63,9 +63,9 @@ export enum SwordMetadataKey {
     OPTION_FILTER = 'GlobalOptionFilter',
     SHORT_COPYRIGHT = 'ShortCopyright',
     SOURCE_TYPE = 'SourceType',
-    VERSIFICATION = 'Versification'
+    VERSIFICATION = 'Versification',
 }
 
 export enum SwordFilterOptions {
-    OSIS_STRONGS = 'OSISStrongs'
+    OSIS_STRONGS = 'OSISStrongs',
 }

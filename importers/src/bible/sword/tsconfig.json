@@ -1,7 +1,7 @@
 {
-  "extends": "../../../tsconfig.json",
-  "compilerOptions": {
-    "noImplicitAny": false,
-    "strictNullChecks": true
-  }
+    "extends": "../../../tsconfig.json",
+    "compilerOptions": {
+        "noImplicitAny": false,
+        "strictNullChecks": true
+    }
 }
