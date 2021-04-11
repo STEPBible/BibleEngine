@@ -76,15 +76,32 @@ function getBook(inBookNum: number, v11n = 'kjv') {
 }
 
 function getAllBookOsisNames(v11n = 'kjv'): string[] {
-    const otNames = versificationMgr[v11n].ot.map((book: any) => book.abbrev);
-    const ntNames = versificationMgr[v11n].nt.map((book: any) => book.abbrev);
+    const otNames = getOTBookOsisNames(v11n);
+    const ntNames = getNTBookOsisNames(v11n);
     return [...otNames, ...ntNames];
+}
+
+function getOTBookOsisNames(v11n = 'kjv'): string[] {
+    return versificationMgr[v11n].ot.map((book: any) => book.abbrev);
+}
+
+function getNTBookOsisNames(v11n = 'kjv'): string[] {
+    return versificationMgr[v11n].nt.map((book: any) => book.abbrev);
 }
 
 function getAllBookFullNames(v11n = 'kjv'): string[] {
     const otNames = versificationMgr[v11n].ot.map((book: any) => book.name);
     const ntNames = versificationMgr[v11n].nt.map((book: any) => book.name);
     return [...otNames, ...ntNames];
+}
+
+function getBookFullNamesIndexedByOsisName(v11n = 'kjv'): Map<string, string> {
+    const osisToBookName = new Map<string, string>();
+    const books = [...versificationMgr[v11n].ot, ...versificationMgr[v11n].nt];
+    for (const book of books) {
+        osisToBookName.set(book.abbrev, book.name);
+    }
+    return osisToBookName;
 }
 
 function getBookNum(inOsis: string, v11n = 'kjv') {
@@ -98,10 +115,13 @@ function getBookNum(inOsis: string, v11n = 'kjv') {
 export default {
     getAllBookFullNames,
     getAllBookOsisNames,
+    getOTBookOsisNames,
+    getNTBookOsisNames,
+    getBookFullNamesIndexedByOsisName,
     getBooksInOT,
     getBooksInNT,
     getChapterMax,
     getVersesInChapter,
     getBook,
-    getBookNum
+    getBookNum,
 };

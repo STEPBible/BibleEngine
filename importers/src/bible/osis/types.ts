@@ -1,13 +1,8 @@
 import {
-    IBibleVersion,
-    IBibleBook,
     IBibleContentSection,
-    BookWithContentForInput,
     ContentGroupType,
     IBibleContentGroup,
     IBibleContent,
-    IBibleCrossReference,
-    IBibleReference
 } from '@bible-engine/core';
 import { OsisXmlNodeName, OsisXmlNodeType, OsisXmlNode } from '../../shared/osisTypes';
 
@@ -16,32 +11,10 @@ export interface ITagWithType extends OsisXmlNode {
     type: TagType;
 }
 
-export type ParserContext = {
-    version?: IBibleVersion;
-    books: BookWithContentForInput[];
-    currentBook?: IBibleBook;
-    currentChapter?: number;
-    currentVerse?: number;
-    crossRefBuffer?: {
-        key: string;
-        refs: IBibleCrossReference[];
-    };
-    strongsBuffer?: string[]
-    contentContainerStack: (
-        | { type: 'root'; contents: IBibleContent[] }
-        | IBibleContentSection
-        | IBibleContentGroup<ContentGroupType>
-    )[];
-    hierarchicalTagStack: ITagWithType[];
-    currentVerseJoinToVersionRef?: IBibleReference;
-    openedSelfClosingTag?: ITagWithType;
-    skipClosingTags: TagType[];
-    sectionStack: (
-        | OsisXmlNodeType.SECTION_MAJOR
-        | OsisXmlNodeType.SECTION
-        | OsisXmlNodeType.SECTION_SUB
-    )[];
-};
+export type ParserStackItem =
+    | { type: 'root'; contents: IBibleContent[] }
+    | IBibleContentSection
+    | IBibleContentGroup<ContentGroupType>;
 
 /**
  * The following `IOsis...` interfaces can be used to do type discrimination by using the type
@@ -115,3 +88,8 @@ export type OsisTag =
     | IOsisChapter<'milestone'>
     | IOsisChapter<'hierarchical'>
     | IOsisCatchWord;
+
+export type OsisSection =
+    | OsisXmlNodeType.SECTION
+    | OsisXmlNodeType.SECTION_SUB
+    | OsisXmlNodeType.SECTION_MAJOR;

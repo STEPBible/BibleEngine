@@ -5,7 +5,7 @@ const dirProjectRoot = resolve(__dirname + '/../../..');
 
 const sqlBible = new BibleEngine({
     type: 'sqlite',
-    database: `${dirProjectRoot}/output/bible.db`
+    database: `${dirProjectRoot}/output/bible.db`,
 });
 
 sqlBible
@@ -14,8 +14,8 @@ sqlBible
             versionUid: 'NEUE',
             bookOsisId: 'Gen',
             versionChapterNum: 1,
-            versionChapterEndNum: 2
+            versionChapterEndNum: 2,
         },
         true
     )
-    .then(data => console.dir(data.content, { depth: 10 }));
+    .then((data) => console.dir(data.content, { depth: 10 }));

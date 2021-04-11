@@ -161,7 +161,14 @@ export class BibleEngine {
     }
 
     getMigrations(type: DatabaseType): any {
-        const SQLITE_TYPES: DatabaseType[] = ['expo', 'sqlite', 'cordova', 'react-native', 'sqljs'];
+        const SQLITE_TYPES: DatabaseType[] = [
+            'expo',
+            'sqlite',
+            'cordova',
+            'react-native',
+            'sqljs',
+            'better-sqlite3',
+        ];
         if (SQLITE_TYPES.includes(type)) {
             return sqliteMigrations;
         } else if (type === 'postgres') {

@@ -52,11 +52,11 @@ export const bookList = new Map([
     ['kol.html', { abbvreviation: 'Kol', title: 'Kolosser', bookNum: 51, osisId: 'Col' }],
     [
         '1thes.html',
-        { abbvreviation: '1Thes', title: '1.Thessalonicher', bookNum: 52, osisId: '1Thess' }
+        { abbvreviation: '1Thes', title: '1.Thessalonicher', bookNum: 52, osisId: '1Thess' },
     ],
     [
         '2thes.html',
-        { abbvreviation: '2Thes', title: '2.Thessalonicher', bookNum: 53, osisId: '2Thess' }
+        { abbvreviation: '2Thes', title: '2.Thessalonicher', bookNum: 53, osisId: '2Thess' },
     ],
     ['1tim.html', { abbvreviation: '1Tim', title: '1.Timotheus', bookNum: 54, osisId: '1Tim' }],
     ['2tim.html', { abbvreviation: '2Tim', title: '2.Timotheus', bookNum: 55, osisId: '2Tim' }],
@@ -70,5 +70,5 @@ export const bookList = new Map([
     ['2jo.html', { abbvreviation: '2Jo', title: '2.Johannes', bookNum: 63, osisId: '2John' }],
     ['3jo.html', { abbvreviation: '3Jo', title: '3.Johannes', bookNum: 64, osisId: '3John' }],
     ['jud.html', { abbvreviation: 'Jud', title: 'Judas', bookNum: 65, osisId: 'Jude' }],
-    ['off.html', { abbvreviation: 'Off', title: 'Offenbarung', bookNum: 66, osisId: 'Rev' }]
+    ['off.html', { abbvreviation: 'Off', title: 'Offenbarung', bookNum: 66, osisId: 'Rev' }],
 ]);

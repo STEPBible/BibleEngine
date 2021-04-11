@@ -22,10 +22,12 @@ export interface OsisXmlNode {
 }
 
 export enum OsisXmlNodeType {
+    BOOK_GROUP = 'bookGroup',
     BOLD = 'bold',
     BOOK = 'book',
     BOOK_INTRODUCTION = 'introduction',
     CROSS_REFERENCE = 'crossReference',
+    EXPLANATION = 'explanation',
     ITALIC = 'italic',
     MILESTONE = 'x-milestone',
     NEWLINE = 'x-newLine',
@@ -54,6 +56,7 @@ export enum Indentation {
 export enum OsisXmlNodeName {
     CATCH_WORD = 'catchWord',
     CHAPTER = 'chapter',
+    COLOPHON = 'colophon',
     DATE = 'date',
     DESCRIPTION = 'description',
     DIVINE_NAME = 'divineName',
@@ -61,6 +64,7 @@ export enum OsisXmlNodeName {
     FOREIGN_WORD = 'foreign',
     HIGHLIGHT = 'hi',
     IDENTIFIER = 'identifier',
+    INSCRIPTION = 'inscription',
     LANGUAGE = 'language',
     LEMMA = 'lemma',
     LINEBREAK = 'lb',
@@ -79,6 +83,8 @@ export enum OsisXmlNodeName {
     REVISION_DESC = 'revisionDesc',
     RIGHTS = 'rights',
     SWORD_MILESTONE = 'x-milestone',
+    SWORD_PILCROW = 'x-p',
+    TEXTUAL_VARIATION = 'rdg',
     TITLE = 'title',
     TRANS_CHANGE = 'transChange',
     TYPE = 'type',

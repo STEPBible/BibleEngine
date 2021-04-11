@@ -32,8 +32,12 @@ export default class SwordModule {
         return buffer;
     }
 
-    getXMLforChapter(verseRange: string): ChapterXML {
+    public getXMLforChapter(verseRange: string): ChapterXML {
         const verseList = verseKey.parseVerseList(verseRange, this.config.versification);
+        return this.getXMLforVerseList(verseList);
+    }
+
+    private getXMLforVerseList(verseList: any[]) {
         let bookPosition: ChapterPosition[];
         let binaryBlob: Uint8Array;
 
@@ -44,7 +48,11 @@ export default class SwordModule {
             bookPosition = this.rawPosNT[verseList[0].book];
             binaryBlob = this.binaryNT;
         } else {
-            throw new Error('Unable to retrieve book from module');
+            throw new Error(`
+                Unable to retrieve book from module: ${verseList[0].book}
+                available Old Testament books: ${JSON.stringify(Object.keys(this.rawPosOT))}
+                available New Testament books: ${JSON.stringify(Object.keys(this.rawPosNT))}
+            `);
         }
         return BlobReader.getXMLforChapter(
             binaryBlob,
@@ -54,7 +62,16 @@ export default class SwordModule {
         );
     }
 
-    getXMLForBook(bookOsisName: string): ChapterXML[] {
+    public getXMLforChapterOsis(bookOsisId: string, chapterNum: number): ChapterXML {
+        const verseList = verseKey.getVerseListForChapter(
+            bookOsisId,
+            chapterNum,
+            this.config.versification
+        );
+        return this.getXMLforVerseList(verseList);
+    }
+
+    public getXMLForBook(bookOsisName: string): ChapterXML[] {
         const bookNum = VerseScheme.getBookNum(bookOsisName, this.config.versification);
         const maxChapter = VerseScheme.getChapterMax(bookNum, this.config.versification);
         const chapters: any = [];
@@ -65,7 +82,7 @@ export default class SwordModule {
         return chapters;
     }
 
-    getXMLForVersion(): BookXML[] {
+    public getXMLForVersion(): BookXML[] {
         const { versification } = this.config;
         const bookOsisNames = VerseScheme.getAllBookOsisNames(versification);
         const bookFullNames = VerseScheme.getAllBookFullNames(versification);
@@ -75,58 +92,71 @@ export default class SwordModule {
                 osisId: bookName,
                 fullName: bookFullNames[i],
                 bookNum: i + 1,
-                chapters: xmlResult
+                chapters: xmlResult,
             };
         });
         return versionXML;
     }
 
-    getBookMetadata(): ImporterBookMetadata {
+    public getBookMetadata(): ImporterBookMetadata {
         const { versification } = this.config;
-        const bookOsisNames = VerseScheme.getAllBookOsisNames(versification);
-        const bookFullNames = VerseScheme.getAllBookFullNames(versification);
-        const map: ImporterBookMetadata = new Map()
+        const bookOsisNames = this.getAvailableOsisBookNames();
+        const osisToName = VerseScheme.getBookFullNamesIndexedByOsisName(versification);
+        const map: ImporterBookMetadata = new Map();
         bookOsisNames.forEach((osisId, index) => {
+            const title = osisToName.get(osisId);
+            if (!title) {
+                throw new Error(`no matching full book name found for OSIS ID: ${osisId}`);
+            }
             map.set(osisId, {
+                title,
                 abbreviation: osisId,
                 number: index,
-                title: bookFullNames[index]
-            })
-        })
-        return map
+            });
+        });
+        return map;
     }
 
-    getSingleXMLDocumentForBook(osisId: string): string {
+    public getAvailableOsisBookNames(): string[] {
+        // Instead of using versification rules, can pull the actual available books,
+        // that were decompressed from the Sword files
+        return [...Object.keys(this.rawPosOT), ...Object.keys(this.rawPosNT)];
+    }
+
+    public getSingleXMLDocumentForBook(osisId: string): string {
         const verseScheme = this.config.versification;
         const bookNum = VerseScheme.getBookNum(osisId, verseScheme);
         const maxChapter = VerseScheme.getChapterMax(bookNum, verseScheme);
         let combinedChapterXML = '';
         for (let chapterNum = 1; chapterNum <= maxChapter; chapterNum += 1) {
-            const chapter: ChapterXML = this.getXMLforChapter(`${osisId} ${chapterNum}`);
+            const chapter: ChapterXML = this.getXMLforChapterOsis(osisId, chapterNum);
             const versesXML = chapter.verses.map(
-                (verse: VerseXML) => `<verse osisID="${osisId}.${chapterNum}.${verse.verse}">${verse.text}</verse>`
+                (verse: VerseXML) =>
+                    `<verse osisID="${osisId}.${chapterNum}.${verse.verse}">${verse.text}</verse>`
             );
             const combinedVersesXML = versesXML.reduce(
                 (combinedXML: string, verseXML: string) => combinedXML + verseXML,
                 ''
             );
-            const chapterXML = `<chapter osisID="${osisId}.${chapterNum}">${combinedVersesXML}</chapter>`;
+            const chapterXML = `<chapter osisID="${osisId}.${chapterNum}">${combinedVersesXML}</chapter>\n`;
             combinedChapterXML += chapterXML;
         }
-        const bookXML = `<div type="book" osisID="${osisId}">${combinedChapterXML}</div>`;
+        const bookXML = `<div type="book" osisID="${osisId}">${combinedChapterXML}</div>\n`;
         return bookXML;
     }
 
-    getSingleXMLDocumentForVersion(): string {
-        const { versification } = this.config;
-        const bookOsisNames = VerseScheme.getAllBookOsisNames(versification);
-        const combinedBookXml = bookOsisNames.map(
-            osisId => this.getSingleXMLDocumentForBook(osisId)
-        ).join('')
+    public getSingleXMLDocumentForVersion(): string {
+        const bookOsisNames = this.getAvailableOsisBookNames();
+        const combinedBookXml = bookOsisNames
+            .map((osisId) => this.getSingleXMLDocumentForBook(osisId))
+            .join('');
         return `
-            <osisText osisIDWork="${this.config.moduleName}" xml:lang="${this.config.language}">
-                ${combinedBookXml}
-            </osisText>
-        `
+            <?xml version="1.0" encoding="UTF-8"?>
+            <osis>
+                <osisText osisIDWork="${this.config.moduleName}" xml:lang="${this.config.language}">
+                    ${combinedBookXml}
+                </osisText>
+            </osis>
+        `;
     }
 }

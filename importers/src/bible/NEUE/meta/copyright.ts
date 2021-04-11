@@ -11,12 +11,12 @@ export default <DocumentRoot>{
                 {
                     type: 'group',
                     groupType: 'paragraph',
-                    contents: [{ type: 'phrase', content: 'Quelle: www.derbibelvertrauen.de' }]
+                    contents: [{ type: 'phrase', content: 'Quelle: www.derbibelvertrauen.de' }],
                 },
                 {
                     type: 'group',
                     groupType: 'paragraph',
-                    contents: [{ type: 'phrase', content: 'Textstand: September 2018' }]
+                    contents: [{ type: 'phrase', content: 'Textstand: September 2018' }],
                 },
                 {
                     type: 'group',
@@ -27,9 +27,9 @@ export default <DocumentRoot>{
                             content:
                                 'Das © Copyright für alle gedruckten Ausgaben liegt bei der ' +
                                 'Christlichen Verlagsgesellschaft mbH, Dillenburg, Moltkestr. 1, ' +
-                                '35683 Dillenburg, Tel. 02771/83020 info@cv-dillenburg.de'
-                        }
-                    ]
+                                '35683 Dillenburg, Tel. 02771/83020 info@cv-dillenburg.de',
+                        },
+                    ],
                 },
                 {
                     type: 'group',
@@ -40,9 +40,9 @@ export default <DocumentRoot>{
                             content:
                                 'Das © Copyright für elektronischen Ausgaben (auch für die ' +
                                 'kostenfreien) bedarf der Genehmigung des Verfassers Karl-Heinz ' +
-                                'Vanheiden, Ahornweg 3, 07926 Gefell.'
-                        }
-                    ]
+                                'Vanheiden, Ahornweg 3, 07926 Gefell.',
+                        },
+                    ],
                 },
                 {
                     type: 'group',
@@ -52,11 +52,11 @@ export default <DocumentRoot>{
                             type: 'phrase',
                             content:
                                 'Kopien einzelner Teile der NeÜ für den privaten oder ' +
-                                'innergemeindlichen Gebrauch sind erlaubt.'
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+                                'innergemeindlichen Gebrauch sind erlaubt.',
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
 };

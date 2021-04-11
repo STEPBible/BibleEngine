@@ -15,6 +15,9 @@ export class DictionaryEntryEntity implements IDictionaryEntry {
     @Column({ nullable: true })
     transliteration?: string;
 
+    @Column({ nullable: true })
+    pronunciation?: string;
+
     @Column()
     gloss: string;
 
@@ -24,15 +27,4 @@ export class DictionaryEntryEntity implements IDictionaryEntry {
     constructor(dict: IDictionaryEntry) {
         Object.assign(this, dict);
     }
-
-    // @AfterLoad()
-    // parse() {
-    //     if (this.contentJson) this.content = JSON.parse(this.contentJson);
-    // }
-
-    // @BeforeInsert()
-    // @BeforeUpdate()
-    // async prepare() {
-    //     if (this.content) this.contentJson = JSON.stringify(this.content);
-    // }
 }

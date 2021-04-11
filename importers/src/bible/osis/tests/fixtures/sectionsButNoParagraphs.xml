@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osis>
+	<osisText osisIDWork="NASB_th" osisRefWork="bible" xml:lang="en" canonical="true">
+		<header>
+			<work osisWork="NASB_th">
+				<title>New American Standard Bible (1995) with Strongs Numbers augmented for BDB</title>
+				<publisher>The Lockman Foundation</publisher>
+				<type type="OSIS">Bible</type>
+				<identifier type="OSIS">Bible.en.NASB_th.1995</identifier>
+				<source>Lockman</source>
+				<language type="IETF">en</language>
+				<scope>Gen-Rev</scope>
+				<refSystem>Bible.NRSV</refSystem>
+			</work>
+		</header>
+		<div type="book" osisID="Gen">
+			<chapter sID="Gen.1" osisID="Gen.1">
+				<title type="sub" canonical="false">The Creation</title>
+				<verse sID="Gen.1.1" osisID="Gen.1.1"/>
+				<w lemma="strong:H7225">In the beginning</w>
+				<w lemma="strong:H0430">God</w>
+				<w lemma="strong:H1254 a#=">created</w>
+				<w lemma="strong:H8064">the heavens</w>
+				<w lemma="strong:H0776">and the earth</w>. 
+				<verse eID="Gen.1.1"/>
+			</chapter>
+			<chapter sID="Gen.2" osisID="Gen.2">
+				<title type="sub" canonical="false">Morning Prayer of Trust in God.</title>
+				<title type="psalm" canonical="true">A Psalm of David, when he fled from Absalom his son.</title>
+				<verse sID="Gen.2.1" osisID="Gen.2.1"/>
+				<transChange>The sons of</transChange>
+				<w lemma="strong:H1144">Benjamin</w>
+				<transChange>were</transChange>
+				<w lemma="strong:H7969">three</w>: 
+				<w lemma="strong:H1106 a#=">Bela</w>
+				<w lemma="strong:H1071">and Becher</w>
+				<w lemma="strong:H3043">and Jediael</w>. 
+				<verse eID="Gen.2.1"/>
+			</chapter>
+		</div>
+	</osisText>
+</osis>
