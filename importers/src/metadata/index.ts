@@ -1,4 +1,6 @@
-export const enBookMetadata = new Map([
+import { ImporterBookMetadata } from '../shared/Importer.interface';
+
+export const enBookMetadata: ImporterBookMetadata = new Map([
     ['Gen', { abbreviation: 'Gen.', title: 'Genesis', number: 1 }],
     ['Exod', { abbreviation: 'Ex.', title: 'Exodus', number: 2 }],
     ['Lev', { abbreviation: 'Lev.', title: 'Leviticus', number: 3 }],
@@ -67,7 +69,7 @@ export const enBookMetadata = new Map([
     ['Rev', { abbreviation: 'Rev.', title: 'Revelation', number: 66 }],
 ]);
 
-export const esBookMetdata = new Map([
+export const esBookMetdata: ImporterBookMetadata = new Map([
     ['Gen', { abbreviation: 'Génesis', title: 'Génesis', number: 1 }],
     ['Exod', { abbreviation: 'Éxodo', title: 'Éxodo', number: 2 }],
     ['Lev', { abbreviation: 'Levítico', title: 'Levítico', number: 3 }],
@@ -136,7 +138,7 @@ export const esBookMetdata = new Map([
     ['Rev', { abbreviation: 'Apocalipsis', title: 'Apocalipsis', number: 66 }],
 ]);
 
-export const frBookMetdata = new Map([
+export const frBookMetdata: ImporterBookMetadata = new Map([
     ['Gen', { abbreviation: 'Ge.', title: 'Genèse', number: 1 }],
     ['Exod', { abbreviation: 'Ex.', title: 'Exode', number: 2 }],
     ['Lev', { abbreviation: 'Lé.', title: 'Lévitique', number: 3 }],
@@ -205,7 +207,7 @@ export const frBookMetdata = new Map([
     ['Rev', { abbreviation: 'Ap.', title: 'Apocalypse', number: 66 }],
 ]);
 
-export const zhsBookMetadata = new Map([
+export const zhsBookMetadata: ImporterBookMetadata = new Map([
     ['Gen', { abbreviation: '创世记', title: '创世记', number: 1 }],
     ['Exod', { abbreviation: '出埃及记', title: '出埃及记', number: 2 }],
     ['Lev', { abbreviation: '利未记', title: '利未记', number: 3 }],
@@ -274,7 +276,7 @@ export const zhsBookMetadata = new Map([
     ['Rev', { abbreviation: '启示录', title: '启示录', number: 66 }],
 ]);
 
-export const zhBookMetadata = new Map([
+export const zhBookMetadata: ImporterBookMetadata = new Map([
     ['Gen', { abbreviation: '創世紀', title: '創世紀', number: 1 }],
     ['Exod', { abbreviation: '出埃及記', title: '出埃及記', number: 2 }],
     ['Lev', { abbreviation: '利未記', title: '利未記', number: 3 }],
