@@ -9,7 +9,7 @@
     },
     "dependencies": {
         "cross-fetch": "^3.0.4",
-        "typeorm": "0.2.31",
+        "typeorm": "file:../../../forks/typeorm/build/package",
         "whatwg-fetch": "3.6.2"
     },
     "devDependencies": {

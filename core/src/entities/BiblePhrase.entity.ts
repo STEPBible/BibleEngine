@@ -7,7 +7,7 @@ import {
     AfterLoad,
     BeforeInsert,
     BeforeUpdate,
-    Index
+    Index,
 } from 'typeorm';
 import { BibleCrossReferenceEntity } from './BibleCrossReference.entity';
 import { BibleNoteEntity } from './BibleNote.entity';
@@ -72,23 +72,15 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
     @Column({ nullable: true, type: 'simple-array' })
     strongs?: string[];
 
-    @OneToMany(
-        () => BibleCrossReferenceEntity,
-        crossReference => crossReference.phrase,
-        {
-            cascade: true
-        }
-    )
+    @OneToMany(() => BibleCrossReferenceEntity, (crossReference) => crossReference.phrase, {
+        cascade: true,
+    })
     @JoinColumn()
     crossReferences: BibleCrossReferenceEntity[];
 
-    @OneToMany(
-        () => BibleNoteEntity,
-        note => note.phrase,
-        {
-            cascade: true
-        }
-    )
+    @OneToMany(() => BibleNoteEntity, (note) => note.phrase, {
+        cascade: true,
+    })
     @JoinColumn()
     notes: BibleNoteEntity[];
 
@@ -107,13 +99,13 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
             this.modifiers = modifiers;
         }
         if (phrase.crossReferences) {
-            this.crossReferences = phrase.crossReferences.map(crossReference => {
+            this.crossReferences = phrase.crossReferences.map((crossReference) => {
                 if (!crossReference.range.versionId)
                     crossReference.range.versionId = reference.versionId;
                 return new BibleCrossReferenceEntity(crossReference, true);
             });
         }
-        if (phrase.notes) this.notes = phrase.notes.map(note => new BibleNoteEntity(note));
+        if (phrase.notes) this.notes = phrase.notes.map((note) => new BibleNoteEntity(note));
     }
 
     @AfterLoad()
@@ -127,7 +119,7 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
             normalizedVerseNum: phraseRef.normalizedVerseNum!,
             normalizedSubverseNum: phraseRef.normalizedSubverseNum!,
             versionId: phraseRef.versionId!,
-            phraseNum: phraseRef.phraseNum!
+            phraseNum: phraseRef.phraseNum!,
         };
 
         // if (this.strongsJoined) this.strongs = this.strongsJoined.split(',');
@@ -138,7 +130,7 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
 
     @BeforeInsert()
     @BeforeUpdate()
-    async prepare() {
+    prepare() {
         this.id = generatePhraseId(this.normalizedReference);
         this.versionId = this.normalizedReference.versionId;
 

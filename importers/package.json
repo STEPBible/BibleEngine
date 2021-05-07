@@ -23,7 +23,7 @@
         "random-words": "^1.1.0",
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
-        "typeorm": "0.2.31",
+        "typeorm": "file:../../../forks/typeorm/build/package",
         "winston": "^3.3.3"
     },
     "devDependencies": {
