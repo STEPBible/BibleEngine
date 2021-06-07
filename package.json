@@ -9,8 +9,7 @@
         "heroku": "node server/lib/heroku.js",
         "buildAll": "yarn workspace @bible-engine/core run build && yarn workspace @bible-engine/importers run build && yarn workspace @bible-engine/server run generateApiClient && yarn workspace @bible-engine/server run build && yarn workspace @bible-engine/client run build",
         "test:app": "yarn workspace @bible-engine/core run test",
-        "typeorm": "yarn ts-node ./node_modules/typeorm/cli.js",
-        "upgradeTypeORM": "rsync -a --delete ../../forks/typeorm/build/package/ node_modules/typeorm/"
+        "typeorm": "yarn ts-node ./node_modules/typeorm/cli.js"
     },
     "workspaces": {
         "packages": [

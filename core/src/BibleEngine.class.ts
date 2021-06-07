@@ -1230,44 +1230,15 @@ export class BibleEngine {
             // RADAR: check performance of higher chunkSize
             const chunkSize = 100;
 
-            // await db.save(globalState.phraseStack, {
-            //     reload: false
-            //     // transaction: false
-            //     // chunk: Math.ceil(globalState.phraseStack.length / 100)
-            // });
-
             const sqlSet: { statement: string; values: any[] }[] = [];
             if (this.executeSqlSetOverride) {
-                // const phraseInserts: any[] = [];
                 for (const phrase of globalState.phraseStack) {
                     phrase.prepare();
-                    // phraseInserts.push([
-                    //     phrase.id,
-                    //     phrase.joinToRefId,
-                    //     phrase.joinToVersionRefId,
-                    //     phrase.versionId,
-                    //     phrase.versionChapterNum,
-                    //     phrase.versionVerseNum,
-                    //     phrase.versionSubverseNum,
-                    //     phrase.sourceTypeId,
-                    //     phrase.content,
-                    //     phrase.linebreak,
-                    //     phrase.skipSpace,
-                    //     JSON.stringify(phrase.modifiers),
-                    //     phrase.quoteWho,
-                    //     phrase.person,
-                    //     phrase.strongs && phrase.strongs.join(','),
-                    // ]);
                 }
-                // sqlSet.push({
-                //     statement:
-                //         'INSERT INTO "bible_phrase" ("id", "joinToRefId", "joinToVersionRefId", "versionId", "versionChapterNum", "versionVerseNum", "versionSubverseNum", "sourceTypeId", "content", "linebreak", "skipSpace", "modifiers", "quoteWho", "person", "strongs") VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                //     values: phraseInserts,
-                // });
                 for (const crossRef of globalState.crossRefStack) {
                     crossRef.prepare();
                 }
-            } // else {
+            } 
             for (let index = 0; index < globalState.phraseStack.length; index += chunkSize) {
                 const insertQb = db
                     .createQueryBuilder()
@@ -1279,7 +1250,6 @@ export class BibleEngine {
                     sqlSet.push({ statement, values });
                 } else await insertQb.execute();
             }
-            // }
 
             for (let index = 0; index < globalState.noteStack.length; index += chunkSize) {
                 const insertQb = db
@@ -1305,10 +1275,6 @@ export class BibleEngine {
                 } else await insertQb.execute();
             }
 
-            // await db.save(globalState.paragraphStack, {
-            //     reload: false
-            //     // transaction: false
-            // });
             for (let index = 0; index < globalState.paragraphStack.length; index += chunkSize) {
                 const insertQb = db
                     .createQueryBuilder()
@@ -1321,12 +1287,6 @@ export class BibleEngine {
                 } else await insertQb.execute();
             }
 
-            // // since there are not that many sections, we use the save method here, taking advantage
-            // // of the automatic relations handling (since sections can have notes)
-            // await db.save(globalState.sectionStack, {
-            //     // transaction: false,
-            //     // chunk: Math.ceil(globalState.sectionStack.length / chunkSize)
-            // });
             for (let index = 0; index < globalState.sectionStack.length; index += chunkSize) {
                 const insertQb = db
                     .createQueryBuilder()
