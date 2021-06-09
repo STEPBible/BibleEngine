@@ -130,6 +130,7 @@ export interface BibleEngineOptions {
 }
 
 export class BibleEngine {
+    static DEBUG = false;
     executeSqlSetOverride?: BibleEngineOptions['executeSqlSetOverride'];
     pDB: Promise<EntityManager>;
     private readonly CONNECTION_NAME = 'bible-engine';
@@ -215,7 +216,8 @@ export class BibleEngine {
         bookInput: BookWithContentForInput,
         options: {
             entityManager?: EntityManager;
-            genSqlOnly?: boolean;
+            skipCrossRefs?: boolean;
+            skipNotes?: boolean;
             skipStrongs?: boolean;
         } = {}
     ) {
@@ -226,13 +228,13 @@ export class BibleEngine {
             where: { versionId: version.id, osisId: bookInput.book.osisId },
         });
 
-        const contentHasNormalizedNumbers = bookInput.contentHasNormalizedNumbers || false;
+        const inputHasNormalizedNumbering = bookInput.contentHasNormalizedNumbers || false;
 
         // if we have pre-generated normalized numbers as well as chapter counts we don't need to
         // generate the bible plaintext structure
         let textData = new Map();
         let chaptersCount = bookInput.book.chaptersCount;
-        if (!contentHasNormalizedNumbers || !chaptersCount || !chaptersCount.length) {
+        if (!inputHasNormalizedNumbering || !chaptersCount || !chaptersCount.length) {
             textData = convertBibleInputToBookPlaintext(bookInput.contents);
             chaptersCount = [];
             for (const verses of textData.values()) {
@@ -263,16 +265,19 @@ export class BibleEngine {
                 );
             }
 
-            bookImportPhraseRange = await this.addBibleBookContent(
-                options.entityManager,
-                bookInput.contents,
+            bookImportPhraseRange = await this.addBibleBookContent({
+                entityManger: options.entityManager,
+                contents: bookInput.contents,
                 version,
-                bookEntity,
-                textData,
-                undefined,
-                undefined,
-                contentHasNormalizedNumbers
-            );
+                book: bookEntity,
+                context: textData,
+                inputHasNormalizedNumbering,
+                skip: {
+                    strongs: options.skipStrongs,
+                    notes: options.skipNotes,
+                    crossRefs: options.skipCrossRefs,
+                },
+            });
 
             bookEntity = await this.updateBook(
                 bookEntity,
@@ -301,16 +306,19 @@ export class BibleEngine {
                     );
                 }
 
-                bookImportPhraseRange = await this.addBibleBookContent(
-                    transactionEntityManger,
-                    bookInput.contents,
+                bookImportPhraseRange = await this.addBibleBookContent({
+                    entityManger: transactionEntityManger,
+                    contents: bookInput.contents,
                     version,
-                    bookEntity,
-                    textData,
-                    undefined,
-                    undefined,
-                    contentHasNormalizedNumbers
-                );
+                    book: bookEntity,
+                    context: textData,
+                    inputHasNormalizedNumbering,
+                    skip: {
+                        strongs: options.skipStrongs,
+                        notes: options.skipNotes,
+                        crossRefs: options.skipCrossRefs,
+                    },
+                });
 
                 bookEntity = await this.updateBook(
                     bookEntity,
@@ -681,13 +689,39 @@ export class BibleEngine {
         return { ...book, ...updates };
     }
 
-    private async addBibleBookContent(
-        entityManger: EntityManager,
-        contents: IBibleContent[],
-        version: BibleVersionEntity,
-        book: IBibleBookEntity,
-        context: BibleBookPlaintext,
-        globalState: {
+    private async addBibleBookContent({
+        entityManger,
+        contents,
+        version,
+        book,
+        context,
+        globalState = {
+            phraseStack: [],
+            paragraphStack: [],
+            sectionStack: [],
+            noteStack: [],
+            crossRefStack: [],
+            usedRefIds: new Set(),
+            currentPhraseNum: 0,
+            currentVersionChapter: 0,
+            currentVersionVerse: -1,
+            currentVersionSubverse: 0,
+        },
+        localState = {
+            modifierState: { quoteLevel: 0, indentLevel: 0 },
+            columnModifierState: {},
+            sectionLevel: 0,
+            recursionLevel: 0,
+        },
+        inputHasNormalizedNumbering = false,
+        skip = {},
+    }: {
+        entityManger: EntityManager;
+        contents: IBibleContent[];
+        version: BibleVersionEntity;
+        book: IBibleBookEntity;
+        context: BibleBookPlaintext;
+        globalState?: {
             phraseStack: BiblePhraseEntity[];
             paragraphStack: BibleParagraphEntity[];
             sectionStack: BibleSectionEntity[];
@@ -703,34 +737,24 @@ export class BibleEngine {
             currentSourceTypeId?: number;
             currentJoinToRefId?: number;
             isWithinParagraph?: boolean;
-        } = {
-            phraseStack: [],
-            paragraphStack: [],
-            sectionStack: [],
-            noteStack: [],
-            crossRefStack: [],
-            usedRefIds: new Set(),
-            currentPhraseNum: 0,
-            currentVersionChapter: 0,
-            currentVersionVerse: -1,
-            currentVersionSubverse: 0,
-        },
-        localState: {
+        };
+        localState?: {
             modifierState: PhraseModifiers;
             columnModifierState: { quoteWho?: string; person?: string };
             sectionLevel: number;
             recursionLevel: number;
-        } = {
-            modifierState: { quoteLevel: 0, indentLevel: 0 },
-            columnModifierState: {},
-            sectionLevel: 0,
-            recursionLevel: 0,
-        },
-        inputHasNormalizedNumbering = false
-    ): Promise<{ firstPhraseId: number | undefined; lastPhraseId: number | undefined }> {
+        };
+        inputHasNormalizedNumbering?: boolean;
+        skip?: {
+            crossRefs?: boolean;
+            notes?: boolean;
+            strongs?: boolean;
+        };
+    }): Promise<{ firstPhraseId: number | undefined; lastPhraseId: number | undefined }> {
+        if (BibleEngine.DEBUG && localState.recursionLevel === 0) console.time('db_prepare');
         if (!this.pDB) throw new NoDbConnectionError();
         const db = entityManger;
-        const skipStrongs = version.hasStrongs === false;
+        const skipStrongs = skip.strongs || version.hasStrongs === false;
         let firstPhraseId: number | undefined, lastPhraseId: number | undefined;
         let lastContent: IBibleContent | undefined;
         for (const content of contents) {
@@ -974,25 +998,32 @@ export class BibleEngine {
                 // check if the last and this content item are both phrases that are only
                 // distinguished by strongs - in case we don't want strongs, we merge them
                 if (
-                    skipStrongs &&
                     lastContent &&
                     (lastContent.type === 'phrase' || !lastContent.type) &&
-                    !lastContent.crossReferences &&
+                    (!lastContent.strongs || skipStrongs) &&
+                    (!lastContent.crossReferences || skip.crossRefs) &&
+                    (!lastContent.notes || skip.notes) &&
                     !lastContent.linebreak &&
-                    !lastContent.notes &&
                     !lastContent.person &&
                     !lastContent.quoteWho &&
-                    !lastContent.skipSpace &&
                     (content.type === 'phrase' || !content.type) &&
-                    !content.crossReferences &&
+                    (!content.strongs || skipStrongs) &&
+                    (!content.crossReferences || skip.crossRefs) &&
+                    (!content.notes || skip.notes) &&
                     !content.linebreak &&
-                    !content.notes &&
                     !content.person &&
-                    !content.quoteWho &&
-                    !content.skipSpace
+                    !content.quoteWho
                 ) {
-                    globalState.phraseStack[globalState.phraseStack.length - 1].content +=
-                        ' ' + content.content;
+                    const lastPhrase = globalState.phraseStack[globalState.phraseStack.length - 1];
+                    if (lastContent.skipSpace === 'both') lastPhrase.skipSpace = 'before';
+                    else if (lastContent.skipSpace === 'after') lastPhrase.skipSpace = undefined;
+                    else if (content.skipSpace === 'before') {
+                    } else lastPhrase.content += ' ';
+
+                    lastPhrase.content += content.content;
+
+                    if (content.skipSpace === 'after' || content.skipSpace === 'both')
+                        lastPhrase.skipSpace = 'after';
                     phraseMergedWithLast = true;
                 } else globalState.currentPhraseNum++;
             }
@@ -1051,12 +1082,12 @@ export class BibleEngine {
                     content.joinToVersionRefId = globalState.currentJoinToVersionRefId;
                 }
 
-                if (content.notes) {
+                if (content.notes && !skip.notes) {
                     for (const note of content.notes) {
                         globalState.noteStack.push(new BibleNoteEntity(note, phraseId));
                     }
                 }
-                if (content.crossReferences) {
+                if (content.crossReferences && !skip.crossRefs) {
                     for (const crossRef of content.crossReferences) {
                         if (!crossRef.range.versionId) crossRef.range.versionId = book.versionId;
                         globalState.crossRefStack.push(
@@ -1115,16 +1146,17 @@ export class BibleEngine {
                 const {
                     firstPhraseId: groupFirstPhraseId,
                     lastPhraseId: groupLastPhraseId,
-                } = await this.addBibleBookContent(
-                    db,
-                    content.contents,
+                } = await this.addBibleBookContent({
+                    entityManger: db,
+                    contents: content.contents,
                     version,
                     book,
                     context,
                     globalState,
-                    childState,
-                    inputHasNormalizedNumbering
-                );
+                    localState: childState,
+                    inputHasNormalizedNumbering,
+                    skip,
+                });
                 if (
                     (firstPhraseId && groupFirstPhraseId && groupFirstPhraseId < firstPhraseId) ||
                     (lastPhraseId && groupLastPhraseId && groupLastPhraseId < lastPhraseId)
@@ -1171,16 +1203,17 @@ export class BibleEngine {
                 let {
                     firstPhraseId: sectionFirstPhraseId,
                     lastPhraseId: sectionLastPhraseId,
-                } = await this.addBibleBookContent(
-                    db,
-                    content.contents,
+                } = await this.addBibleBookContent({
+                    entityManger: db,
+                    contents: content.contents,
                     version,
                     book,
                     context,
                     globalState,
-                    childState,
-                    inputHasNormalizedNumbering
-                );
+                    localState: childState,
+                    inputHasNormalizedNumbering,
+                    skip,
+                });
 
                 if (content.type === 'group' && content.groupType === 'paragraph')
                     globalState.isWithinParagraph = false;
@@ -1225,6 +1258,8 @@ export class BibleEngine {
         }
 
         if (localState.recursionLevel === 0) {
+            if (BibleEngine.DEBUG) console.timeEnd('db_prepare');
+            if (BibleEngine.DEBUG) console.time('db_set');
             // we are at the end of the root method => persist everything
 
             // RADAR: check performance of higher chunkSize
@@ -1238,7 +1273,7 @@ export class BibleEngine {
                 for (const crossRef of globalState.crossRefStack) {
                     crossRef.prepare();
                 }
-            } 
+            }
             for (let index = 0; index < globalState.phraseStack.length; index += chunkSize) {
                 const insertQb = db
                     .createQueryBuilder()
@@ -1299,7 +1334,11 @@ export class BibleEngine {
                 } else await insertQb.execute();
             }
 
+            if (BibleEngine.DEBUG) console.timeEnd('db_set');
+
+            if (BibleEngine.DEBUG) console.time('db_write');
             if (this.executeSqlSetOverride) await this.executeSqlSetOverride(sqlSet);
+            if (BibleEngine.DEBUG) console.timeEnd('db_write');
         }
 
         return { firstPhraseId, lastPhraseId };

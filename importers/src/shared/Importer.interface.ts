@@ -6,25 +6,31 @@ export interface IImporterOptions {
     sourceEncoding?: string;
     versionMeta?: Partial<IBibleVersion>;
     bookMeta?: ImporterBookMetadata;
+    skip?: { crossRefs?: boolean; notes?: boolean; strongs?: boolean };
 }
-export type ImporterBookMetadata = Map<string, {
-    abbreviation: string; title: string; number: number
-}>
+export type ImporterBookMetadata = Map<
+    string,
+    {
+        abbreviation: string;
+        title: string;
+        number: number;
+    }
+>;
 
 export interface IBibleEngineImporter {
-    new(bibleEngine: BibleEngine, options: IImporterOptions): BibleEngineImporter;
+    new (bibleEngine: BibleEngine, options: IImporterOptions): BibleEngineImporter;
 }
 
 export class BibleEngineImporter {
-    constructor(protected bibleEngine: BibleEngine, protected options: IImporterOptions = {}) { }
+    constructor(protected bibleEngine: BibleEngine, protected options: IImporterOptions = {}) {}
 
-    import() { }
+    import() {}
 
     async run() {
         await this.bibleEngine.pDB;
         console.log(`running importer: ${this}`);
         if (this.options?.versionMeta?.uid) {
-            console.log('version: ', this.options?.versionMeta?.uid)
+            console.log('version: ', this.options?.versionMeta?.uid);
         }
         return await this.import();
     }
