@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<osis>
+    <osisText osisRefWork="Bible" xml:lang="en" osisIDWork="ESV">
+        <div type="book" osisID="Gen">
+            <div type="section">
+                <title>main-section</title>
+                <chapter osisID="Gen.1">
+                    <div type="subSection">
+                        <title>sub-section</title>
+                        <verse osisID="Gen.1.1">
+                            <div type="paragraph" sID="paragraph" />
+                            paragraph1
+                            <div type="paragraph" eID="paragraph" />
+                        </verse>
+                    </div>
+                </chapter>
+            </div>
+        </div>
+    </osisText>
+</osis>
