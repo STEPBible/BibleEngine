@@ -6,14 +6,19 @@ import {
     Index,
     AfterLoad,
     BeforeInsert,
-    BeforeUpdate
+    BeforeUpdate,
 } from 'typeorm';
 import {
     generateReferenceId,
     parseReferenceId,
-    isReferenceNormalized
+    isReferenceNormalized,
 } from '../functions/reference.functions';
-import { IBibleReferenceRangeNormalized, IBibleCrossReference, IBiblePhraseWithNumbers, IBibleSectionEntity } from '../models';
+import {
+    IBibleReferenceRangeNormalized,
+    IBibleCrossReference,
+    IBiblePhraseWithNumbers,
+    IBibleSectionEntity,
+} from '../models';
 
 @Entity('bible_cross_reference')
 export class BibleCrossReferenceEntity implements IBibleCrossReference {
@@ -56,7 +61,7 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
     @Column({ nullable: true })
     @Index()
     phraseId?: number;
-        // using string notation here to prevent circular reference
+    // using string notation here to prevent circular reference
     @ManyToOne('BiblePhraseEntity', 'crossReferences')
     phrase?: IBiblePhraseWithNumbers;
 
@@ -64,7 +69,7 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
     @Index()
     sectionId?: number;
 
-        // using string notation here to prevent circular reference
+    // using string notation here to prevent circular reference
     @ManyToOne('BibleSectionEntity', 'crossReferences')
     section?: IBibleSectionEntity;
 
@@ -105,7 +110,7 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
                     normalizedVerseNum: crossRef.range.versionVerseNum,
                     normalizedChapterEndNum: crossRef.range.versionChapterEndNum,
                     normalizedVerseEndNum: crossRef.range.versionVerseEndNum,
-                    isNormalized: true
+                    isNormalized: true,
                 };
             else {
                 throw new Error(`can't generate cross reference: range is not normalized`);
@@ -128,7 +133,7 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
         this.range = {
             isNormalized: true,
             bookOsisId: normalizedRef.bookOsisId,
-            versionId: this.versionId
+            versionId: this.versionId,
         };
         if (normalizedRef.normalizedChapterNum)
             this.range.normalizedChapterNum = normalizedRef.normalizedChapterNum;
@@ -151,7 +156,7 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
 
     @BeforeInsert()
     @BeforeUpdate()
-    async prepare() {
+    prepare() {
         this.normalizedRefId = generateReferenceId(this.range);
         if (this.range.normalizedChapterEndNum || this.range.normalizedVerseEndNum)
             this.normalizedRefIdEnd = generateReferenceId({
@@ -160,7 +165,7 @@ export class BibleCrossReferenceEntity implements IBibleCrossReference {
                 normalizedChapterNum:
                     this.range.normalizedChapterEndNum || this.range.normalizedChapterNum,
                 normalizedVerseNum: this.range.normalizedVerseEndNum,
-                normalizedSubverseNum: this.range.normalizedSubverseEndNum
+                normalizedSubverseNum: this.range.normalizedSubverseEndNum,
             });
         if (this.range.partIndicator) this.partIndicator = this.range.partIndicator;
         if (this.range.partIndicatorEnd) this.partIndicatorEnd = this.range.partIndicatorEnd;

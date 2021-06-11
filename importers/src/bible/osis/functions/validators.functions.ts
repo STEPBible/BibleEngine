@@ -18,16 +18,15 @@ export function validateGroup(
 }
 
 export function stackHasParagraph(context: ParserContext, currentContainer: ParserStackItem) {
-    return (
-        context.contentContainerStack.findIndex((container) => {
-            if (container.type === 'group' && container.groupType === 'paragraph') return true;
+    for (let i = context.contentContainerStack.length - 1; i >= 0; i--) {
+        const container = context.contentContainerStack[i];
+        if (container.type === 'group' && container.groupType === 'paragraph') return true;
 
-            if (container !== currentContainer) {
-                const lastContent = container.contents[container.contents.length - 1];
-                if (lastContent?.type === 'group' && lastContent?.groupType === 'paragraph')
-                    return true;
-            }
-            return false;
-        }) !== -1
-    );
+        if (container !== currentContainer) {
+            const lastContent = container.contents[container.contents.length - 1];
+            if (lastContent?.type === 'group' && lastContent?.groupType === 'paragraph')
+                return true;
+        }
+    }
+    return false;
 }

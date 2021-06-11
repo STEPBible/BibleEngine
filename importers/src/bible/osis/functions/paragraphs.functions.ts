@@ -1,4 +1,4 @@
-import { OsisXmlNodeName } from './../../../shared/osisTypes';
+import { OsisXmlNodeName, OsisXmlNodeType } from './../../../shared/osisTypes';
 import { IBibleContentGroup } from '@bible-engine/core';
 import Logger from '../../../shared/Logger';
 import { ParserContext } from '../entities/ParserContext';
@@ -11,11 +11,13 @@ export function isBeginningOfParagraph(context: ParserContext) {
     return currentContainer?.groupType === 'paragraph' && !currentContainer?.contents?.length;
 }
 
-export const createParagraph = (): IBibleContentGroup<'paragraph'> => {
+export const createParagraph = (
+    contents: IBibleContentGroup<'paragraph'>['contents'] = []
+): IBibleContentGroup<'paragraph'> => {
     return {
         type: 'group',
         groupType: 'paragraph',
-        contents: [],
+        contents,
     };
 };
 
@@ -43,5 +45,8 @@ export const closeCurrentParagraph = (context: ParserContext) => {
 };
 
 export const sourceTextHasParagraphs = (xml: string) => {
-    return xml.includes(`<${OsisXmlNodeName.PARAGRAPH}>`);
+    return (
+        xml.includes(`<${OsisXmlNodeName.PARAGRAPH}>`) ||
+        xml.includes(`type="${OsisXmlNodeType.PARAGRAPH}"`)
+    );
 };

@@ -63,10 +63,10 @@ export const startNewSection = (context: ParserContext, elementType: OsisSection
 };
 
 export const getCurrentSection = (context: ParserContext) => {
-    return context.contentContainerStack.find((container) => {
-        if (container.type === 'section') {
-            return true;
+    for (let i = context.contentContainerStack.length - 1; i >= 0; i--) {
+        if (context.contentContainerStack[i].type === 'section') {
+            return context.contentContainerStack[i] as IBibleContentSection;
         }
-        return false;
-    });
+    }
+    return undefined;
 };

@@ -21,6 +21,10 @@ describe('sourceTextHasParagraphs', () => {
         const NORMAL_PARAGRAPH = '<p>';
         expect(sourceTextHasParagraphs(NORMAL_PARAGRAPH)).toBe(true);
     });
+    it('identifies paragraph attributes', () => {
+        const PARAGRAPH_ATTRIBUTES = '<div type="paragraph">';
+        expect(sourceTextHasParagraphs(PARAGRAPH_ATTRIBUTES)).toBe(true);
+    });
 });
 
 describe('startNewParagraph', () => {

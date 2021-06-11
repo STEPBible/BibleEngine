@@ -2,8 +2,9 @@ import { ConnectionOptions } from 'typeorm';
 
 import {
     BibleEngine,
+    BibleEngineOptions,
     BibleVersionRemoteOnlyError,
-    IBibleReferenceRangeQuery
+    IBibleReferenceRangeQuery,
 } from '@bible-engine/core';
 import { BibleApi } from './Bible.api';
 
@@ -12,20 +13,28 @@ export class BibleEngineClient {
     localBibleEngine?: BibleEngine;
 
     constructor({
+        bibleEngineConnectionOptions,
         bibleEngineOptions,
-        apiBaseUrl
+        apiBaseUrl,
     }: {
-        bibleEngineOptions?: ConnectionOptions;
+        bibleEngineConnectionOptions?: ConnectionOptions;
+        bibleEngineOptions?: BibleEngineOptions;
         apiBaseUrl?: string;
     }) {
         if (apiBaseUrl) this.remoteApi = new BibleApi(apiBaseUrl);
-        if (bibleEngineOptions) this.localBibleEngine = new BibleEngine(bibleEngineOptions);
+        if (bibleEngineConnectionOptions)
+            this.localBibleEngine = new BibleEngine(
+                bibleEngineConnectionOptions,
+                bibleEngineOptions
+            );
     }
 
     getBooksForVersion(versionUid: string, forceRemote = false) {
         if (forceRemote || !this.localBibleEngine) {
             if (this.remoteApi)
-                return this.remoteApi.getBooksForVersion({ versionUid }).then(resp => resp.result);
+                return this.remoteApi
+                    .getBooksForVersion({ versionUid })
+                    .then((resp) => resp.result);
             throw new Error(`No remote config provided`);
         } else return this.localBibleEngine.getBooksForVersionUid(versionUid);
     }
@@ -35,12 +44,12 @@ export class BibleEngineClient {
             if (this.remoteApi)
                 return this.remoteApi
                     .getDefinition({ strongNum: strong, dictionaryId: dictionary })
-                    .then(resp => resp.result);
+                    .then((resp) => resp.result);
             throw new Error(`No remote config provided`);
         } else
             return this.localBibleEngine
                 .getDictionaryEntries(strong, dictionary)
-                .then(entries => (entries.length ? entries[0] : undefined));
+                .then((entries) => (entries.length ? entries[0] : undefined));
     }
 
     async getFullDataForReferenceRange(
@@ -71,14 +80,14 @@ export class BibleEngineClient {
         }
 
         if (this.remoteApi)
-            return this.remoteApi.getReferenceRange(rangeQuery).then(resp => resp.result);
+            return this.remoteApi.getReferenceRange(rangeQuery).then((resp) => resp.result);
         throw new Error(`can't get formatted text: invalid version`);
     }
 
     getVersions(forceRemote = false) {
         if (!this.localBibleEngine || forceRemote) {
             // TODO: persist updates if local database exists
-            if (this.remoteApi) return this.remoteApi.getVersions().then(resp => resp.result);
+            if (this.remoteApi) return this.remoteApi.getVersions().then((resp) => resp.result);
             throw new Error(`No remote config provided`);
         } else return this.localBibleEngine.getVersions();
     }

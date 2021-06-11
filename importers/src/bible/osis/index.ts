@@ -124,7 +124,11 @@ export class OsisImporter extends BibleEngineImporter {
         const version = await this.bibleEngine.addVersion(context.version);
         for (const book of context.books) {
             Logger.verbose(`importing book ${book.book.title}`, context);
-            await this.bibleEngine.addBookWithContent(version, book);
+            await this.bibleEngine.addBookWithContent(version, book, {
+                skipCrossRefs: this.options.skip?.crossRefs,
+                skipNotes: this.options.skip?.notes,
+                skipStrongs: this.options.skip?.strongs,
+            });
         }
 
         return this.bibleEngine.finalizeVersion(version.id);
@@ -221,11 +225,6 @@ export class OsisImporter extends BibleEngineImporter {
                         `Duplicate book: book already exists in stack: ${tag.attributes.osisID}`,
                         context
                     );
-                }
-
-                if (tag.isSelfClosing) {
-                    // SWORD modules have self-closing book marker tags
-                    return;
                 }
 
                 if (context.currentBook) {
@@ -328,14 +327,6 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.LINE_GROUP: {
-                if (tag.isSelfClosing && tag.attributes.sID) {
-                    this.startNewLineGroup();
-                    break;
-                }
-                if (tag.isSelfClosing && tag.attributes.eID) {
-                    this.closeCurrentLineGroup(context);
-                    break;
-                }
                 this.startNewLineGroup();
                 break;
             }
@@ -484,8 +475,7 @@ export class OsisImporter extends BibleEngineImporter {
                         currentContainer.type !== 'group' ||
                         currentContainer.groupType !== 'paragraph'
                     ) {
-                        const paragraph = createParagraph();
-
+                        const paragraph = createParagraph([titleGroup]);
                         currentContainer.contents.push(paragraph);
                     } else currentContainer.contents.push(titleGroup);
                     context.contentContainerStack.push(titleGroup);
@@ -791,10 +781,6 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.LINE_GROUP: {
-                if (currentTag.isSelfClosing) {
-                    // Some SWORD modules have self-closing line groups
-                    break;
-                }
                 this.closeCurrentLineGroup(context);
                 break;
             }
@@ -1019,9 +1005,7 @@ export class OsisImporter extends BibleEngineImporter {
             if (this.context.hasParagraphsInSourceText) {
                 throw new OsisParseError(`text outside of paragraph: "${text}"`, context);
             }
-            const hasNoStructureMarkup =
-                !this.context.hasParagraphsInSourceText && !this.context.hasParagraphsInSourceText;
-            if (hasNoStructureMarkup) {
+            if (!this.context.hasParagraphsInSourceText) {
                 currentContainer = startNewParagraph(context);
             }
         }
@@ -1063,7 +1047,7 @@ export class OsisImporter extends BibleEngineImporter {
         };
 
         if (currentContainer.type !== 'group' || currentContainer.groupType !== 'paragraph') {
-            const paragraph = createParagraph();
+            const paragraph = createParagraph([lineGroupGroup]);
             currentContainer.contents.push(paragraph);
         } else currentContainer.contents.push(lineGroupGroup);
         this.context.contentContainerStack.push(lineGroupGroup);
