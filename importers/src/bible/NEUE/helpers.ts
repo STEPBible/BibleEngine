@@ -8,12 +8,12 @@ import {
     DocumentElement,
     ContentGroupType,
     BibleReferenceParser,
-    IBibleReferenceRange,
     getReferencesFromText,
     IBibleContentSection,
     IBibleContentPhrase,
     IBibleContent,
     IBibleContentGroup,
+    IBibleReferenceRangeQuery,
 } from '@bible-engine/core';
 import { startsWithPunctuationChar } from '../../shared/helpers.functions';
 
@@ -377,7 +377,7 @@ export const visitNode = (
                     // this point). In order to be able to use this data across installations (e.g.
                     // in a client-server use-case), we use the universal versionUid instead of
                     // versionId.
-                    const bibleReference: IBibleReferenceRange = {
+                    const bibleReference: IBibleReferenceRangeQuery = {
                         bookOsisId: ref.start.b,
                         versionUid: globalState.versionUid,
                         versionChapterNum: ref.start.c,

@@ -232,13 +232,17 @@ export class BibleEngine {
 
         // if we have pre-generated normalized numbers as well as chapter counts we don't need to
         // generate the bible plaintext structure
-        let textData = new Map();
+        let textData: BibleBookPlaintext = new Map();
         let chaptersCount = bookInput.book.chaptersCount;
         if (!inputHasNormalizedNumbering || !chaptersCount || !chaptersCount.length) {
             textData = convertBibleInputToBookPlaintext(bookInput.contents);
             chaptersCount = [];
             for (const verses of textData.values()) {
-                chaptersCount.push(verses.size);
+                // we need to fetch the actual key of the last verse (which is the last verse number)
+                // not only the length of the array, since there might be skipped verses in versions
+                // however `chaptersCount` needs to contain the last verse number not number of
+                // unskipped verses within a chapter
+                chaptersCount.push(Array.from(verses.keys()).pop() || 0);
             }
         }
 
