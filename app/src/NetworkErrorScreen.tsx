@@ -5,7 +5,7 @@ import Text from './Text'
 
 export default class NetworkErrorScreen extends React.Component {
   static navigationOptions = {
-    header: null,
+    headerShown: false,
   }
   render() {
     return (

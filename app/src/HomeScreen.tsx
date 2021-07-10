@@ -32,14 +32,13 @@ const DEVICE_WIDTH = Dimensions.get('window').width
 @observer
 class HomeScreen extends React.Component<{}, {}> {
   static navigationOptions = {
-    headerTitle: <NavigationHeader />,
+    headerTitle: () => <NavigationHeader />,
     headerStyle: {
       height: 49,
-      marginTop: STATUS_BAR_HEIGHT * -1 + 10,
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerLeft: null,
+    headerLeft: () => null,
   }
   flatListRef: any
   settingsRef = React.createRef()

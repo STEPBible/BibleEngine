@@ -17,7 +17,7 @@ const DEVICE_WIDTH = Dimensions.get('window').width
 
 export default class OfflineSuccessScreen extends React.Component {
   static navigationOptions = {
-    header: null,
+    headerShown: false,
   }
   state = {
     loading: false,

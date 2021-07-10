@@ -13,7 +13,7 @@ const DEVICE_WIDTH = Dimensions.get('window').width
 @observer
 export default class OnboardingScreen extends React.Component {
   static navigationOptions = {
-    header: null,
+    headerShown: false,
   }
   carousel: any
 

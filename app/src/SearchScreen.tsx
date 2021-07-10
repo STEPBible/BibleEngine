@@ -27,7 +27,7 @@ const DEVICE_HEIGHT = Dimensions.get('window').height
 @observer
 class SearchScreen extends React.Component<{}, {}> {
   static navigationOptions = {
-    header: null,
+    headerShown: false,
   }
   state = {
     searchInputText: '',
