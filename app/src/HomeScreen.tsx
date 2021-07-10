@@ -191,57 +191,55 @@ class HomeScreen extends React.Component<{}, {}> {
 
   render() {
     return (
-      <React.Fragment>
-        <SafeAreaInsetsContext.Consumer>
-          {insets => (
-            <React.Fragment>
-              <View style={{ marginTop: insets?.top || 0 }} />
-              <NavigationHeader style={{ marginTop: insets?.top || 0 }} />
-            </React.Fragment>
-          )}
-        </SafeAreaInsetsContext.Consumer>
-        <FlatList
-          data={bibleStore.chapterSections}
-          ref={ref => (this.flatListRef = ref)}
-          renderItem={this.renderItem}
-          bounces={false}
-          keyExtractor={(item, index) => `flatlist-item-${index}`}
-          contentContainerStyle={styles.container}
-          onEndReached={bibleStore.loadAnotherSection}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={bibleStore.loading && LoadingScreen}
-          ListFooterComponent={
-            bibleStore.notAllSectionsAreLoaded && <LoadingScreen />
-          }
-        />
-        <FAB
-          visible={
-            bibleStore.fontsAreReady &&
-            !bibleStore.loading &&
-            !bibleStore.showSettings &&
-            !!bibleStore.previousRange
-          }
-          color="#2F3030"
-          small
-          style={styles.previousChapterButton}
-          icon="chevron-left"
-          onPress={bibleStore.goToPreviousChapter}
-        />
-        <FAB
-          visible={
-            bibleStore.fontsAreReady &&
-            !bibleStore.loading &&
-            !bibleStore.showSettings &&
-            !!bibleStore.nextRange
-          }
-          color="#2F3030"
-          small
-          style={styles.nextChapterButton}
-          icon="chevron-right"
-          onPress={bibleStore.goToNextChapter}
-        />
-        <QuickSettings />
-      </React.Fragment>
+      <SafeAreaInsetsContext.Consumer>
+        {insets => (
+          <React.Fragment>
+            <View style={{ height: insets?.top || 0 }} />
+            <NavigationHeader />
+            <FlatList
+              data={bibleStore.chapterSections}
+              ref={ref => (this.flatListRef = ref)}
+              renderItem={this.renderItem}
+              bounces={false}
+              keyExtractor={(item, index) => `flatlist-item-${index}`}
+              contentContainerStyle={styles.container}
+              onEndReached={bibleStore.loadAnotherSection}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={bibleStore.loading && LoadingScreen}
+              ListFooterComponent={
+                bibleStore.notAllSectionsAreLoaded && <LoadingScreen />
+              }
+            />
+            <FAB
+              visible={
+                bibleStore.fontsAreReady &&
+                !bibleStore.loading &&
+                !bibleStore.showSettings &&
+                !!bibleStore.previousRange
+              }
+              color="#2F3030"
+              small
+              style={styles.previousChapterButton}
+              icon="chevron-left"
+              onPress={bibleStore.goToPreviousChapter}
+            />
+            <FAB
+              visible={
+                bibleStore.fontsAreReady &&
+                !bibleStore.loading &&
+                !bibleStore.showSettings &&
+                !!bibleStore.nextRange
+              }
+              color="#2F3030"
+              small
+              style={styles.nextChapterButton}
+              icon="chevron-right"
+              onPress={bibleStore.goToNextChapter}
+            />
+            <QuickSettings />
+          </React.Fragment>
+        )}
+      </SafeAreaInsetsContext.Consumer>
     )
   }
 }
