@@ -1,10 +1,10 @@
 import React from 'react'
-import { FlatList, Animated, Dimensions, View, StyleSheet } from 'react-native'
+import { FlatList, Dimensions, View, StyleSheet } from 'react-native'
 import { IBibleContent, IBiblePhrase } from '@bible-engine/core'
-import { FAB, TouchableRipple, Surface } from 'react-native-paper'
+import { FAB } from 'react-native-paper'
 import { observer } from 'mobx-react/native'
 import store from 'react-native-simple-store'
-import BottomSheet from 'reanimated-bottom-sheet'
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 import {
   Margin,
@@ -12,7 +12,6 @@ import {
   Settings,
   getDebugStyles,
   FontFamily,
-  STATUS_BAR_HEIGHT,
   AsyncStorageKey,
 } from './Constants'
 import NavigationHeader from './NavigationHeader'
@@ -21,24 +20,14 @@ import CrossReference from './CrossReference'
 import Footnote from './Footnote'
 import Text from './Text'
 import LoadingScreen from './LoadingScreen'
-import NetworkErrorScreen from './NetworkErrorScreen'
 import bibleStore from './BibleStore'
 import { observe } from 'mobx'
 import QuickSettings from './QuickSettings'
 
-const DEVICE_HEIGHT = Dimensions.get('window').height
-const DEVICE_WIDTH = Dimensions.get('window').width
-
 @observer
 class HomeScreen extends React.Component<{}, {}> {
   static navigationOptions = {
-    headerTitle: () => <NavigationHeader />,
-    headerStyle: {
-      height: 49,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
-    headerLeft: () => null,
+    headerShown: false,
   }
   flatListRef: any
   settingsRef = React.createRef()
@@ -203,6 +192,14 @@ class HomeScreen extends React.Component<{}, {}> {
   render() {
     return (
       <React.Fragment>
+        <SafeAreaInsetsContext.Consumer>
+          {insets => (
+            <React.Fragment>
+              <View style={{ marginTop: insets?.top || 0 }} />
+              <NavigationHeader style={{ marginTop: insets?.top || 0 }} />
+            </React.Fragment>
+          )}
+        </SafeAreaInsetsContext.Consumer>
         <FlatList
           data={bibleStore.chapterSections}
           ref={ref => (this.flatListRef = ref)}
