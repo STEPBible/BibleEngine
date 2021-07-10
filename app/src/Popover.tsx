@@ -27,7 +27,7 @@ import {
   getRectForRef,
 } from './Utility'
 
-const noop = () => {}
+const noop = () => { }
 
 const DEFAULT_ARROW_SIZE = new Size(16, 8)
 const DEFAULT_BORDER_RADIUS = 10
@@ -270,8 +270,8 @@ class Popover extends React.Component {
         ) {
           this.debug(
             'measureContent - Waiting ' +
-              (this.getDisplayArea() ? 'for Rect' : 'for Display Area') +
-              ' - requestedContentSize',
+            (this.getDisplayArea() ? 'for Rect' : 'for Display Area') +
+            ' - requestedContentSize',
             requestedContentSize
           )
           setTimeout(() => this.measureContent(requestedContentSize), 100)
@@ -320,10 +320,10 @@ class Popover extends React.Component {
         this.measureContentTimeout = setTimeout(() => {
           this.debug(
             'measureContent - new requestedContentSize: ' +
-              JSON.stringify(requestedContentSize) +
-              ' (used to be ' +
-              JSON.stringify(this.state.requestedContentSize) +
-              ')'
+            JSON.stringify(requestedContentSize) +
+            ' (used to be ' +
+            JSON.stringify(this.state.requestedContentSize) +
+            ')'
           )
           this.handleGeomChange(requestedContentSize)
         }, 50)
@@ -507,9 +507,9 @@ class Popover extends React.Component {
     anchorPoint.x = Math.min(
       anchorPoint.x,
       displayArea.x +
-        displayArea.width -
-        arrowSize.width / 2 -
-        this.getBorderRadius()
+      displayArea.width -
+      arrowSize.width / 2 -
+      this.getBorderRadius()
     )
 
     return {
@@ -564,9 +564,9 @@ class Popover extends React.Component {
     anchorPoint.x = Math.min(
       anchorPoint.x,
       displayArea.x +
-        displayArea.width -
-        arrowSize.width / 2 -
-        this.getBorderRadius()
+      displayArea.width -
+      arrowSize.width / 2 -
+      this.getBorderRadius()
     )
 
     return {
@@ -626,9 +626,9 @@ class Popover extends React.Component {
     anchorPoint.y = Math.min(
       anchorPoint.y,
       displayArea.y +
-        displayArea.height -
-        arrowSize.height / 2 -
-        this.getBorderRadius()
+      displayArea.height -
+      arrowSize.height / 2 -
+      this.getBorderRadius()
     )
 
     return {
@@ -687,9 +687,9 @@ class Popover extends React.Component {
     anchorPoint.y = Math.min(
       anchorPoint.y,
       displayArea.y +
-        displayArea.height -
-        arrowSize.height / 2 -
-        this.getBorderRadius()
+      displayArea.height -
+      arrowSize.height / 2 -
+      this.getBorderRadius()
     )
 
     return {
@@ -720,9 +720,9 @@ class Popover extends React.Component {
     }
     if (
       displayArea.x +
-        displayArea.width -
-        (fromRect.x + fromRect.width) -
-        arrowSize.width >=
+      displayArea.width -
+      (fromRect.x + fromRect.width) -
+      arrowSize.width >=
       requestedContentSize.width
     )
       // We could fit it on the right side
@@ -773,17 +773,17 @@ class Popover extends React.Component {
         displayArea.y + displayArea.height - (fromRect.y + fromRect.height)
       return topSpace - 50 > bottomSpace
         ? this.computeGeometry({
-            requestedContentSize,
-            placement: PLACEMENT_OPTIONS.TOP,
-            fromRect,
-            displayArea,
-          })
+          requestedContentSize,
+          placement: PLACEMENT_OPTIONS.TOP,
+          fromRect,
+          displayArea,
+        })
         : this.computeGeometry({
-            requestedContentSize,
-            placement: PLACEMENT_OPTIONS.BOTTOM,
-            fromRect,
-            displayArea,
-          })
+          requestedContentSize,
+          placement: PLACEMENT_OPTIONS.BOTTOM,
+          fromRect,
+          displayArea,
+        })
     }
   }
 
