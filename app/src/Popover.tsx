@@ -1197,18 +1197,22 @@ class Popover extends React.Component {
       Animated.timing(values.fade, {
         ...commonConfig,
         toValue: fade,
+        useNativeDriver: true,
       }),
       Animated.timing(values.translate, {
         ...commonConfig,
         toValue: translatePoint,
+        useNativeDriver: true,
       }),
       Animated.timing(values.scale, {
         ...commonConfig,
         toValue: scale,
+        useNativeDriver: true,
       }),
       Animated.timing(values.translateArrow, {
         ...commonConfig,
         toValue: newArrowLocation,
+        useNativeDriver: true,
       }),
     ]).start(() => {
       this.animating = false
