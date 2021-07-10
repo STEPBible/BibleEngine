@@ -219,7 +219,7 @@ class HomeScreen extends React.Component<{}, {}> {
               }
               color="#2F3030"
               small
-              style={styles.previousChapterButton}
+              style={this.prevChapterButtonStyle(insets?.bottom || 0)}
               icon="chevron-left"
               onPress={bibleStore.goToPreviousChapter}
             />
@@ -232,7 +232,7 @@ class HomeScreen extends React.Component<{}, {}> {
               }
               color="#2F3030"
               small
-              style={styles.nextChapterButton}
+              style={this.nextChapterButtonStyle(insets?.bottom || 0)}
               icon="chevron-right"
               onPress={bibleStore.goToNextChapter}
             />
@@ -242,7 +242,21 @@ class HomeScreen extends React.Component<{}, {}> {
       </SafeAreaInsetsContext.Consumer>
     )
   }
+
+  prevChapterButtonStyle = (bottomInset: number) => ({
+    ...styles.chapterButton,
+    bottom: DEFAULT_NAV_BUTTONS_INSET + bottomInset,
+    left: DEFAULT_NAV_BUTTONS_INSET,
+  })
+
+  nextChapterButtonStyle = (bottomInset: number) => ({
+    ...styles.chapterButton,
+    bottom: DEFAULT_NAV_BUTTONS_INSET + bottomInset,
+    right: DEFAULT_NAV_BUTTONS_INSET,
+  })
 }
+
+const DEFAULT_NAV_BUTTONS_INSET = 16
 
 const styles = StyleSheet.create({
   container: {
@@ -259,17 +273,9 @@ const styles = StyleSheet.create({
     padding: 24,
     textAlign: 'center',
   },
-  previousChapterButton: {
+  chapterButton: {
     backgroundColor: '#F9F9F9',
-    bottom: 16,
-    left: 16,
     position: 'absolute',
-  },
-  nextChapterButton: {
-    backgroundColor: '#F9F9F9',
-    bottom: 16,
-    position: 'absolute',
-    right: 16,
   },
   phrase: { flexDirection: 'row', ...getDebugStyles() },
   phraseText: {
