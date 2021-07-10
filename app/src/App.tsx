@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useKeepAwake } from 'expo-keep-awake'
 import { createAppContainer } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
-import { SafeAreaProvider } from 'react-native-safe-area-view'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'react-native'
 import { Provider as PaperProvider, DarkTheme } from 'react-native-paper'
 
