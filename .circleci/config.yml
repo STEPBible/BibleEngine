@@ -97,8 +97,8 @@ jobs:
                       expo login --non-interactive -u technical@tyndalehouse.com
                       EXPO_DEBUG=true expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
     deploy_android:
-        macos:
-            xcode: 11.3.0
+        docker:
+            - image: circleci/node:14.15.3
         steps:
             - checkout
             - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
@@ -118,8 +118,8 @@ jobs:
                   no_output_timeout: 30m
             - run: cd app && yarn expo upload:android --non-interactive --key ~/secrets.json
     deploy_ios:
-        macos:
-            xcode: 11.3.0
+        docker:
+            - image: circleci/node:14.15.3
         steps:
             - checkout
             - restore_cache:
