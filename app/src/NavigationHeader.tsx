@@ -76,9 +76,9 @@ class NavigationHeader extends React.Component<Props, {}> {
 const styles = StyleSheet.create({
   header: {
     flex: 1,
-    minHeight: 49,
     flexDirection: 'row',
-    height: NAV_BAR_HEIGHT,
+    minHeight: NAV_BAR_HEIGHT,
+    maxHeight: NAV_BAR_HEIGHT,
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
