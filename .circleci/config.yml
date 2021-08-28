@@ -76,7 +76,6 @@ jobs:
     #         - run: core/src/tests/mysql_migration_tests.sh
     #         - run: core/src/tests/postgres_migration_tests.sh
     deploy_expo:
-        resource_class: medium+
         docker:
             - image: circleci/node:14.15.3
         steps:
@@ -110,14 +109,15 @@ jobs:
                       - yarn-mac-{{ checksum "yarn.lock" }}
             - run: yarn install --frozen-lockfile
             - run: cd app && yarn install --frozen-lockfile
-            - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
+            - run: yarn global add expo-cli
+            - run: cd app && expo login --non-interactive -u technical@tyndalehouse.com
             - run:
-                  command: cd app && yarn expo build:android --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
+                  command: cd app && expo build:android --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
                   no_output_timeout: 30m
             - run:
-                  command: cd app && yarn expo build:android --non-interactive --no-publish -t app-bundle --release-channel $(git rev-parse --short HEAD)
+                  command: cd app && expo build:android --non-interactive --no-publish -t app-bundle --release-channel $(git rev-parse --short HEAD)
                   no_output_timeout: 30m
-            - run: cd app && yarn expo upload:android --non-interactive --key ~/secrets.json
+            - run: cd app && expo upload:android --non-interactive --key ~/secrets.json
     deploy_ios:
         docker:
             - image: circleci/node:14.15.3
@@ -135,8 +135,9 @@ jobs:
                   paths:
                       - node_modules
                       - app/node_modules
-            - run: cd app && yarn expo login --non-interactive -u technical@tyndalehouse.com
+            - run: yarn global add expo-cli
+            - run: cd app && expo login --non-interactive -u technical@tyndalehouse.com
             - run:
-                  command: cd app && yarn expo build:ios --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
+                  command: cd app && expo build:ios --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
                   no_output_timeout: 30m
-            - run: cd app && yarn expo upload:ios --non-interactive
+            - run: cd app && expo upload:ios --non-interactive
