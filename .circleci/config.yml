@@ -95,7 +95,7 @@ jobs:
                       export PATH="$PATH:$( yarn global bin )"
                       cd app
                       expo login --non-interactive -u technical@tyndalehouse.com
-                      EXPO_DEBUG=true expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
+                      EXPO_DEBUG=true NODE_OPTIONS=--max_old_space_size=4096 expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
     deploy_android:
         docker:
             - image: circleci/node:14.15.3
