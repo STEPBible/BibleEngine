@@ -76,7 +76,7 @@ jobs:
     #         - run: core/src/tests/mysql_migration_tests.sh
     #         - run: core/src/tests/postgres_migration_tests.sh
     deploy_expo:
-        resource_class: large
+        resource_class: medium+
         docker:
             - image: circleci/node:14.15.3
         steps:
