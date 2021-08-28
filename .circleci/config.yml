@@ -95,7 +95,7 @@ jobs:
                       export PATH="$PATH:$( yarn global bin )"
                       cd app
                       expo login --non-interactive -u technical@tyndalehouse.com
-                      EXPO_DEBUG=true NODE_OPTIONS=--max_old_space_size=8192 expo publish --non-interactive --release-channel $(git rev-parse --short HEAD)
+                      EXPO_DEBUG=true NODE_OPTIONS=--max_old_space_size=8192 expo publish --non-interactive --release-channel $(git rev-parse HEAD)
     deploy_android:
         docker:
             - image: circleci/node:14.15.3
@@ -112,10 +112,10 @@ jobs:
             - run: yarn global add expo-cli
             - run: cd app && expo login --non-interactive -u technical@tyndalehouse.com
             - run:
-                  command: cd app && expo build:android --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
+                  command: cd app && expo build:android --non-interactive --no-publish --release-channel $(git rev-parse HEAD)
                   no_output_timeout: 30m
             - run:
-                  command: cd app && expo build:android --non-interactive --no-publish -t app-bundle --release-channel $(git rev-parse --short HEAD)
+                  command: cd app && expo build:android --non-interactive --no-publish -t app-bundle --release-channel $(git rev-parse HEAD)
                   no_output_timeout: 30m
             - run: cd app && expo upload:android --non-interactive --key ~/secrets.json
     deploy_ios:
@@ -138,6 +138,6 @@ jobs:
             - run: yarn global add expo-cli
             - run: cd app && expo login --non-interactive -u technical@tyndalehouse.com
             - run:
-                  command: cd app && expo build:ios --non-interactive --no-publish --release-channel $(git rev-parse --short HEAD)
+                  command: cd app && expo build:ios --non-interactive --no-publish --release-channel $(git rev-parse HEAD)
                   no_output_timeout: 30m
             - run: cd app && expo upload:ios --non-interactive
