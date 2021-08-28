@@ -76,23 +76,27 @@ jobs:
     #         - run: core/src/tests/mysql_migration_tests.sh
     #         - run: core/src/tests/postgres_migration_tests.sh
     deploy_expo:
-        docker:
-            - image: circleci/node:14.15.3
+        machine:
+            image: ubuntu-1604:201903-01
+        environment:
+            BASH_ENV: /opt/circleci/.nvm/nvm.sh
         steps:
             - checkout
             - run: cd ~ && git clone https://github.com/danbenn/step-bible-secrets.git
             - run: cp ~/step-bible-secrets/.env app
             - run: cp ~/step-bible-secrets/esvSearchIndex.db app/assets
+            - run: core/src/tests/install_yarn.sh
             - restore_cache:
                   name: Restore Yarn Package Cache
                   keys:
                       - yarn-modules-{{ checksum "yarn.lock" }}
-            - run: yarn install --frozen-lockfile
-            - run: cd app && yarn install --frozen-lockfile
+            - run: nvm use 14.15.3 && yarn install --frozen-lockfile
+            - run: cd app && nvm use 14.15.3 && yarn install --frozen-lockfile
             - run: yarn global add expo-cli
             - run:
                   command: |
                       export PATH="$PATH:$( yarn global bin )"
+                      nvm use 14.15.3
                       cd app
                       expo login --non-interactive -u technical@tyndalehouse.com
                       EXPO_DEBUG=true NODE_OPTIONS=--max_old_space_size=8192 expo publish --non-interactive --release-channel $(git rev-parse HEAD)
