@@ -121,7 +121,7 @@ jobs:
             - run:
                   command: cd app && yarn expo build:android --non-interactive --no-publish -t app-bundle --release-channel $(git rev-parse HEAD)
                   no_output_timeout: 30m
-            - run: cd app && yarn expo upload:android --non-interactive --key ~/secrets.json
+            - run: cd app && yarn expo upload:android --non-interactive --key ~/secrets.json --latest
     deploy_ios:
         docker:
             - image: circleci/node:14.15.3
