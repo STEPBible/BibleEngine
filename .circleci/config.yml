@@ -90,14 +90,14 @@ jobs:
                   name: Restore Yarn Package Cache
                   keys:
                       - yarn-modules-{{ checksum "yarn.lock" }}
-            - run: nvm use 14.15.3 && yarn install --frozen-lockfile
-            - run: cd app && nvm use 14.15.3 && yarn install --frozen-lockfile
-            - run: yarn global add expo-cli
             - run:
                   command: |
                       export PATH="$PATH:$( yarn global bin )"
                       nvm use 14.15.3
+                      yarn install --frozen-lockfile
                       cd app
+                      yarn install --frozen-lockfile
+                      yarn global add expo-cli
                       expo login --non-interactive -u technical@tyndalehouse.com
                       EXPO_DEBUG=true NODE_OPTIONS=--max_old_space_size=8192 expo publish --non-interactive --release-channel $(git rev-parse HEAD)
     deploy_android:
