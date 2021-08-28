@@ -4,20 +4,20 @@ workflows:
     build_test_deploy:
         jobs:
             - build_yarn
-            - test:
-                  requires:
-                      - build_yarn
-            - test_migrations:
-                  requires:
-                      - build_yarn
+            # - test:
+            #       requires:
+            #           - build_yarn
+            # - test_migrations:
+            #       requires:
+            #           - build_yarn
             - request_deploy_app:
                   type: approval
             - deploy_expo:
                   context: expo-credentials
                   requires:
                       - request_deploy_app
-                      - test
-                      - test_migrations
+                    #   - test
+                    #   - test_migrations
             - deploy_ios:
                   context: expo-credentials
                   requires:
@@ -44,37 +44,37 @@ jobs:
                   paths:
                       - node_modules
                       - app/node_modules
-    test:
-        docker:
-            - image: circleci/node:14.15.3
-        steps:
-            - checkout
-            - restore_cache:
-                  name: Restore Yarn Package Cache
-                  keys:
-                      - yarn-modules-{{ checksum "yarn.lock" }}
-            - run: yarn install --frozen-lockfile
-            - run: cd core && yarn test
-            - run: cd importers && yarn test
-            - run: cd client && yarn test --passWithNoTests
-            - run: cd app && yarn install
-            - run: cd app && yarn test
-    test_migrations:
-        machine:
-            image: ubuntu-1604:201903-01
-        environment:
-            BASH_ENV: /opt/circleci/.nvm/nvm.sh
-        steps:
-            - checkout
-            - run: core/src/tests/install_yarn.sh
-            - restore_cache:
-                  name: Restore Yarn Package Cache
-                  keys:
-                      - yarn-modules-{{ checksum "yarn.lock" }}
-            - run: nvm use 14.15.3 && yarn install --frozen-lockfile
-            - run: core/src/tests/sqlite_migration_tests.sh
-            - run: core/src/tests/mysql_migration_tests.sh
-            - run: core/src/tests/postgres_migration_tests.sh
+    # test:
+    #     docker:
+    #         - image: circleci/node:14.15.3
+    #     steps:
+    #         - checkout
+    #         - restore_cache:
+    #               name: Restore Yarn Package Cache
+    #               keys:
+    #                   - yarn-modules-{{ checksum "yarn.lock" }}
+    #         - run: yarn install --frozen-lockfile
+    #         - run: cd core && yarn test
+    #         - run: cd importers && yarn test
+    #         - run: cd client && yarn test --passWithNoTests
+    #         - run: cd app && yarn install
+    #         - run: cd app && yarn test
+    # test_migrations:
+    #     machine:
+    #         image: ubuntu-1604:201903-01
+    #     environment:
+    #         BASH_ENV: /opt/circleci/.nvm/nvm.sh
+    #     steps:
+    #         - checkout
+    #         - run: core/src/tests/install_yarn.sh
+    #         - restore_cache:
+    #               name: Restore Yarn Package Cache
+    #               keys:
+    #                   - yarn-modules-{{ checksum "yarn.lock" }}
+    #         - run: nvm use 14.15.3 && yarn install --frozen-lockfile
+    #         - run: core/src/tests/sqlite_migration_tests.sh
+    #         - run: core/src/tests/mysql_migration_tests.sh
+    #         - run: core/src/tests/postgres_migration_tests.sh
     deploy_expo:
         docker:
             - image: circleci/node:14.15.3
