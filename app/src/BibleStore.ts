@@ -14,7 +14,7 @@ import {
   DATABASE_DOWNLOAD_URL,
   SENTRY_DSN,
   GOOGLE_ANALYTICS_TRACKING_ID,
-} from 'react-native-dotenv'
+} from '@env'
 import 'react-native-console-time-polyfill'
 import { ConnectionOptions } from 'typeorm'
 import { AsyncStorage, LayoutAnimation } from 'react-native'
