@@ -68,14 +68,6 @@ git clone https://github.com/tyndale/BibleEngine.git
 cd BibleEngine
 ```
 
-Use the mobile-friendly version of TypeORM:
-
-```
-git checkout expo-app
-git checkout master
-git checkout expo-app -- core/typeorm.ts
-```
-
 Build Typescript files, and ignore any warnings or errors:
 
 ```
@@ -123,12 +115,6 @@ Reset everything to master, and remove untracked files like node_modules:
 git checkout master
 git pull origin master
 git clean -xdff
-```
-
-Use the mobile-friendly version of TypeORM:
-
-```
-git checkout expo-app -- core/typeorm.ts
 ```
 
 Rebuild the Typescript files:
