@@ -35,6 +35,10 @@ class HomeScreen extends React.Component<{}, {}> {
 
   state = {
     fontScale: 1,
+    chapterSections: [],
+    previousRange: {},
+    loading: false,
+    nextRange: {},
   }
 
   constructor(props) {
@@ -49,15 +53,33 @@ class HomeScreen extends React.Component<{}, {}> {
       }
     })
     await bibleStore.initialize()
-    observe(bibleStore, 'loading', () => {
+    observe(bibleStore, 'loading', (value) => {
+      this.setState({ ...this.state, loading: value.newValue })
       this.scrollToTop()
+    })
+    observe(bibleStore, 'nextRange', (value) => {
+      console.log('value: ', )
+      this.setState({ ...this.state, previousRange: value.newValue })
+    })
+    observe(bibleStore, 'previousRange', (value) => {
+      this.setState({ ...this.state, previousRange: value.newValue })
+    })
+    observe(bibleStore, 'chapterSections', (value) => {
+      this.setState({ ...this.state, chapterSections: value.newValue })
     })
     observe(bibleStore, 'fontScale', () => {
       // This component doesnt react to BibleStore.fontScale updates, for some reason
       // So we have to set the fontScale in the local component state
       this.setState({ ...this.state, fontScale: bibleStore.fontScale })
     })
-    this.setState({ ...this.state, fontScale: bibleStore.fontScale })
+    this.setState({
+      ...this.state,
+      fontScale: bibleStore.fontScale,
+      chapterSections: bibleStore.chapterSections,
+      loading: bibleStore.loading,
+      nextRange: bibleStore.nextRange,
+      previousRange: bibleStore.previousRange,
+    })
   }
 
   renderItem = (content: any, index: number): any => {
@@ -170,15 +192,6 @@ class HomeScreen extends React.Component<{}, {}> {
     )
   }
 
-  scaledFontSize = (style: any) => {
-    return {
-      ...style,
-      fontSize: style.fontSize
-        ? style.fontSize * bibleStore.fontScale
-        : undefined,
-    }
-  }
-
   renderFlatlistItem = ({ item, index }) => {
     return this.renderItem(item, index)
   }
@@ -197,7 +210,7 @@ class HomeScreen extends React.Component<{}, {}> {
             <View style={{ height: insets?.top || 0 }} />
             <NavigationHeader />
             <FlatList
-              data={bibleStore.chapterSections}
+              data={this.state.chapterSections}
               ref={ref => (this.flatListRef = ref)}
               renderItem={this.renderItem}
               bounces={false}
@@ -205,7 +218,7 @@ class HomeScreen extends React.Component<{}, {}> {
               contentContainerStyle={styles.container}
               onEndReached={bibleStore.loadAnotherSection}
               showsVerticalScrollIndicator={false}
-              ListEmptyComponent={bibleStore.loading && LoadingScreen}
+              ListEmptyComponent={this.state.loading && LoadingScreen}
               ListFooterComponent={
                 bibleStore.notAllSectionsAreLoaded && <LoadingScreen />
               }
@@ -213,9 +226,9 @@ class HomeScreen extends React.Component<{}, {}> {
             <FAB
               visible={
                 bibleStore.fontsAreReady &&
-                !bibleStore.loading &&
+                !this.state.loading &&
                 !bibleStore.showSettings &&
-                !!bibleStore.previousRange
+                !!this.state.previousRange
               }
               color="#2F3030"
               small
@@ -226,9 +239,9 @@ class HomeScreen extends React.Component<{}, {}> {
             <FAB
               visible={
                 bibleStore.fontsAreReady &&
-                !bibleStore.loading &&
+                !this.state.loading &&
                 !bibleStore.showSettings &&
-                !!bibleStore.nextRange
+                !!this.state.nextRange
               }
               color="#2F3030"
               small

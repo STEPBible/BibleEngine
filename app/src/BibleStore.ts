@@ -214,7 +214,6 @@ class BibleStore {
       bibleEngineClient.localBibleEngine = bibleEngine
       await this.setVersions()
     } catch (e) {
-      console.error('Couldnt set local database: ', e)
       Sentry.Native.captureException(e)
       await FileSystem.deleteAsync(DATABASE_PATH, { idempotent: true })
     }
@@ -225,7 +224,7 @@ class BibleStore {
     const db = await bibleEngine.pDB
     await db.connection.close()
     const expoDb: any = await SQLite.openDatabase('bibles.db')
-    expoDb.close()
+    await expoDb._db.close()
   }
 
   async createSqliteDirectory() {
