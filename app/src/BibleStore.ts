@@ -225,7 +225,7 @@ class BibleStore {
     const db = await bibleEngine.pDB
     await db.connection.close()
     const expoDb: any = await SQLite.openDatabase('bibles.db')
-    expoDb._db.close()
+    expoDb.close()
   }
 
   async createSqliteDirectory() {
