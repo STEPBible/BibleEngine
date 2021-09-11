@@ -3,7 +3,7 @@ import { View, Image, Dimensions, LayoutAnimation } from 'react-native'
 import { TouchableRipple } from 'react-native-paper'
 import { observer } from 'mobx-react/native'
 import Carousel, { Pagination } from 'react-native-snap-carousel'
-import SafeAreaView from 'react-native-safe-area-view'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { FontFamily, Color, FontSize, Margin } from './Constants'
 import Text from './Text'
@@ -13,7 +13,7 @@ const DEVICE_WIDTH = Dimensions.get('window').width
 @observer
 export default class OnboardingScreen extends React.Component {
   static navigationOptions = {
-    header: null,
+    headerShown: false,
   }
   carousel: any
 

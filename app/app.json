@@ -4,13 +4,11 @@
     "description": "",
     "slug": "step-bible",
     "privacy": "unlisted",
-    "sdkVersion": "37.0.0",
     "platforms": [
       "ios",
       "android"
     ],
-    "version": "2.1.0",
-    "orientation": "portrait",
+    "version": "2.1.2",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -27,11 +25,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tyndale.step",
-      "buildNumber": "16"
+      "buildNumber": "24"
     },
     "android": {
       "package": "com.tyndale.stepbible",
-      "versionCode": 22
+      "versionCode": 26
     },
     "packagerOpts": {
       "sourceExts": [

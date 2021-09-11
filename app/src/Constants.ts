@@ -5,8 +5,6 @@ import Constants from 'expo-constants'
 import { Platform } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 
-import { GOOGLE_ANALYTICS_TRACKING_ID } from 'react-native-dotenv'
-
 export const Flags = {
   DEBUG: false,
   USE_CACHE: true,

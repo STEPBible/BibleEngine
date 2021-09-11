@@ -1,10 +1,10 @@
 import React from 'react'
-import { FlatList, Animated, Dimensions, View, StyleSheet } from 'react-native'
+import { FlatList, Dimensions, View, StyleSheet } from 'react-native'
 import { IBibleContent, IBiblePhrase } from '@bible-engine/core'
-import { FAB, TouchableRipple, Surface } from 'react-native-paper'
+import { FAB } from 'react-native-paper'
 import { observer } from 'mobx-react/native'
 import store from 'react-native-simple-store'
-import BottomSheet from 'reanimated-bottom-sheet'
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 import {
   Margin,
@@ -12,7 +12,6 @@ import {
   Settings,
   getDebugStyles,
   FontFamily,
-  STATUS_BAR_HEIGHT,
   AsyncStorageKey,
 } from './Constants'
 import NavigationHeader from './NavigationHeader'
@@ -21,25 +20,14 @@ import CrossReference from './CrossReference'
 import Footnote from './Footnote'
 import Text from './Text'
 import LoadingScreen from './LoadingScreen'
-import NetworkErrorScreen from './NetworkErrorScreen'
 import bibleStore from './BibleStore'
 import { observe } from 'mobx'
 import QuickSettings from './QuickSettings'
 
-const DEVICE_HEIGHT = Dimensions.get('window').height
-const DEVICE_WIDTH = Dimensions.get('window').width
-
 @observer
 class HomeScreen extends React.Component<{}, {}> {
   static navigationOptions = {
-    headerTitle: <NavigationHeader />,
-    headerStyle: {
-      height: 49,
-      marginTop: STATUS_BAR_HEIGHT * -1 + 10,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
-    headerLeft: null,
+    headerShown: false,
   }
   flatListRef: any
   settingsRef = React.createRef()
@@ -47,6 +35,10 @@ class HomeScreen extends React.Component<{}, {}> {
 
   state = {
     fontScale: 1,
+    chapterSections: [],
+    previousRange: {},
+    loading: false,
+    nextRange: {},
   }
 
   constructor(props) {
@@ -61,15 +53,33 @@ class HomeScreen extends React.Component<{}, {}> {
       }
     })
     await bibleStore.initialize()
-    observe(bibleStore, 'loading', () => {
+    observe(bibleStore, 'loading', (value) => {
+      this.setState({ ...this.state, loading: value.newValue })
       this.scrollToTop()
+    })
+    observe(bibleStore, 'nextRange', (value) => {
+      console.log('value: ', )
+      this.setState({ ...this.state, previousRange: value.newValue })
+    })
+    observe(bibleStore, 'previousRange', (value) => {
+      this.setState({ ...this.state, previousRange: value.newValue })
+    })
+    observe(bibleStore, 'chapterSections', (value) => {
+      this.setState({ ...this.state, chapterSections: value.newValue })
     })
     observe(bibleStore, 'fontScale', () => {
       // This component doesnt react to BibleStore.fontScale updates, for some reason
       // So we have to set the fontScale in the local component state
       this.setState({ ...this.state, fontScale: bibleStore.fontScale })
     })
-    this.setState({ ...this.state, fontScale: bibleStore.fontScale })
+    this.setState({
+      ...this.state,
+      fontScale: bibleStore.fontScale,
+      chapterSections: bibleStore.chapterSections,
+      loading: bibleStore.loading,
+      nextRange: bibleStore.nextRange,
+      previousRange: bibleStore.previousRange,
+    })
   }
 
   renderItem = (content: any, index: number): any => {
@@ -182,15 +192,6 @@ class HomeScreen extends React.Component<{}, {}> {
     )
   }
 
-  scaledFontSize = (style: any) => {
-    return {
-      ...style,
-      fontSize: style.fontSize
-        ? style.fontSize * bibleStore.fontScale
-        : undefined,
-    }
-  }
-
   renderFlatlistItem = ({ item, index }) => {
     return this.renderItem(item, index)
   }
@@ -203,52 +204,72 @@ class HomeScreen extends React.Component<{}, {}> {
 
   render() {
     return (
-      <React.Fragment>
-        <FlatList
-          data={bibleStore.chapterSections}
-          ref={ref => (this.flatListRef = ref)}
-          renderItem={this.renderItem}
-          bounces={false}
-          keyExtractor={(item, index) => `flatlist-item-${index}`}
-          contentContainerStyle={styles.container}
-          onEndReached={bibleStore.loadAnotherSection}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={bibleStore.loading && LoadingScreen}
-          ListFooterComponent={
-            bibleStore.notAllSectionsAreLoaded && <LoadingScreen />
-          }
-        />
-        <FAB
-          visible={
-            bibleStore.fontsAreReady &&
-            !bibleStore.loading &&
-            !bibleStore.showSettings &&
-            !!bibleStore.previousRange
-          }
-          color="#2F3030"
-          small
-          style={styles.previousChapterButton}
-          icon="chevron-left"
-          onPress={bibleStore.goToPreviousChapter}
-        />
-        <FAB
-          visible={
-            bibleStore.fontsAreReady &&
-            !bibleStore.loading &&
-            !bibleStore.showSettings &&
-            !!bibleStore.nextRange
-          }
-          color="#2F3030"
-          small
-          style={styles.nextChapterButton}
-          icon="chevron-right"
-          onPress={bibleStore.goToNextChapter}
-        />
-        <QuickSettings />
-      </React.Fragment>
+      <SafeAreaInsetsContext.Consumer>
+        {insets => (
+          <React.Fragment>
+            <View style={{ height: insets?.top || 0 }} />
+            <NavigationHeader />
+            <FlatList
+              data={this.state.chapterSections}
+              ref={ref => (this.flatListRef = ref)}
+              renderItem={this.renderItem}
+              bounces={false}
+              keyExtractor={(item, index) => `flatlist-item-${index}`}
+              contentContainerStyle={styles.container}
+              onEndReached={bibleStore.loadAnotherSection}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={this.state.loading && LoadingScreen}
+              ListFooterComponent={
+                bibleStore.notAllSectionsAreLoaded && <LoadingScreen />
+              }
+            />
+            <FAB
+              visible={
+                bibleStore.fontsAreReady &&
+                !this.state.loading &&
+                !bibleStore.showSettings &&
+                !!this.state.previousRange
+              }
+              color="#2F3030"
+              small
+              style={this.prevChapterButtonStyle(insets?.bottom || 0)}
+              icon="chevron-left"
+              onPress={bibleStore.goToPreviousChapter}
+            />
+            <FAB
+              visible={
+                bibleStore.fontsAreReady &&
+                !this.state.loading &&
+                !bibleStore.showSettings &&
+                !!this.state.nextRange
+              }
+              color="#2F3030"
+              small
+              style={this.nextChapterButtonStyle(insets?.bottom || 0)}
+              icon="chevron-right"
+              onPress={bibleStore.goToNextChapter}
+            />
+            <QuickSettings />
+          </React.Fragment>
+        )}
+      </SafeAreaInsetsContext.Consumer>
     )
   }
+
+  prevChapterButtonStyle = (bottomInset: number) => ({
+    ...styles.chapterButton,
+    bottom: DEFAULT_NAV_BUTTONS_INSET + bottomInset,
+    left: DEFAULT_NAV_BUTTONS_INSET,
+  })
+
+  nextChapterButtonStyle = (bottomInset: number) => ({
+    ...styles.chapterButton,
+    bottom: DEFAULT_NAV_BUTTONS_INSET + bottomInset,
+    right: DEFAULT_NAV_BUTTONS_INSET,
+  })
 }
+
+const DEFAULT_NAV_BUTTONS_INSET = 16
 
 const styles = StyleSheet.create({
   container: {
@@ -265,17 +286,9 @@ const styles = StyleSheet.create({
     padding: 24,
     textAlign: 'center',
   },
-  previousChapterButton: {
+  chapterButton: {
     backgroundColor: '#F9F9F9',
-    bottom: 16,
-    left: 16,
     position: 'absolute',
-  },
-  nextChapterButton: {
-    backgroundColor: '#F9F9F9',
-    bottom: 16,
-    position: 'absolute',
-    right: 16,
   },
   phrase: { flexDirection: 'row', ...getDebugStyles() },
   phraseText: {

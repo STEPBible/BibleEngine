@@ -96,8 +96,8 @@ const CollapsibleExtraHeader = props => {
   const opacity = collapsibleBackgroundStyle.disableFadeoutInnerComponent
     ? defaultOpacity
     : animatedDiffClampY
-    ? getOpacity(animatedDiffClampY, height)
-    : defaultOpacity
+      ? getOpacity(animatedDiffClampY, height)
+      : defaultOpacity
   return (
     <Animated.View
       style={[
@@ -260,8 +260,8 @@ export const withCollapsible = (
 
       this.animatedY = isForTabNavigator
         ? Object.keys(tabNavigator.router.childRouters).map(
-            () => new Animated.Value(0)
-          )
+          () => new Animated.Value(0)
+        )
         : [new Animated.Value(0)]
       this.animatedYSum = this.animatedY.reduce(
         (a, b) => new Animated.add(a, b),
