@@ -1,0 +1,12 @@
+{
+  "build": {
+    "release": {},
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    }
+  },
+  "submit": {
+    "release": {}
+  }
+}
