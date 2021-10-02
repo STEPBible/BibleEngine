@@ -134,6 +134,7 @@ class BibleStore {
       if (!(await this.testQueryWorks())) {
         await this.createSqliteDirectory()
         const asset = Asset.fromModule(require("../assets/bibles.db"));
+        await FileSystem.deleteAsync(DATABASE_PATH)
         await FileSystem.downloadAsync(asset.uri, DATABASE_PATH)
       }
       bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
