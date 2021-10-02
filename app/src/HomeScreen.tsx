@@ -58,7 +58,6 @@ class HomeScreen extends React.Component<{}, {}> {
       this.scrollToTop()
     })
     observe(bibleStore, 'nextRange', (value) => {
-      console.log('value: ', )
       this.setState({ ...this.state, previousRange: value.newValue })
     })
     observe(bibleStore, 'previousRange', (value) => {

@@ -1,14 +1,13 @@
-import { BibleEngineClient } from '@bible-engine/client'
 import {
   IBibleReferenceRangeQuery,
-  BibleEngine,
   IBibleCrossReference,
   BibleBookEntity,
   BOOK_DATA,
+  BibleEngine,
+  IBibleVersion,
 } from '@bible-engine/core'
 import * as FileSystem from 'expo-file-system'
 import * as SQLite from 'expo-sqlite'
-import NetInfo from '@react-native-community/netinfo'
 import {
   REMOTE_BIBLE_ENGINE_URL,
   DATABASE_DOWNLOAD_URL,
@@ -26,11 +25,17 @@ import { observable, action } from 'mobx'
 import Fonts from './Fonts'
 import { SQLITE_DIRECTORY, DATABASE_PATH } from './Constants'
 import JsonAsset from './JsonAsset'
+import { Asset } from 'expo-asset'
 
+const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
+  database: 'bibles.db',
+  type: 'expo',
+  driver: require('expo-sqlite'),
+  synchronize: false,
+  migrationsRun: false,
+}
 const analytics = new Analytics(GOOGLE_ANALYTICS_TRACKING_ID)
-const bibleEngineClient = new BibleEngineClient({
-  apiBaseUrl: REMOTE_BIBLE_ENGINE_URL,
-})
+let bibleEngine: BibleEngine;
 let cache: AsyncTrunk
 
 class BibleStore {
@@ -41,7 +46,7 @@ class BibleStore {
   @version(1) @observable isFirstLoad = true
   @version(1) @observable chapterContent = []
   @version(1) @observable versionChapterNum = this.DEFAULT_CHAPTER
-  @version(1) @observable bibleVersions = []
+  @version(1) @observable bibleVersions: IBibleVersion[] = []
   @version(1) @observable books: BibleBookEntity[] = []
   @version(1) @observable bookOsisId = this.DEFAULT_BOOK
   @version(1) @observable versionUid = this.DEFAULT_VERSION
@@ -54,7 +59,6 @@ class BibleStore {
 
   @ignore @observable loading = true
   @ignore @observable isConnected = null
-  @ignore @observable forceRemote = true
   @ignore @observable fontsAreReady = false
   @ignore @observable chapterSections = []
   @ignore @observable showStrongs = true
@@ -62,15 +66,7 @@ class BibleStore {
   @ignore @observable cacheIsRestored = false
   @ignore settingsRef
 
-  BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
-    database: 'bibles.db',
-    type: 'expo',
-    driver: require('expo-sqlite'),
-    synchronize: false,
-  }
-
   constructor() {
-    NetInfo.addEventListener(this.onNetworkChange)
     this.setUpErrorLogging()
     cache = new AsyncTrunk(this, { storage: AsyncStorage })
   }
@@ -81,20 +77,7 @@ class BibleStore {
     await cache.init()
     this.cacheIsRestored = true
     this.chapterSections = this.chapterContent.slice(0, 1)
-    if (
-      this.books.length > 0 &&
-      this.chapterContent.length > 0 &&
-      this.bibleVersions.length > 0
-    ) {
-      this.loading = false
-      await this.setLocalDatabase()
-      return
-    }
-    if (this.isConnected === false) {
-      this.loadOfflineContent()
-    } else {
-      this.lazyLoadContent()
-    }
+    this.loadOfflineContent()
   }
 
   async loadSearchIndex() {
@@ -107,75 +90,21 @@ class BibleStore {
 
   async loadOfflineContent() {
     await this.setLocalDatabase()
-    if (bibleEngineClient.localBibleEngine === undefined) {
-      return
-    }
     if (this.chapterContent.length === 0) {
       this.changeCurrentBibleVersion(this.versionUid)
     }
     this.setBooks(this.versionUid)
   }
 
-  async lazyLoadContent() {
-    this.setBooks(this.versionUid)
-    this.setVersions().then(async () => {
-      if (this.chapterContent.length === 0) {
-        await this.changeCurrentBibleVersion(this.versionUid)
-      }
-      this.setLocalDatabase()
-    })
-  }
-
   @action async setBooks(versionUid: string) {
-    const books = await bibleEngineClient.getBooksForVersion(
+    const books = await bibleEngine.getBooksForVersionUid(
       versionUid,
-      this.forceRemote
     )
     this.books = books
   }
 
   async setVersions() {
-    let bibleVersions
-    if (this.isConnected) {
-      bibleVersions = await this.getBothOfflineAndOnlineVersions()
-    } else {
-      bibleVersions = await bibleEngineClient.localBibleEngine.getVersions()
-    }
-    this.bibleVersions = bibleVersions
-    return bibleVersions
-  }
-
-  async getBothOfflineAndOnlineVersions() {
-    let localVersions: any[] = []
-    if (bibleEngineClient.localBibleEngine) {
-      try {
-        localVersions = await bibleEngineClient.localBibleEngine.getVersions()
-      } catch (e) {
-        localVersions = []
-      }
-    }
-    let remoteVersions: any[] = []
-    if (bibleEngineClient.remoteApi) {
-      const { result } = await bibleEngineClient.remoteApi.getVersions()
-      remoteVersions = result.map(version => ({
-        ...version,
-        dataLocation: 'remote',
-      }))
-    }
-    return this.getMergedOfflineAndOnlineVersions(localVersions, remoteVersions)
-  }
-
-  getMergedOfflineAndOnlineVersions(
-    localVersions: any[],
-    remoteVersions: any[]
-  ) {
-    const versions = localVersions
-    for (const remoteVersion of remoteVersions) {
-      if (!versions.find((version: any) => version.uid === remoteVersion.uid)) {
-        versions.push(remoteVersion)
-      }
-    }
-    return versions
+    this.bibleVersions = await bibleEngine.getVersions()
   }
 
   changeCurrentBibleVersion = async (versionUid: string) => {
@@ -192,28 +121,25 @@ class BibleStore {
       bookOsisId: this.bookOsisId,
       versionChapterNum: this.versionChapterNum,
     }
-    this.forceRemote = version.dataLocation !== 'db'
     this.updateCurrentBibleReference(newReference)
   }
 
   getDictionaryEntry = async (strongsNum: string, dictionary: string) => {
-    return bibleEngineClient.getDictionaryEntry(strongsNum, dictionary)
+    return bibleEngine.getDictionaryEntries(strongsNum, dictionary)
   }
 
   async setLocalDatabase() {
     console.time('setLocalDatabase')
     try {
       if (!(await this.testQueryWorks())) {
-        if (!this.isConnected) {
-          return
-        }
         await this.createSqliteDirectory()
-        await FileSystem.downloadAsync(DATABASE_DOWNLOAD_URL, DATABASE_PATH)
+        const asset = Asset.fromModule(require("../assets/bibles.db"));
+        await FileSystem.downloadAsync(asset.uri, DATABASE_PATH)
       }
-      const bibleEngine = new BibleEngine(this.BIBLE_ENGINE_OPTIONS)
-      bibleEngineClient.localBibleEngine = bibleEngine
+      bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       await this.setVersions()
     } catch (e) {
+      console.log('setLocalDatabase had exception: ', e)
       Sentry.Native.captureException(e)
       await FileSystem.deleteAsync(DATABASE_PATH, { idempotent: true })
     }
@@ -223,8 +149,8 @@ class BibleStore {
   async closeDatabaseConnection(bibleEngine: BibleEngine) {
     const db = await bibleEngine.pDB
     await db.connection.close()
-    const expoDb: any = await SQLite.openDatabase('bibles.db')
-    await expoDb._db.close()
+    // const expoDb: any = await SQLite.openDatabase('bibles.db')
+    // await expoDb._db.close()
   }
 
   async createSqliteDirectory() {
@@ -236,6 +162,7 @@ class BibleStore {
   }
 
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
+    console.log('updateCurrentBibleReference')
     console.time('updateCurrentBibleReference')
     this.loading = true
     this.showStrongs = false
@@ -253,9 +180,8 @@ class BibleStore {
 
     const forceRemote = version.dataLocation !== 'db' && this.isConnected
 
-    const chapter = await bibleEngineClient.getFullDataForReferenceRange(
+    const chapter = await bibleEngine.getFullDataForReferenceRange(
       rangeQuery,
-      forceRemote,
       true
     )
     let chapterContent: any = chapter.content.contents
@@ -308,7 +234,7 @@ class BibleStore {
       const referenceRanges = refs.map(ref => ref.range)
       const verses = await Promise.all(
         referenceRanges.map(range =>
-          bibleEngineClient.localBibleEngine!.getPhrases(range)
+          bibleEngine!.getPhrases(range)
         )
       )
       const verseContents = verses.map(phrases =>
@@ -324,10 +250,7 @@ class BibleStore {
   async testQueryWorks(): Promise<boolean> {
     let bibleEngine
     try {
-      bibleEngine = new BibleEngine({
-        ...this.BIBLE_ENGINE_OPTIONS,
-        migrationsRun: false,
-      })
+      bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
       await bibleEngine.runMigrations()
       const result = await bibleEngine.getDictionaryEntries(
         'H0001',
@@ -394,18 +317,11 @@ class BibleStore {
     this.settingsRef = settingsRef
   }
 
-  onNetworkChange = ({ isConnected }) => {
-    this.isConnected = isConnected
-    if (!isConnected) {
-      this.forceRemote = false
-    }
-  }
-
   async setUpErrorLogging() {
     Sentry.init({
       dsn: SENTRY_DSN,
       enableInExpoDevelopment: false,
-      debug: true,
+      debug: false,
     })
   }
 
