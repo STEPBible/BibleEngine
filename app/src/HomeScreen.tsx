@@ -95,7 +95,12 @@ class HomeScreen extends React.Component<{}, {}> {
       return <View key={`section-${index}`}>{this.renderSection(content)}</View>
     }
     if (content.type === 'group') {
-      if (content.groupType === 'paragraph' || content.groupType === 'indent') {
+      if (
+        content.groupType === 'paragraph' ||
+        content.groupType === 'indent' ||
+        content.groupType === 'lineGroup' ||
+        content.groupType === 'line'
+      ) {
         return (
           <View key={`group-${index}`}>
             <View style={styles.paragraph}>
