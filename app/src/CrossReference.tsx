@@ -143,12 +143,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.1)',
   },
   popover__background_container: {
-    // backgroundColor: 'yellow',
     overflow: 'hidden',
     width: DEVICE_WIDTH - 20,
   },
   popover__content: {
-    // backgroundColor: 'cyan',
     flex: 1,
     maxHeight: DEVICE_HEIGHT * 0.4,
     borderBottomColor: 'gray',
@@ -157,7 +155,6 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   popover__content__header: {
-    // backgroundColor: 'yellow',
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.SMALL,

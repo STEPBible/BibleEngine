@@ -305,13 +305,15 @@ const styles = StyleSheet.create({
   phrasePunctuation: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.MEDIUM,
-    marginBottom: Margin.EXTRA_SMALL
+    marginBottom: Margin.EXTRA_SMALL,
+    marginRight: 3,
   },
   phraseText: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.EXTRA_SMALL,
-    marginLeft: 7,
+    marginLeft: 3,
+    marginRight: 3,
   },
   paragraph: {
     flexDirection: 'row',
