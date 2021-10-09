@@ -107,7 +107,7 @@ export default class Footnote extends React.Component<Props, State> {
 
 const styles = StyleSheet.create({
   touchable: {
-    marginLeft: -8,
+    marginLeft: -4,
   },
   text: {
     marginTop: -4,

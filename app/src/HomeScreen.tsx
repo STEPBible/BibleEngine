@@ -169,7 +169,6 @@ class HomeScreen extends React.Component<{}, {}> {
     if (content.strongs) {
       return (
         <View style={styles.phrase} key={`strong-${this.itemNum}`}>
-          {this.renderFootnote(content)}
           {this.renderVerseNumber(content)}
           {this.renderCrossReference(content)}
           <StrongsWord
@@ -177,12 +176,12 @@ class HomeScreen extends React.Component<{}, {}> {
             phrase={content.content}
             strongs={content.strongs}
           />
+          {this.renderFootnote(content)}
         </View>
       )
     }
     return (
       <View style={styles.phrase} key={`phrase-${this.itemNum}`}>
-        {this.renderFootnote(content)}
         {this.renderVerseNumber(content)}
         {this.renderCrossReference(content)}
         {content.content.split(' ').map((phrase: string, index) => {
@@ -198,6 +197,7 @@ class HomeScreen extends React.Component<{}, {}> {
             </View>
           )})
         }
+        {this.renderFootnote(content)}
       </View>
     )
   }
