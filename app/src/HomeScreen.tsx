@@ -185,16 +185,26 @@ class HomeScreen extends React.Component<{}, {}> {
         {this.renderFootnote(content)}
         {this.renderVerseNumber(content)}
         {this.renderCrossReference(content)}
-        {content.content.split(' ').map((phrase, index) => (
-          <View key={`phrase-${this.itemNum}-${index}`}>
-            <Text style={bibleStore.scaledFontSize(styles.phraseText)}>
-              {phrase}
-            </Text>
-          </View>
-        ))}
+        {content.content.split(' ').map((phrase: string, index) => {
+          let phraseStyle: any = styles.phraseText
+          if (this.isPunctuationChar(phrase)) {
+            phraseStyle = styles.phrasePunctuation
+          }
+          return (
+            <View key={`phrase-${this.itemNum}-${index}`}>
+              <Text style={bibleStore.scaledFontSize(phraseStyle)}>
+                {phrase}
+              </Text>
+            </View>
+          )})
+        }
       </View>
     )
   }
+
+  isPunctuationChar(phrase: string) {
+    return ['.', ',', ':', '?', '!', ';'].includes(phrase.trim().slice(0, 1))
+}
 
   renderFlatlistItem = ({ item, index }) => {
     return this.renderItem(item, index)
@@ -295,11 +305,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   phrase: { flexDirection: 'row', ...getDebugStyles() },
+  phrasePunctuation: {
+    fontFamily: FontFamily.CARDO,
+    fontSize: FontSize.MEDIUM,
+    marginBottom: Margin.EXTRA_SMALL
+  },
   phraseText: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.EXTRA_SMALL,
-    marginRight: 7,
+    marginLeft: 7,
   },
   paragraph: {
     flexDirection: 'row',

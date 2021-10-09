@@ -376,13 +376,13 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.EXTRA_SMALL,
-    marginRight: 7,
+    marginLeft: 7,
   },
   phraseText: {
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.EXTRA_SMALL,
-    marginRight: 7,
+    marginLeft: 7,
   },
   documentPhrase: {
     fontFamily: FontFamily.CARDO,
