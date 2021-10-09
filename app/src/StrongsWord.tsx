@@ -222,12 +222,17 @@ class StrongsWord extends React.Component<Props, State> {
       return null
     }
     return (
-      <View style={styles.popover__content__definitions__entry}>
-        {element.content.contents.map(
-          (element: DocumentElement, index: number) =>
-            this.renderDocumentElement(element, index)
-        )}
-      </View>
+      <React.Fragment>
+        <View style={styles.popover__content__definitions__entry}>
+          {element.content.contents.map(
+            (element: DocumentElement, index: number) =>
+              this.renderDocumentElement(element, index)
+          )}
+        </View>
+        <Text style={styles.strongsReference}>
+          {`Strongs: ${element.strong}`}
+        </Text>
+      </React.Fragment>
     )
   }
 
@@ -399,6 +404,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     // margin: 5
   },
+  strongsReference: {
+    fontFamily: FontFamily.CARDO_ITALIC,
+    fontSize: FontSize.EXTRA_SMALL,
+    color: 'gray'
+  }
 })
 
 export default StrongsWord
