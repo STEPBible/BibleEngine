@@ -233,9 +233,6 @@ class HomeScreen extends React.Component<{}, {}> {
               onEndReached={bibleStore.loadAnotherSection}
               showsVerticalScrollIndicator={false}
               ListEmptyComponent={this.state.loading && LoadingScreen}
-              ListFooterComponent={
-                bibleStore.notAllSectionsAreLoaded && <LoadingScreen />
-              }
             />
             <FAB
               visible={
