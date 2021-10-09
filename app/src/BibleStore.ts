@@ -5,6 +5,7 @@ import {
   BOOK_DATA,
   BibleEngine,
   IBibleVersion,
+  BibleEngineOptions,
 } from '@bible-engine/core'
 import * as FileSystem from 'expo-file-system'
 import * as SQLite from 'expo-sqlite'
@@ -23,7 +24,7 @@ import { AsyncTrunk, ignore, version } from 'mobx-sync'
 import { observable, action } from 'mobx'
 
 import Fonts from './Fonts'
-import { SQLITE_DIRECTORY, DATABASE_PATH } from './Constants'
+import { SQLITE_DIRECTORY, DATABASE_PATH, LEXICONS_PATH } from './Constants'
 import JsonAsset from './JsonAsset'
 import { Asset } from 'expo-asset'
 
@@ -34,8 +35,14 @@ const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
   synchronize: false,
   migrationsRun: false,
 }
+const LEXICON_ENGINE_OPTIONS: ConnectionOptions = {
+  ...BIBLE_ENGINE_OPTIONS,
+  database: 'lexicons.db',
+  migrationsRun: true,
+}
 const analytics = new Analytics(GOOGLE_ANALYTICS_TRACKING_ID)
 let bibleEngine: BibleEngine;
+let lexiconEngine: BibleEngine;
 let cache: AsyncTrunk
 
 class BibleStore {
@@ -125,7 +132,8 @@ class BibleStore {
   }
 
   getDictionaryEntry = async (strongsNum: string, dictionary: string) => {
-    return bibleEngine.getDictionaryEntries(strongsNum, dictionary)
+    const entries = await lexiconEngine.getDictionaryEntries(strongsNum, dictionary)
+    return entries?.[0]
   }
 
   async setLocalDatabase() {
@@ -137,7 +145,10 @@ class BibleStore {
         await FileSystem.deleteAsync(DATABASE_PATH)
         await FileSystem.downloadAsync(asset.uri, DATABASE_PATH)
       }
+      const asset = Asset.fromModule(require("../assets/lexicons.db"));
+      await FileSystem.downloadAsync(asset.uri, LEXICONS_PATH)
       bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
+      lexiconEngine = new BibleEngine(LEXICON_ENGINE_OPTIONS)
       await this.setVersions()
     } catch (e) {
       console.log('setLocalDatabase had exception: ', e)

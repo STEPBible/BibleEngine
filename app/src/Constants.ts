@@ -78,6 +78,7 @@ export const STATUS_BAR_HEIGHT =
 
 export const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`
 export const DATABASE_PATH = `${SQLITE_DIRECTORY}/bibles.db`
+export const LEXICONS_PATH = `${SQLITE_DIRECTORY}/lexicons.db`
 
 const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green']
 
