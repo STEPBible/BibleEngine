@@ -14,7 +14,7 @@ import {
   DATABASE_DOWNLOAD_URL,
   SENTRY_DSN,
   GOOGLE_ANALYTICS_TRACKING_ID,
-} from 'react-native-dotenv'
+} from '@env'
 import 'react-native-console-time-polyfill'
 import { ConnectionOptions } from 'typeorm'
 import { AsyncStorage, LayoutAnimation } from 'react-native'
@@ -214,8 +214,7 @@ class BibleStore {
       bibleEngineClient.localBibleEngine = bibleEngine
       await this.setVersions()
     } catch (e) {
-      console.error('Couldnt set local database: ', e)
-      Sentry.captureException(e)
+      Sentry.Native.captureException(e)
       await FileSystem.deleteAsync(DATABASE_PATH, { idempotent: true })
     }
     console.timeEnd('setLocalDatabase')
@@ -225,7 +224,7 @@ class BibleStore {
     const db = await bibleEngine.pDB
     await db.connection.close()
     const expoDb: any = await SQLite.openDatabase('bibles.db')
-    expoDb._db.close()
+    await expoDb._db.close()
   }
 
   async createSqliteDirectory() {

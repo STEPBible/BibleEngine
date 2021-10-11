@@ -10,9 +10,9 @@ import {
   Dimensions,
   Keyboard,
   FlatList,
-  SafeAreaView,
   Image,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import * as elasticlunr from 'elasticlunr'
 import { observer } from 'mobx-react/native'
 
@@ -27,7 +27,7 @@ const DEVICE_HEIGHT = Dimensions.get('window').height
 @observer
 class SearchScreen extends React.Component<{}, {}> {
   static navigationOptions = {
-    header: null,
+    headerShown: false,
   }
   state = {
     searchInputText: '',

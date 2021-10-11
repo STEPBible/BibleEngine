@@ -7,7 +7,7 @@ import Text from './Text'
 
 export default class OfflineLoadingScreen extends React.Component {
   static navigationOptions = {
-    header: null,
+    headerShown: false,
   }
   interval: any
   state = {

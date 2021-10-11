@@ -8,7 +8,7 @@ Having said that: Good you are here! Have a look at our [Project board](https://
 
 ## About BibleEngine
 
-_BibleEngine_ can serve as a general purpose library for powering JavaScript bible projects. In it's core, the project makes use of the [excellent datasets of Tyndale House](https://tyndale.github.io/STEPBible-Data/) to provide features like:
+_BibleEngine_ can serve as a general purpose library for powering JavaScript bible projects. In it's core, the project makes use of the [excellent datasets of Tyndale House](https://stepbible.github.io/STEPBible-Data/) to provide features like:
 
 -   automatic versification conversion across any bible version
 -   integrated up-to-date original language text with variants for all text forms
