@@ -8,8 +8,7 @@
         "test": "yarn jest"
     },
     "dependencies": {
-        "cross-fetch": "^3.0.4",
-        "whatwg-fetch": "3.6.2"
+        "whatwg-fetch": "^3.6.2"
     },
     "peerDependencies": {
         "@bible-engine/core": "0.x"

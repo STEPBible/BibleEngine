@@ -10,7 +10,9 @@
     "dependencies": {
         "bible-passage-reference-parser": "^2.0.1",
         "reflect-metadata": "^0.1.13",
-        "typeorm": "~0.2.36",
-        "whatwg-fetch": "3.6.2"
+        "whatwg-fetch": "^3.6.2"
+    },
+    "peerDependencies": {
+        "typeorm": "~0.2.34"
     }
 }
