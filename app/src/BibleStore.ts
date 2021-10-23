@@ -120,7 +120,10 @@ class BibleStore {
         this.closeDatabaseConnection(bibleEngine)
       }
       await this.createSqliteDirectory()
-      await this.setupBibleModule(module)
+      await Promise.all([
+        await this.setupBibleModule(module),
+        await this.setupBibleModule(LEXICON_MODULE)
+      ])
       const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
         database: module.filename,
         type: 'expo',
@@ -128,7 +131,13 @@ class BibleStore {
         synchronize: false,
         migrationsRun: false,
       }
+      const LEXICON_ENGINE_OPTIONS: ConnectionOptions = {
+        ...BIBLE_ENGINE_OPTIONS,
+        database: LEXICON_MODULE.filename,
+        name: 'lexicon-engine'
+      }
       bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
+      lexiconEngine = new BibleEngine(LEXICON_ENGINE_OPTIONS)
     } catch (e) {
       console.log('setLocalDatabase had exception', e)
       Sentry.Native.captureException(e)

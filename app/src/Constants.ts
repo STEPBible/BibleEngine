@@ -1,5 +1,6 @@
 import normalizeText from './normalizeText'
 import { Analytics } from 'expo-analytics'
+import { Asset } from 'expo-asset'
 import { DefaultTheme } from 'react-native-paper'
 import Constants from 'expo-constants'
 import { Platform } from 'react-native'
@@ -87,6 +88,11 @@ export interface BibleModule {
   asset: Asset
 }
 
+export interface LexiconModule {
+  filename: string
+  asset: Asset
+}
+
 export const BIBLE_MODULES: BibleModule[] = [
   {
     uid: 'ESV',
@@ -101,6 +107,12 @@ export const BIBLE_MODULES: BibleModule[] = [
     asset: Asset.fromModule(require('../assets/cuvs.db')),
   }
 ]
+
+export const LEXICON_MODULE: LexiconModule = {
+  filename: 'lexicons.db',
+  asset: Asset.fromModule(require('../assets/lexicons.db'))
+}
+
 const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green']
 
 export function randomColor() {
