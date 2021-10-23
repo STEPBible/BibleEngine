@@ -1,12 +1,12 @@
 {
   "build": {
-    "release": {},
+    "production": {},
     "development": {
       "developmentClient": true,
       "distribution": "internal"
     }
   },
   "submit": {
-    "release": {}
+    "production": {}
   }
 }
