@@ -24,22 +24,9 @@ import { AsyncTrunk, ignore, version } from 'mobx-sync'
 import { observable, action } from 'mobx'
 
 import Fonts from './Fonts'
-import { SQLITE_DIRECTORY, DATABASE_PATH, LEXICONS_PATH } from './Constants'
+import { SQLITE_DIRECTORY, DATABASE_PATH, LEXICONS_PATH, BIBLE_MODULES, LEXICON_MODULE, BibleModule, LexiconModule } from './Constants'
 import JsonAsset from './JsonAsset'
-import { Asset } from 'expo-asset'
 
-const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
-  database: 'bibles.db',
-  type: 'expo',
-  driver: require('expo-sqlite'),
-  synchronize: false,
-  migrationsRun: false,
-}
-const LEXICON_ENGINE_OPTIONS: ConnectionOptions = {
-  ...BIBLE_ENGINE_OPTIONS,
-  database: 'lexicons.db',
-  migrationsRun: true,
-}
 const analytics = new Analytics(GOOGLE_ANALYTICS_TRACKING_ID)
 let bibleEngine: BibleEngine;
 let lexiconEngine: BibleEngine;
@@ -84,7 +71,9 @@ class BibleStore {
     await cache.init()
     this.cacheIsRestored = true
     this.chapterSections = this.chapterContent.slice(0, 1)
-    this.loadOfflineContent()
+    const module = this.getCurrentModule(this.versionUid)
+    await this.changeCurrentBibleVersion(module)
+    await this.setBooks(this.versionUid)
   }
 
   async loadSearchIndex() {
@@ -95,14 +84,6 @@ class BibleStore {
     )
   }
 
-  async loadOfflineContent() {
-    await this.setLocalDatabase()
-    if (this.chapterContent.length === 0) {
-      this.changeCurrentBibleVersion(this.versionUid)
-    }
-    this.setBooks(this.versionUid)
-  }
-
   @action async setBooks(versionUid: string) {
     const books = await bibleEngine.getBooksForVersionUid(
       versionUid,
@@ -110,25 +91,20 @@ class BibleStore {
     this.books = books
   }
 
-  async setVersions() {
-    this.bibleVersions = await bibleEngine.getVersions()
-  }
-
-  changeCurrentBibleVersion = async (versionUid: string) => {
-    if (this.bibleVersions.length === 0) {
-      return
+  changeCurrentBibleVersion = async (module: BibleModule) => {
+    try {
+      this.versionUid = module.uid
+      const newReference = {
+        versionUid: this.versionUid,
+        bookOsisId: this.bookOsisId,
+        versionChapterNum: this.versionChapterNum,
+      }
+      await this.setLocalDatabase()
+      await this.updateCurrentBibleReference(newReference)
+    } catch (error) {
+      console.log('changeCurrentBibleVersion failed', error)
+      throw error
     }
-    this.versionUid = versionUid
-    this.version = this.bibleVersions.filter(
-      version => version.uid === versionUid
-    )[0]
-    const newReference = {
-      version: this.version,
-      versionUid,
-      bookOsisId: this.bookOsisId,
-      versionChapterNum: this.versionChapterNum,
-    }
-    this.updateCurrentBibleReference(newReference)
   }
 
   getDictionaryEntry = async (strongsNum: string, dictionary: string) => {
@@ -138,31 +114,44 @@ class BibleStore {
 
   async setLocalDatabase() {
     console.time('setLocalDatabase')
+    const module = this.getCurrentModule(this.versionUid)
     try {
-      if (!(await this.testQueryWorks())) {
-        await this.createSqliteDirectory()
-        const asset = Asset.fromModule(require("../assets/bibles.db"));
-        await FileSystem.deleteAsync(DATABASE_PATH)
-        await FileSystem.downloadAsync(asset.uri, DATABASE_PATH)
+      if (bibleEngine) {
+        this.closeDatabaseConnection(bibleEngine)
       }
-      const asset = Asset.fromModule(require("../assets/lexicons.db"));
-      await FileSystem.downloadAsync(asset.uri, LEXICONS_PATH)
+      await this.createSqliteDirectory()
+      await this.setupBibleModule(module)
+      const BIBLE_ENGINE_OPTIONS: ConnectionOptions = {
+        database: module.filename,
+        type: 'expo',
+        driver: require('expo-sqlite'),
+        synchronize: false,
+        migrationsRun: false,
+      }
       bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
-      lexiconEngine = new BibleEngine(LEXICON_ENGINE_OPTIONS)
-      await this.setVersions()
     } catch (e) {
-      console.log('setLocalDatabase had exception: ', e)
+      console.log('setLocalDatabase had exception', e)
       Sentry.Native.captureException(e)
-      await FileSystem.deleteAsync(DATABASE_PATH, { idempotent: true })
+    } finally {
+      console.timeEnd('setLocalDatabase')
     }
-    console.timeEnd('setLocalDatabase')
+  }
+
+  getCurrentModule(currentUid: string) {
+    const module = BIBLE_MODULES.find(module => module.uid === currentUid)
+    if (module) return module
+    throw new Error(`no module found matching uid: ${currentUid}`)
+  }
+
+  async setupBibleModule(module: BibleModule | LexiconModule) {
+    const destination = `${FileSystem.documentDirectory}SQLite/${module.filename}`
+    await FileSystem.deleteAsync(destination, { idempotent: true })
+    await FileSystem.downloadAsync(module.asset.uri, destination)
   }
 
   async closeDatabaseConnection(bibleEngine: BibleEngine) {
     const db = await bibleEngine.pDB
     await db.connection.close()
-    // const expoDb: any = await SQLite.openDatabase('bibles.db')
-    // await expoDb._db.close()
   }
 
   async createSqliteDirectory() {
@@ -174,13 +163,11 @@ class BibleStore {
   }
 
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
-    console.log('updateCurrentBibleReference')
     console.time('updateCurrentBibleReference')
     this.loading = true
     this.showStrongs = false
     const rangeQuery = {
       versionChapterNum: range.normalizedChapterNum,
-      versionUid: this.versionUid,
       ...range,
     }
     this.versionChapterNum =
@@ -191,7 +178,6 @@ class BibleStore {
     this.chapterSections = []
 
     const forceRemote = version.dataLocation !== 'db' && this.isConnected
-
     const chapter = await bibleEngine.getFullDataForReferenceRange(
       rangeQuery,
       true
@@ -256,24 +242,6 @@ class BibleStore {
     } catch (e) {
       const emptyVerses = refs.map(ref => ref.range).map(range => '')
       return emptyVerses
-    }
-  }
-
-  async testQueryWorks(): Promise<boolean> {
-    let bibleEngine
-    try {
-      bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
-      await bibleEngine.runMigrations()
-      const result = await bibleEngine.getDictionaryEntries(
-        'H0001',
-        '@BdbMedDef'
-      )
-      await this.closeDatabaseConnection(bibleEngine)
-      return !!result.length
-    } catch (e) {
-      console.log('Test query failed: ', e)
-      await this.closeDatabaseConnection(bibleEngine)
-      return false
     }
   }
 

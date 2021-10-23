@@ -5,7 +5,7 @@ import { BibleVersionEntity } from '@bible-engine/core'
 import { observer } from 'mobx-react/native'
 
 import bibleStore from './BibleStore'
-import { FontFamily } from './Constants'
+import { BIBLE_MODULES, FontFamily } from './Constants'
 import { TouchableRipple } from 'react-native-paper'
 
 @observer
@@ -23,20 +23,20 @@ class VersionScreen extends React.Component<any, any> {
   render() {
     return (
       <ScrollView contentContainerStyle={styles.list}>
-        {bibleStore.bibleVersions.map((version: BibleVersionEntity) => (
+        {BIBLE_MODULES.map((module) => (
           <TouchableRipple
             onPress={() => {
               this.props.navigation.navigate('Home')
-              bibleStore.changeCurrentBibleVersion(version.uid)
+              bibleStore.changeCurrentBibleVersion(module)
             }}
             underlayColor="#e8eaed"
-            key={version.uid}
+            key={module.uid}
             style={styles.list__item}
           >
             <React.Fragment>
-              <Text style={styles.list__item__header}>{version.uid}</Text>
+              <Text style={styles.list__item__header}>{module.uid}</Text>
               <Text style={styles.list__item__description}>
-                {version.title}
+                {module.title}
               </Text>
             </React.Fragment>
           </TouchableRipple>

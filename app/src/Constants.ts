@@ -80,6 +80,27 @@ export const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`
 export const DATABASE_PATH = `${SQLITE_DIRECTORY}/bibles.db`
 export const LEXICONS_PATH = `${SQLITE_DIRECTORY}/lexicons.db`
 
+export interface BibleModule {
+  uid: string
+  title: string
+  filename: string
+  asset: Asset
+}
+
+export const BIBLE_MODULES: BibleModule[] = [
+  {
+    uid: 'ESV',
+    title: 'English Standard Version',
+    filename: 'esv.db',
+    asset: Asset.fromModule(require('../assets/esv.db')),
+  },
+  {
+    uid: '和合本 (简)',
+    title: '和合本 (简体字)',
+    filename: 'cuvs.db',
+    asset: Asset.fromModule(require('../assets/cuvs.db')),
+  }
+]
 const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green']
 
 export function randomColor() {
