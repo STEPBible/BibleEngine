@@ -1,9 +1,19 @@
 {
   "build": {
-    "production": {},
+
     "development": {
       "developmentClient": true,
       "distribution": "internal"
+    },
+    "staging": {
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      }
     }
   },
   "submit": {
