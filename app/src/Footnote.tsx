@@ -19,6 +19,7 @@ import {
   DEBUG,
   getDebugStyles,
 } from './Constants'
+import { Footnote as FootNoteMethods } from './models/Footnote'
 import Text from './Text'
 import Popover from './Popover'
 import bibleStore from './BibleStore'
@@ -50,10 +51,7 @@ export default class Footnote extends React.Component<Props, State> {
   }
 
   getNoteText = (note: IBibleNote) => {
-    const noteText = note.content.contents
-      .map(phrase => phrase.content)
-      .join(' ')
-    return `${note.key}) ${noteText}`
+    return `${note.key}) ${ FootNoteMethods.getPlainText(note)}`
   }
 
   renderFootnote = ({ item }) => (
