@@ -55,9 +55,7 @@ export class BibleEngineRemoteError extends Error {
     error: any;
 
     constructor(response: IApiResponseError) {
-        super(
-            `Error ${response.statusCode} from BibleEngine server`
-        );
+        super(`Error ${response.statusCode} from BibleEngine server`);
         this.name = 'BibleEngineRemoteError';
         this.statusCode = response.statusCode;
         this.error = response.error;
@@ -68,7 +66,7 @@ export async function apiRequest<T>({
     url,
     method,
     data,
-    queryParams
+    queryParams,
 }: {
     url: string;
     method?: 'POST' | 'PUT' | 'GET' | 'DELETE';
@@ -77,7 +75,7 @@ export async function apiRequest<T>({
 }): Promise<IApiResponseSuccess<T & { source: 'remote' }>> {
     const headers: HeadersInit = {
         Accept: 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
     };
     const opt: RequestInit = { method: !method ? (!!data ? 'POST' : 'GET') : method, headers };
     if (data) opt.body = JSON.stringify(data);
@@ -95,7 +93,7 @@ export async function apiRequest<T>({
     let result = null;
     let statusCode = 500;
 
-    const response = await fetch(url, opt).catch(e => {
+    const response = await fetch(url, opt).catch((e) => {
         // service unavailable (could be client offline or server down) => fetch doesn't give us
         // a more fine-tuned error status, we need to determine that down the line
         statusCode = 503;
@@ -108,7 +106,7 @@ export async function apiRequest<T>({
         const resultString = await response.text();
         try {
             result = JSON.parse(resultString);
-        } catch (e) {
+        } catch (e: any) {
             if (statusCode === 200) {
                 error = e;
                 statusCode = 415; // Unsupported media type

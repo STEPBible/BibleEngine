@@ -5,7 +5,7 @@ import {
     V11nRuleEntity,
     getOsisIdFromBookString,
     getSourceTypeId,
-    getBookGenericIdFromOsisId
+    getBookGenericIdFromOsisId,
 } from '@bible-engine/core';
 import { BibleEngineImporter } from '../../shared/Importer.interface';
 
@@ -30,9 +30,9 @@ const replaceNoteVars = (note: string) => {
 
 export class V11nImporter extends BibleEngineImporter {
     async import() {
-        const p = new Promise(promiseResolve => {
+        const p = new Promise((promiseResolve) => {
             const rd = createInterface({
-                input: createReadStream(resolve(__dirname) + '/data/v11n-rules.tsv')
+                input: createReadStream(resolve(__dirname) + '/data/v11n-rules.tsv'),
             });
 
             let lineNr = 0;
@@ -41,7 +41,7 @@ export class V11nImporter extends BibleEngineImporter {
             const ignoredRulesSourceTypes: string[] = [];
             let ignoredRulesNonAp = 0;
             const ignoredRulesNonApSourceTypes: string[] = [];
-            rd.on('line', line => {
+            rd.on('line', (line) => {
                 let ruleNotSupported = false;
                 lineNr++;
 
@@ -50,21 +50,26 @@ export class V11nImporter extends BibleEngineImporter {
                     return;
                 }
 
-                const action = row[3];
+                // get action and normalize
+                let action = row[3].replace('Verse', 'verse');
+                if (action.slice(-1) === '*') action = action.slice(0, -1);
+                if (action === 'Psalm Title') action = 'Keep verse';
+                else if (action === 'Renumber Title') action = 'Renumber verse';
+
                 if (
                     action !== 'Keep verse' &&
-                    action !== 'Merged with' &&
+                    action !== 'Merged verse' &&
                     action !== 'Renumber verse' &&
                     action !== 'Empty verse'
                 )
                     throw new Error(`invalid action ${action}`);
 
-                const sourceRef = row[1].split('.');
+                const sourceRef = row[1].replace('Title', '1.0').split('.');
                 const sourceBookOsisId = getOsisIdFromBookString(sourceRef[0]);
                 const sourceRefNumbers = sourceRef[1].split(':');
                 const sourceRefVerseInfo = sourceRefNumbers[1].split('.');
 
-                const standardRef = row[2].split('.');
+                const standardRef = row[2].replace('Title', '1.0').split('.');
                 const standardBookOsisId = getOsisIdFromBookString(standardRef[0]);
                 const standardRefNumbers = standardRef[1].split(':');
                 let standardRefVerse = standardRefNumbers[1];
@@ -104,7 +109,9 @@ export class V11nImporter extends BibleEngineImporter {
                     ruleNotSupported = true;
                 }
 
-                const sourceTypeId = !row[0] ? undefined : getSourceTypeId(row[0]);
+                const sourceTypeId = !row[0]
+                    ? undefined
+                    : getSourceTypeId(row[0].trim().replace(' +', '+').replace('Latin=', 'Latin'));
                 if (!!row[0] && sourceTypeId === undefined)
                     throw new Error(`unknown sourceType ${row[0]}`);
 
@@ -129,14 +136,14 @@ export class V11nImporter extends BibleEngineImporter {
                             bookOsisId: sourceBookOsisId as string,
                             versionChapterNum: +sourceRefNumbers[0],
                             versionVerseNum: +sourceRefVerseInfo[0],
-                            versionSubverseNum: +sourceRefVerseInfo[1]
+                            versionSubverseNum: +sourceRef[2],
                         },
                         standardRef: {
                             bookOsisId: standardBookOsisId as string,
                             normalizedChapterNum: +standardRefNumbers[0],
                             normalizedVerseNum: +standardRefVerse,
                             normalizedSubverseNum: +standardRef[2],
-                            partIndicator: standardRefVersePartIndicator
+                            partIndicator: standardRefVersePartIndicator,
                         },
                         action,
                         noteMarker: row[4],
@@ -144,7 +151,7 @@ export class V11nImporter extends BibleEngineImporter {
                         noteSecondary: replaceNoteVars(row[6]),
                         noteAncientVersions: row[7],
                         sourceTypeId,
-                        tests: row[8]
+                        tests: row[8]?.replace(/Title/g, '1.0'),
                     })
                 );
             });

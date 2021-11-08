@@ -7,6 +7,7 @@ export interface IImporterOptions {
     versionMeta?: Partial<IBibleVersion>;
     bookMeta?: ImporterBookMetadata;
     skip?: { crossRefs?: boolean; notes?: boolean; strongs?: boolean };
+    autoGenMissingParagraphs?: boolean;
 }
 export type ImporterBookMetadata = Map<
     string,

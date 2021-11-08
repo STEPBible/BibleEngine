@@ -5,7 +5,8 @@
     "main": "lib/index.js",
     "scripts": {
         "test": "yarn jest --runInBand",
-        "build": "rimraf ./lib && tsc && copyup './src/**/data/*' ./lib"
+        "build": "rimraf ./lib && tsc && copyup './src/**/data/*' ./lib",
+        "devScript": "../node_modules/.bin/ts-node -T"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.0.0",

@@ -24,7 +24,9 @@ export const createParagraph = (
 export const startNewParagraph = (context: ParserContext) => {
     let currentContainer = getCurrentContainer(context);
     if (stackHasParagraph(context, currentContainer)) {
-        throw new OsisParseError('Cannot start new paragraph inside a paragraph', context);
+        if (!context.autoGenMissingParagraphs)
+            throw new OsisParseError('Cannot start new paragraph inside a paragraph', context);
+        else closeCurrentParagraph(context);
     }
     const paragraph = createParagraph();
     currentContainer.contents.push(paragraph);
@@ -47,6 +49,7 @@ export const closeCurrentParagraph = (context: ParserContext) => {
 export const sourceTextHasParagraphs = (xml: string) => {
     return (
         xml.includes(`<${OsisXmlNodeName.PARAGRAPH}>`) ||
-        xml.includes(`type="${OsisXmlNodeType.PARAGRAPH}"`)
+        xml.includes(`type="${OsisXmlNodeType.PARAGRAPH}"`) ||
+        xml.includes(`type="${OsisXmlNodeType.SWORD_PILCROW}"`)
     );
 };

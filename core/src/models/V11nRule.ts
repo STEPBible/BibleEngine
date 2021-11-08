@@ -10,7 +10,7 @@ export interface IV11nRule {
     standardRefId?: number;
 
     // one of `action` or `actionId` is required
-    action?: 'Keep verse' | 'Merged with' | 'Renumber verse' | 'Empty verse';
+    action?: 'Keep verse' | 'Merged verse' | 'Renumber verse' | 'Empty verse';
     actionId?: number;
 
     noteMarker: string;

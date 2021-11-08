@@ -5,48 +5,48 @@ import { BibleBookPlaintext } from '../models';
  */
 export type BookData = {
     [key: string]: { genericId: number; names: { [key: string]: string[] } };
-}
+};
 export const BOOK_DATA: BookData = {
     /*
      Old Testament
     */
     Gen: {
         genericId: 1,
-        names: { en: ['Genesis', 'Ge', 'Gen'] }
+        names: { en: ['Genesis', 'Ge', 'Gen'] },
     },
     Exod: {
         genericId: 2,
-        names: { en: ['Exodus', 'Ex', 'Exo'] }
+        names: { en: ['Exodus', 'Ex', 'Exo'] },
     },
     Lev: {
         genericId: 3,
-        names: { en: ['Leviticus', 'Le', 'Lev'] }
+        names: { en: ['Leviticus', 'Le', 'Lev'] },
     },
     Num: {
         genericId: 4,
-        names: { en: ['Numbers', 'Nu', 'Num'] }
+        names: { en: ['Numbers', 'Nu', 'Num'] },
     },
     Deut: {
         genericId: 5,
-        names: { en: ['Deuteronomy', 'Dt', 'Deut', 'Deu', 'De'] }
+        names: { en: ['Deuteronomy', 'Dt', 'Deut', 'Deu', 'De'] },
     },
     Josh: {
         genericId: 6,
-        names: { en: ['Joshua', 'Js', 'Jos', 'Jos', 'Josh'] }
+        names: { en: ['Joshua', 'Js', 'Jos', 'Jos', 'Josh'] },
     },
     Judg: {
         genericId: 7,
-        names: { en: ['Judges', 'Jg', 'Jdg', 'Jdgs'] }
+        names: { en: ['Judges', 'Jg', 'Jdg', 'Jdgs'] },
     },
     Ruth: {
         genericId: 8,
-        names: { en: ['Ruth', 'Ru', 'Rut'] }
+        names: { en: ['Ruth', 'Ru', 'Rut'] },
     },
     '1Sam': {
         genericId: 9,
         names: {
-            en: ['1 Samuel', '1S', '1 Sam', '1Sam', '1 Sa', '1Sa', 'I Samuel', 'I Sam', 'I Sa']
-        }
+            en: ['1 Samuel', '1S', '1 Sam', '1Sam', '1 Sa', '1Sa', 'I Samuel', 'I Sam', 'I Sa'],
+        },
     },
     '2Sam': {
         genericId: 10,
@@ -61,15 +61,15 @@ export const BOOK_DATA: BookData = {
                 'II Samuel',
                 'II Sam',
                 'II Sa',
-                'IIS'
-            ]
-        }
+                'IIS',
+            ],
+        },
     },
     '1Kgs': {
         genericId: 11,
         names: {
-            en: ['1 Kings', '1K', '1 Kin', '1Kin', '1 Ki', 'IK', '1Ki', 'I Kings', 'I Kin', 'I Ki']
-        }
+            en: ['1 Kings', '1K', '1 Kin', '1Kin', '1 Ki', 'IK', '1Ki', 'I Kings', 'I Kin', 'I Ki'],
+        },
     },
     '2Kgs': {
         genericId: 12,
@@ -84,9 +84,9 @@ export const BOOK_DATA: BookData = {
                 '2Ki',
                 'II Kings',
                 'II Kin',
-                'II Ki'
-            ]
-        }
+                'II Ki',
+            ],
+        },
     },
     '1Chr': {
         genericId: 13,
@@ -100,9 +100,9 @@ export const BOOK_DATA: BookData = {
                 'ICh',
                 'I Chronicles',
                 'I Chr',
-                'I Ch'
-            ]
-        }
+                'I Ch',
+            ],
+        },
     },
     '2Chr': {
         genericId: 14,
@@ -117,37 +117,37 @@ export const BOOK_DATA: BookData = {
                 'IICh',
                 'II Chronicles',
                 'II Chr',
-                'II Ch'
-            ]
-        }
+                'II Ch',
+            ],
+        },
     },
     Ezra: {
         genericId: 15,
-        names: { en: ['Ezra', 'Ezr'] }
+        names: { en: ['Ezra', 'Ezr'] },
     },
     Neh: {
         genericId: 16,
-        names: { en: ['Nehemiah', 'Ne', 'Neh', 'Neh', 'Ne'] }
+        names: { en: ['Nehemiah', 'Ne', 'Neh', 'Neh', 'Ne'] },
     },
     Esth: {
         genericId: 17,
-        names: { en: ['Esther', 'Es', 'Est', 'Esth'] }
+        names: { en: ['Esther', 'Es', 'Est', 'Esth'] },
     },
     Job: {
         genericId: 18,
-        names: { en: ['Job', 'Jb', 'Job'] }
+        names: { en: ['Job', 'Jb', 'Job'] },
     },
     Ps: {
         genericId: 19,
-        names: { en: ['Psalm', 'Ps', 'Psa'] }
+        names: { en: ['Psalm', 'Ps', 'Psa'] },
     },
     Prov: {
         genericId: 20,
-        names: { en: ['Proverbs', 'Pr', 'Prov', 'Pro'] }
+        names: { en: ['Proverbs', 'Pr', 'Prov', 'Pro'] },
     },
     Eccl: {
         genericId: 21,
-        names: { en: ['Ecclesiastes', 'Ec', 'Ecc', 'Qohelet'] }
+        names: { en: ['Ecclesiastes', 'Ec', 'Ecc', 'Qohelet'] },
     },
     Song: {
         genericId: 22,
@@ -161,77 +161,77 @@ export const BOOK_DATA: BookData = {
                 'SongOfSongs',
                 'SongofSolomon',
                 'Canticle of Canticles',
-                'Sng'
-            ]
-        }
+                'Sng',
+            ],
+        },
     },
     Isa: {
         genericId: 23,
-        names: { en: ['Isaiah', 'Is', 'Isa'] }
+        names: { en: ['Isaiah', 'Is', 'Isa'] },
     },
     Jer: {
         genericId: 24,
-        names: { en: ['Jeremiah', 'Je', 'Jer'] }
+        names: { en: ['Jeremiah', 'Je', 'Jer'] },
     },
     Lam: {
         genericId: 25,
-        names: { en: ['Lamentations', 'La', 'Lam', 'Lament'] }
+        names: { en: ['Lamentations', 'La', 'Lam', 'Lament'] },
     },
     Ezek: {
         genericId: 26,
-        names: { en: ['Ezekiel', 'Ek', 'Ezek', 'Eze', 'Ezk'] }
+        names: { en: ['Ezekiel', 'Ek', 'Ezek', 'Eze', 'Ezk'] },
     },
     Dan: {
         genericId: 27,
-        names: { en: ['Daniel', 'Da', 'Dan', 'Dl', 'Dnl'] }
+        names: { en: ['Daniel', 'Da', 'Dan', 'Dl', 'Dnl'] },
     },
     Hos: {
         genericId: 28,
-        names: { en: ['Hosea', 'Ho', 'Hos'] }
+        names: { en: ['Hosea', 'Ho', 'Hos'] },
     },
     Joel: {
         genericId: 29,
-        names: { en: ['Joel', 'Jl', 'Joel', 'Joe', 'Jol'] }
+        names: { en: ['Joel', 'Jl', 'Joel', 'Joe', 'Jol'] },
     },
     Amos: {
         genericId: 30,
-        names: { en: ['Amos', 'Am', 'Amos', 'Amo'] }
+        names: { en: ['Amos', 'Am', 'Amos', 'Amo'] },
     },
     Obad: {
         genericId: 31,
-        names: { en: ['Obadiah', 'Ob', 'Oba', 'Obd', 'Odbh'] }
+        names: { en: ['Obadiah', 'Ob', 'Oba', 'Obd', 'Odbh'] },
     },
     Jonah: {
         genericId: 32,
-        names: { en: ['Jonah', 'Jh', 'Jon', 'Jnh'] }
+        names: { en: ['Jonah', 'Jh', 'Jon', 'Jnh'] },
     },
     Mic: {
         genericId: 33,
-        names: { en: ['Micah', 'Mi', 'Mic'] }
+        names: { en: ['Micah', 'Mi', 'Mic'] },
     },
     Nah: {
         genericId: 34,
-        names: { en: ['Nahum', 'Na', 'Nah', 'Nah', 'Na', 'Nam'] }
+        names: { en: ['Nahum', 'Na', 'Nah', 'Nah', 'Na', 'Nam'] },
     },
     Hab: {
         genericId: 35,
-        names: { en: ['Habakkuk', 'Hb', 'Hab', 'Hk', 'Habk'] }
+        names: { en: ['Habakkuk', 'Hb', 'Hab', 'Hk', 'Habk'] },
     },
     Zeph: {
         genericId: 36,
-        names: { en: ['Zephaniah', 'Zp', 'Zep', 'Zeph'] }
+        names: { en: ['Zephaniah', 'Zp', 'Zep', 'Zeph'] },
     },
     Hag: {
         genericId: 37,
-        names: { en: ['Haggai', 'Ha', 'Hag', 'Hagg'] }
+        names: { en: ['Haggai', 'Ha', 'Hag', 'Hagg'] },
     },
     Zech: {
         genericId: 38,
-        names: { en: ['Zechariah', 'Zc', 'Zech', 'Zec'] }
+        names: { en: ['Zechariah', 'Zc', 'Zech', 'Zec'] },
     },
     Mal: {
         genericId: 39,
-        names: { en: ['Malachi', 'Ml', 'Mal', 'Mlc'] }
+        names: { en: ['Malachi', 'Ml', 'Mal', 'Mlc'] },
     },
 
     /*
@@ -240,27 +240,27 @@ export const BOOK_DATA: BookData = {
 
     Matt: {
         genericId: 40,
-        names: { en: ['Matthew', 'Mt', 'Matt', 'Mat'] }
+        names: { en: ['Matthew', 'Mt', 'Matt', 'Mat'] },
     },
     Mark: {
         genericId: 41,
-        names: { en: ['Mark', 'Mk', 'Mar', 'Mrk'] }
+        names: { en: ['Mark', 'Mk', 'Mar', 'Mrk'] },
     },
     Luke: {
         genericId: 42,
-        names: { en: ['Luke', 'Lk', 'Luk', 'Lu'] }
+        names: { en: ['Luke', 'Lk', 'Luk', 'Lu'] },
     },
     John: {
         genericId: 43,
-        names: { en: ['John', 'Jn', 'Joh', 'Jo', 'Jhn'] }
+        names: { en: ['John', 'Jn', 'Joh', 'Jo', 'Jhn'] },
     },
     Acts: {
         genericId: 44,
-        names: { en: ['Acts', 'Ac', 'Act'] }
+        names: { en: ['Acts', 'Ac', 'Act'] },
     },
     Rom: {
         genericId: 45,
-        names: { en: ['Romans', 'Ro', 'Rom', 'Rmn', 'Rmns'] }
+        names: { en: ['Romans', 'Ro', 'Rom', 'Rmn', 'Rmns'] },
     },
     '1Cor': {
         genericId: 46,
@@ -275,9 +275,9 @@ export const BOOK_DATA: BookData = {
                 '1Co',
                 'I Corinthians',
                 'I Cor',
-                'I Co'
-            ]
-        }
+                'I Co',
+            ],
+        },
     },
     '2Cor': {
         genericId: 47,
@@ -292,25 +292,25 @@ export const BOOK_DATA: BookData = {
                 '2Co',
                 'II Corinthians',
                 'II Cor',
-                'II Co'
-            ]
-        }
+                'II Co',
+            ],
+        },
     },
     Gal: {
         genericId: 48,
-        names: { en: ['Galatians', 'Ga', 'Gal', 'Gltns'] }
+        names: { en: ['Galatians', 'Ga', 'Gal', 'Gltns'] },
     },
     Eph: {
         genericId: 49,
-        names: { en: ['Ephesians', 'Ep', 'Eph', 'Ephn'] }
+        names: { en: ['Ephesians', 'Ep', 'Eph', 'Ephn'] },
     },
     Phil: {
         genericId: 50,
-        names: { en: ['Philippians', 'Pp', 'Phi', 'Phil', 'Phi', 'Php'] }
+        names: { en: ['Philippians', 'Pp', 'Phi', 'Phil', 'Phi', 'Php'] },
     },
     Col: {
         genericId: 51,
-        names: { en: ['Colossians', 'Co', 'Col', 'Colo', 'Cln', 'Clns'] }
+        names: { en: ['Colossians', 'Co', 'Col', 'Colo', 'Cln', 'Clns'] },
     },
     '1Thess': {
         genericId: 52,
@@ -330,9 +330,9 @@ export const BOOK_DATA: BookData = {
                 'I Thessalonians',
                 'I Thess',
                 'I The',
-                'I Th'
-            ]
-        }
+                'I Th',
+            ],
+        },
     },
     '2Thess': {
         genericId: 53,
@@ -353,9 +353,9 @@ export const BOOK_DATA: BookData = {
                 'II Thessalonians',
                 'II Thess',
                 'II The',
-                'II Th'
-            ]
-        }
+                'II Th',
+            ],
+        },
     },
     '1Tim': {
         genericId: 54,
@@ -370,9 +370,9 @@ export const BOOK_DATA: BookData = {
                 '1Ti',
                 'I Timothy',
                 'I Tim',
-                'I Ti'
-            ]
-        }
+                'I Ti',
+            ],
+        },
     },
     '2Tim': {
         genericId: 55,
@@ -388,31 +388,31 @@ export const BOOK_DATA: BookData = {
                 '2Ti',
                 'II Timothy',
                 'II Tim',
-                'II Ti'
-            ]
-        }
+                'II Ti',
+            ],
+        },
     },
     Titus: {
         genericId: 56,
-        names: { en: ['Titus', 'Ti', 'Tit', 'Tt', 'Ts'] }
+        names: { en: ['Titus', 'Ti', 'Tit', 'Tt', 'Ts'] },
     },
     Phlm: {
         genericId: 57,
-        names: { en: ['Philemon', 'Pm', 'Phile', 'Phile', 'Philm', 'Pm', 'Phm'] }
+        names: { en: ['Philemon', 'Pm', 'Phile', 'Phile', 'Philm', 'Pm', 'Phm'] },
     },
     Heb: {
         genericId: 58,
-        names: { en: ['Hebrews', 'He', 'Heb', 'Hw'] }
+        names: { en: ['Hebrews', 'He', 'Heb', 'Hw'] },
     },
     Jas: {
         genericId: 59,
-        names: { en: ['James', 'Jm', 'Jam', 'Jas', 'Ja'] }
+        names: { en: ['James', 'Jm', 'Jam', 'Jas', 'Ja'] },
     },
     '1Pet': {
         genericId: 60,
         names: {
-            en: ['1 Peter', '1P', '1 Pet', '1Pet', 'IPe', '1P', 'I Peter', 'I Pet', 'I Pe', '1Pe']
-        }
+            en: ['1 Peter', '1P', '1 Pet', '1Pet', 'IPe', '1P', 'I Peter', 'I Pet', 'I Pe', '1Pe'],
+        },
     },
     '2Pet': {
         genericId: 61,
@@ -427,17 +427,17 @@ export const BOOK_DATA: BookData = {
                 'II Peter',
                 'II Pet',
                 'II Pe',
-                '2Pe'
-            ]
-        }
+                '2Pe',
+            ],
+        },
     },
     '1John': {
         genericId: 62,
-        names: { en: ['1 John', '1J', '1 Jn', '1Jn', '1 Jo', 'IJo', 'I John', 'I Jo', 'I Jn'] }
+        names: { en: ['1 John', '1J', '1 Jn', '1Jn', '1 Jo', 'IJo', 'I John', 'I Jo', 'I Jn'] },
     },
     '2John': {
         genericId: 63,
-        names: { en: ['2 John', '2J', '2 Jn', '2Jn', '2 Jo', 'IIJo', 'II John', 'II Jo', 'II Jn'] }
+        names: { en: ['2 John', '2J', '2 Jn', '2Jn', '2 Jo', 'IIJo', 'II John', 'II Jo', 'II Jn'] },
     },
     '3John': {
         genericId: 64,
@@ -452,17 +452,17 @@ export const BOOK_DATA: BookData = {
                 'IIIJo',
                 'III John',
                 'III Jo',
-                'III Jn'
-            ]
-        }
+                'III Jn',
+            ],
+        },
     },
     Jude: {
         genericId: 65,
-        names: { en: ['Jude', 'Jude', 'Jude'] }
+        names: { en: ['Jude', 'Jude', 'Jude'] },
     },
     Rev: {
         genericId: 66,
-        names: { en: ['Revelation', 'Re', 'Rev', 'Rvltn'] }
+        names: { en: ['Revelation', 'Re', 'Rev', 'Rvltn'] },
     },
 
     /*
@@ -471,76 +471,76 @@ export const BOOK_DATA: BookData = {
 
     Tob: {
         genericId: 70,
-        names: { en: ['Tobit'] }
+        names: { en: ['Tobit'] },
     },
     Jdt: {
         genericId: 71,
-        names: { en: ['Judith'] }
+        names: { en: ['Judith'] },
     },
     AddEsth: {
         genericId: 72,
-        names: { en: ['Additions to Esther'] }
+        names: { en: ['Additions to Esther'] },
     },
     Wis: {
         genericId: 73,
-        names: { en: ['Wisdom', 'Wisdom of Solomon'] }
+        names: { en: ['Wisdom', 'Wisdom of Solomon'] },
     },
     Sir: {
         genericId: 74,
-        names: { en: ['Sirach', 'Ecclesiasticus'] }
+        names: { en: ['Sirach', 'Ecclesiasticus'] },
     },
     Bar: {
         genericId: 75,
-        names: { en: ['Baruch'] }
+        names: { en: ['Baruch'] },
     },
     EpJer: {
         genericId: 76,
-        names: { en: ['Letter of Jeremiah', 'Lje'] }
+        names: { en: ['Letter of Jeremiah', 'Lje'] },
     },
     PrAzar: {
         genericId: 77,
-        names: { en: ['Prayer of Azariah'] }
+        names: { en: ['Prayer of Azariah'] },
     },
     Sus: {
         genericId: 78,
-        names: { en: ['Susanna'] }
+        names: { en: ['Susanna'] },
     },
     Bel: {
         genericId: 79,
-        names: { en: ['Bel and the Dragon'] }
+        names: { en: ['Bel and the Dragon'] },
     },
     '1Macc': {
         genericId: 80,
-        names: { en: ['1 Maccabees'] }
+        names: { en: ['1 Maccabees'] },
     },
     '2Macc': {
         genericId: 81,
-        names: { en: ['2 Maccabees'] }
+        names: { en: ['2 Maccabees'] },
     },
     '3Macc': {
         genericId: 82,
-        names: { en: ['3 Maccabees'] }
+        names: { en: ['3 Maccabees'] },
     },
     '4Macc': {
         genericId: 83,
-        names: { en: ['4 Maccabees'] }
+        names: { en: ['4 Maccabees'] },
     },
     PrMan: {
         genericId: 84,
-        names: { en: ['Prayer of Manasseh', 'Song of the Three Children'] }
+        names: { en: ['Prayer of Manasseh', 'Song of the Three Children'] },
     },
     '1Esd': {
         genericId: 85,
-        names: { en: ['1 Esdras'] }
+        names: { en: ['1 Esdras'] },
     },
     '2Esd': {
         genericId: 86,
-        names: { en: ['2 Esdras', '5 Ezra'] }
+        names: { en: ['2 Esdras', '5 Ezra'] },
     },
     Ps151: {
         genericId: 87,
-        names: { en: ['Psalm'] }
-    }
+        names: { en: ['Psalm'] },
+    },
 };
 
 /**
@@ -585,7 +585,7 @@ export const OT_BOOKS = [
     'Zeph',
     'Hag',
     'Zech',
-    'Mal'
+    'Mal',
 ];
 
 /**
@@ -618,7 +618,7 @@ export const NT_BOOKS = [
     '2John',
     '3John',
     'Jude',
-    'Rev'
+    'Rev',
 ];
 
 /**
@@ -641,7 +641,7 @@ export const AP_BOOKS = [
     '4Macc',
     '1Esd',
     '2Esd',
-    'Ps151'
+    'Ps151',
 ];
 
 // NRSV chapter and verse numbers
@@ -818,18 +818,24 @@ export const NORMALIZED_VERSE_NUMS = [
 ];
 
 const sourceTypes = new Map([
-    [0, 'All'],
+    [0, 'AllBibles'],
     [10, 'English'],
-    [11, 'English+Hebrew'],
-    [12, 'English+Greek'],
+    [11, 'English+Greek'],
+    [12, 'English+Greek1'],
     [13, 'English+Greek2'],
     [14, 'English+Latin'],
     [15, 'English+Latin+Greek'],
-    [16, 'English+Hebrew+Greek'],
-    [17, 'English+Hebrew+Latin'],
-    [18, 'English+Hebrew+Latin+Greek'],
-    [19, 'EngTitleSeparate'],
-    [20, 'English+Latin2'],
+    [16, 'English+Latin2'],
+    [17, 'English+Hebrew'],
+    [18, 'English+Hebrew+Greek'],
+    [19, 'English+Hebrew+Latin'],
+    [20, 'English+Hebrew+Latin+Greek'],
+    [21, 'EngTitleSeparate'],
+    [22, 'EngTitleMerged'],
+    [23, 'EngTitleMerged+Hebrew'],
+    [24, 'English2'],
+    [25, 'English2+Greek2'],
+    [26, 'English3'],
     [30, 'Hebrew'],
     [31, 'Hebrew+Greek'],
     [32, 'Hebrew+Latin'],
@@ -841,17 +847,32 @@ const sourceTypes = new Map([
     [43, 'Latin2-DRA'],
     [44, 'Latin2'],
     [45, 'Latin+Greek2'],
+    [46, 'Latin+Hebrew'],
+    [47, 'Latin+Bulgarian'],
     [50, 'Greek'],
     [51, 'GreekUndivided'],
     [52, 'Greek2'],
     [53, 'Greek2Undivided'],
-    [54, 'Greek2-NETS'],
-    [55, 'GreekIntegrated'],
-    [56, 'Greek3'],
-    [60, 'Slavonic'],
-    [61, 'SpanishRV'],
-    [62, 'Bangladeshi'],
-    [63, 'FrenchNEG']
+    [54, 'GreekUndivided2'],
+    [55, 'Greek2-NETS'],
+    [56, 'GreekIntegrated'],
+    [57, 'Greek3'],
+    [58, 'GrkTitleMerged'],
+    [59, 'GrkTitleSeparate'],
+    [60, 'GrkTitleSeparate2'],
+    [61, 'Greek+Latin'],
+    [70, 'German'],
+    [80, 'Slavonic'],
+    [81, 'SpanishRV'],
+    [82, 'Bangladeshi'],
+    [83, 'FrenchNEG'],
+    [84, 'Japanese'],
+    [85, 'Bulgarian'],
+    [86, 'Bulgarian2'],
+    [87, 'BrentonMerged'],
+    [88, 'Lingala'],
+    [89, 'Italian'],
+    [90, 'Arabic'],
 ]);
 
 export const getBookGenericIdFromOsisId = (osisId: string, checkAlternatives = false) => {
@@ -932,12 +953,13 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
         const refBaseFactorParts = testParts[1].split('*');
         const refBaseReferenceParts = refBaseFactorParts[0].split('.');
         const refBaseNumbers = refBaseReferenceParts[1].split(':');
+        const refBaseAddition = refBaseReferenceParts[2]?.split('+');
 
         const refBase: TestReference = {
             chapterNumber: +refBaseNumbers[0],
             verseNumber: +refBaseNumbers[1],
-            subverseNumber: refBaseReferenceParts[2] ? +refBaseReferenceParts[2] : 0,
-            factor: refBaseFactorParts[1] ? +refBaseFactorParts[1] : 1
+            subverseNumber: refBaseAddition?.[0] ? +refBaseAddition[0] : 1,
+            factor: refBaseFactorParts[1] ? +refBaseFactorParts[1] : 1,
         };
         const contextChapter = context.get(refBase.chapterNumber);
 
@@ -955,28 +977,44 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
                 if (
                     !contextChapter ||
                     !contextChapter.has(refBase.verseNumber) ||
+                    // RADAR: we have a problem since in BibleEngine subverse 1 always exists (and subverse zero if psalm title exists) however in the
+                    //        context of the rules subverses only exist if explicitly created. We try to approximate a check by handling the three cases
+                    //        0, 1 and >1 differently
+                    (refBase.subverseNumber === 0 &&
+                        !contextChapter.get(refBase.verseNumber)![0]) ||
+                    // we assume a check for `.1=Exist` wants to know if subverses are created at all (which only make sense if there are more than one)
+                    //  => this case is handled above already
+                    // we assume a check for `.2=Exist` wants to test for a certain number of subverses to at least exists
                     (refBase.subverseNumber &&
-                        !contextChapter.get(refBase.verseNumber)![refBase.subverseNumber])
+                        refBase.subverseNumber > 1 &&
+                        contextChapter.get(refBase.verseNumber)!.filter(Boolean).length <
+                            refBase.subverseNumber)
                 )
                     return false;
             } else if (refTest === 'NotExist') {
                 if (
                     contextChapter &&
                     contextChapter.has(refBase.verseNumber) &&
-                    (!refBase.subverseNumber ||
-                        contextChapter.get(refBase.verseNumber)![refBase.subverseNumber])
+                    (typeof refBase.subverseNumber === 'undefined' ||
+                        refBase.subverseNumber === 1 ||
+                        // see comment at `Exist`
+                        (refBase.subverseNumber === 0 &&
+                            contextChapter.get(refBase.verseNumber)![0]) ||
+                        (refBase.subverseNumber > 1 &&
+                            contextChapter.get(refBase.verseNumber)!.filter(Boolean).length >=
+                                refBase.subverseNumber))
                 )
                     return false;
             }
         } else {
             const refCompareFactorParts = testParts[3].split('*');
-            const refCompareSubverseParts = refCompareFactorParts[0].split('.');
-            const refCompareNumbers = refCompareSubverseParts[0].split(':');
+            const refCompareReferenceParts = refCompareFactorParts[0].split('.');
+            const refCompareNumbers = refCompareReferenceParts[1].split(':');
             const refCompare: TestReference = {
                 chapterNumber: +refCompareNumbers[0],
                 verseNumber: +refCompareNumbers[1],
-                subverseNumber: refCompareSubverseParts[1] ? +refCompareSubverseParts[1] : 0,
-                factor: refCompareFactorParts[1] ? +refCompareFactorParts[1] : 1
+                subverseNumber: refCompareReferenceParts[2] ? +refCompareReferenceParts[2] : 1,
+                factor: refCompareFactorParts[1] ? +refCompareFactorParts[1] : 1,
             };
             const contextCompareChapter = context.get(refCompare.chapterNumber);
 
@@ -987,9 +1025,12 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
 
             if (!baseVerse || !compareVerse) return false;
 
-            const baseText = refBase.subverseNumber
-                ? baseVerse[refBase.subverseNumber]
-                : baseVerse.join(' ');
+            // RADAR: currently the only rules that use an addition add together the psalm title with verse 1.
+            //        since BibleEngine puts the title in 1.0, we just join the whole verse in that case for simplicity.
+            const baseText =
+                refBase.subverseNumber && !refBaseAddition?.[1]
+                    ? baseVerse[refBase.subverseNumber]
+                    : baseVerse.join(' ');
             const compareText = refCompare.subverseNumber
                 ? compareVerse[refCompare.subverseNumber]
                 : compareVerse.join(' ');

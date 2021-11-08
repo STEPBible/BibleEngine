@@ -40,17 +40,19 @@ export enum OsisXmlNodeType {
     SECTION_MAJOR = 'majorSection',
     SECTION_SUB = 'subSection',
     SELAH = 'x-selah',
+    SWORD_MILESTONE = 'x-milestone',
+    SWORD_PILCROW = 'x-p',
     TEXTUAL_NOTE = 'x-textual-note',
-    UNDERLINE = 'underline'
+    UNDERLINE = 'underline',
 }
 
 export enum OsisXmlNodeSubType {
-    PRE_VERSE = 'x-preverse'
+    PRE_VERSE = 'x-preverse',
 }
 
 export enum Indentation {
     SMALL = '1',
-    LARGE = '2'
+    LARGE = '2',
 }
 
 export enum OsisXmlNodeName {
@@ -82,8 +84,6 @@ export enum OsisXmlNodeName {
     REFERENCE = 'reference',
     REVISION_DESC = 'revisionDesc',
     RIGHTS = 'rights',
-    SWORD_MILESTONE = 'x-milestone',
-    SWORD_PILCROW = 'x-p',
     TEXTUAL_VARIATION = 'rdg',
     TITLE = 'title',
     TRANS_CHANGE = 'transChange',
@@ -94,5 +94,5 @@ export enum OsisXmlNodeName {
     WORK = 'work',
     VERSION_SCOPE = 'scope',
     XML = 'xml',
-    XML_ROOT = 'osis'
+    XML_ROOT = 'osis',
 }

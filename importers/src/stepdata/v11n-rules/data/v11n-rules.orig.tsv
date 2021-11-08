@@ -392,19 +392,19 @@ English+Hebrew+Latin	Exo.35:17	Exo.35:17	Keep verse	Acd. [12a]	%In some Bibles t
 English+Hebrew+Latin	Exo.35:18	Exo.35:18	Keep verse	Acd. [12b]	%In some Bibles the verse numbering here is% 35:12b.		(Hebrew=35:18 • Latin=35:18 • Greek=35:12b)	Exo.35:16>Exo.35:18				
 English+Hebrew+Latin	Exo.35:19	Exo.35:19	Keep verse	Acd. [18-19]	%In some Bibles the verse numbering here is% 35:18-19.		(Hebrew=35:19 • Latin=35:19 • Greek=35:18-19)	Exo.35:16>Exo.35:18				
 English+Hebrew+Latin	Exo.35:27	Exo.35:27	Keep verse	Acd. [27-28]	%In some Bibles the verse numbering here is% 35:27-28.		(Hebrew=35:27 • Latin=35:27 • Greek=35:27-28)	Exo.35:16>Exo.35:18				
-Greek	Exo.35:9	Exo.35:10	Renumber verse*	Nec. [9]	%Normally in this Bible the verse numbering here is% 35:9.		(Hebrew=35:10 • Latin=35:10 • Greek=35:9)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:10	Exo.35:11	Renumber verse*	Nec. [10]	%Normally in this Bible the verse numbering here is% 35:10.		(Hebrew=35:11 • Latin=35:11 • Greek=35:10)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:11	Exo.35:12	Renumber verse*	Nec. [11]	%Normally in this Bible the verse numbering here is% 35:11.		(Hebrew=35:12 • Latin=35:12 • Greek=35:11)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:12	Exo.35:17	Renumber verse*	Nec. [12a]	%Normally in this Bible this verse and the next occur as one verse that is numbered% 35:12.		(Hebrew=35:17 • Latin=35:17 • Greek=35:12a)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:12	Exo.35:18	Merged verse*	Nec. [12b]	%As normal in this Bible the text for this verse is included in the previous verse.%		(Hebrew=35:18 • Latin=35:18 • Greek=35:12b)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:13	Exo.35:9	Renumber verse*	Nec. [13]	%Normally in this Bible the verse numbering here is% 35:13.		(Hebrew=35:9 • Latin=35:9 • Greek=35:13)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:14	Exo.35:8.2	Renumber verse*	Nec. [14]	%Normally in this Bible the verse numbering here is% 35:14.		(Hebrew=35:8 • Latin=35:8 • Greek=35:14)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:15	Exo.35:13	Renumber verse*	Nec. [15]	%Normally in this Bible the verse numbering here is% 35:15.		(Hebrew=35:13 • Latin=35:13 • Greek=35:15)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:16	Exo.35:14	Renumber verse*	Nec. [16]	%Normally in this Bible the verse numbering here is% 35:16.		(Hebrew=35:14 • Latin=35:14 • Greek=35:16)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:17	Exo.35:15	Renumber verse*	Nec. [17a]	%Normally in this Bible this verse and the next occur as one verse that is numbered% 35:17.		(Hebrew=35:15 • Latin=35:15 • Greek=35:17a)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:17	Exo.35:16	Merged verse*	Nec. [17b]	%As normal in this Bible the text for this verse is included in the previous verse.%		(Hebrew=35:16 • Latin=35:16 • Greek=35:17b)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:18	Exo.35:19.1	Renumber verse	Nec. [18]	%Normally in this Bible the verse numbering here is% 35:18-19.		(Hebrew=35:19 • Latin=35:19 • Greek=35:18-19)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
-Greek	Exo.35:19	Exo.35:19.2	Renumber verse	Nec. [19]	%Normally in this Bible the verse numbering here is% 35:19.		(Hebrew=35:19 • Latin=35:19 • Greek=35:18-19)	Exo.35:16<Exo.35:18 & Exo.35:999=Exist				
+Greek	Exo.35:9	Exo.35:10	Renumber verse*	Nec. [9]	%Normally in this Bible the verse numbering here is% 35:9.		(Hebrew=35:10 • Latin=35:10 • Greek=35:9)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:10	Exo.35:11	Renumber verse*	Nec. [10]	%Normally in this Bible the verse numbering here is% 35:10.		(Hebrew=35:11 • Latin=35:11 • Greek=35:10)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:11	Exo.35:12	Renumber verse*	Nec. [11]	%Normally in this Bible the verse numbering here is% 35:11.		(Hebrew=35:12 • Latin=35:12 • Greek=35:11)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:12	Exo.35:17	Renumber verse*	Nec. [12a]	%Normally in this Bible this verse and the next occur as one verse that is numbered% 35:12.		(Hebrew=35:17 • Latin=35:17 • Greek=35:12a)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:12	Exo.35:18	Merged verse*	Nec. [12b]	%As normal in this Bible the text for this verse is included in the previous verse.%		(Hebrew=35:18 • Latin=35:18 • Greek=35:12b)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:13	Exo.35:9	Renumber verse*	Nec. [13]	%Normally in this Bible the verse numbering here is% 35:13.		(Hebrew=35:9 • Latin=35:9 • Greek=35:13)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:14	Exo.35:8	Renumber verse*	Nec. [14]	%Normally in this Bible the verse numbering here is% 35:14.		(Hebrew=35:8 • Latin=35:8 • Greek=35:14)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:15	Exo.35:13	Renumber verse*	Nec. [15]	%Normally in this Bible the verse numbering here is% 35:15.		(Hebrew=35:13 • Latin=35:13 • Greek=35:15)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:16	Exo.35:14	Renumber verse*	Nec. [16]	%Normally in this Bible the verse numbering here is% 35:16.		(Hebrew=35:14 • Latin=35:14 • Greek=35:16)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:17	Exo.35:15	Renumber verse*	Nec. [17a]	%Normally in this Bible this verse and the next occur as one verse that is numbered% 35:17.		(Hebrew=35:15 • Latin=35:15 • Greek=35:17a)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:17	Exo.35:16	Merged verse*	Nec. [17b]	%As normal in this Bible the text for this verse is included in the previous verse.%		(Hebrew=35:16 • Latin=35:16 • Greek=35:17b)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:18	Exo.35:19.1	Renumber verse	Nec. [18]	%Normally in this Bible the verse numbering here is% 35:18-19.		(Hebrew=35:19 • Latin=35:19 • Greek=35:18-19)	Exo.35:16<Exo.35:18				
+Greek	Exo.35:19	Exo.35:19.2	Renumber verse	Nec. [19]	%Normally in this Bible the verse numbering here is% 35:19.		(Hebrew=35:19 • Latin=35:19 • Greek=35:18-19)	Exo.35:16<Exo.35:18				
 												
 English+Hebrew+Latin	Exo.36:8	Exo.36:8	Keep verse	Acd. [37:1,2a]	%In some Bibles the verse numbering here is% 37:1, 2a.		(Hebrew=36:8 • Latin=36:8 • Greek=37:1; 2a)	Exo.36:38=Last & Exo.37:2.1=NotExist				
 English+Hebrew+Latin	Exo.36:9	Exo.36:9	Keep verse	Acd. [37:2]	%In some Bibles the verse numbering here is% 37:2.		(Hebrew=36:9 • Latin=36:9 • Greek=37:2, 2b)	Exo.36:38=Last & Exo.37:2.1=NotExist				
@@ -2355,10 +2355,10 @@ English+Hebrew+Latin	1Ki.14:17	1Ki.14:17	Keep verse	Acd. [12:24m]	%In some Bible
 English+Hebrew+Latin	1Ki.14:18	1Ki.14:18	Keep verse	Acd. [+]	%In some Bibles this verse may not contain any text%.		(Hebrew=14:18 • Latin=14:18 • Greek= --)	1Ki.12:24.1=NotExist & 1Ki.12:21*2>1Ki.12:24				
 English+Hebrew+Latin	1Ki.14:19	1Ki.14:19	Keep verse	Acd. [+]	%In some Bibles this verse may not contain any text%.		(Hebrew=14:19 • Latin=14:19 • Greek= --)	1Ki.12:24.1=NotExist & 1Ki.12:21*2>1Ki.12:24				
 English+Hebrew+Latin	1Ki.14:20	1Ki.14:20	Keep verse	Acd. [+]	%In some Bibles this verse may not contain any text%.		(Hebrew=14:20 • Latin=14:20 • Greek= --)	1Ki.12:24.1=NotExist & 1Ki.12:21*2>1Ki.12:24				
-Greek	1Ki.11:5	1Ki.11:7	Renumber verse*	Nec. [5]	%Normally in this Bible the verse numbering here is% 11:5.		(Hebrew=11:7 • Latin=11:7 • Greek=11:5)	1Ki.11:6<1Ki.11:35 & 1Ki.11:999=Exist				
-Greek	1Ki.11:6	1Ki.11:5	Renumber verse*	Nec. [6]	%Normally in this Bible the verse numbering here is% 11:6.		(Hebrew=11:5 • Latin=11:5 • Greek=11:6)	1Ki.11:6<1Ki.11:35 & 1Ki.11:999=Exist				
-Greek	1Ki.11:7	1Ki.11:8	Renumber verse*	Nec. [7]	%Normally in this Bible the verse numbering here is% 11:7.		(Hebrew=11:8 • Latin=11:8 • Greek=11:7)	1Ki.11:6<1Ki.11:35 & 1Ki.11:999=Exist				
-Greek	1Ki.11:8	1Ki.11:6	Renumber verse*	Nec. [8]	%Normally in this Bible the verse numbering here is% 11:8.		(Hebrew=11:6 • Latin=11:6 • Greek=11:8)	1Ki.11:6<1Ki.11:35 & 1Ki.11:999=Exist				
+Greek	1Ki.11:5	1Ki.11:7	Renumber verse*	Nec. [5]	%Normally in this Bible the verse numbering here is% 11:5.		(Hebrew=11:7 • Latin=11:7 • Greek=11:5)	1Ki.11:6<1Ki.11:35				
+Greek	1Ki.11:6	1Ki.11:5	Renumber verse*	Nec. [6]	%Normally in this Bible the verse numbering here is% 11:6.		(Hebrew=11:5 • Latin=11:5 • Greek=11:6)	1Ki.11:6<1Ki.11:35				
+Greek	1Ki.11:7	1Ki.11:8	Renumber verse*	Nec. [7]	%Normally in this Bible the verse numbering here is% 11:7.		(Hebrew=11:8 • Latin=11:8 • Greek=11:7)	1Ki.11:6<1Ki.11:35				
+Greek	1Ki.11:8	1Ki.11:6	Renumber verse*	Nec. [8]	%Normally in this Bible the verse numbering here is% 11:8.		(Hebrew=11:6 • Latin=11:6 • Greek=11:8)	1Ki.11:6<1Ki.11:35				
 Greek	1Ki.11:19	1Ki.11:19	Keep verse	Acd. [12:24e]	%Normally in this Bible similar text is found at% 12:24e.		(Hebrew=11:19 • Latin=11:19 • Greek=11:19 [=12:24e])	1Ki.12:24.1=Exist & 1Ki.12:21*2<1Ki.12:24				
 Greek	1Ki.11:21	1Ki.11:21	Keep verse	Acd. [12:24d]	%Normally in this Bible similar text is found at% 12:24d.		(Hebrew=11:21 • Latin=11:21 • Greek=11:21 [=12:24d1])	1Ki.12:24.1=Exist & 1Ki.12:21*2<1Ki.12:24				
 Greek	1Ki.11:22	1Ki.11:22	Keep verse	Acd. [12:24d]	%Normally in this Bible similar text is found at% 12:24d.		(Hebrew=11:22 • Latin=11:22 • Greek=11:22 [=12:24d2])	1Ki.12:24.1=Exist & 1Ki.12:21*2<1Ki.12:24				
@@ -5269,21 +5269,21 @@ English+Hebrew	Psa.11:4	Psa.11:4	Keep verse	Acd. [10:5]	%In some Bibles the vers
 English+Hebrew	Psa.11:5	Psa.11:5	Keep verse	Acd. [10:6]	%In some Bibles the verse numbering here is% 10:6.		(Hebrew=11:5 • Latin=10:6 • Greek=10:5)	Psa.11:7=Last				
 English+Hebrew	Psa.11:6	Psa.11:6	Keep verse	Acd. [10:7]	%In some Bibles the verse numbering here is% 10:7.		(Hebrew=11:6 • Latin=10:7 • Greek=10:6)	Psa.11:7=Last				
 English+Hebrew	Psa.11:7	Psa.11:7	Keep verse	Acd. [10:8]	%In some Bibles the verse numbering here is% 10:8.		(Hebrew=11:7 • Latin=10:8 • Greek=10:7)	Psa.11:7=Last				
-Greek	Psa.10:1	Psa.11:1	Renumber verse	Nec. [10:1]	%Normally in this Bible the verse numbering here is% 10:1.		(Hebrew=11:1 • Latin=10:1-2 • Greek=10:1)	Psa.10:7=Last & Psa.10:Title=NotExist				
-Greek	Psa.10:2	Psa.11:2	Renumber verse	Nec. [10:2]	%Normally in this Bible the verse numbering here is% 10:2.		(Hebrew=11:2 • Latin=10:3 • Greek=10:2)	Psa.10:7=Last & Psa.10:Title=NotExist				
-Greek	Psa.10:3	Psa.11:3	Renumber verse	Nec. [10:3]	%Normally in this Bible the verse numbering here is% 10:3.		(Hebrew=11:3 • Latin=10:4 • Greek=10:3)	Psa.10:7=Last & Psa.10:Title=NotExist				
-Greek	Psa.10:4	Psa.11:4	Renumber verse	Nec. [10:4]	%Normally in this Bible the verse numbering here is% 10:4.		(Hebrew=11:4 • Latin=10:5 • Greek=10:4)	Psa.10:7=Last & Psa.10:Title=NotExist				
-Greek	Psa.10:5	Psa.11:5	Renumber verse	Nec. [10:5]	%Normally in this Bible the verse numbering here is% 10:5.		(Hebrew=11:5 • Latin=10:6 • Greek=10:5)	Psa.10:7=Last & Psa.10:Title=NotExist				
-Greek	Psa.10:6	Psa.11:6	Renumber verse	Nec. [10:6]	%Normally in this Bible the verse numbering here is% 10:6.		(Hebrew=11:6 • Latin=10:7 • Greek=10:6)	Psa.10:7=Last & Psa.10:Title=NotExist				
-Greek	Psa.10:7	Psa.11:7	Renumber verse	Nec. [10:7]	%Normally in this Bible the verse numbering here is% 10:7.		(Hebrew=11:7 • Latin=10:8 • Greek=10:7)	Psa.10:7=Last & Psa.10:Title=NotExist				
-Latin	Psa.10:1	Psa.11:Title	Renumber Title	Nec. [10:1]	%Normally in this Bible the verse numbering here is% 10:1.		(Hebrew=11:1 • Latin=10:1-2 • Greek=10:1)	Psa.10:8=Last & Psa.10:Title=NotExist				
-Latin	Psa.10:2	Psa.11:1	Renumber verse	Nec. [10:2]	%Normally in this Bible the verse numbering here is% 10:2.		(Hebrew=11:1 • Latin=10:1-2 • Greek=10:1)	Psa.10:8=Last & Psa.10:Title=NotExist				
-Latin	Psa.10:3	Psa.11:2	Renumber verse	Nec. [10:3]	%Normally in this Bible the verse numbering here is% 10:3.		(Hebrew=11:2 • Latin=10:3 • Greek=10:2)	Psa.10:8=Last				
-Latin	Psa.10:4	Psa.11:3	Renumber verse	Nec. [10:4]	%Normally in this Bible the verse numbering here is% 10:4.		(Hebrew=11:3 • Latin=10:4 • Greek=10:3)	Psa.10:8=Last				
-Latin	Psa.10:5	Psa.11:4	Renumber verse	Nec. [10:5]	%Normally in this Bible the verse numbering here is% 10:5.		(Hebrew=11:4 • Latin=10:5 • Greek=10:4)	Psa.10:8=Last				
-Latin	Psa.10:6	Psa.11:5	Renumber verse	Nec. [10:6]	%Normally in this Bible the verse numbering here is% 10:6.		(Hebrew=11:5 • Latin=10:6 • Greek=10:5)	Psa.10:8=Last				
-Latin	Psa.10:8	Psa.11:6	Renumber verse	Nec. [10:7]	%Normally in this Bible the verse numbering here is% 10:7.		(Hebrew=11:6 • Latin=10:7 • Greek=10:6)	Psa.10:8=Last				
-Latin	Psa.10:8	Psa.11:7	Renumber verse	Nec. [10:8]	%Normally in this Bible the verse numbering here is% 10:8.		(Hebrew=11:7 • Latin=10:8 • Greek=10:7)	Psa.10:8=Last				
+Greek	Psa.10:1	Psa.11:1	Renumber verse	Nec. [10:1]	%Normally in this Bible the verse numbering here is% 10:1.		(Hebrew=11:1 • Latin=10:1-2 • Greek=10:1)	Psa.10:8=Last & Psa.11:Title=NotExist				
+Greek	Psa.10:2	Psa.11:2	Renumber verse	Nec. [10:2]	%Normally in this Bible the verse numbering here is% 10:2.		(Hebrew=11:2 • Latin=10:3 • Greek=10:2)	Psa.10:8=Last & Psa.11:Title=NotExist				
+Greek	Psa.10:3	Psa.11:3	Renumber verse	Nec. [10:3]	%Normally in this Bible the verse numbering here is% 10:3.		(Hebrew=11:3 • Latin=10:4 • Greek=10:3)	Psa.10:8=Last & Psa.11:Title=NotExist				
+Greek	Psa.10:4	Psa.11:4	Renumber verse	Nec. [10:4]	%Normally in this Bible the verse numbering here is% 10:4.		(Hebrew=11:4 • Latin=10:5 • Greek=10:4)	Psa.10:8=Last & Psa.11:Title=NotExist				
+Greek	Psa.10:5	Psa.11:5	Renumber verse	Nec. [10:5]	%Normally in this Bible the verse numbering here is% 10:5.		(Hebrew=11:5 • Latin=10:6 • Greek=10:5)	Psa.10:8=Last & Psa.11:Title=NotExist				
+Greek	Psa.10:6	Psa.11:6	Renumber verse	Nec. [10:6]	%Normally in this Bible the verse numbering here is% 10:6.		(Hebrew=11:6 • Latin=10:7 • Greek=10:6)	Psa.10:8=Last & Psa.11:Title=NotExist				
+Greek	Psa.10:7	Psa.11:7	Renumber verse	Nec. [10:7]	%Normally in this Bible the verse numbering here is% 10:7.		(Hebrew=11:7 • Latin=10:8 • Greek=10:7)	Psa.10:8=Last & Psa.11:Title=NotExist				
+Latin	Psa.10:1	Psa.11:Title	Renumber Title	Nec. [10:1]	%Normally in this Bible the verse numbering here is% 10:1.		(Hebrew=11:1 • Latin=10:1-2 • Greek=10:1)	Psa.10:7=Last & Psa.11:Title=NotExist				
+Latin	Psa.10:2	Psa.11:1	Renumber verse	Nec. [10:2]	%Normally in this Bible the verse numbering here is% 10:2.		(Hebrew=11:1 • Latin=10:1-2 • Greek=10:1)	Psa.10:7=Last & Psa.11:Title=NotExist				
+Latin	Psa.10:3	Psa.11:2	Renumber verse	Nec. [10:3]	%Normally in this Bible the verse numbering here is% 10:3.		(Hebrew=11:2 • Latin=10:3 • Greek=10:2)	Psa.10:7=Last				
+Latin	Psa.10:4	Psa.11:3	Renumber verse	Nec. [10:4]	%Normally in this Bible the verse numbering here is% 10:4.		(Hebrew=11:3 • Latin=10:4 • Greek=10:3)	Psa.10:7=Last				
+Latin	Psa.10:5	Psa.11:4	Renumber verse	Nec. [10:5]	%Normally in this Bible the verse numbering here is% 10:5.		(Hebrew=11:4 • Latin=10:5 • Greek=10:4)	Psa.10:7=Last				
+Latin	Psa.10:6	Psa.11:5	Renumber verse	Nec. [10:6]	%Normally in this Bible the verse numbering here is% 10:6.		(Hebrew=11:5 • Latin=10:6 • Greek=10:5)	Psa.10:7=Last				
+Latin	Psa.10:7	Psa.11:6	Renumber verse	Nec. [10:7]	%Normally in this Bible the verse numbering here is% 10:7.		(Hebrew=11:6 • Latin=10:7 • Greek=10:6)	Psa.10:7=Last				
+Latin	Psa.10:8	Psa.11:7	Renumber verse	Nec. [10:8]	%Normally in this Bible the verse numbering here is% 10:8.		(Hebrew=11:7 • Latin=10:8 • Greek=10:7)	Psa.10:7=Last				
 GrkTitleMerged	Psa.10:1	Psa.11:1	Renumber verse	Nec. [10:1]	%Normally in this Bible the verse numbering here is% 10:1.		(Hebrew=11:1 • Latin=10:1-2 • Greek=10:1)	Psa.10:Title=NotExist & Psa.10:7=Last				
 GrkTitleSeparate	Psa.10:Title	Psa.11:Title	Renumber Title	Nec. [10:1]	%Normally in this Bible the verse numbering here is% 10:1.		(Hebrew=11:1 • Latin=10:1-2 • Greek=10:1)	Psa.10:7=Last & Psa.10:Title=Exist				
 GrkTitleSeparate	Psa.10:1	Psa.11:1	Renumber verse	Nec. [10:1]	%Normally in this Bible the verse numbering here is% 10:1.		(Hebrew=11:1 • Latin=10:1-2 • Greek=10:1)	Psa.10:7=Last & Psa.10:Title=Exist				
@@ -6635,30 +6635,30 @@ Latin+Greek	Psa.33:20	Psa.34:19	Renumber verse	Nec. [33:20]	%Normally in this Bi
 Latin+Greek	Psa.33:21	Psa.34:20	Renumber verse	Nec. [33:21]	%Normally in this Bible the verse numbering here is% 33:21.		(Hebrew=34:21 • Latin=33:21 • Greek=33:21)	Psa.34:28=Last & Psa.34:Title=NotExist				
 Latin+Greek	Psa.33:22	Psa.34:21	Renumber verse	Nec. [33:22]	%Normally in this Bible the verse numbering here is% 33:22.		(Hebrew=34:22 • Latin=33:22 • Greek=33:22)	Psa.34:28=Last & Psa.34:Title=NotExist				
 Latin+Greek	Psa.33:23	Psa.34:22	Renumber verse	Nec. [33:23]	%Normally in this Bible the verse numbering here is% 33:23.		(Hebrew=34:23 • Latin=33:23 • Greek=33:23)	Psa.34:28=Last & Psa.34:Title=NotExist				
-GrkTitleMerged	Psa.33:1	Psa.34:1	Renumber Verse	Nec. [33:1]	%Normally in this Bible the verse numbering here is% 33:1.		(Hebrew=34:1 • Latin=33:1 • Greek=33:1)	Psa.33:Title=NotExist & Psa.34:28=Last & Psa.33:22=Last			
-GrkTitleSeparate	Psa.33:Title	Psa.34:Title	Renumber Title	Nec. [33:1]	%Normally in this Bible the verse numbering here is% 33:1.		(Hebrew=34:1 • Latin=33:1 • Greek=33:1)	Psa.33:Title=Exist & Psa.34:28=Last & Psa.33:22=Last				
-GrkTitleSeparate	Psa.33:1	Psa.34:1	Renumber verse	Nec. [33:1]	%Normally in this Bible the verse numbering here is% 33:1.		(Hebrew=34:2 • Latin=33:2 • Greek=33:2)	Psa.33:Title=Exist & Psa.34:28=Last & Psa.33:22=Last				
-GrkTitleSeparate	Psa.33:2	Psa.34:2	Renumber verse	Nec. [33:2]	%Normally in this Bible the verse numbering here is% 33:2.		(Hebrew=34:3 • Latin=33:3 • Greek=33:3)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:3	Psa.34:3	Renumber verse	Nec. [33:3]	%Normally in this Bible the verse numbering here is% 33:3.		(Hebrew=34:4 • Latin=33:4 • Greek=33:4)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:4	Psa.34:4	Renumber verse	Nec. [33:4]	%Normally in this Bible the verse numbering here is% 33:4.		(Hebrew=34:5 • Latin=33:5 • Greek=33:5)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:5	Psa.34:5	Renumber verse	Nec. [33:5]	%Normally in this Bible the verse numbering here is% 33:5.		(Hebrew=34:6 • Latin=33:6 • Greek=33:6)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:6	Psa.34:6	Renumber verse	Nec. [33:6]	%Normally in this Bible the verse numbering here is% 33:6.		(Hebrew=34:7 • Latin=33:7 • Greek=33:7)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:7	Psa.34:7	Renumber verse	Nec. [33:7]	%Normally in this Bible the verse numbering here is% 33:7.		(Hebrew=34:8 • Latin=33:8 • Greek=33:8)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:8	Psa.34:8	Renumber verse	Nec. [33:8]	%Normally in this Bible the verse numbering here is% 33:8.		(Hebrew=34:9 • Latin=33:9 • Greek=33:9)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:9	Psa.34:9	Renumber verse	Nec. [33:9]	%Normally in this Bible the verse numbering here is% 33:9.		(Hebrew=34:10 • Latin=33:10 • Greek=33:10)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:10	Psa.34:10	Renumber verse	Nec. [33:10]	%Normally in this Bible the verse numbering here is% 33:10.		(Hebrew=34:11 • Latin=33:11 • Greek=33:11)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:11	Psa.34:11	Renumber verse	Nec. [33:11]	%Normally in this Bible the verse numbering here is% 33:11.		(Hebrew=34:12 • Latin=33:12 • Greek=33:12)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:12	Psa.34:12	Renumber verse	Nec. [33:12]	%Normally in this Bible the verse numbering here is% 33:12.		(Hebrew=34:13 • Latin=33:13 • Greek=33:13)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:13	Psa.34:13	Renumber verse	Nec. [33:13]	%Normally in this Bible the verse numbering here is% 33:13.		(Hebrew=34:14 • Latin=33:14 • Greek=33:14)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:14	Psa.34:14	Renumber verse	Nec. [33:14]	%Normally in this Bible the verse numbering here is% 33:14.		(Hebrew=34:15 • Latin=33:15 • Greek=33:15)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:15	Psa.34:15	Renumber verse	Nec. [33:15]	%Normally in this Bible the verse numbering here is% 33:15.		(Hebrew=34:16 • Latin=33:16 • Greek=33:16)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:16	Psa.34:16	Renumber verse	Nec. [33:16]	%Normally in this Bible the verse numbering here is% 33:16.		(Hebrew=34:17 • Latin=33:17 • Greek=33:17)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:17	Psa.34:17	Renumber verse	Nec. [33:17]	%Normally in this Bible the verse numbering here is% 33:17.		(Hebrew=34:18 • Latin=33:18 • Greek=33:18)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:18	Psa.34:18	Renumber verse	Nec. [33:18]	%Normally in this Bible the verse numbering here is% 33:18.		(Hebrew=34:19 • Latin=33:19 • Greek=33:19)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:19	Psa.34:19	Renumber verse	Nec. [33:19]	%Normally in this Bible the verse numbering here is% 33:19.		(Hebrew=34:20 • Latin=33:20 • Greek=33:20)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:20	Psa.34:20	Renumber verse	Nec. [33:20]	%Normally in this Bible the verse numbering here is% 33:20.		(Hebrew=34:21 • Latin=33:21 • Greek=33:21)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:21	Psa.34:21	Renumber verse	Nec. [33:21]	%Normally in this Bible the verse numbering here is% 33:21.		(Hebrew=34:22 • Latin=33:22 • Greek=33:22)	Psa.34:28=Last & Psa.33:22=Last
-GrkTitleSeparate	Psa.33:22	Psa.34:22	Renumber verse	Nec. [33:22]	%Normally in this Bible the verse numbering here is% 33:22.		(Hebrew=34:23 • Latin=33:23 • Greek=33:23)	Psa.34:28=Last & Psa.33:22=Last
+GrkTitleMerged	Psa.33:1	Psa.34:1	Renumber Verse	Nec. [33:1]	%Normally in this Bible the verse numbering here is% 33:1.		(Hebrew=34:1 • Latin=33:1 • Greek=33:1)	Psa.33:Title=NotExist & Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:Title	Psa.34:Title	Renumber Title	Nec. [33:1]	%Normally in this Bible the verse numbering here is% 33:1.		(Hebrew=34:1 • Latin=33:1 • Greek=33:1)	Psa.33:Title=Exist & Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:1	Psa.34:1	Renumber verse	Nec. [33:1]	%Normally in this Bible the verse numbering here is% 33:1.		(Hebrew=34:2 • Latin=33:2 • Greek=33:2)	Psa.33:Title=Exist & Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:2	Psa.34:2	Renumber verse	Nec. [33:2]	%Normally in this Bible the verse numbering here is% 33:2.		(Hebrew=34:3 • Latin=33:3 • Greek=33:3)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:3	Psa.34:3	Renumber verse	Nec. [33:3]	%Normally in this Bible the verse numbering here is% 33:3.		(Hebrew=34:4 • Latin=33:4 • Greek=33:4)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:4	Psa.34:4	Renumber verse	Nec. [33:4]	%Normally in this Bible the verse numbering here is% 33:4.		(Hebrew=34:5 • Latin=33:5 • Greek=33:5)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:5	Psa.34:5	Renumber verse	Nec. [33:5]	%Normally in this Bible the verse numbering here is% 33:5.		(Hebrew=34:6 • Latin=33:6 • Greek=33:6)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:6	Psa.34:6	Renumber verse	Nec. [33:6]	%Normally in this Bible the verse numbering here is% 33:6.		(Hebrew=34:7 • Latin=33:7 • Greek=33:7)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:7	Psa.34:7	Renumber verse	Nec. [33:7]	%Normally in this Bible the verse numbering here is% 33:7.		(Hebrew=34:8 • Latin=33:8 • Greek=33:8)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:8	Psa.34:8	Renumber verse	Nec. [33:8]	%Normally in this Bible the verse numbering here is% 33:8.		(Hebrew=34:9 • Latin=33:9 • Greek=33:9)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:9	Psa.34:9	Renumber verse	Nec. [33:9]	%Normally in this Bible the verse numbering here is% 33:9.		(Hebrew=34:10 • Latin=33:10 • Greek=33:10)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:10	Psa.34:10	Renumber verse	Nec. [33:10]	%Normally in this Bible the verse numbering here is% 33:10.		(Hebrew=34:11 • Latin=33:11 • Greek=33:11)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:11	Psa.34:11	Renumber verse	Nec. [33:11]	%Normally in this Bible the verse numbering here is% 33:11.		(Hebrew=34:12 • Latin=33:12 • Greek=33:12)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:12	Psa.34:12	Renumber verse	Nec. [33:12]	%Normally in this Bible the verse numbering here is% 33:12.		(Hebrew=34:13 • Latin=33:13 • Greek=33:13)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:13	Psa.34:13	Renumber verse	Nec. [33:13]	%Normally in this Bible the verse numbering here is% 33:13.		(Hebrew=34:14 • Latin=33:14 • Greek=33:14)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:14	Psa.34:14	Renumber verse	Nec. [33:14]	%Normally in this Bible the verse numbering here is% 33:14.		(Hebrew=34:15 • Latin=33:15 • Greek=33:15)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:15	Psa.34:15	Renumber verse	Nec. [33:15]	%Normally in this Bible the verse numbering here is% 33:15.		(Hebrew=34:16 • Latin=33:16 • Greek=33:16)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:16	Psa.34:16	Renumber verse	Nec. [33:16]	%Normally in this Bible the verse numbering here is% 33:16.		(Hebrew=34:17 • Latin=33:17 • Greek=33:17)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:17	Psa.34:17	Renumber verse	Nec. [33:17]	%Normally in this Bible the verse numbering here is% 33:17.		(Hebrew=34:18 • Latin=33:18 • Greek=33:18)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:18	Psa.34:18	Renumber verse	Nec. [33:18]	%Normally in this Bible the verse numbering here is% 33:18.		(Hebrew=34:19 • Latin=33:19 • Greek=33:19)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:19	Psa.34:19	Renumber verse	Nec. [33:19]	%Normally in this Bible the verse numbering here is% 33:19.		(Hebrew=34:20 • Latin=33:20 • Greek=33:20)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:20	Psa.34:20	Renumber verse	Nec. [33:20]	%Normally in this Bible the verse numbering here is% 33:20.		(Hebrew=34:21 • Latin=33:21 • Greek=33:21)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:21	Psa.34:21	Renumber verse	Nec. [33:21]	%Normally in this Bible the verse numbering here is% 33:21.		(Hebrew=34:22 • Latin=33:22 • Greek=33:22)	Psa.34:28=Last				
+GrkTitleSeparate	Psa.33:22	Psa.34:22	Renumber verse	Nec. [33:22]	%Normally in this Bible the verse numbering here is% 33:22.		(Hebrew=34:23 • Latin=33:23 • Greek=33:23)	Psa.34:28=Last				
 												
 EngTitleMerged+Hebrew	Psa.35:1	Psa.35:1	Keep verse	Acd. [34:1]	%In some Bibles the verse numbering here is% 34:1.		(Hebrew=35:1 • Latin=34:1 • Greek=34:1)	Psa.35:28=Last & Psa.35:Title=NotExist				
 English	Psa.35:Title	Psa.35:Title	Psalm Title	Acd. [1]	%In some Bibles the verse numbering here is% 35:1.		(Hebrew=35:1 • Latin=34:1 • Greek=34:1)	Psa.35:28=Last & Psa.35:Title=Exist				
@@ -9094,44 +9094,44 @@ Latin+Greek	Psa.68:34	Psa.69:33	Renumber verse	Nec. [68:34]	%Normally in this Bi
 Latin+Greek	Psa.68:35	Psa.69:34	Renumber verse	Nec. [68:35]	%Normally in this Bible the verse numbering here is% 68:35.		(Hebrew=69:35 • Latin=68:35 • Greek=68:35)	Psa.69:6=Last & Psa.70:24=Last & Psa.69:Title=NotExist				
 Latin+Greek	Psa.68:36	Psa.69:35	Renumber verse	Nec. [68:36]	%Normally in this Bible the verse numbering here is% 68:36.		(Hebrew=69:36 • Latin=68:36 • Greek=68:36)	Psa.69:6=Last & Psa.70:24=Last & Psa.69:Title=NotExist				
 Latin+Greek	Psa.68:37	Psa.69:36	Renumber verse	Nec. [68:37]	%Normally in this Bible the verse numbering here is% 68:37.		(Hebrew=69:37 • Latin=68:37 • Greek=68:37)	Psa.69:6=Last & Psa.70:24=Last & Psa.69:Title=NotExist				
-GrkTitleMerged	Psa.68:1	Psa.69:1	Renumber Verse	Nec. [68:1]	%Normally in this Bible the verse numbering here is% 68:1.		(Hebrew=69:1 • Latin=68:1 • Greek=68:1)	Psa.68:Title=NotExist & Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:Title	Psa.69:Title	Renumber Title	Nec. [68:1]	%Normally in this Bible the verse numbering here is% 68:1.		(Hebrew=69:1 • Latin=68:1 • Greek=68:1)	Psa.68:Title=Exist & Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:1	Psa.69:1	Renumber verse	Nec. [68:1]	%Normally in this Bible the verse numbering here is% 68:1.		(Hebrew=69:2 • Latin=68:2 • Greek=68:2)	Psa.68:Title=Exist & Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:2	Psa.69:2	Renumber verse	Nec. [68:2]	%Normally in this Bible the verse numbering here is% 68:2.		(Hebrew=69:3 • Latin=68:3 • Greek=68:3)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:3	Psa.69:3	Renumber verse	Nec. [68:3]	%Normally in this Bible the verse numbering here is% 68:3.		(Hebrew=69:4 • Latin=68:4 • Greek=68:4)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:4	Psa.69:4	Renumber verse	Nec. [68:4]	%Normally in this Bible the verse numbering here is% 68:4.		(Hebrew=69:5 • Latin=68:5 • Greek=68:5)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:5	Psa.69:5	Renumber verse	Nec. [68:5]	%Normally in this Bible the verse numbering here is% 68:5.		(Hebrew=69:6 • Latin=68:6 • Greek=68:6)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:6	Psa.69:6	Renumber verse	Nec. [68:6]	%Normally in this Bible the verse numbering here is% 68:6.		(Hebrew=69:7 • Latin=68:7 • Greek=68:7)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:7	Psa.69:7	Renumber verse	Nec. [68:7]	%Normally in this Bible the verse numbering here is% 68:7.		(Hebrew=69:8 • Latin=68:8 • Greek=68:8)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:8	Psa.69:8	Renumber verse	Nec. [68:8]	%Normally in this Bible the verse numbering here is% 68:8.		(Hebrew=69:9 • Latin=68:9 • Greek=68:9)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:9	Psa.69:9	Renumber verse	Nec. [68:9]	%Normally in this Bible the verse numbering here is% 68:9.		(Hebrew=69:10 • Latin=68:10 • Greek=68:10)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:10	Psa.69:10	Renumber verse	Nec. [68:10]	%Normally in this Bible the verse numbering here is% 68:10.		(Hebrew=69:11 • Latin=68:11 • Greek=68:11)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:11	Psa.69:11	Renumber verse	Nec. [68:11]	%Normally in this Bible the verse numbering here is% 68:11.		(Hebrew=69:12 • Latin=68:12 • Greek=68:12)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:12	Psa.69:12	Renumber verse	Nec. [68:12]	%Normally in this Bible the verse numbering here is% 68:12.		(Hebrew=69:13 • Latin=68:13 • Greek=68:13)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:13	Psa.69:13	Renumber verse	Nec. [68:13]	%Normally in this Bible the verse numbering here is% 68:13.		(Hebrew=69:14 • Latin=68:14 • Greek=68:14)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:14	Psa.69:14	Renumber verse	Nec. [68:14]	%Normally in this Bible the verse numbering here is% 68:14.		(Hebrew=69:15 • Latin=68:15 • Greek=68:15)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:15	Psa.69:15	Renumber verse	Nec. [68:15]	%Normally in this Bible the verse numbering here is% 68:15.		(Hebrew=69:16 • Latin=68:16 • Greek=68:16)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:16	Psa.69:16	Renumber verse	Nec. [68:16]	%Normally in this Bible the verse numbering here is% 68:16.		(Hebrew=69:17 • Latin=68:17 • Greek=68:17)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:17	Psa.69:17	Renumber verse	Nec. [68:17]	%Normally in this Bible the verse numbering here is% 68:17.		(Hebrew=69:18 • Latin=68:18 • Greek=68:18)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:18	Psa.69:18	Renumber verse	Nec. [68:18]	%Normally in this Bible the verse numbering here is% 68:18.		(Hebrew=69:19 • Latin=68:19 • Greek=68:19)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:19	Psa.69:19	Renumber verse	Nec. [68:19]	%Normally in this Bible the verse numbering here is% 68:19.		(Hebrew=69:20 • Latin=68:20 • Greek=68:20)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:20	Psa.69:20	Renumber verse	Nec. [68:20]	%Normally in this Bible the verse numbering here is% 68:20.		(Hebrew=69:21 • Latin=68:21 • Greek=68:21)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:21	Psa.69:21	Renumber verse	Nec. [68:21]	%Normally in this Bible the verse numbering here is% 68:21.		(Hebrew=69:22 • Latin=68:22 • Greek=68:22)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:22	Psa.69:22	Renumber verse	Nec. [68:22]	%Normally in this Bible the verse numbering here is% 68:22.		(Hebrew=69:23 • Latin=68:23 • Greek=68:23)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:23	Psa.69:23	Renumber verse	Nec. [68:23]	%Normally in this Bible the verse numbering here is% 68:23.		(Hebrew=69:24 • Latin=68:24 • Greek=68:24)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:24	Psa.69:24	Renumber verse	Nec. [68:24]	%Normally in this Bible the verse numbering here is% 68:24.		(Hebrew=69:25 • Latin=68:25 • Greek=68:25)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:25	Psa.69:25	Renumber verse	Nec. [68:25]	%Normally in this Bible the verse numbering here is% 68:25.		(Hebrew=69:26 • Latin=68:26 • Greek=68:26)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:26	Psa.69:26	Renumber verse	Nec. [68:26]	%Normally in this Bible the verse numbering here is% 68:26.		(Hebrew=69:27 • Latin=68:27 • Greek=68:27)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:27	Psa.69:27	Renumber verse	Nec. [68:27]	%Normally in this Bible the verse numbering here is% 68:27.		(Hebrew=69:28 • Latin=68:28 • Greek=68:28)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:28	Psa.69:28	Renumber verse	Nec. [68:28]	%Normally in this Bible the verse numbering here is% 68:28.		(Hebrew=69:29 • Latin=68:29 • Greek=68:29)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:29	Psa.69:29	Renumber verse	Nec. [68:29]	%Normally in this Bible the verse numbering here is% 68:29.		(Hebrew=69:30 • Latin=68:30 • Greek=68:30)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:30	Psa.69:30	Renumber verse	Nec. [68:30]	%Normally in this Bible the verse numbering here is% 68:30.		(Hebrew=69:31 • Latin=68:31 • Greek=68:31)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:31	Psa.69:31	Renumber verse	Nec. [68:31]	%Normally in this Bible the verse numbering here is% 68:31.		(Hebrew=69:32 • Latin=68:32 • Greek=68:32)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:32	Psa.69:32	Renumber verse	Nec. [68:32]	%Normally in this Bible the verse numbering here is% 68:32.		(Hebrew=69:33 • Latin=68:33 • Greek=68:33)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:33	Psa.69:33	Renumber verse	Nec. [68:33]	%Normally in this Bible the verse numbering here is% 68:33.		(Hebrew=69:34 • Latin=68:34 • Greek=68:34)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:34	Psa.69:34	Renumber verse	Nec. [68:34]	%Normally in this Bible the verse numbering here is% 68:34.		(Hebrew=69:35 • Latin=68:35 • Greek=68:35)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:35	Psa.69:35	Renumber verse	Nec. [68:35]	%Normally in this Bible the verse numbering here is% 68:35.		(Hebrew=69:36 • Latin=68:36 • Greek=68:36)	Psa.68:36=Last & Psa.69:5=Last				
-GrkTitleSeparate	Psa.68:36	Psa.69:36	Renumber verse	Nec. [68:36]	%Normally in this Bible the verse numbering here is% 68:36.		(Hebrew=69:37 • Latin=68:37 • Greek=68:37)	Psa.68:36=Last & Psa.69:5=Last				
+GrkTitleMerged	Psa.68:1	Psa.69:1	Renumber Verse	Nec. [68:1]	%Normally in this Bible the verse numbering here is% 68:1.		(Hebrew=69:1 • Latin=68:1 • Greek=68:1)	Psa.68:Title=NotExist & Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:Title	Psa.69:Title	Renumber Title	Nec. [68:1]	%Normally in this Bible the verse numbering here is% 68:1.		(Hebrew=69:1 • Latin=68:1 • Greek=68:1)	Psa.68:Title=Exist & Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:1	Psa.69:1	Renumber verse	Nec. [68:1]	%Normally in this Bible the verse numbering here is% 68:1.		(Hebrew=69:2 • Latin=68:2 • Greek=68:2)	Psa.68:Title=Exist & Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:2	Psa.69:2	Renumber verse	Nec. [68:2]	%Normally in this Bible the verse numbering here is% 68:2.		(Hebrew=69:3 • Latin=68:3 • Greek=68:3)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:3	Psa.69:3	Renumber verse	Nec. [68:3]	%Normally in this Bible the verse numbering here is% 68:3.		(Hebrew=69:4 • Latin=68:4 • Greek=68:4)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:4	Psa.69:4	Renumber verse	Nec. [68:4]	%Normally in this Bible the verse numbering here is% 68:4.		(Hebrew=69:5 • Latin=68:5 • Greek=68:5)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:5	Psa.69:5	Renumber verse	Nec. [68:5]	%Normally in this Bible the verse numbering here is% 68:5.		(Hebrew=69:6 • Latin=68:6 • Greek=68:6)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:6	Psa.69:6	Renumber verse	Nec. [68:6]	%Normally in this Bible the verse numbering here is% 68:6.		(Hebrew=69:7 • Latin=68:7 • Greek=68:7)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:7	Psa.69:7	Renumber verse	Nec. [68:7]	%Normally in this Bible the verse numbering here is% 68:7.		(Hebrew=69:8 • Latin=68:8 • Greek=68:8)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:8	Psa.69:8	Renumber verse	Nec. [68:8]	%Normally in this Bible the verse numbering here is% 68:8.		(Hebrew=69:9 • Latin=68:9 • Greek=68:9)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:9	Psa.69:9	Renumber verse	Nec. [68:9]	%Normally in this Bible the verse numbering here is% 68:9.		(Hebrew=69:10 • Latin=68:10 • Greek=68:10)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:10	Psa.69:10	Renumber verse	Nec. [68:10]	%Normally in this Bible the verse numbering here is% 68:10.		(Hebrew=69:11 • Latin=68:11 • Greek=68:11)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:11	Psa.69:11	Renumber verse	Nec. [68:11]	%Normally in this Bible the verse numbering here is% 68:11.		(Hebrew=69:12 • Latin=68:12 • Greek=68:12)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:12	Psa.69:12	Renumber verse	Nec. [68:12]	%Normally in this Bible the verse numbering here is% 68:12.		(Hebrew=69:13 • Latin=68:13 • Greek=68:13)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:13	Psa.69:13	Renumber verse	Nec. [68:13]	%Normally in this Bible the verse numbering here is% 68:13.		(Hebrew=69:14 • Latin=68:14 • Greek=68:14)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:14	Psa.69:14	Renumber verse	Nec. [68:14]	%Normally in this Bible the verse numbering here is% 68:14.		(Hebrew=69:15 • Latin=68:15 • Greek=68:15)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:15	Psa.69:15	Renumber verse	Nec. [68:15]	%Normally in this Bible the verse numbering here is% 68:15.		(Hebrew=69:16 • Latin=68:16 • Greek=68:16)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:16	Psa.69:16	Renumber verse	Nec. [68:16]	%Normally in this Bible the verse numbering here is% 68:16.		(Hebrew=69:17 • Latin=68:17 • Greek=68:17)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:17	Psa.69:17	Renumber verse	Nec. [68:17]	%Normally in this Bible the verse numbering here is% 68:17.		(Hebrew=69:18 • Latin=68:18 • Greek=68:18)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:18	Psa.69:18	Renumber verse	Nec. [68:18]	%Normally in this Bible the verse numbering here is% 68:18.		(Hebrew=69:19 • Latin=68:19 • Greek=68:19)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:19	Psa.69:19	Renumber verse	Nec. [68:19]	%Normally in this Bible the verse numbering here is% 68:19.		(Hebrew=69:20 • Latin=68:20 • Greek=68:20)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:20	Psa.69:20	Renumber verse	Nec. [68:20]	%Normally in this Bible the verse numbering here is% 68:20.		(Hebrew=69:21 • Latin=68:21 • Greek=68:21)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:21	Psa.69:21	Renumber verse	Nec. [68:21]	%Normally in this Bible the verse numbering here is% 68:21.		(Hebrew=69:22 • Latin=68:22 • Greek=68:22)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:22	Psa.69:22	Renumber verse	Nec. [68:22]	%Normally in this Bible the verse numbering here is% 68:22.		(Hebrew=69:23 • Latin=68:23 • Greek=68:23)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:23	Psa.69:23	Renumber verse	Nec. [68:23]	%Normally in this Bible the verse numbering here is% 68:23.		(Hebrew=69:24 • Latin=68:24 • Greek=68:24)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:24	Psa.69:24	Renumber verse	Nec. [68:24]	%Normally in this Bible the verse numbering here is% 68:24.		(Hebrew=69:25 • Latin=68:25 • Greek=68:25)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:25	Psa.69:25	Renumber verse	Nec. [68:25]	%Normally in this Bible the verse numbering here is% 68:25.		(Hebrew=69:26 • Latin=68:26 • Greek=68:26)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:26	Psa.69:26	Renumber verse	Nec. [68:26]	%Normally in this Bible the verse numbering here is% 68:26.		(Hebrew=69:27 • Latin=68:27 • Greek=68:27)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:27	Psa.69:27	Renumber verse	Nec. [68:27]	%Normally in this Bible the verse numbering here is% 68:27.		(Hebrew=69:28 • Latin=68:28 • Greek=68:28)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:28	Psa.69:28	Renumber verse	Nec. [68:28]	%Normally in this Bible the verse numbering here is% 68:28.		(Hebrew=69:29 • Latin=68:29 • Greek=68:29)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:29	Psa.69:29	Renumber verse	Nec. [68:29]	%Normally in this Bible the verse numbering here is% 68:29.		(Hebrew=69:30 • Latin=68:30 • Greek=68:30)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:30	Psa.69:30	Renumber verse	Nec. [68:30]	%Normally in this Bible the verse numbering here is% 68:30.		(Hebrew=69:31 • Latin=68:31 • Greek=68:31)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:31	Psa.69:31	Renumber verse	Nec. [68:31]	%Normally in this Bible the verse numbering here is% 68:31.		(Hebrew=69:32 • Latin=68:32 • Greek=68:32)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:32	Psa.69:32	Renumber verse	Nec. [68:32]	%Normally in this Bible the verse numbering here is% 68:32.		(Hebrew=69:33 • Latin=68:33 • Greek=68:33)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:33	Psa.69:33	Renumber verse	Nec. [68:33]	%Normally in this Bible the verse numbering here is% 68:33.		(Hebrew=69:34 • Latin=68:34 • Greek=68:34)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:34	Psa.69:34	Renumber verse	Nec. [68:34]	%Normally in this Bible the verse numbering here is% 68:34.		(Hebrew=69:35 • Latin=68:35 • Greek=68:35)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:35	Psa.69:35	Renumber verse	Nec. [68:35]	%Normally in this Bible the verse numbering here is% 68:35.		(Hebrew=69:36 • Latin=68:36 • Greek=68:36)	Psa.68:36=Last				
+GrkTitleSeparate	Psa.68:36	Psa.69:36	Renumber verse	Nec. [68:36]	%Normally in this Bible the verse numbering here is% 68:36.		(Hebrew=69:37 • Latin=68:37 • Greek=68:37)	Psa.68:36=Last				
 												
 EngTitleMerged	Psa.70:1	Psa.70:1	Keep verse	Acd. [1-2]	%In some Bibles the verse numbering here is% 70:1-2.		(Hebrew=70:1-2 • Latin=69:1-2 • Greek=69:1-2)	Psa.70:5=Last & Psa.70:Title=NotExist				
 English	Psa.70:Title	Psa.70:Title	Psalm Title	Acd. [1]	%In some Bibles the verse numbering here is% 70:1.		(Hebrew=70:1 • Latin=69:1 • Greek=69:1)	Psa.70:5=Last & Psa.70:Title=Exist				
@@ -12561,7 +12561,7 @@ GrkTitleSeparate	Psa.127:6	Psa.128:6	Renumber verse	Nec. [127:6]	%Normally in th
 												
 EngTitleMerged+Hebrew	Psa.129:1	Psa.129:1	Keep verse	Acd. [128:1]	%In some Bibles the verse numbering here is% 128:1.		(Hebrew=129:1 • Latin=128:1 • Greek=128:1)	Psa.129:8=Last & Psa.131:3=Last & Psa.129:Title=NotExist				
 English	Psa.129:Title	Psa.129:Title	Psalm Title	Acd. [1]	%In some Bibles the verse numbering here is% 129:1.		(Hebrew=129:1 • Latin=128:1 • Greek=128:1)	Psa.129:8=Last & Psa.131:3=Last & Psa.129:Title=Exist				
-English	Psa.129:1	Psa.129:1	Keep verse	Acd. [2]	%In some Bibles the verse numbering here is% 129:2.		(Hebrew=129:1 • Latin=128:1 • Greek=128:1)	Psa.129:8=Last & Psa.131:3=Last & Psa.129:Title=Exist				
+English	Psa.129:1	Psa.129:1	Renumber verse	Acd. [2]	%In some Bibles the verse numbering here is% 129:2.		(Hebrew=129:1 • Latin=128:1 • Greek=128:1)	Psa.129:8=Last & Psa.131:3=Last & Psa.129:Title=Exist				
 English+Hebrew	Psa.129:2	Psa.129:2	Keep verse	Acd. [128:2]	%In some Bibles the verse numbering here is% 128:2.		(Hebrew=129:2 • Latin=128:2 • Greek=128:2)	Psa.129:8=Last & Psa.131:3=Last				
 English+Hebrew	Psa.129:3	Psa.129:3	Keep verse	Acd. [128:3]	%In some Bibles the verse numbering here is% 128:3.		(Hebrew=129:3 • Latin=128:3 • Greek=128:3)	Psa.129:8=Last & Psa.131:3=Last				
 English+Hebrew	Psa.129:4	Psa.129:4	Keep verse	Acd. [128:4]	%In some Bibles the verse numbering here is% 128:4.		(Hebrew=129:4 • Latin=128:4 • Greek=128:4)	Psa.129:8=Last & Psa.131:3=Last				
@@ -12590,7 +12590,7 @@ GrkTitleSeparate	Psa.128:8	Psa.129:8	Renumber verse	Nec. [128:8]	%Normally in th
 												
 EngTitleMerged+Hebrew	Psa.130:1	Psa.130:1	Keep verse	Acd. [129:1]	%In some Bibles the verse numbering here is% 129:1.		(Hebrew=130:1 • Latin=129:1 • Greek=129:1)	Psa.130:8=Last & Psa.132:18=Last & Psa.131:3=Last & Psa.130:Title=NotExist				
 English	Psa.130:Title	Psa.130:Title	Psalm Title	Acd. [1]	%In some Bibles the verse numbering here is% 130:1.		(Hebrew=130:1 • Latin=129:1 • Greek=129:1)	Psa.130:8=Last & Psa.132:18=Last & Psa.131:3=Last & Psa.130:Title=Exist				
-English	Psa.130:1	Psa.130:1	Keep verse	Acd. [2]	%In some Bibles the verse numbering here is% 130:2.		(Hebrew=130:1 • Latin=129:1 • Greek=129:1)	Psa.130:8=Last & Psa.132:18=Last & Psa.131:3=Last & Psa.130:Title=Exist				
+English	Psa.130:1	Psa.130:1	Renumber verse	Acd. [2]	%In some Bibles the verse numbering here is% 130:2.		(Hebrew=130:1 • Latin=129:1 • Greek=129:1)	Psa.130:8=Last & Psa.132:18=Last & Psa.131:3=Last & Psa.130:Title=Exist				
 English+Hebrew	Psa.130:2	Psa.130:2	Keep verse	Acd. [129:2]	%In some Bibles the verse numbering here is% 129:2.		(Hebrew=130:2 • Latin=129:2 • Greek=129:2)	Psa.130:8=Last & Psa.132:18=Last & Psa.131:3=Last				
 English+Hebrew	Psa.130:3	Psa.130:3	Keep verse	Acd. [129:3]	%In some Bibles the verse numbering here is% 129:3.		(Hebrew=130:3 • Latin=129:3 • Greek=129:3)	Psa.130:8=Last & Psa.132:18=Last & Psa.131:3=Last				
 English+Hebrew	Psa.130:4	Psa.130:4	Keep verse	Acd. [129:4]	%In some Bibles the verse numbering here is% 129:4.		(Hebrew=130:4 • Latin=129:4 • Greek=129:4)	Psa.130:8=Last & Psa.132:18=Last & Psa.131:3=Last				
@@ -12607,8 +12607,8 @@ Latin+Greek	Psa.129:6	Psa.130:6	Renumber verse	Nec. [129:6]	%Normally in this Bi
 Latin+Greek	Psa.129:7	Psa.130:7	Renumber verse	Nec. [129:7]	%Normally in this Bible the verse numbering here is% 129:7.		(Hebrew=130:7 • Latin=129:7 • Greek=129:7)	Psa.130:3=Last & Psa.130:Title=NotExist				
 Latin+Greek	Psa.129:8	Psa.130:8	Renumber verse	Nec. [129:8]	%Normally in this Bible the verse numbering here is% 129:8.		(Hebrew=130:8 • Latin=129:8 • Greek=129:8)	Psa.130:3=Last & Psa.130:Title=NotExist				
 GrkTitleMerged	Psa.129:1	Psa.130:1	Renumber Verse	Nec. [129:1]	%Normally in this Bible the verse numbering here is% 129:1.		(Hebrew=130:1 • Latin=129:1 • Greek=129:1)	Psa.129:Title=NotExist & Psa.131:18=Last & Psa.129:8=Last				
-GrkTitleSeparate	Psa.129:Title	Psa.130:Title	Renumber Title	Nec. [129:1]	%Normally in this Bible the verse numbering here is% 129:1.		(Hebrew=130:1 • Latin=129:1 • Greek=129:1)	Psa.129:Title=Exist & Psa.129:8=Last & Psa.131:18=Last				
-GrkTitleSeparate	Psa.129:1	Psa.130:1	Renumber verse	Nec. [129:1]	%Normally in this Bible the verse numbering here is% 129:1.		(Hebrew=130:1 • Latin=129:1 • Greek=129:1)	Psa.129:Title=Exist & Psa.129:8=Last & Psa.131:18=Last				
+GrkTitleSeparate	Psa.129:Title	Psa.130:Title	Renumber Title	Nec. [129:1]	%Normally in this Bible the verse numbering here is% 129:1.		(Hebrew=130:1 • Latin=129:1 • Greek=129:1)	Psa.129:Title=Exist & Psa.129:8=Last				
+GrkTitleSeparate	Psa.129:1	Psa.130:1	Renumber verse	Nec. [129:1]	%Normally in this Bible the verse numbering here is% 129:1.		(Hebrew=130:1 • Latin=129:1 • Greek=129:1)	Psa.129:Title=Exist & Psa.129:8=Last				
 GrkTitleSeparate	Psa.129:2	Psa.130:2	Renumber verse	Nec. [129:2]	%Normally in this Bible the verse numbering here is% 129:2.		(Hebrew=130:2 • Latin=129:2 • Greek=129:2)	Psa.129:8=Last & Psa.131:18=Last				
 GrkTitleSeparate	Psa.129:3	Psa.130:3	Renumber verse	Nec. [129:3]	%Normally in this Bible the verse numbering here is% 129:3.		(Hebrew=130:3 • Latin=129:3 • Greek=129:3)	Psa.129:8=Last & Psa.131:18=Last				
 GrkTitleSeparate	Psa.129:4	Psa.130:4	Renumber verse	Nec. [129:4]	%Normally in this Bible the verse numbering here is% 129:4.		(Hebrew=130:4 • Latin=129:4 • Greek=129:4)	Psa.129:8=Last & Psa.131:18=Last				
@@ -13098,14 +13098,14 @@ Hebrew	Psa.142:5	Psa.142:4	Renumber verse	Nec. [5]	%Normally in this Bible the v
 Hebrew	Psa.142:6	Psa.142:5	Renumber verse	Nec. [6]	%Normally in this Bible the verse numbering here is% 142:6.		(Hebrew=142:6 • Latin=141:6 • Greek=141:6)	Psa.142:8=Last & Psa.142:Title=NotExist				
 Hebrew	Psa.142:7	Psa.142:6	Renumber verse	Nec. [7]	%Normally in this Bible the verse numbering here is% 142:7.		(Hebrew=142:7 • Latin=141:7 • Greek=141:7)	Psa.142:8=Last & Psa.142:Title=NotExist				
 Hebrew	Psa.142:8	Psa.142:7	Renumber verse	Nec. [8]	%Normally in this Bible the verse numbering here is% 142:8.		(Hebrew=142:8 • Latin=141:8 • Greek=141:8)	Psa.142:8=Last & Psa.142:Title=NotExist				
-Latin+Greek	Psa.141:1	Psa.142:Title	Renumber Title	Nec. [141:1]	%Normally in this Bible the verse numbering here is% 141:1.		(Hebrew=142:1 • Latin=141:1 • Greek=141:1)	Psa.142:12=Last & Psa.142:Title=NotExist & Psa.141:8=Last
-Latin+Greek	Psa.141:2	Psa.142:1	Renumber verse	Nec. [141:2]	%Normally in this Bible the verse numbering here is% 141:2.		(Hebrew=142:2 • Latin=141:2 • Greek=141:2)	Psa.142:12=Last & Psa.142:Title=NotExist & Psa.141:8=Last
-Latin+Greek	Psa.141:3	Psa.142:2	Renumber verse	Nec. [141:3]	%Normally in this Bible the verse numbering here is% 141:3.		(Hebrew=142:3 • Latin=141:3 • Greek=141:3)	Psa.142:12=Last & Psa.142:Title=NotExist & Psa.141:8=Last
-Latin+Greek	Psa.141:4	Psa.142:3	Renumber verse	Nec. [141:4]	%Normally in this Bible the verse numbering here is% 141:4.		(Hebrew=142:4 • Latin=141:4 • Greek=141:4)	Psa.142:12=Last & Psa.142:Title=NotExist & Psa.141:8=Last
-Latin+Greek	Psa.141:5	Psa.142:4	Renumber verse	Nec. [141:5]	%Normally in this Bible the verse numbering here is% 141:5.		(Hebrew=142:5 • Latin=141:5 • Greek=141:5)	Psa.142:12=Last & Psa.142:Title=NotExist & Psa.141:8=Last
-Latin+Greek	Psa.141:6	Psa.142:5	Renumber verse	Nec. [141:6]	%Normally in this Bible the verse numbering here is% 141:6.		(Hebrew=142:6 • Latin=141:6 • Greek=141:6)	Psa.142:12=Last & Psa.142:Title=NotExist & Psa.141:8=Last
-Latin+Greek	Psa.141:7	Psa.142:6	Renumber verse	Nec. [141:7]	%Normally in this Bible the verse numbering here is% 141:7.		(Hebrew=142:7 • Latin=141:7 • Greek=141:7)	Psa.142:12=Last & Psa.142:Title=NotExist & Psa.141:8=Last
-Latin+Greek	Psa.141:8	Psa.142:7	Renumber verse	Nec. [141:8]	%Normally in this Bible the verse numbering here is% 141:8.		(Hebrew=142:8 • Latin=141:8 • Greek=141:8)	Psa.142:12=Last & Psa.142:Title=NotExist & Psa.141:8=Last
+Latin+Greek	Psa.141:1	Psa.142:Title	Renumber Title	Nec. [141:1]	%Normally in this Bible the verse numbering here is% 141:1.		(Hebrew=142:1 • Latin=141:1 • Greek=141:1)	Psa.142:12=Last & Psa.142:Title=NotExist				
+Latin+Greek	Psa.141:2	Psa.142:1	Renumber verse	Nec. [141:2]	%Normally in this Bible the verse numbering here is% 141:2.		(Hebrew=142:2 • Latin=141:2 • Greek=141:2)	Psa.142:12=Last & Psa.142:Title=NotExist				
+Latin+Greek	Psa.141:3	Psa.142:2	Renumber verse	Nec. [141:3]	%Normally in this Bible the verse numbering here is% 141:3.		(Hebrew=142:3 • Latin=141:3 • Greek=141:3)	Psa.142:12=Last & Psa.142:Title=NotExist				
+Latin+Greek	Psa.141:4	Psa.142:3	Renumber verse	Nec. [141:4]	%Normally in this Bible the verse numbering here is% 141:4.		(Hebrew=142:4 • Latin=141:4 • Greek=141:4)	Psa.142:12=Last & Psa.142:Title=NotExist				
+Latin+Greek	Psa.141:5	Psa.142:4	Renumber verse	Nec. [141:5]	%Normally in this Bible the verse numbering here is% 141:5.		(Hebrew=142:5 • Latin=141:5 • Greek=141:5)	Psa.142:12=Last & Psa.142:Title=NotExist				
+Latin+Greek	Psa.141:6	Psa.142:5	Renumber verse	Nec. [141:6]	%Normally in this Bible the verse numbering here is% 141:6.		(Hebrew=142:6 • Latin=141:6 • Greek=141:6)	Psa.142:12=Last & Psa.142:Title=NotExist				
+Latin+Greek	Psa.141:7	Psa.142:6	Renumber verse	Nec. [141:7]	%Normally in this Bible the verse numbering here is% 141:7.		(Hebrew=142:7 • Latin=141:7 • Greek=141:7)	Psa.142:12=Last & Psa.142:Title=NotExist				
+Latin+Greek	Psa.141:8	Psa.142:7	Renumber verse	Nec. [141:8]	%Normally in this Bible the verse numbering here is% 141:8.		(Hebrew=142:8 • Latin=141:8 • Greek=141:8)	Psa.142:12=Last & Psa.142:Title=NotExist				
 GrkTitleMerged	Psa.141:1	Psa.142:1	Renumber Verse	Nec. [141:1]	%Normally in this Bible the verse numbering here is% 141:1.		(Hebrew=142:1 • Latin=141:1 • Greek=141:1)	Psa.141:Title=NotExist & Psa.141:7=Last				
 GrkTitleSeparate	Psa.141:Title	Psa.142:Title	Renumber Title	Nec. [141:1]	%Normally in this Bible the verse numbering here is% 141:1.		(Hebrew=142:1 • Latin=141:1 • Greek=141:1)	Psa.141:Title=Exist & Psa.141:7=Last				
 GrkTitleSeparate	Psa.141:1	Psa.142:1	Renumber verse	Nec. [141:1]	%Normally in this Bible the verse numbering here is% 141:1.		(Hebrew=142:2 • Latin=141:2 • Greek=141:2)	Psa.141:Title=Exist & Psa.141:7=Last				
@@ -16798,12 +16798,12 @@ English+Latin	Mal.4:3	Mal.4:3	Keep verse	Acd. [3:21]	%In some Bibles the verse n
 English+Latin	Mal.4:4	Mal.4:4	Keep verse	Acd. [3:22]	%In some Bibles the verse numbering here is% 3:22.		(Hebrew=3:22 • Latin=4:4 • Greek=4:5)	Mal.3:18=Last & Mal.4:5<Mal.4:6				
 English+Latin	Mal.4:5	Mal.4:5	Keep verse	Acd. [3:23]	%In some Bibles the verse numbering here is% 3:23.		(Hebrew=3:23 • Latin=4:5 • Greek=4:6)	Mal.3:18=Last & Mal.4:5<Mal.4:6				
 English+Latin	Mal.4:6	Mal.4:6	Keep verse	Acd. [3:24]	%In some Bibles the verse numbering here is% 3:24.		(Hebrew=3:24 • Latin=4:6 • Greek=4:4)	Mal.3:18=Last & Mal.4:5<Mal.4:6				
-Greek	Mal.4:1	Mal.4:1	Keep verse	Acd. [3:19]	%In some Bibles the verse numbering here is% 3:19.		(Hebrew=3:19 • Latin=4:1 • Greek=4:1)	Mal.3:18=Last & Mal.4:5>Mal.4:6 & Mal.4:999=Exist				
-Greek	Mal.4:2	Mal.4:2	Keep verse	Acd. [3:20]	%In some Bibles the verse numbering here is% 3:20.		(Hebrew=3:20 • Latin=4:2 • Greek=4:2)	Mal.3:18=Last & Mal.4:5>Mal.4:6 & Mal.4:999=Exist				
-Greek	Mal.4:3	Mal.4:3	Keep verse	Acd. [3:21]	%In some Bibles the verse numbering here is% 3:21.		(Hebrew=3:21 • Latin=4:3 • Greek=4:3)	Mal.3:18=Last & Mal.4:5>Mal.4:6 & Mal.4:999=Exist				
-Greek	Mal.4:4	Mal.4:6	Renumber verse*	Nec. [4]	%Normally in this Bible the verse numbering here is% 4:4.		(Hebrew=3:24 • Latin=4:6 • Greek=4:4)	Mal.3:18=Last & Mal.4:5>Mal.4:6 & Mal.4:999=Exist				
-Greek	Mal.4:5	Mal.4:4	Renumber verse*	Nec. [5]	%Normally in this Bible the verse numbering here is% 4:5.		(Hebrew=3:22 • Latin=4:4 • Greek=4:5)	Mal.3:18=Last & Mal.4:5>Mal.4:6 & Mal.4:999=Exist				
-Greek	Mal.4:6	Mal.4:5	Renumber verse*	Nec. [6]	%Normally in this Bible the verse numbering here is% 4:6.		(Hebrew=3:23 • Latin=4:5 • Greek=4:6)	Mal.3:18=Last & Mal.4:5>Mal.4:6 & Mal.4:999=Exist				
+Greek	Mal.4:1	Mal.4:1	Keep verse	Acd. [3:19]	%In some Bibles the verse numbering here is% 3:19.		(Hebrew=3:19 • Latin=4:1 • Greek=4:1)	Mal.3:18=Last & Mal.4:5>Mal.4:6				
+Greek	Mal.4:2	Mal.4:2	Keep verse	Acd. [3:20]	%In some Bibles the verse numbering here is% 3:20.		(Hebrew=3:20 • Latin=4:2 • Greek=4:2)	Mal.3:18=Last & Mal.4:5>Mal.4:6				
+Greek	Mal.4:3	Mal.4:3	Keep verse	Acd. [3:21]	%In some Bibles the verse numbering here is% 3:21.		(Hebrew=3:21 • Latin=4:3 • Greek=4:3)	Mal.3:18=Last & Mal.4:5>Mal.4:6				
+Greek	Mal.4:4	Mal.4:6	Renumber verse*	Nec. [4]	%Normally in this Bible the verse numbering here is% 4:4.		(Hebrew=3:24 • Latin=4:6 • Greek=4:4)	Mal.3:18=Last & Mal.4:5>Mal.4:6				
+Greek	Mal.4:5	Mal.4:4	Renumber verse*	Nec. [5]	%Normally in this Bible the verse numbering here is% 4:5.		(Hebrew=3:22 • Latin=4:4 • Greek=4:5)	Mal.3:18=Last & Mal.4:5>Mal.4:6				
+Greek	Mal.4:6	Mal.4:5	Renumber verse*	Nec. [6]	%Normally in this Bible the verse numbering here is% 4:6.		(Hebrew=3:23 • Latin=4:5 • Greek=4:6)	Mal.3:18=Last & Mal.4:5>Mal.4:6				
 Hebrew	Mal.3:19	Mal.4:1	Renumber verse	Nec. [3:19]	%Normally in this Bible the verse numbering here is% 3:19.		(Hebrew=3:19 • Latin=4:1 • Greek=4:1)	Mal.3:24=Last & Mal.3:23<Mal.3:24				
 Hebrew	Mal.3:20	Mal.4:2	Renumber verse	Nec. [3:20]	%Normally in this Bible the verse numbering here is% 3:20.		(Hebrew=3:20 • Latin=4:2 • Greek=4:2)	Mal.3:24=Last & Mal.3:23<Mal.3:24				
 Hebrew	Mal.3:21	Mal.4:3	Renumber verse	Nec. [3:21]	%Normally in this Bible the verse numbering here is% 3:21.		(Hebrew=3:21 • Latin=4:3 • Greek=4:3)	Mal.3:24=Last & Mal.3:23<Mal.3:24				

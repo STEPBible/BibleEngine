@@ -428,6 +428,7 @@ export const visitNode = (
             const numbers = {
                 versionChapterNum: globalState.currentChapterNumber,
                 versionVerseNum: globalState.currentVerseNumber,
+                versionSubverseNum: 1,
             };
 
             const textByNotes = text.split('*');

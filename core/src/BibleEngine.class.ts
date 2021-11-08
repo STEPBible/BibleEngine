@@ -148,8 +148,8 @@ export class BibleEngine {
     async findConnection(dbConfig: ConnectionOptions) {
         try {
             return getConnection(this.CONNECTION_NAME).manager;
-        } catch (error) {
-            if (error.name === 'ConnectionNotFoundError') {
+        } catch (error: any) {
+            if (error?.name === 'ConnectionNotFoundError') {
                 return this.createConnection(dbConfig);
             }
             throw error;
@@ -552,10 +552,42 @@ export class BibleEngine {
                 generatePhraseId(generateEndReferenceFromRange(normalizedRange))
             ),
         };
-        if (normalizedRange.versionId) where.versionId = normalizedRange.versionId;
+        let order: any = { id: 'ASC' };
+        if (normalizedRange.versionId) {
+            where.versionId = normalizedRange.versionId;
+            if (normalizedRange.versionChapterNum && normalizedRange.versionChapterEndNum)
+                where.versionChapterNum = Between(
+                    normalizedRange.versionChapterNum,
+                    normalizedRange.versionChapterEndNum
+                );
+            else if (normalizedRange.versionChapterNum)
+                where.versionChapterNum = normalizedRange.versionChapterNum;
+
+            const singleChapter =
+                normalizedRange.versionChapterNum &&
+                (!normalizedRange.versionChapterEndNum ||
+                    normalizedRange.versionChapterNum === normalizedRange.versionChapterEndNum);
+            if (singleChapter && normalizedRange.versionVerseNum) {
+                if (normalizedRange.versionVerseNum && normalizedRange.versionVerseEndNum)
+                    where.versionVerseNum = Between(
+                        normalizedRange.versionVerseNum,
+                        normalizedRange.versionVerseEndNum
+                    );
+                else if (normalizedRange.versionVerseNum)
+                    where.versionVerseNum = normalizedRange.versionVerseNum;
+            }
+
+            order = {
+                versionChapterNum: 'ASC',
+                versionVerseNum: 'ASC',
+                versionSubverseNum: 'ASC',
+                id: 'ASC',
+            };
+        }
+
         return db.find(BiblePhraseEntity, {
             where,
-            order: { id: 'ASC' },
+            order,
             relations: ['notes', 'crossReferences'],
         });
     }
@@ -774,7 +806,9 @@ export class BibleEngine {
                         content.numbering.versionChapterIsStartingInRange;
                 if (content.numbering.versionVerseIsStarting)
                     globalState.currentVersionVerse = content.numbering.versionVerseIsStarting;
-                globalState.currentVersionSubverse = content.numbering.versionSubverseIsStarting;
+                if (content.numbering.versionSubverseIsStarting)
+                    globalState.currentVersionSubverse =
+                        content.numbering.versionSubverseIsStarting;
                 globalState.currentJoinToVersionRefId = content.numbering.joinToVersionRefId;
             } else if (
                 (content.type === 'phrase' || !content.type) &&
@@ -882,7 +916,7 @@ export class BibleEngine {
                             versionId: reference.versionId,
                             normalizedChapterNum: rule.standardRef.normalizedChapterNum!,
                             normalizedVerseNum: rule.standardRef.normalizedVerseNum!,
-                            normalizedSubverseNum: rule.standardRef.normalizedSubverseNum || 0,
+                            normalizedSubverseNum: rule.standardRef.normalizedSubverseNum!,
                             phraseNum: 0,
                         };
                         emptyAddedPhraseId = generatePhraseId(emptyPhraseReference);
@@ -894,6 +928,7 @@ export class BibleEngine {
                                 content: '',
                                 versionChapterNum: rule.standardRef.normalizedChapterNum!,
                                 versionVerseNum: rule.standardRef.normalizedVerseNum!,
+                                versionSubverseNum: rule.standardRef.normalizedSubverseNum,
                             };
 
                             globalState.phraseStack.push(
@@ -905,7 +940,7 @@ export class BibleEngine {
                                 (firstPhraseId && emptyAddedPhraseId < firstPhraseId) ||
                                 (lastPhraseId && emptyAddedPhraseId < lastPhraseId)
                             )
-                                console.error(
+                                console.log(
                                     `shuffled phraseId ${emptyAddedPhraseId}: ${firstPhraseId}(first) ${lastPhraseId}(last)`
                                 );
                             if (!firstPhraseId) firstPhraseId = emptyAddedPhraseId;
@@ -916,15 +951,15 @@ export class BibleEngine {
                             // the sourceRef generates a range. we create an empty phrase for
                             // each of them and keep track of last ref of the range to link the
                             // content-phrase to it later
-                            if (firstStandardRefId)
+                            if (firstStandardRefId && firstStandardRefId !== rule.standardRefId) {
                                 throw new Error(
-                                    `v11n: trying to renumber an already renumbered ref: ` +
-                                        `${firstStandardRefId}`
+                                    `v11n: contradictory standardRefId ${rule.standardRefId} (by rule ${rule.id}) to previous ${firstStandardRefId}`
                                 );
+                            }
 
                             nRef = rule.standardRef;
                             firstStandardRefId = rule.standardRefId;
-                        } else if (rule.action === 'Merged with') {
+                        } else if (rule.action === 'Merged verse') {
                             if (!firstStandardRefId)
                                 throw new Error(
                                     `v11n: trying to continue a range that wasn't started`
@@ -934,6 +969,7 @@ export class BibleEngine {
                                 content: '',
                                 versionChapterNum: globalState.currentVersionChapter,
                                 versionVerseNum: globalState.currentVersionVerse,
+                                versionSubverseNum: globalState.currentVersionSubverse,
                                 // we link the empty phrases to the first standardRef
                                 joinToRefId: firstStandardRefId,
                             };
@@ -951,7 +987,7 @@ export class BibleEngine {
                                 (firstPhraseId && emptyAddedPhraseId < firstPhraseId) ||
                                 (lastPhraseId && emptyAddedPhraseId < lastPhraseId)
                             )
-                                console.error(
+                                console.log(
                                     `shuffled phraseId ${emptyAddedPhraseId}: ${firstPhraseId}(first) ${lastPhraseId}(last)`
                                 );
 
@@ -986,12 +1022,13 @@ export class BibleEngine {
                     globalState.currentPhraseNum++;
                 } else {
                     const newRefId = generateReferenceId(nRef);
-                    if (globalState.usedRefIds.has(newRefId))
+                    if (globalState.usedRefIds.has(newRefId)) {
                         throw new Error(
                             `normalization caused the duplicate reference ${newRefId} - this ` +
                                 `is caused by inconsistencies in the v11n rules and would ` +
                                 `cause the reference to be overwritten`
                         );
+                    }
 
                     globalState.usedRefIds.add(newRefId);
                     globalState.currentPhraseNum = 1;
@@ -1036,7 +1073,9 @@ export class BibleEngine {
                 if (
                     !globalState.currentNormalizedReference ||
                     !globalState.currentNormalizedReference.normalizedChapterNum ||
-                    !globalState.currentNormalizedReference.normalizedVerseNum
+                    !globalState.currentNormalizedReference.normalizedVerseNum ||
+                    typeof globalState.currentNormalizedReference.normalizedSubverseNum ===
+                        'undefined'
                 )
                     throw new Error(`can't add phrases: normalisation failed`);
 
@@ -1053,7 +1092,7 @@ export class BibleEngine {
                         globalState.currentNormalizedReference.normalizedChapterNum,
                     normalizedVerseNum: globalState.currentNormalizedReference.normalizedVerseNum,
                     normalizedSubverseNum:
-                        globalState.currentNormalizedReference.normalizedSubverseNum || 0,
+                        globalState.currentNormalizedReference.normalizedSubverseNum,
                     versionId: book.versionId,
                     phraseNum: globalState.currentPhraseNum,
                 };
@@ -1062,7 +1101,7 @@ export class BibleEngine {
                     (firstPhraseId && phraseId < firstPhraseId) ||
                     (lastPhraseId && phraseId < lastPhraseId && !globalState.currentJoinToRefId)
                 )
-                    console.error(
+                    console.log(
                         `shuffled phraseId ${phraseId} (${emptyAddedPhraseId}): ${firstPhraseId}(first) ${lastPhraseId}(last)`
                     );
 
@@ -1165,7 +1204,7 @@ export class BibleEngine {
                     (firstPhraseId && groupFirstPhraseId && groupFirstPhraseId < firstPhraseId) ||
                     (lastPhraseId && groupLastPhraseId && groupLastPhraseId < lastPhraseId)
                 )
-                    console.error(
+                    console.log(
                         `shuffled phraseId ${groupFirstPhraseId}-${groupLastPhraseId}: ${firstPhraseId}(first) ${lastPhraseId}(last)`
                     );
 
@@ -1249,7 +1288,7 @@ export class BibleEngine {
                         (firstPhraseId && sectionFirstPhraseId < firstPhraseId) ||
                         (lastPhraseId && sectionLastPhraseId < lastPhraseId)
                     )
-                        console.error(
+                        console.log(
                             `shuffled phraseId ${sectionFirstPhraseId}-${sectionLastPhraseId}: ${firstPhraseId}(first) ${lastPhraseId}(last)`
                         );
 
@@ -1458,7 +1497,7 @@ export class BibleEngine {
             isNormalized: true,
             normalizedChapterNum: phraseStart.normalizedChapterNum,
             normalizedVerseNum: phraseStart.normalizedVerseNum,
-            normalizedSubverseNum: phraseStart.normalizedSubverseNum || undefined,
+            normalizedSubverseNum: phraseStart.normalizedSubverseNum ?? undefined,
         };
 
         // we only come here when there is a verseNum - in this case an end chapter without an end
@@ -1496,7 +1535,7 @@ export class BibleEngine {
 
             normRange.normalizedChapterEndNum = phraseEnd.normalizedChapterNum;
             normRange.normalizedVerseEndNum = phraseEnd.normalizedVerseNum;
-            if (phraseEnd.normalizedSubverseNum)
+            if (typeof phraseEnd.normalizedSubverseNum !== 'undefined')
                 normRange.normalizedSubverseEndNum = phraseEnd.normalizedSubverseNum;
         }
 

@@ -1,0 +1,25 @@
+1Ki.11:6<1Ki.11:35
+
+ 6-NEUE: Auf diese Weise tat Salomo, was Jahwe missfiel. Er folgte ihm nicht so treu wie sein Vater David.
+35-NEUE: Aber seinem Sohn werde ich das Königtum wegnehmen und dir die Herrschaft über die zehn Stämme geben.
+
+  6-ESV: So Solomon did what was evil in the sight of the Lord and did not wholly follow the Lord, as David his father had done.
+ 35-ESV: But I will take the kingdom out of his son’s hand and will give it to you, ten tribes.
+
+
+Exo.35:16<Exo.35:18
+
+16-NEG79: l’autel des holocaustes, sa grille d’airain, ses barres, et tous ses ustensiles; la cuve avec sa base;
+18-NEG79: les pieux du tabernacle, les pieux du parvis, et leurs cordages; les vêtements d’office pour le service dans le sanctuaire,
+
+16-ESV: the altar of burnt offering, with its grating of bronze, its poles, and all its utensils, the basin and its stand;
+18-ESV: the pegs of the tabernacle and the pegs of the court, and their cords;
+
+
+Mal.4:5>Mal.4:6
+
+5-CUVS:「看哪，耶和华大而可畏之日未到以前，我必差遣先知 以利亚 到你们那里去。
+6-CUVS: 他必使父亲的心转向儿女，儿女的心转向父亲，免得我来咒诅遍地。」
+
+5-ESV: Behold, I will send you Elijah the prophet before the great and awesome day of theLordcomes.
+6-ESV: And he will turn the hearts of fathers to their children and the hearts of children to their fathers, lest I come and strike the land with a decree of utter destruction.”

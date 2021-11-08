@@ -57,7 +57,7 @@ export const startNewSection = (context: ParserContext, elementType: OsisSection
     currentContainer.contents.push(section);
     context.contentContainerStack.push(section);
 
-    if (!context.hasParagraphsInSourceText) {
+    if (!context.hasParagraphsInSourceText || context.autoGenMissingParagraphs) {
         startNewParagraph(context);
     }
 };

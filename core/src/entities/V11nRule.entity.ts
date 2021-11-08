@@ -5,13 +5,13 @@ import {
     BeforeInsert,
     BeforeUpdate,
     PrimaryGeneratedColumn,
-    Index
+    Index,
 } from 'typeorm';
 import { IV11nRule, IBibleReference, IBibleReferenceNormalized } from '../models';
 import {
     generateReferenceId,
     generateNormalizedRangeFromVersionRange,
-    parseReferenceId
+    parseReferenceId,
 } from '../functions/reference.functions';
 
 @Entity('v11n_rule')
@@ -53,40 +53,51 @@ export class V11nRuleEntity implements IV11nRule {
     static actionTypes = new Map<number, IV11nRule['action']>([
         [1, 'Keep verse'],
         [2, 'Renumber verse'],
-        [3, 'Merged with'],
-        [4, 'Empty verse']
+        [3, 'Merged verse'],
+        [4, 'Empty verse'],
     ]);
 
     static notePhrases = new Map<string, string>([
         ['other', 'In some Bibles the verse numbering here is REF'],
-        ['otherDan', 'In some Bibles the verse numbering here is Daniel REF'],
         ['version', 'Normally in this Bible the verse numbering here is REF'],
-        ['versionDan', 'Normally in this Bible the verse numbering here is Daniel REF'],
         [
             'versionMerge',
-            'Normally in this Bible this verse and the next are merged into one verse that is numbered REF'
+            'Normally in this Bible this verse and the next occur as one verse that is numbered REF',
         ],
+        ['versionTextFrom', 'As normal in this Bible this verse contains the text of REF'],
         [
-            'versionMissing',
-            'Normally in this Bible some text may be missing here because it is merged with REF'
+            'versionTextPrevious',
+            'As normal in this Bible the text for this verse is included in the previous verse.',
         ],
-        ['wordsFrom', 'Normally in this Bible this verse includes words that are at REF'],
-        ['wordsExtraAt', 'The extra words are found at REF'],
-        ['wordsAlsoAt', 'This verse includes words that are also at REF'],
-        ['wordsAltAt', 'This verse includes words that are alternatively at REF'],
-        ['otherWordsAt', 'In some Bibles this verse includes words that are alternatively at REF'],
-        ['otherText', 'In some Bibles this verse may contain text similar to REF'],
-        ['otherTextOrNo', 'Some manuscripts have no text here. Others have text similar to REF'],
-        ['otherNo', 'Some manuscripts have no text at REF'],
-        ['otherBook', 'In some Bibles this chapter is a separate book'],
+        ['versionTextAt', 'As normal in this Bible the text for this verse is included at REF'],
+        ['versionWordsFrom', 'Normally in this Bible this verse includes words that are at REF'],
+        ['versionWordsAt', 'The extra words are found at REF'],
+        ['versionSimilarAt', 'Normally in this Bible similar text is found at REF'],
+        ['versionMergedWith', 'As normal in this Bible the text for this verse is merged with REF'],
+        ['versionNumbering', 'Normally in this Bible verse numbering here is REF'],
+        ['otherSimilarAt', 'In some Bibles similar text is found at REF'],
+        ['otherSimliarTo', 'In some Bibles this verse may contain text similar to REF'],
+        ['otherNoOrSimilar', 'Some manuscripts have no text here. Others have text similar to REF'],
+        ['wordsSimilarAt', 'Similar words are found at REF'],
+        ['otherOnlyStart', 'In some Bibles only the start of this verse is present'],
+        ['versionOnlyStart', 'Normally in this Bible only the start of this verse is present'],
+        ['otherExtraText', 'In some Bibles this verse contains extra text'],
+        ['otherNoTextAt', 'Some manuscripts have no text at REF'],
+        ['versionEmpty', 'Normally in this Bible this verse does not contain any text'],
         ['otherEmpty', 'In some Bibles this verse may not contain any text'],
-        ['empty', 'This verse may not contain any text'],
-        ['otherStart', 'In some Bibles this verse starts on a different word'],
+        ['maybeEmpty', 'This verse may not contain any text'],
+        ['otherChapterSeparateBook', 'In some Bibles this chapter is a separate book'],
+        ['otherFollowedBy', 'In some Bibles this verse is followed by the contents of REF'],
         [
-            'otherAdd',
-            'At the end of this verse some manuscripts add information such as where this letter was written'
+            'versionFollowedBy',
+            'Normally in this Bible this verse is followed by the contents of REF',
         ],
-        ['otherBookAt', 'In some Bibles this book is found at REF']
+        ['otherBookAt', 'In some Bibles this book is found at REF'],
+        ['otherDifferentStart', 'In some Bibles this verse starts on a different word'],
+        [
+            'otherAddInformation',
+            'At the end of this verse some manuscripts add information such as where this letter was written',
+        ],
     ]);
 
     constructor(rule: IV11nRule) {
@@ -103,7 +114,7 @@ export class V11nRuleEntity implements IV11nRule {
             bookOsisId: _sourceRef.bookOsisId,
             versionChapterNum: _sourceRef.normalizedChapterNum,
             versionVerseNum: _sourceRef.normalizedVerseNum,
-            versionSubverseNum: _sourceRef.normalizedSubverseNum
+            versionSubverseNum: _sourceRef.normalizedSubverseNum,
         };
 
         const action = V11nRuleEntity.actionTypes.get(this.actionId);

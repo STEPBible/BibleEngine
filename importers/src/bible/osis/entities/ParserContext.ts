@@ -14,6 +14,8 @@ export class ParserContext {
     currentBook?: IBibleBook;
     currentChapter?: number;
     currentVerse?: number;
+    isCurrentVerseImplicit?: boolean;
+    currentSubverse?: number;
     crossRefBuffer?: {
         key?: string;
         refs: IBibleCrossReference[];
@@ -31,4 +33,5 @@ export class ParserContext {
     )[] = [];
     hasSectionsInSourceText: boolean;
     hasParagraphsInSourceText: boolean;
+    autoGenMissingParagraphs?: boolean;
 }

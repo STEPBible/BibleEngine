@@ -74,6 +74,7 @@ export class OsisImporter extends BibleEngineImporter {
             this.context = new ParserContext();
             this.context.hasSectionsInSourceText = xml.includes(`type="section"`);
             this.context.hasParagraphsInSourceText = sourceTextHasParagraphs(xml);
+            this.context.autoGenMissingParagraphs = this.options.autoGenMissingParagraphs;
             const xmlStream = parser(STRICT_MODE_ENABLED);
             xmlStream.ontext = (text: string) => {
                 if (encounteredError) {
@@ -263,9 +264,13 @@ export class OsisImporter extends BibleEngineImporter {
                     );
                 // sometimes there is a verse 1 tag, sometimes not
                 context.currentVerse = 1;
+                context.currentSubverse = 1;
+                context.isCurrentVerseImplicit = true;
+                if (!this.context.hasParagraphsInSourceText) startNewParagraph(context);
                 break;
             }
             case OsisXmlNodeName.VERSE: {
+                context.isCurrentVerseImplicit = false;
                 if (typeof context.currentVerse !== 'number') {
                     throw new OsisParseError(`verse outside a chapter`, context);
                 }
@@ -307,6 +312,7 @@ export class OsisImporter extends BibleEngineImporter {
                     };
                 }
 
+                context.currentSubverse = 1;
                 break;
             }
             case OsisXmlNodeType.SECTION_MAJOR:
@@ -315,14 +321,9 @@ export class OsisImporter extends BibleEngineImporter {
                 startNewSection(context, elementType);
                 break;
             }
-            case OsisXmlNodeName.SWORD_PILCROW: {
-                if (tag.isSelfClosing && tag.attributes.sID) {
-                    startNewParagraph(context);
-                }
-                break;
-            }
             case OsisXmlNodeName.PARAGRAPH:
-            case OsisXmlNodeType.PARAGRAPH: {
+            case OsisXmlNodeType.PARAGRAPH:
+            case OsisXmlNodeType.SWORD_PILCROW: {
                 startNewParagraph(context);
                 break;
             }
@@ -465,6 +466,8 @@ export class OsisImporter extends BibleEngineImporter {
                     break;
                 }
                 if (tag.attributes.canonical === 'true') {
+                    // if the canonical title is outside of verse 1 (i.e. we set the verse number implicitly on chapter start), we number it as `1.0`
+                    if (context.isCurrentVerseImplicit) context.currentSubverse = 0;
                     const titleGroup: IBibleContentGroup<'title'> = {
                         type: 'group',
                         groupType: 'title',
@@ -521,6 +524,7 @@ export class OsisImporter extends BibleEngineImporter {
                         skipSpace: 'after',
                         versionChapterNum: context.currentChapter,
                         versionVerseNum: context.currentVerse,
+                        versionSubverseNum: context.currentSubverse,
                     };
                     currentContainer.contents.push(markerPhrase);
                 }
@@ -582,7 +586,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.PUBLISHER:
             case OsisXmlNodeName.REF_SYSTEM:
             case OsisXmlNodeName.RIGHTS:
-            case OsisXmlNodeName.SWORD_MILESTONE:
+            case OsisXmlNodeType.SWORD_MILESTONE:
             case OsisXmlNodeName.TEXTUAL_VARIATION:
             case OsisXmlNodeName.TYPE:
             case OsisXmlNodeName.REVISION_DESC:
@@ -741,6 +745,7 @@ export class OsisImporter extends BibleEngineImporter {
                             versionChapterNum:
                                 context.currentVerseJoinToVersionRef.versionChapterNum,
                             versionVerseNum: emptyVerse,
+                            versionSubverseNum: 1,
                             joinToVersionRefId: generateVersionReferenceId({
                                 bookOsisId: context.currentBook!.osisId,
                                 versionChapterNum: context.currentChapter,
@@ -754,8 +759,19 @@ export class OsisImporter extends BibleEngineImporter {
                 }
                 break;
             }
+            case OsisXmlNodeName.CHAPTER: {
+                if (!this.context.hasParagraphsInSourceText) {
+                    const paragraph = getCurrentContainer(context);
+                    if (
+                        paragraph &&
+                        paragraph.type === 'group' &&
+                        paragraph.groupType === 'paragraph'
+                    )
+                        closeCurrentParagraph(context);
+                }
+                break;
+            }
             case OsisXmlNodeName.OSIS_ROOT:
-            case OsisXmlNodeName.CHAPTER:
             case OsisXmlNodeName.LINEBREAK: {
                 // nothing to do
                 break;
@@ -769,7 +785,8 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.PARAGRAPH:
-            case OsisXmlNodeType.PARAGRAPH: {
+            case OsisXmlNodeType.PARAGRAPH:
+            case OsisXmlNodeType.SWORD_PILCROW: {
                 closeCurrentParagraph(context);
                 break;
             }
@@ -826,6 +843,7 @@ export class OsisImporter extends BibleEngineImporter {
                             context
                         );
                     }
+                    if (context.isCurrentVerseImplicit) context.currentSubverse = 1;
                 }
                 break;
             }
@@ -854,6 +872,7 @@ export class OsisImporter extends BibleEngineImporter {
                         content: currentTag.attributes.marker,
                         versionChapterNum: context.currentChapter,
                         versionVerseNum: context.currentVerse,
+                        versionSubverseNum: context.currentSubverse,
                         skipSpace: 'before',
                     });
                 break;
@@ -880,15 +899,6 @@ export class OsisImporter extends BibleEngineImporter {
                 }
                 break;
             }
-            case OsisXmlNodeName.SWORD_PILCROW: {
-                const isEndingParagraphMarker =
-                    currentTag.isSelfClosing && currentTag.attributes.eID;
-                if (isEndingParagraphMarker) {
-                    closeCurrentParagraph(context);
-                    break;
-                }
-                break;
-            }
             case OsisXmlNodeType.BOOK_GROUP:
             case OsisXmlNodeName.CATCH_WORD:
             case OsisXmlNodeName.COLOPHON:
@@ -909,7 +919,7 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.PUBLISHER:
             case OsisXmlNodeName.REF_SYSTEM:
             case OsisXmlNodeName.RIGHTS:
-            case OsisXmlNodeName.SWORD_MILESTONE:
+            case OsisXmlNodeType.SWORD_MILESTONE:
             case OsisXmlNodeName.TEXTUAL_VARIATION:
             case OsisXmlNodeName.TYPE:
             case OsisXmlNodeName.REVISION_DESC:
@@ -1002,10 +1012,10 @@ export class OsisImporter extends BibleEngineImporter {
         }
 
         if (!stackHasParagraph(context, currentContainer)) {
-            if (this.context.hasParagraphsInSourceText) {
+            if (this.context.hasParagraphsInSourceText && !context.autoGenMissingParagraphs) {
                 throw new OsisParseError(`text outside of paragraph: "${text}"`, context);
             }
-            if (!this.context.hasParagraphsInSourceText) {
+            if (!this.context.hasParagraphsInSourceText || context.autoGenMissingParagraphs) {
                 currentContainer = startNewParagraph(context);
             }
         }
@@ -1019,6 +1029,7 @@ export class OsisImporter extends BibleEngineImporter {
             content: trimmedText,
             versionChapterNum: context.currentChapter,
             versionVerseNum: context.currentVerse,
+            versionSubverseNum: context.currentSubverse,
         };
         if (startsWithPunctuationChar(trimmedText)) phrase.skipSpace = 'before';
         if (context.crossRefBuffer) {
@@ -1100,6 +1111,7 @@ export class OsisImporter extends BibleEngineImporter {
                         content: '',
                         versionChapterNum: context.currentChapter,
                         versionVerseNum: context.currentVerse,
+                        versionSubverseNum: context.currentSubverse,
                     };
                     currentContainer.contents.push(emptyPhrase);
                     return emptyPhrase;

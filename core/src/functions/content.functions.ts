@@ -22,20 +22,20 @@ import {
     IBibleNote,
     IBibleVersion,
     IBibleBook,
-    IBibleReferenceRangeQuery
+    IBibleReferenceRangeQuery,
 } from '../models';
 import {
     BiblePhraseEntity,
     BibleParagraphEntity,
     BibleSectionEntity,
     BibleBookEntity,
-    BibleVersionEntity
+    BibleVersionEntity,
 } from '../entities';
 import {
     generateReferenceRangeLabel,
     slimDownCrossReference,
     generateRangeFromGenericSection,
-    slimDownReferenceRange
+    slimDownReferenceRange,
 } from './reference.functions';
 import { getNormalizedChapterCountForOsisId, getNormalizedVerseCount } from './v11n.functions';
 import { StringModifiers } from '../models/BiblePhrase';
@@ -105,7 +105,7 @@ export const convertBibleInputToBookPlaintext = (
                 throw new Error(`missing numbering in input`);
             }
 
-            const subverseNum = _currentNumbers.subverse || 0;
+            const subverseNum = _currentNumbers.subverse ?? 1;
             if (!_accChapters.has(_currentNumbers.chapter))
                 _accChapters.set(_currentNumbers.chapter, new Map());
             const chapter = _accChapters.get(_currentNumbers.chapter)!; // we know it's set
@@ -139,7 +139,7 @@ export const generateBibleDocument = (
     const rootGroup: IBibleContentGeneratorRoot = {
         type: 'root',
         parent: undefined,
-        contents: []
+        contents: [],
     };
     if (!phrases.length) return rootGroup;
 
@@ -162,7 +162,7 @@ export const generateBibleDocument = (
         normalizedVerse: -1, // we have zero-verses (psalms in some versions)
         normalizedSubverse: 0,
         versionChapter: 0,
-        versionVerse: -1 // we have zero-verses (psalms in some versions)
+        versionVerse: -1, // we have zero-verses (psalms in some versions)
     };
 
     for (const phrase of phrases) {
@@ -170,7 +170,7 @@ export const generateBibleDocument = (
         let activeParagraph: IBibleContentGeneratorGroup<'paragraph'>['meta'] | undefined;
         const activeModifiers: PhraseModifiers & { quoteWho?: string; person?: string } = {
             indentLevel: 0,
-            quoteLevel: 0
+            quoteLevel: 0,
         };
 
         // go backwards through all groups and check if the current phrase is still within that
@@ -260,9 +260,9 @@ export const generateBibleDocument = (
                         quoteLevel > activeModifiers['quoteLevel']
                     )
                         activeModifiers['quoteLevel'] = quoteLevel;
-                    activeModifiers['quoteWho'] = (_group as IBibleContentGeneratorGroup<
-                        'quote'
-                    >).modifier;
+                    activeModifiers[
+                        'quoteWho'
+                    ] = (_group as IBibleContentGeneratorGroup<'quote'>).modifier;
                 } else if (
                     // since typescript 3.5 we have to do this weird switch for different modifier
                     // types (although the code inside the cases is exactly the same). i don't
@@ -276,17 +276,17 @@ export const generateBibleDocument = (
                     _group.groupType === 'person' ||
                     _group.groupType === 'link'
                 ) {
-                    activeModifiers[_group.groupType] = (_group as IBibleContentGeneratorGroup<
-                        StringModifiers
-                    >).modifier;
+                    activeModifiers[
+                        _group.groupType
+                    ] = (_group as IBibleContentGeneratorGroup<StringModifiers>).modifier;
                 } else if (_group.groupType === 'line') {
-                    activeModifiers[_group.groupType] = (_group as IBibleContentGeneratorGroup<
-                        'line'
-                    >).modifier;
+                    activeModifiers[
+                        _group.groupType
+                    ] = (_group as IBibleContentGeneratorGroup<'line'>).modifier;
                 } else if (_group.groupType === 'title') {
-                    activeModifiers[_group.groupType] = (_group as IBibleContentGeneratorGroup<
-                        'title'
-                    >).modifier;
+                    activeModifiers[
+                        _group.groupType
+                    ] = (_group as IBibleContentGeneratorGroup<'title'>).modifier;
                 } else {
                     // => this group has a boolean modifier
                     activeModifiers[_group.groupType] = true;
@@ -305,10 +305,10 @@ export const generateBibleDocument = (
         // go through all levels of context
         for (const level of Object.keys(context)
             .sort()
-            .map(key => +key)) {
+            .map((key) => +key)) {
             // look for the section where the phrase is in (if any) and open it if necessary
             const section = context[level].startingSections.find(
-                _section =>
+                (_section) =>
                     phrase.id >= _section.phraseStartId &&
                     phrase.id <= _section.phraseEndId &&
                     // in some situations (like verse reference popups) we don't want to show
@@ -324,7 +324,7 @@ export const generateBibleDocument = (
             if (
                 section &&
                 !activeSections.find(
-                    activeSection =>
+                    (activeSection) =>
                         activeSection.level === level &&
                         activeSection.phraseStartId === section.phraseStartId &&
                         activeSection.phraseEndId === section.phraseEndId
@@ -335,7 +335,7 @@ export const generateBibleDocument = (
                     // got corrupted somewhere. throw an error so we know about it
                     (activeGroup.type !== 'root' && activeGroup.type !== 'section') ||
                     // throw error if creating a section in the wrong level order
-                    activeSections.find(activeSection => activeSection.level >= level)
+                    activeSections.find((activeSection) => activeSection.level >= level)
                 ) {
                     console.log(activeGroup);
                     console.log(activeSections);
@@ -348,7 +348,7 @@ export const generateBibleDocument = (
                 const newSectionMeta = {
                     level,
                     phraseStartId: section.phraseStartId,
-                    phraseEndId: section.phraseEndId
+                    phraseEndId: section.phraseEndId,
                 };
                 const newSection: IBibleContentGeneratorSection = {
                     ...section,
@@ -356,7 +356,7 @@ export const generateBibleDocument = (
                     meta: newSectionMeta,
                     level,
                     contents: [],
-                    parent: activeGroup
+                    parent: activeGroup,
                 };
                 activeGroup.contents.push(newSection);
                 activeGroup = newSection;
@@ -366,7 +366,7 @@ export const generateBibleDocument = (
 
         // look for the paragraph where the phrase is in (if any) and open it if necessary
         const paragraph = paragraphs.find(
-            _paragraph =>
+            (_paragraph) =>
                 phrase.id >= _paragraph.phraseStartId && phrase.id <= _paragraph.phraseEndId
         );
         if (paragraph && activeParagraph && activeParagraph.paragraphId !== paragraph.id) {
@@ -379,14 +379,14 @@ export const generateBibleDocument = (
             const newParagraphMeta = {
                 paragraphId: paragraph.id,
                 phraseStartId: paragraph.phraseStartId,
-                phraseEndId: paragraph.phraseEndId
+                phraseEndId: paragraph.phraseEndId,
             };
             const newParagraph: IBibleContentGeneratorGroup<'paragraph'> = {
                 type: 'group',
                 groupType: 'paragraph',
                 meta: newParagraphMeta,
                 contents: [],
-                parent: activeGroup
+                parent: activeGroup,
             };
             activeGroup.contents[activeGroup.contents.length] = newParagraph;
             activeGroup = newParagraph;
@@ -411,7 +411,7 @@ export const generateBibleDocument = (
             'translationChange',
             'person',
             'divineName',
-            'sela'
+            'sela',
         ];
 
         for (const modifier of modifiers) {
@@ -428,7 +428,7 @@ export const generateBibleDocument = (
                         groupType: 'indent',
                         parent: activeGroup,
                         meta: { level: phrase.getModifierValue('indentLevel')! },
-                        contents: []
+                        contents: [],
                     };
 
                     activeModifiers['indentLevel'] = phrase.getModifierValue('indentLevel')!;
@@ -447,7 +447,7 @@ export const generateBibleDocument = (
                         modifier: phrase.quoteWho,
                         parent: activeGroup,
                         meta: { level: phrase.getModifierValue('quoteLevel')! },
-                        contents: []
+                        contents: [],
                     };
 
                     activeModifiers['quoteLevel'] = phrase.getModifierValue('quoteLevel')!;
@@ -470,7 +470,7 @@ export const generateBibleDocument = (
                         groupType: modifier,
                         modifier: phrase.getModifierValue(modifier),
                         parent: activeGroup,
-                        contents: []
+                        contents: [],
                     };
 
                     // since typescript 3.5 we have to do this weird switch for different modifier
@@ -493,7 +493,7 @@ export const generateBibleDocument = (
                         groupType: 'person',
                         modifier: phrase.person,
                         parent: activeGroup,
-                        contents: []
+                        contents: [],
                     };
                     activeModifiers[modifier] = phrase.person;
                 }
@@ -506,7 +506,7 @@ export const generateBibleDocument = (
                         meta: undefined, // TypeScript wants that (bug?)
                         groupType: modifier,
                         parent: activeGroup,
-                        contents: []
+                        contents: [],
                     };
                     activeModifiers[modifier] = true;
                 }
@@ -578,7 +578,7 @@ export const generateBibleDocument = (
                 phrase.normalizedReference.normalizedSubverseNum;
             currentNumbering.normalizedSubverse = phrase.normalizedReference.normalizedSubverseNum;
         }
-        if(phrase.joinToRefId) {
+        if (phrase.joinToRefId) {
             numbering.joinToRefId = phrase.joinToRefId;
             currentNumbering.joinToRefId = phrase.joinToRefId;
         }
@@ -598,7 +598,7 @@ export const generateBibleDocument = (
             numbering.versionSubverseIsStarting = phrase.versionSubverseNum;
             currentNumbering.versionSubverse = phrase.versionSubverseNum;
         }
-        if(phrase.joinToVersionRefId) {
+        if (phrase.joinToVersionRefId) {
             numbering.joinToVersionRefId = phrase.joinToVersionRefId;
             currentNumbering.joinToVersionRefId = phrase.joinToVersionRefId;
         }
@@ -606,16 +606,16 @@ export const generateBibleDocument = (
         const outputPhrase: IBibleContentGeneratorPhrase = {
             ...phrase,
             type: 'phrase',
-            parent: activeGroup
+            parent: activeGroup,
         };
         if (phrase.crossReferences && phrase.crossReferences.length) {
-            outputPhrase.crossReferences = phrase.crossReferences.map(crossRef => ({
+            outputPhrase.crossReferences = phrase.crossReferences.map((crossRef) => ({
                 ...crossRef,
                 label: generateReferenceRangeLabel(
                     crossRef.range,
                     bookAbbreviations[crossRef.range.bookOsisId],
                     chapterVerseSeparator
-                )
+                ),
             }));
         }
 
@@ -668,7 +668,7 @@ export const generateContextSections = (
                 for (const parentSection of [
                     ...context[section.level - 1].startingSections,
                     context[section.level - 1].wrappingSection,
-                    context[section.level - 1].endingPartialSection
+                    context[section.level - 1].endingPartialSection,
                 ]) {
                     if (
                         parentSection &&
@@ -689,7 +689,7 @@ export const generateContextSections = (
                 context[section.level] = {
                     startingSections: [],
                     previousSections: [],
-                    nextSections: []
+                    nextSections: [],
                 };
             }
 
@@ -733,7 +733,7 @@ export const generateContextRanges = (
         paragraph: {},
         sections: {},
         versionChapter: {},
-        normalizedChapter: {}
+        normalizedChapter: {},
     };
 
     if (phrases.length) {
@@ -787,7 +787,7 @@ export const generateContextRanges = (
             if (range.versionChapterNum > 1)
                 contextRanges.versionChapter.previousRange = {
                     bookOsisId: book.osisId,
-                    versionChapterNum: range.versionChapterNum - 1
+                    versionChapterNum: range.versionChapterNum - 1,
                 };
             if (
                 (range.versionChapterEndNum &&
@@ -800,7 +800,7 @@ export const generateContextRanges = (
                     bookOsisId: book.osisId,
                     versionChapterNum: range.versionChapterEndNum
                         ? range.versionChapterEndNum + 1
-                        : range.versionChapterNum! + 1
+                        : range.versionChapterNum! + 1,
                 };
             }
             if (
@@ -813,7 +813,7 @@ export const generateContextRanges = (
             ) {
                 contextRanges.versionChapter.completeRange = {
                     bookOsisId: book.osisId,
-                    versionChapterNum: range.versionChapterNum
+                    versionChapterNum: range.versionChapterNum,
                 };
             }
             if (
@@ -824,7 +824,7 @@ export const generateContextRanges = (
             ) {
                 contextRanges.versionChapter.completeStartingRange = {
                     bookOsisId: book.osisId,
-                    versionChapterNum: range.versionChapterNum
+                    versionChapterNum: range.versionChapterNum,
                 };
             }
             if (
@@ -835,7 +835,7 @@ export const generateContextRanges = (
             ) {
                 contextRanges.versionChapter.completeEndingRange = {
                     bookOsisId: book.osisId,
-                    versionChapterNum: range.versionChapterEndNum
+                    versionChapterNum: range.versionChapterEndNum,
                 };
             }
         }
@@ -843,7 +843,7 @@ export const generateContextRanges = (
             if (rangeNormalized.normalizedChapterNum > 1)
                 contextRanges.normalizedChapter.previousRange = {
                     bookOsisId: book.osisId,
-                    normalizedChapterNum: rangeNormalized.normalizedChapterNum - 1
+                    normalizedChapterNum: rangeNormalized.normalizedChapterNum - 1,
                 };
             if (
                 (rangeNormalized.normalizedChapterEndNum &&
@@ -858,7 +858,7 @@ export const generateContextRanges = (
                     bookOsisId: book.osisId,
                     normalizedChapterNum: rangeNormalized.normalizedChapterEndNum
                         ? rangeNormalized.normalizedChapterEndNum + 1
-                        : rangeNormalized.normalizedChapterNum! + 1
+                        : rangeNormalized.normalizedChapterNum! + 1,
                 };
             }
             if (
@@ -873,7 +873,7 @@ export const generateContextRanges = (
             ) {
                 contextRanges.normalizedChapter.completeRange = {
                     bookOsisId: book.osisId,
-                    normalizedChapterNum: rangeNormalized.normalizedChapterNum
+                    normalizedChapterNum: rangeNormalized.normalizedChapterNum,
                 };
             }
             if (
@@ -884,7 +884,7 @@ export const generateContextRanges = (
             ) {
                 contextRanges.normalizedChapter.completeStartingRange = {
                     bookOsisId: book.osisId,
-                    normalizedChapterNum: rangeNormalized.normalizedChapterNum
+                    normalizedChapterNum: rangeNormalized.normalizedChapterNum,
                 };
             }
             if (
@@ -896,12 +896,12 @@ export const generateContextRanges = (
             ) {
                 contextRanges.normalizedChapter.completeEndingRange = {
                     bookOsisId: book.osisId,
-                    normalizedChapterNum: rangeNormalized.normalizedChapterEndNum
+                    normalizedChapterNum: rangeNormalized.normalizedChapterEndNum,
                 };
             }
         }
 
-        for (const sectionLevel of Object.keys(context).map(_sectionLevel => +_sectionLevel)) {
+        for (const sectionLevel of Object.keys(context).map((_sectionLevel) => +_sectionLevel)) {
             if (!contextRanges.sections[sectionLevel]) contextRanges.sections[sectionLevel] = {};
 
             if (context[sectionLevel] && context[sectionLevel].wrappingSection) {
@@ -969,7 +969,7 @@ export const stripUnnecessaryDataFromBibleBook = (
         title: bookEntity.title,
         type: bookEntity.type,
         chaptersCount: bookEntity.chaptersCount,
-        longTitle: bookEntity.longTitle
+        longTitle: bookEntity.longTitle,
     };
     if (bookEntity.introduction && !stripDocuments) book.introduction = bookEntity.introduction;
     return book;
@@ -989,7 +989,7 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
             // attributes. They are redudant.
             const inputPhrase: IBibleContentPhrase = {
                 // type: 'phrase',
-                content: phrase.content
+                content: phrase.content,
                 // versionChapterNum: phrase.versionChapterNum,
                 // versionVerseNum: phrase.versionVerseNum
             };
@@ -1005,7 +1005,7 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
             if (phrase.notes && phrase.notes.length)
                 inputPhrase.notes = phrase.notes.map(({ key, type, content }) => {
                     const note: IBibleNote = {
-                        content
+                        content,
                     };
                     if (key) note.key = key;
                     if (type) note.type = type;
@@ -1024,14 +1024,14 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
                 modifier: obj.modifier,
                 contents: <(IBibleContentGroup<ContentGroupType> | IBibleContentPhrase)[]>(
                     stripUnnecessaryDataFromBibleContent(obj.contents)
-                )
+                ),
             };
             if (obj.numbering) inputGroup.numbering = obj.numbering;
             inputData.push(inputGroup);
         } else if (obj.type === 'section') {
             const inputSection: IBibleContentSection = {
                 type: 'section',
-                contents: stripUnnecessaryDataFromBibleContent(obj.contents)
+                contents: stripUnnecessaryDataFromBibleContent(obj.contents),
             };
             if (obj.level !== undefined) inputSection.level = obj.level;
             if (obj.title) inputSection.title = obj.title;
@@ -1053,7 +1053,7 @@ export const stripUnnecessaryDataFromBibleContextData = (
     for (const rangeContext of <('paragraph' | 'versionChapter' | 'normalizedChapter')[]>[
         'paragraph',
         'versionChapter',
-        'normalizedChapter'
+        'normalizedChapter',
     ]) {
         for (const rangeType of <(keyof IBibleOutputRich['contextRanges']['paragraph'])[]>(
             Object.keys(contextRanges[rangeContext])
@@ -1064,7 +1064,7 @@ export const stripUnnecessaryDataFromBibleContextData = (
         }
     }
 
-    for (const level of Object.keys(context).map(_level => +_level)) {
+    for (const level of Object.keys(context).map((_level) => +_level)) {
         for (const rangeType of <(keyof IBibleOutputRich['contextRanges']['sections'][0])[]>(
             Object.keys(contextRanges['sections'][level])
         )) {
@@ -1077,7 +1077,7 @@ export const stripUnnecessaryDataFromBibleContextData = (
         const slimDownBibleSection = (section: IBibleSection): IBibleSection => {
             const slimSection: IBibleSection = {
                 phraseStartId: section.phraseStartId,
-                phraseEndId: section.phraseEndId
+                phraseEndId: section.phraseEndId,
             };
             if (section.title) slimSection.title = section.title;
             if (section.subTitle) slimSection.subTitle = section.subTitle;

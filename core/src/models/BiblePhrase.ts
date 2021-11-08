@@ -26,6 +26,7 @@ export interface IBiblePhraseWithNumbers extends IBiblePhrase, IBibleReferenceVe
 
     versionChapterNum?: number; // has to be set
     versionVerseNum?: number; // has to be set
+    versionSubverseNum?: number; // has to be set
 
     /** in case normalized numbers come pre-calculated (e.g. when downloading a version) */
     normalizedReference?: IBibleReferenceNormalizedNumbers;

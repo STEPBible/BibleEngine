@@ -5,7 +5,7 @@ import {
     IBiblePhraseRef,
     IBibleReferenceRangeNormalized,
     IBibleSectionGeneric,
-    IBibleCrossReference
+    IBibleCrossReference,
 } from '../models';
 import { pad } from './utils.functions';
 import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from './v11n.functions';
@@ -27,11 +27,11 @@ export const generateContextRangeFromVersionRange = ({
     versionId,
     bookOsisId,
     versionChapterNum,
-    versionChapterEndNum
+    versionChapterEndNum,
 }: IBibleReferenceRange): IBibleReferenceRange => {
     const contextRange: IBibleReferenceRange = {
         versionId,
-        bookOsisId
+        bookOsisId,
     };
     if (versionChapterNum) {
         // our queries are graceful with out of bounds references, so we don't bother looking
@@ -68,13 +68,14 @@ export const generateEndReferenceFromRange = (
             : range.normalizedVerseNum && !range.normalizedChapterEndNum
             ? range.normalizedVerseNum
             : 999,
-        normalizedSubverseNum: range.normalizedSubverseEndNum
-            ? range.normalizedSubverseEndNum
-            : range.normalizedSubverseNum && !range.normalizedVerseEndNum
-            ? range.normalizedSubverseNum
-            : 99,
+        normalizedSubverseNum:
+            typeof range.normalizedSubverseEndNum !== 'undefined'
+                ? range.normalizedSubverseEndNum
+                : typeof range.normalizedSubverseNum !== 'undefined' && !range.normalizedVerseEndNum
+                ? range.normalizedSubverseNum
+                : 99,
         versionId: range.versionId || 999,
-        phraseNum: 99
+        phraseNum: 99,
     };
 };
 
@@ -94,10 +95,10 @@ export const generateNormalizedRangeFromVersionRange = (
         isNormalized: true,
         normalizedChapterNum: range.normalizedChapterNum || range.versionChapterNum,
         normalizedVerseNum: range.normalizedVerseNum || range.versionVerseNum,
-        normalizedSubverseNum: range.normalizedSubverseNum || range.versionSubverseNum,
+        normalizedSubverseNum: range.normalizedSubverseNum ?? range.versionSubverseNum,
         normalizedChapterEndNum: range.normalizedChapterEndNum || range.versionChapterEndNum,
         normalizedVerseEndNum: range.normalizedVerseEndNum || range.versionVerseEndNum,
-        normalizedSubverseEndNum: range.normalizedSubverseEndNum || range.versionSubverseEndNum
+        normalizedSubverseEndNum: range.normalizedSubverseEndNum ?? range.versionSubverseEndNum,
     };
 };
 
@@ -118,22 +119,28 @@ export const generatePhraseId = (reference: IBiblePhraseRef): number => {
 /**
  * local method to generate an integer reference from osisId, chapter, verse and
  * subverse
- * @param bookNumber 
- * @param chapter 
- * @param verse 
- * @param subverse 
+ * @param bookNumber
+ * @param chapter
+ * @param verse
+ * @param subverse
  * @returns {number}
  */
-const _generateReferenceId = (osisId: string, chapter?: number, verse?: number, subverse?: number) => {
+const _generateReferenceId = (
+    osisId: string,
+    chapter?: number,
+    verse?: number,
+    subverse?: number
+) => {
     let refId = pad(getBookGenericIdFromOsisId(osisId), 2);
     if (chapter) refId += '' + pad(chapter, 3);
     else refId += '000';
     if (verse) refId += '' + pad(verse, 3);
     else refId += '000';
-    if (subverse) refId += '' + pad(subverse, 2);
-    else refId += '00';
+    if (typeof subverse === 'number' && !isNaN(subverse)) {
+        refId += '' + pad(subverse, 2);
+    } else refId += chapter && verse ? '01' : '00';
     return +refId;
-}
+};
 
 /**
  * encodes a normalized reference object into an integer to use in database operations
@@ -141,17 +148,27 @@ const _generateReferenceId = (osisId: string, chapter?: number, verse?: number, 
  * @returns {number}
  */
 export const generateReferenceId = (reference: IBibleReferenceNormalized): number => {
-    return _generateReferenceId(reference.bookOsisId, reference.normalizedChapterNum, reference.normalizedVerseNum, reference.normalizedSubverseNum);
+    return _generateReferenceId(
+        reference.bookOsisId,
+        reference.normalizedChapterNum,
+        reference.normalizedVerseNum,
+        reference.normalizedSubverseNum
+    );
 };
 
 /**
  * encodes a version reference object into an integer to use in database operations
- * @param {IBibleReferenceVersion} reference 
+ * @param {IBibleReferenceVersion} reference
  * @returns {number}
  */
 export const generateVersionReferenceId = (reference: IBibleReference): number => {
-    return _generateReferenceId(reference.bookOsisId, reference.versionChapterNum, reference.versionVerseNum, reference.versionSubverseNum);
-}
+    return _generateReferenceId(
+        reference.bookOsisId,
+        reference.versionChapterNum,
+        reference.versionVerseNum,
+        reference.versionSubverseNum
+    );
+};
 
 /**
  * Generates a range object from two phrase ids
@@ -171,7 +188,7 @@ export const generateRangeFromGenericSection = (
         normalizedChapterNum: refStart.normalizedChapterNum,
         normalizedVerseNum: refStart.normalizedVerseNum,
         normalizedChapterEndNum: refEnd.normalizedChapterNum,
-        normalizedVerseEndNum: refEnd.normalizedVerseNum
+        normalizedVerseEndNum: refEnd.normalizedVerseNum,
     };
 };
 
@@ -254,8 +271,8 @@ export const getReferencesFromText = (
                             ...entity,
                             indices: [
                                 entity.indices[0] + localRefIndex,
-                                entity.indices[1] + localRefIndex
-                            ]
+                                entity.indices[1] + localRefIndex,
+                            ],
                         });
                     }
                 }
@@ -317,7 +334,7 @@ export const parsePhraseId = (id: number): IBiblePhraseRef => {
     return {
         ...parseReferenceId(_id),
         versionId,
-        phraseNum
+        phraseNum,
     };
 };
 
@@ -340,11 +357,12 @@ export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
     const normalizedBookNum = _id;
     const ref: IBibleReferenceNormalized = {
         isNormalized: true,
-        bookOsisId: getOsisIdFromBookGenericId(normalizedBookNum)
+        bookOsisId: getOsisIdFromBookGenericId(normalizedBookNum),
     };
     if (normalizedChapterNum) ref.normalizedChapterNum = normalizedChapterNum;
     if (normalizedVerseNum) ref.normalizedVerseNum = normalizedVerseNum;
-    if (normalizedSubverseNum) ref.normalizedSubverseNum = normalizedSubverseNum;
+    if (normalizedChapterNum && normalizedVerseNum)
+        ref.normalizedSubverseNum = normalizedSubverseNum;
 
     return ref;
 };
@@ -357,11 +375,11 @@ export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
 export const slimDownCrossReference = ({
     key,
     range,
-    label
+    label,
 }: IBibleCrossReference): IBibleCrossReference => ({
     key,
     label,
-    range: slimDownReferenceRange(range)
+    range: slimDownReferenceRange(range),
 });
 
 /**
@@ -373,7 +391,7 @@ export const slimDownCrossReference = ({
  */
 export const slimDownReferenceRange = (range: IBibleReferenceRange) => {
     const refRange: IBibleReferenceRange = {
-        bookOsisId: range.bookOsisId
+        bookOsisId: range.bookOsisId,
     };
     if (range.versionChapterNum) refRange.versionChapterNum = range.versionChapterNum;
     if (range.versionVerseNum) refRange.versionVerseNum = range.versionVerseNum;
