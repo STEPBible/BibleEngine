@@ -327,11 +327,15 @@ export class OsisImporter extends BibleEngineImporter {
                 startNewParagraph(context);
                 break;
             }
-            case OsisXmlNodeName.LINE_GROUP: {
+            case OsisXmlNodeName.LINE_GROUP:
+            case OsisXmlNodeName.LIST:
+            case OsisXmlNodeName.TABLE: {
                 this.startNewLineGroup();
                 break;
             }
-            case OsisXmlNodeName.LINE: {
+            case OsisXmlNodeName.ITEM:
+            case OsisXmlNodeName.LINE:
+            case OsisXmlNodeName.ROW: {
                 let currentContainer = getCurrentContainer(context);
                 let lineNr =
                     currentContainer.type === 'group' && currentContainer.groupType === 'lineGroup'
@@ -374,6 +378,10 @@ export class OsisImporter extends BibleEngineImporter {
                                 context
                             );
                         phrase.linebreak = true;
+                        break;
+                    }
+                    case OsisXmlNodeType.OPTIONAL: {
+                        // ignore
                         break;
                     }
                     default:
@@ -485,7 +493,12 @@ export class OsisImporter extends BibleEngineImporter {
                 } else if (!context.hasSectionsInSourceText) {
                     // Since titles should always be attached to a section,
                     // versions with titles but not sections need artifical sections
-                    startNewSection(context, OsisXmlNodeType.SECTION);
+                    startNewSection(
+                        context,
+                        tag.attributes.level === 'sub'
+                            ? OsisXmlNodeType.SECTION_SUB
+                            : OsisXmlNodeType.SECTION
+                    );
                 }
                 // section title is handled in parseTextNode
                 break;
@@ -790,14 +803,18 @@ export class OsisImporter extends BibleEngineImporter {
                 closeCurrentParagraph(context);
                 break;
             }
-            case OsisXmlNodeName.LINE: {
+            case OsisXmlNodeName.ITEM:
+            case OsisXmlNodeName.LINE:
+            case OsisXmlNodeName.ROW: {
                 const lineGroup = context.contentContainerStack.pop();
                 if (!lineGroup || lineGroup.type !== 'group' || lineGroup.groupType !== 'line') {
                     throw new OsisParseError(`unclean container stack while closing line`, context);
                 }
                 break;
             }
-            case OsisXmlNodeName.LINE_GROUP: {
+            case OsisXmlNodeName.LINE_GROUP:
+            case OsisXmlNodeName.LIST:
+            case OsisXmlNodeName.TABLE: {
                 this.closeCurrentLineGroup(context);
                 break;
             }

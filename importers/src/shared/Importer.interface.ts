@@ -13,8 +13,9 @@ export type ImporterBookMetadata = Map<
     string,
     {
         abbreviation: string;
-        title: string;
+        longTitle?: string;
         number: number;
+        title: string;
     }
 >;
 
