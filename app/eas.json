@@ -1,6 +1,5 @@
 {
   "build": {
-
     "development": {
       "developmentClient": true,
       "distribution": "internal"
@@ -11,6 +10,7 @@
       }
     },
     "production": {
+      "node": "12.18.0",
       "android": {
         "buildType": "app-bundle"
       }
@@ -18,5 +18,8 @@
   },
   "submit": {
     "production": {}
+  },
+  "cli": {
+    "version": ">= 0.34.1"
   }
 }

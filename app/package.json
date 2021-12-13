@@ -18,6 +18,7 @@
   },
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
+    "eas-build-pre-install": "cd .. && yarn install",
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -90,5 +91,8 @@
   },
   "peerDependencies": {
     "@bible-engine/core": "0.x"
+  },
+  "expo": {
+    "plugins": ["sentry-expo"]
   }
 }

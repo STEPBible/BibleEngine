@@ -7,6 +7,7 @@ module.exports = {
   resolver: {
     assetExts: ['db', 'ttf', 'png'],
     resolverMainFields: ['browser', 'main'],
+    sourceExts: ['jsx', 'js', 'ts', 'tsx'],
   },
   transformer: {
     minifierPath: 'metro-minify-terser',
