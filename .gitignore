@@ -1,5 +1,7 @@
 node_modules/
 /core/*.db
+*.aab
+*.ipa
 yarn-error.log
 core/output
 notes
