@@ -49,7 +49,7 @@
     }
   },
   "dependencies": {
-    "@bible-engine/core": "file:../core",
+    "@bible-engine/core": "0.2.0",
     "@expo/vector-icons": "^12.0.0",
     "@react-native-community/netinfo": "6.0.0",
     "@types/react-native-snap-carousel": "^3.8.4",
@@ -87,12 +87,15 @@
     "react-navigation": "^4.4.4",
     "react-navigation-collapsible": "^5.10.2",
     "react-navigation-stack": "^2.10.4",
-    "sentry-expo": "^4.0.0"
+    "sentry-expo": "^4.0.0",
+    "typeorm": "~0.2.34"
   },
   "peerDependencies": {
     "@bible-engine/core": "0.x"
   },
   "expo": {
-    "plugins": ["sentry-expo"]
+    "plugins": [
+      "sentry-expo"
+    ]
   }
 }
