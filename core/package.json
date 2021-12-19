@@ -2,6 +2,7 @@
     "name": "@bible-engine/core",
     "version": "0.2.0",
     "main": "lib/index.js",
+    "license": "MIT",
     "scripts": {
         "test": "yarn jest",
         "build": "rimraf ./lib && tsc && npm run buildES6",
