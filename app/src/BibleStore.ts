@@ -91,6 +91,7 @@ class BibleStore {
       }
       await this.setLocalDatabase()
       await this.updateCurrentBibleReference(newReference)
+      await this.setBooks(this.versionUid)
     } catch (error) {
       console.log('changeCurrentBibleVersion failed', error)
       throw error
