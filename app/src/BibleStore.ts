@@ -186,7 +186,6 @@ class BibleStore {
     this.chapterContent = []
     this.chapterSections = []
 
-    const forceRemote = version.dataLocation !== 'db' && this.isConnected
     const chapter = await bibleEngine.getFullDataForReferenceRange(
       rangeQuery,
       true
