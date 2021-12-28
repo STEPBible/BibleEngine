@@ -1,28 +1,23 @@
-import React from 'react'
-import { FlatList, Dimensions, View, StyleSheet } from 'react-native'
 import { IBibleContent, IBiblePhrase } from '@bible-engine/core'
-import { FAB } from 'react-native-paper'
+import { observe } from 'mobx'
 import { observer } from 'mobx-react/native'
+import React from 'react'
+import { Dimensions, FlatList, StyleSheet, View } from 'react-native'
+import { FAB } from 'react-native-paper'
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import store from 'react-native-simple-store'
-import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
-
+import bibleStore from './BibleStore'
 import {
-  Margin,
-  FontSize,
-  Settings,
-  getDebugStyles,
-  FontFamily,
-  AsyncStorageKey,
+  AsyncStorageKey, FontFamily, FontSize, getDebugStyles, Margin, Settings
 } from './Constants'
-import NavigationHeader from './NavigationHeader'
-import StrongsWord from './StrongsWord'
 import CrossReference from './CrossReference'
 import Footnote from './Footnote'
-import Text from './Text'
 import LoadingScreen from './LoadingScreen'
-import bibleStore from './BibleStore'
-import { observe } from 'mobx'
+import NavigationHeader from './NavigationHeader'
 import QuickSettings from './QuickSettings'
+import StrongsWord from './StrongsWord'
+import Text from './Text'
+
 
 @observer
 class HomeScreen extends React.Component<{}, {}> {

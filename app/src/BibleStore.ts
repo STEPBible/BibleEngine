@@ -1,31 +1,21 @@
 import {
-  IBibleReferenceRangeQuery,
-  IBibleCrossReference,
-  BibleBookEntity,
-  BOOK_DATA,
-  BibleEngine,
-  IBibleVersion,
-  BibleEngineOptions,
+  BibleBookEntity, BibleEngine, BOOK_DATA, IBibleCrossReference, IBibleReferenceRangeQuery, IBibleVersion
 } from '@bible-engine/core'
-import * as FileSystem from 'expo-file-system'
-import * as SQLite from 'expo-sqlite'
 import {
-  REMOTE_BIBLE_ENGINE_URL,
-  DATABASE_DOWNLOAD_URL,
-  SENTRY_DSN,
-  GOOGLE_ANALYTICS_TRACKING_ID,
+  GOOGLE_ANALYTICS_TRACKING_ID, SENTRY_DSN
 } from '@env'
-import 'react-native-console-time-polyfill'
-import { ConnectionOptions } from 'typeorm'
-import { AsyncStorage, LayoutAnimation } from 'react-native'
-import * as Sentry from 'sentry-expo'
 import { Analytics, PageHit } from 'expo-analytics'
+import * as FileSystem from 'expo-file-system'
+import { action, observable } from 'mobx'
 import { AsyncTrunk, ignore, version } from 'mobx-sync'
-import { observable, action } from 'mobx'
-
+import { AsyncStorage, LayoutAnimation } from 'react-native'
+import 'react-native-console-time-polyfill'
+import * as Sentry from 'sentry-expo'
+import { ConnectionOptions } from 'typeorm'
+import { BibleModule, BIBLE_MODULES, LexiconModule, LEXICON_MODULE, SQLITE_DIRECTORY } from './Constants'
 import Fonts from './Fonts'
-import { SQLITE_DIRECTORY, DATABASE_PATH, LEXICONS_PATH, BIBLE_MODULES, LEXICON_MODULE, BibleModule, LexiconModule } from './Constants'
 import JsonAsset from './JsonAsset'
+
 
 const analytics = new Analytics(GOOGLE_ANALYTICS_TRACKING_ID)
 let bibleEngine: BibleEngine;
