@@ -168,6 +168,7 @@ class BibleStore {
     const rangeQuery = {
       versionChapterNum: range.normalizedChapterNum,
       ...range,
+      versionUid: this.versionUid,
     }
     this.versionChapterNum =
       rangeQuery.versionChapterNum || this.DEFAULT_CHAPTER
