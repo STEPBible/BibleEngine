@@ -108,6 +108,7 @@ class BibleStore {
     try {
       if (bibleEngine) {
         this.closeDatabaseConnection(bibleEngine)
+        this.closeDatabaseConnection(lexiconEngine)
       }
       await this.createSqliteDirectory()
       await Promise.all([
