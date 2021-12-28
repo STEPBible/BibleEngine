@@ -4,18 +4,18 @@ import {
 import {
   GOOGLE_ANALYTICS_TRACKING_ID, SENTRY_DSN
 } from '@env'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Analytics, PageHit } from 'expo-analytics'
 import * as FileSystem from 'expo-file-system'
 import { action, observable } from 'mobx'
 import { AsyncTrunk, ignore, version } from 'mobx-sync'
-import { AsyncStorage, LayoutAnimation } from 'react-native'
+import { LayoutAnimation } from 'react-native'
 import 'react-native-console-time-polyfill'
 import * as Sentry from 'sentry-expo'
 import { ConnectionOptions } from 'typeorm'
 import { BibleModule, BIBLE_MODULES, LexiconModule, LEXICON_MODULE, SQLITE_DIRECTORY } from './Constants'
 import Fonts from './Fonts'
 import JsonAsset from './JsonAsset'
-
 
 const analytics = new Analytics(GOOGLE_ANALYTICS_TRACKING_ID)
 let bibleEngine: BibleEngine;
