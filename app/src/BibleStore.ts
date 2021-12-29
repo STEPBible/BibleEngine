@@ -207,9 +207,6 @@ class BibleStore {
     this.chapterSections = chapterContent.slice(0, 1)
     this.loading = false
     setTimeout(() => {
-      LayoutAnimation.configureNext(
-        LayoutAnimation.create(1000, 'easeInEaseOut', 'opacity')
-      )
       this.showStrongs = true
     }, 100)
     console.timeEnd('updateCurrentBibleReference')
