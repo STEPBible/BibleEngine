@@ -17,7 +17,11 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "1476903313"
+      }
+    }
   },
   "cli": {
     "version": ">= 0.34.1"
