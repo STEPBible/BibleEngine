@@ -1,6 +1,6 @@
 {
   "name": "step-bible-mobile",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "private": true,
   "devDependencies": {
     "@types/jest": "^22.2.3",

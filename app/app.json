@@ -8,7 +8,7 @@
       "ios",
       "android"
     ],
-    "version": "2.2.0",
+    "version": "2.2.1",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -25,15 +25,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tyndale.step",
-      "buildNumber": "2.2.0"
+      "buildNumber": "2.2.1"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
       "package": "com.tyndale.stepbible",
-      "versionCode": 420020200
+      "versionCode": 440020201
     },
     "packagerOpts": {
       "sourceExts": [
