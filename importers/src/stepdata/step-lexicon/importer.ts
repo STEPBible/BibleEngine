@@ -7,25 +7,30 @@ import { BibleEngineImporter } from '../../shared/Importer.interface';
 
 const STRONGS_NUM = '@StrNo';
 const ENGLISH_GLOSS = '@StepGloss';
+const SPANISH_GLOSS = '@es_Gloss';
 const ORIGINAL_WORD = '@STEPUnicodeAccented';
 const HEBREW_DEFINITION = '@BdbMedDef';
 const SIMPLIFIED_CHINESE_GLOSS = '@zh_Gloss';
 const TRADITIONAL_CHINESE_GLOSS = '@zh_tw_Gloss';
 const SIMPLIFIED_CHINESE_DEFINITION = '@zh_Definition';
 const TRADITIONAL_CHINESE_DEFINITION = '@zh_tw_Definition';
+const SPANISH_DEFINITION = '@es_Definition';
 const GREEK_SHORT_DEFINITION = '@MounceShortDef';
 const GREEK_DEFINITION = '@MounceMedDef';
-const EXTENDED_GREEK_DEFINITION = '@FLsjDefs'
+const EXTENDED_GREEK_DEFINITION = '@FLsjDefs';
 const TRANSLITERATION = '@StrTranslit';
 
 export class StepLexiconImporter extends BibleEngineImporter {
     async import() {}
 
     static isValidContent(line: string) {
-        return line && line.split('=').length >= 2
+        return line && line.split('=').length >= 2;
     }
 
     static parseStrongsDefinitions(rawText: string): IDictionaryEntry[] {
+        rawText = rawText
+            .replace(/@sp_Gloss/g, '@es_Gloss')
+            .replace(/@sp_Definition/g, '@es_Definition');
         const entries = rawText.split('$=');
         const definitions: IDictionaryEntry[] = [];
         for (const entry of entries) {
@@ -46,8 +51,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         gloss: attributes[ENGLISH_GLOSS],
                         content: attributes[HEBREW_DEFINITION],
                     });
-                }
-                else if (attribute === GREEK_SHORT_DEFINITION) {
+                } else if (attribute === GREEK_SHORT_DEFINITION) {
                     definitions.push({
                         strong: attributes[STRONGS_NUM],
                         dictionary: GREEK_SHORT_DEFINITION,
@@ -56,8 +60,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         gloss: attributes[ENGLISH_GLOSS],
                         content: attributes[GREEK_SHORT_DEFINITION],
                     });
-                }
-                else if (attribute === GREEK_DEFINITION) {
+                } else if (attribute === GREEK_DEFINITION) {
                     definitions.push({
                         strong: attributes[STRONGS_NUM],
                         dictionary: GREEK_DEFINITION,
@@ -66,8 +69,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         gloss: attributes[ENGLISH_GLOSS],
                         content: attributes[GREEK_DEFINITION],
                     });
-                }
-                else if (attribute === EXTENDED_GREEK_DEFINITION) {
+                } else if (attribute === EXTENDED_GREEK_DEFINITION) {
                     definitions.push({
                         strong: attributes[STRONGS_NUM],
                         dictionary: EXTENDED_GREEK_DEFINITION,
@@ -76,8 +78,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         gloss: attributes[ENGLISH_GLOSS],
                         content: attributes[EXTENDED_GREEK_DEFINITION],
                     });
-                }
-                else if (attribute === SIMPLIFIED_CHINESE_DEFINITION) {
+                } else if (attribute === SIMPLIFIED_CHINESE_DEFINITION) {
                     definitions.push({
                         strong: attributes[STRONGS_NUM],
                         dictionary: SIMPLIFIED_CHINESE_DEFINITION,
@@ -86,8 +87,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         gloss: attributes[SIMPLIFIED_CHINESE_GLOSS],
                         content: attributes[SIMPLIFIED_CHINESE_DEFINITION],
                     });
-                }
-                else if (attribute === TRADITIONAL_CHINESE_DEFINITION) {
+                } else if (attribute === TRADITIONAL_CHINESE_DEFINITION) {
                     definitions.push({
                         strong: attributes[STRONGS_NUM],
                         dictionary: TRADITIONAL_CHINESE_DEFINITION,
@@ -96,10 +96,19 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         gloss: attributes[TRADITIONAL_CHINESE_GLOSS],
                         content: attributes[TRADITIONAL_CHINESE_DEFINITION],
                     });
+                } else if (attribute === SPANISH_DEFINITION) {
+                    definitions.push({
+                        strong: attributes[STRONGS_NUM],
+                        dictionary: SPANISH_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: attributes[TRANSLITERATION],
+                        gloss: attributes[SPANISH_GLOSS],
+                        content: attributes[SPANISH_DEFINITION],
+                    });
                 }
             }
         }
-        return definitions
+        return definitions;
     }
 
     toString() {
