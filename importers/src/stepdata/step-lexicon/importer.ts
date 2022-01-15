@@ -7,24 +7,22 @@ import { BibleEngineImporter } from '../../shared/Importer.interface';
 
 const STRONGS_NUM = '@StrNo';
 const ENGLISH_GLOSS = '@StepGloss';
+const ORIGINAL_WORD = '@STEPUnicodeAccented';
+const HEBREW_DEFINITION = '@BdbMedDef';
 const SIMPLIFIED_CHINESE_GLOSS = '@zh_Gloss';
 const TRADITIONAL_CHINESE_GLOSS = '@zh_tw_Gloss';
-const ORIGINAL_WORD = '@STEPUnicodeAccented';
-const HEBREW_TRANSLITERATION = '@AcadTransAccented';
-const HEBREW_DEFINITION = '@BdbMedDef';
 const SIMPLIFIED_CHINESE_DEFINITION = '@zh_Definition';
 const TRADITIONAL_CHINESE_DEFINITION = '@zh_tw_Definition';
-
-// const GREEK_SHORT_DEFINITION = '@MounceShortDef';
-// const GREEK_DEFINITION = '@MounceMedDef';
-// const GREEK_TRANSLITERATION = '@StrTranslit';
-// const PRONUNCIATION = '@StrPronunc';
+const GREEK_SHORT_DEFINITION = '@MounceShortDef';
+const GREEK_DEFINITION = '@MounceMedDef';
+const EXTENDED_GREEK_DEFINITION = '@FLsjDefs'
+const TRANSLITERATION = '@StrTranslit';
 
 export class StepLexiconImporter extends BibleEngineImporter {
     async import() {}
 
     static isValidContent(line: string) {
-        return line && line.split('=').length >= 2 && line.split('=')[1].trim().length;
+        return line && line.split('=').length >= 2
     }
 
     static parseStrongsDefinitions(rawText: string): IDictionaryEntry[] {
@@ -35,43 +33,69 @@ export class StepLexiconImporter extends BibleEngineImporter {
             const attributes: any = {};
             for (const line of lines) {
                 const key = line.split('=')[0].trim();
-                const value = line.split('=')[1].trim();
+                const value = line.split('=').slice(1).join('=').trim();
                 attributes[key] = value;
             }
             for (const attribute of Object.keys(attributes)) {
-                if (attribute == HEBREW_DEFINITION) {
+                if (attribute === HEBREW_DEFINITION) {
                     definitions.push({
                         strong: attributes[STRONGS_NUM],
                         dictionary: HEBREW_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
-                        transliteration: attributes[HEBREW_TRANSLITERATION],
+                        transliteration: attributes[TRANSLITERATION],
                         gloss: attributes[ENGLISH_GLOSS],
                         content: attributes[HEBREW_DEFINITION],
                     });
                 }
-                if (attribute == SIMPLIFIED_CHINESE_DEFINITION) {
-                    if (attributes[STRONGS_NUM][0] === 'H') {
-                        definitions.push({
-                            strong: attributes[STRONGS_NUM],
-                            dictionary: SIMPLIFIED_CHINESE_DEFINITION,
-                            lemma: attributes[ORIGINAL_WORD],
-                            transliteration: attributes[HEBREW_TRANSLITERATION],
-                            gloss: attributes[SIMPLIFIED_CHINESE_GLOSS],
-                            content: attributes[SIMPLIFIED_CHINESE_DEFINITION],
-                        });
-                    }
+                else if (attribute === GREEK_SHORT_DEFINITION) {
+                    definitions.push({
+                        strong: attributes[STRONGS_NUM],
+                        dictionary: GREEK_SHORT_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: attributes[TRANSLITERATION],
+                        gloss: attributes[ENGLISH_GLOSS],
+                        content: attributes[GREEK_SHORT_DEFINITION],
+                    });
                 }
-                if (attribute == TRADITIONAL_CHINESE_DEFINITION) {
-                    if (attributes[STRONGS_NUM][0] === 'H') {
-                        definitions.push({
-                            strong: attributes[STRONGS_NUM],
-                            dictionary: TRADITIONAL_CHINESE_DEFINITION,
-                            lemma: attributes[ORIGINAL_WORD],
-                            transliteration: attributes[HEBREW_TRANSLITERATION],
-                            gloss: attributes[TRADITIONAL_CHINESE_GLOSS],
-                            content: attributes[TRADITIONAL_CHINESE_DEFINITION],
-                        });
-                    }
+                else if (attribute === GREEK_DEFINITION) {
+                    definitions.push({
+                        strong: attributes[STRONGS_NUM],
+                        dictionary: GREEK_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: attributes[TRANSLITERATION],
+                        gloss: attributes[ENGLISH_GLOSS],
+                        content: attributes[GREEK_DEFINITION],
+                    });
+                }
+                else if (attribute === EXTENDED_GREEK_DEFINITION) {
+                    definitions.push({
+                        strong: attributes[STRONGS_NUM],
+                        dictionary: EXTENDED_GREEK_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: attributes[TRANSLITERATION],
+                        gloss: attributes[ENGLISH_GLOSS],
+                        content: attributes[EXTENDED_GREEK_DEFINITION],
+                    });
+                }
+                else if (attribute === SIMPLIFIED_CHINESE_DEFINITION) {
+                    definitions.push({
+                        strong: attributes[STRONGS_NUM],
+                        dictionary: SIMPLIFIED_CHINESE_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: attributes[TRANSLITERATION],
+                        gloss: attributes[SIMPLIFIED_CHINESE_GLOSS],
+                        content: attributes[SIMPLIFIED_CHINESE_DEFINITION],
+                    });
+                }
+                else if (attribute === TRADITIONAL_CHINESE_DEFINITION) {
+                    definitions.push({
+                        strong: attributes[STRONGS_NUM],
+                        dictionary: TRADITIONAL_CHINESE_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: attributes[TRANSLITERATION],
+                        gloss: attributes[TRADITIONAL_CHINESE_GLOSS],
+                        content: attributes[TRADITIONAL_CHINESE_DEFINITION],
+                    });
                 }
             }
         }
