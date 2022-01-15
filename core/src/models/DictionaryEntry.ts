@@ -7,5 +7,5 @@ export interface IDictionaryEntry {
     transliteration?: string;
     pronunciation?: string;
     gloss: string;
-    content?: DocumentRoot;
+    content?: string;
 }
