@@ -34,6 +34,17 @@ export class StepLexiconImporter extends BibleEngineImporter {
         const entries = rawText.split('$=');
         const definitions: IDictionaryEntry[] = [];
         for (const entry of entries) {
+            if (!entry || entry.trim() === '') {
+                continue;
+            }
+            const strongsNum = entry.split('=', 1)[0];
+            const lastCharOfStrongs = strongsNum[strongsNum.length - 1];
+            const firstCharOfStrongs = strongsNum[0];
+            const isHebrew = firstCharOfStrongs === 'H';
+            const isExperimentalNumberingSystem = lastCharOfStrongs !== ' ' && isHebrew;
+            if (isExperimentalNumberingSystem) {
+                continue;
+            }
             const lines = entry.split('\n').filter(this.isValidContent);
             const attributes: any = {};
             for (const line of lines) {
