@@ -16,7 +16,7 @@ $=H0001 ==============================
 @sp_Gloss=	padre
 @sp_Definition=	padre, antepasado, autor, hacedor de cualquier cosa, término de respeto y honor como maestro o maestro, consejero
 @StrTranslit=	ʼâb
-$=H0001G==============================
+$=H0001 ==============================
 @BdbMedDef=	A man living at the time of United Monarchy, first mentioned at 1Ki.7.13; also called Huram-abi (KJV: "Huram my father's") at 2Ch.2.13; 4.16;
 $=G0004=αβαρης============================
 @StrNo=	G0004

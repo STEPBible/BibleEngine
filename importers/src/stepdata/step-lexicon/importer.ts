@@ -33,19 +33,14 @@ export class StepLexiconImporter extends BibleEngineImporter {
             .replace(/@sp_Definition/g, '@es_Definition');
         const entries = rawText.split('$=');
         const definitions: IDictionaryEntry[] = [];
+        const seenStrongsNums = new Set()
         for (const entry of entries) {
-            if (!entry || entry.trim() === '') {
+            const strongsNum = entry.split('=', 1)[0].trim();
+            if (seenStrongsNums.has(strongsNum)) {
                 continue;
             }
-            const strongsNum = entry.split('=', 1)[0];
-            const lastCharOfStrongs = strongsNum[strongsNum.length - 1];
-            const firstCharOfStrongs = strongsNum[0];
-            const isHebrew = firstCharOfStrongs === 'H';
-            const isExperimentalNumberingSystem = lastCharOfStrongs !== ' ' && isHebrew;
-            if (isExperimentalNumberingSystem) {
-                continue;
-            }
-            const lines = entry.split('\n').filter(this.isValidContent);
+            seenStrongsNums.add(strongsNum);
+            const lines = entry.split('\n');
             const attributes: any = {};
             for (const line of lines) {
                 const key = line.split('=')[0].trim();
@@ -55,65 +50,65 @@ export class StepLexiconImporter extends BibleEngineImporter {
             for (const attribute of Object.keys(attributes)) {
                 if (attribute === HEBREW_DEFINITION) {
                     definitions.push({
-                        strong: attributes[STRONGS_NUM],
+                        strong: strongsNum,
                         dictionary: HEBREW_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
                         transliteration: attributes[TRANSLITERATION],
-                        gloss: attributes[ENGLISH_GLOSS],
+                        gloss: attributes[ENGLISH_GLOSS] || '',
                         content: attributes[HEBREW_DEFINITION],
                     });
                 } else if (attribute === GREEK_SHORT_DEFINITION) {
                     definitions.push({
-                        strong: attributes[STRONGS_NUM],
+                        strong: strongsNum,
                         dictionary: GREEK_SHORT_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
                         transliteration: attributes[TRANSLITERATION],
-                        gloss: attributes[ENGLISH_GLOSS],
+                        gloss: attributes[ENGLISH_GLOSS] || '',
                         content: attributes[GREEK_SHORT_DEFINITION],
                     });
                 } else if (attribute === GREEK_DEFINITION) {
                     definitions.push({
-                        strong: attributes[STRONGS_NUM],
+                        strong: strongsNum,
                         dictionary: GREEK_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
                         transliteration: attributes[TRANSLITERATION],
-                        gloss: attributes[ENGLISH_GLOSS],
+                        gloss: attributes[ENGLISH_GLOSS] || '',
                         content: attributes[GREEK_DEFINITION],
                     });
                 } else if (attribute === EXTENDED_GREEK_DEFINITION) {
                     definitions.push({
-                        strong: attributes[STRONGS_NUM],
+                        strong: strongsNum,
                         dictionary: EXTENDED_GREEK_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
                         transliteration: attributes[TRANSLITERATION],
-                        gloss: attributes[ENGLISH_GLOSS],
+                        gloss: attributes[ENGLISH_GLOSS] || '',
                         content: attributes[EXTENDED_GREEK_DEFINITION],
                     });
                 } else if (attribute === SIMPLIFIED_CHINESE_DEFINITION) {
                     definitions.push({
-                        strong: attributes[STRONGS_NUM],
+                        strong: strongsNum,
                         dictionary: SIMPLIFIED_CHINESE_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
                         transliteration: attributes[TRANSLITERATION],
-                        gloss: attributes[SIMPLIFIED_CHINESE_GLOSS],
+                        gloss: attributes[SIMPLIFIED_CHINESE_GLOSS] || '',
                         content: attributes[SIMPLIFIED_CHINESE_DEFINITION],
                     });
                 } else if (attribute === TRADITIONAL_CHINESE_DEFINITION) {
                     definitions.push({
-                        strong: attributes[STRONGS_NUM],
+                        strong: strongsNum,
                         dictionary: TRADITIONAL_CHINESE_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
                         transliteration: attributes[TRANSLITERATION],
-                        gloss: attributes[TRADITIONAL_CHINESE_GLOSS],
+                        gloss: attributes[TRADITIONAL_CHINESE_GLOSS] || '',
                         content: attributes[TRADITIONAL_CHINESE_DEFINITION],
                     });
                 } else if (attribute === SPANISH_DEFINITION) {
                     definitions.push({
-                        strong: attributes[STRONGS_NUM],
+                        strong: strongsNum,
                         dictionary: SPANISH_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
                         transliteration: attributes[TRANSLITERATION],
-                        gloss: attributes[SPANISH_GLOSS],
+                        gloss: attributes[SPANISH_GLOSS] || '',
                         content: attributes[SPANISH_DEFINITION],
                     });
                 }
