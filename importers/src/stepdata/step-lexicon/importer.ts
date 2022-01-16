@@ -1,11 +1,10 @@
 import { IDictionaryEntry } from '@bible-engine/core';
-// import { resolve } from 'path';
+import { resolve } from 'path';
 import { BibleEngineImporter } from '../../shared/Importer.interface';
 
-// const fs = require('fs');
-// const dirProjectRoot = resolve(__dirname + '/../..');
+const fs = require('fs');
+const dirProjectRoot = resolve(__dirname + '/../..');
 
-const STRONGS_NUM = '@StrNo';
 const ENGLISH_GLOSS = '@StepGloss';
 const SPANISH_GLOSS = '@es_Gloss';
 const ORIGINAL_WORD = '@STEPUnicodeAccented';
@@ -21,10 +20,18 @@ const EXTENDED_GREEK_DEFINITION = '@FLsjDefs';
 const TRANSLITERATION = '@StrTranslit';
 
 export class StepLexiconImporter extends BibleEngineImporter {
-    async import() {}
-
-    static isValidContent(line: string) {
-        return line && line.split('=').length >= 2;
+    async import() {
+        const hebrewLexiconLines = fs
+            .readFileSync(`${dirProjectRoot}/stepdata/step-lexicon/data/lexicon_hebrew.txt`)
+            .toString();
+        const greekLexiconLines = fs
+            .readFileSync(`${dirProjectRoot}/stepdata/step-lexicon/data/lexicon_greek.txt`)
+            .toString();
+        const rawText = hebrewLexiconLines + greekLexiconLines
+        const definitions = StepLexiconImporter.parseStrongsDefinitions(rawText);
+        await Promise.all(
+            definitions.map((definition) => this.bibleEngine.addDictionaryEntry(definition))
+        );
     }
 
     static parseStrongsDefinitions(rawText: string): IDictionaryEntry[] {
