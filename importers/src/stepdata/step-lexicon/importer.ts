@@ -1,4 +1,5 @@
 import { IDictionaryEntry } from '@bible-engine/core';
+import { transliterate } from 'hebrew-transliteration';
 import { resolve } from 'path';
 import { BibleEngineImporter } from '../../shared/Importer.interface';
 
@@ -38,7 +39,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
         rawText = rawText
             .replace(/@sp_Gloss/g, '@es_Gloss')
             .replace(/@sp_Definition/g, '@es_Definition');
-        const entries = rawText.split('$=');
+        const entries = rawText.split('$=').filter(chunk => !!chunk.trim());
         const definitions: IDictionaryEntry[] = [];
         const seenStrongsNums = new Set();
         for (const entry of entries) {
@@ -54,13 +55,23 @@ export class StepLexiconImporter extends BibleEngineImporter {
                 const value = line.split('=').slice(1).join('=').trim();
                 attributes[key] = value;
             }
+            if (!strongsNum) {
+                throw new Error(entry)
+            }
+            const isHebrewStrongs = strongsNum[0].toLowerCase() === 'h';
+            const hebrewTransliteration = transliterate(attributes[ORIGINAL_WORD] || '', {
+                isSimple: true,
+            });
+            const transliteration = isHebrewStrongs
+                ? hebrewTransliteration
+                : attributes[TRANSLITERATION];
             for (const attribute of Object.keys(attributes)) {
                 if (attribute === HEBREW_DEFINITION) {
                     definitions.push({
                         strong: strongsNum,
                         dictionary: HEBREW_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
-                        transliteration: attributes[TRANSLITERATION],
+                        transliteration: hebrewTransliteration,
                         gloss: attributes[ENGLISH_GLOSS] || '',
                         content: attributes[HEBREW_DEFINITION],
                     });
@@ -96,7 +107,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         strong: strongsNum,
                         dictionary: SIMPLIFIED_CHINESE_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
-                        transliteration: attributes[TRANSLITERATION],
+                        transliteration: transliteration,
                         gloss: attributes[SIMPLIFIED_CHINESE_GLOSS] || '',
                         content: attributes[SIMPLIFIED_CHINESE_DEFINITION],
                     });
@@ -105,7 +116,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         strong: strongsNum,
                         dictionary: TRADITIONAL_CHINESE_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
-                        transliteration: attributes[TRANSLITERATION],
+                        transliteration: transliteration,
                         gloss: attributes[TRADITIONAL_CHINESE_GLOSS] || '',
                         content: attributes[TRADITIONAL_CHINESE_DEFINITION],
                     });
@@ -114,7 +125,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         strong: strongsNum,
                         dictionary: SPANISH_DEFINITION,
                         lemma: attributes[ORIGINAL_WORD],
-                        transliteration: attributes[TRANSLITERATION],
+                        transliteration: transliteration,
                         gloss: attributes[SPANISH_GLOSS] || '',
                         content: attributes[SPANISH_DEFINITION],
                     });
