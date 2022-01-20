@@ -1,251 +1,138 @@
-import { BibleEngineImporter } from '../../shared/Importer.interface';
+import { IDictionaryEntry } from '@bible-engine/core';
+import { transliterate } from 'hebrew-transliteration';
 import { resolve } from 'path';
-
-import {
-    DocumentRoot,
-    DocumentGroup,
-    DocumentPhrase,
-    DocumentElement,
-    IDictionaryEntry
-} from '@bible-engine/core';
+import { BibleEngineImporter } from '../../shared/Importer.interface';
 
 const fs = require('fs');
-
 const dirProjectRoot = resolve(__dirname + '/../..');
 
-enum LexiconEntryType {
-    STRONGS_NUM = '@StrNo',
-    ENGLISH_GLOSS = '@StepGloss',
-    SIMPLIFIED_CHINESE_GLOSS = '@zh_Gloss',
-    TRADITIONAL_CHINESE_GLOSS = '@zh_tw_Gloss',
-    ORIGINAL_WORD = '@STEPUnicodeAccented',
-    HEBREW_TRANSLITERATION = '@AcadTransAccented',
-    GREEK_TRANSLITERATION = '@StrTranslit',
-    PRONUNCIATION = '@StrPronunc',
-    HEBREW_DEFINITION = '@BdbMedDef',
-    GREEK_SHORT_DEFINITION = '@MounceShortDef',
-    GREEK_DEFINITION = '@MounceMedDef',
-    SIMPLIFIED_CHINESE_DEFINITION = '@zh_Definition',
-    TRADITIONAL_CHINESE_DEFINITION = '@zh_tw_Definition'
-}
-
-const HEBREW_DICTIONARIES = [
-    LexiconEntryType.HEBREW_DEFINITION,
-    LexiconEntryType.SIMPLIFIED_CHINESE_DEFINITION,
-    LexiconEntryType.TRADITIONAL_CHINESE_DEFINITION,
-]
-const GREEK_DICTIONARIES = [
-    LexiconEntryType.GREEK_SHORT_DEFINITION,
-    LexiconEntryType.GREEK_DEFINITION,
-    LexiconEntryType.SIMPLIFIED_CHINESE_DEFINITION,
-    LexiconEntryType.TRADITIONAL_CHINESE_DEFINITION,
-]
-const DICTIONARIES = [...GREEK_DICTIONARIES, ...HEBREW_DICTIONARIES]
-const DICTIONARY_TO_GLOSS: any = {
-    [LexiconEntryType.HEBREW_DEFINITION]: LexiconEntryType.ENGLISH_GLOSS,
-    [LexiconEntryType.GREEK_SHORT_DEFINITION]: LexiconEntryType.ENGLISH_GLOSS,
-    [LexiconEntryType.GREEK_DEFINITION]: LexiconEntryType.ENGLISH_GLOSS,
-    [LexiconEntryType.SIMPLIFIED_CHINESE_DEFINITION]: LexiconEntryType.SIMPLIFIED_CHINESE_GLOSS,
-    [LexiconEntryType.TRADITIONAL_CHINESE_DEFINITION]: LexiconEntryType.TRADITIONAL_CHINESE_GLOSS,
-}
+const ENGLISH_GLOSS = '@StepGloss';
+const SPANISH_GLOSS = '@es_Gloss';
+const ORIGINAL_WORD = '@STEPUnicodeAccented';
+const HEBREW_DEFINITION = '@BdbMedDef';
+const SIMPLIFIED_CHINESE_GLOSS = '@zh_Gloss';
+const TRADITIONAL_CHINESE_GLOSS = '@zh_tw_Gloss';
+const SIMPLIFIED_CHINESE_DEFINITION = '@zh_Definition';
+const TRADITIONAL_CHINESE_DEFINITION = '@zh_tw_Definition';
+const SPANISH_DEFINITION = '@es_Definition';
+const GREEK_SHORT_DEFINITION = '@MounceShortDef';
+const GREEK_DEFINITION = '@MounceMedDef';
+const EXTENDED_GREEK_DEFINITION = '@FLsjDefs';
+const TRANSLITERATION = '@StrTranslit';
 
 export class StepLexiconImporter extends BibleEngineImporter {
     async import() {
-        await this.importHebrewLexicon()
-        await this.importGreekLexicon()
-    }
-
-    async importHebrewLexicon() {
         const hebrewLexiconLines = fs
-            .readFileSync(`${dirProjectRoot}/stepdata/step-lexicon/data/hebrew_lexicon.txt`)
-            .toString()
-            .split('\n')
-
-        const hebrewLexiconEntries = this.getStrongsContent(hebrewLexiconLines);
-        const hebrewDictionaryEntries = this.getHebrewDictionaryEntries(
-            hebrewLexiconEntries,
-        );
-        await Promise.all(
-            hebrewDictionaryEntries.map(
-                entry => this.bibleEngine.addDictionaryEntry(entry)
-            )
-        )
-    }
-
-    async importGreekLexicon() {
+            .readFileSync(`${dirProjectRoot}/stepdata/step-lexicon/data/lexicon_hebrew.txt`)
+            .toString();
         const greekLexiconLines = fs
-            .readFileSync(`${dirProjectRoot}/stepdata/step-lexicon/data/greek_lexicon.txt`)
-            .toString()
-            .split('\n')
-
-        const greekLexiconEntries = this.getStrongsContent(greekLexiconLines);
-        const greekDictionaryEntries = this.getGreekDictionaryEntries(
-            greekLexiconEntries,
-        );
+            .readFileSync(`${dirProjectRoot}/stepdata/step-lexicon/data/lexicon_greek.txt`)
+            .toString();
+        const rawText = hebrewLexiconLines + greekLexiconLines;
+        const definitions = StepLexiconImporter.parseStrongsDefinitions(rawText);
         await Promise.all(
-            greekDictionaryEntries.map(
-                entry => this.bibleEngine.addDictionaryEntry(entry)
-            )
-        )
-    }
-
-    isValidContent(line: string) {
-        return (
-            line &&
-            line.split('=').length >= 2 &&
-            line.split('=')[1].trim().length &&
-            Object.values(LexiconEntryType).includes(line.split('=')[0].trim() as LexiconEntryType)
-
+            definitions.map((definition) => this.bibleEngine.addDictionaryEntry(definition))
         );
     }
 
-    getStrongsContent(lines: string[]) {
-        let currentStrongsNum = '';
-        const lexiconEntries: any = lines
-            .filter((line: string) => this.isValidContent(line))
-            .reduce((currentLexiconEntries: any, line: string) => {
-                const entryType: any = line.split('=')[0].trim();
-                const entryValue: string = line
-                    .split('=')
-                    .slice(1)
-                    .join('')
-                    .trim();
-                if (entryType === LexiconEntryType.STRONGS_NUM) {
-                    currentStrongsNum = entryValue;
-                    currentLexiconEntries[currentStrongsNum] = {};
-                    return currentLexiconEntries;
-                }
-                if (DICTIONARIES.includes(entryType)) {
-                    const definitions = entryValue.split('<br>').filter(elt => elt);
-                    currentLexiconEntries[currentStrongsNum][entryType] = definitions;
-                    return currentLexiconEntries;
-                }
-                currentLexiconEntries[currentStrongsNum][entryType] = entryValue;
-                return currentLexiconEntries;
-            }, {});
-        return lexiconEntries;
-    }
-
-    getHebrewDictionaryEntries(lexicon: any) {
-        const dictionaryEntries: IDictionaryEntry[] = []
-        const strongsNums = Object.keys(lexicon)
-        for (const strong of strongsNums) {
-            const entry = lexicon[strong]
-            const lemma = entry[LexiconEntryType.ORIGINAL_WORD]
-            const transliteration = entry[LexiconEntryType.HEBREW_TRANSLITERATION]
-            const pronunciation = entry[LexiconEntryType.PRONUNCIATION]
-            for (const dictionary of HEBREW_DICTIONARIES) {
-                if (entry[dictionary]) {
-                    const gloss = entry[DICTIONARY_TO_GLOSS[dictionary]]
-                    const content = this.getHebrewContentStructure(entry[dictionary]);
-                    dictionaryEntries.push({
-                        strong,
-                        dictionary,
-                        lemma,
-                        transliteration,
-                        pronunciation,
-                        gloss,
-                        content
-                    })
+    static parseStrongsDefinitions(rawText: string): IDictionaryEntry[] {
+        rawText = rawText
+            .replace(/@sp_Gloss/g, '@es_Gloss')
+            .replace(/@sp_Definition/g, '@es_Definition');
+        const entries = rawText.split('$=').filter(chunk => !!chunk.trim());
+        const definitions: IDictionaryEntry[] = [];
+        const seenStrongsNums = new Set();
+        for (const entry of entries) {
+            const strongsNum = entry.split('=', 1)[0].trim();
+            if (seenStrongsNums.has(strongsNum)) {
+                continue;
+            }
+            seenStrongsNums.add(strongsNum);
+            const lines = entry.split('\n');
+            const attributes: any = {};
+            for (const line of lines) {
+                const key = line.split('=')[0].trim();
+                const value = line.split('=').slice(1).join('=').trim();
+                attributes[key] = value;
+            }
+            if (!strongsNum) {
+                throw new Error(entry)
+            }
+            const isHebrewStrongs = strongsNum[0].toLowerCase() === 'h';
+            const hebrewTransliteration = transliterate(attributes[ORIGINAL_WORD] || '', {
+                isSimple: true,
+            });
+            const transliteration = isHebrewStrongs
+                ? hebrewTransliteration
+                : attributes[TRANSLITERATION];
+            for (const attribute of Object.keys(attributes)) {
+                if (attribute === HEBREW_DEFINITION) {
+                    definitions.push({
+                        strong: strongsNum,
+                        dictionary: HEBREW_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: hebrewTransliteration,
+                        gloss: attributes[ENGLISH_GLOSS] || '',
+                        content: attributes[HEBREW_DEFINITION],
+                    });
+                } else if (attribute === GREEK_SHORT_DEFINITION) {
+                    definitions.push({
+                        strong: strongsNum,
+                        dictionary: GREEK_SHORT_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: attributes[TRANSLITERATION],
+                        gloss: attributes[ENGLISH_GLOSS] || '',
+                        content: attributes[GREEK_SHORT_DEFINITION],
+                    });
+                } else if (attribute === GREEK_DEFINITION) {
+                    definitions.push({
+                        strong: strongsNum,
+                        dictionary: GREEK_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: attributes[TRANSLITERATION],
+                        gloss: attributes[ENGLISH_GLOSS] || '',
+                        content: attributes[GREEK_DEFINITION],
+                    });
+                } else if (attribute === EXTENDED_GREEK_DEFINITION) {
+                    definitions.push({
+                        strong: strongsNum,
+                        dictionary: EXTENDED_GREEK_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: attributes[TRANSLITERATION],
+                        gloss: attributes[ENGLISH_GLOSS] || '',
+                        content: attributes[EXTENDED_GREEK_DEFINITION],
+                    });
+                } else if (attribute === SIMPLIFIED_CHINESE_DEFINITION) {
+                    definitions.push({
+                        strong: strongsNum,
+                        dictionary: SIMPLIFIED_CHINESE_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: transliteration,
+                        gloss: attributes[SIMPLIFIED_CHINESE_GLOSS] || '',
+                        content: attributes[SIMPLIFIED_CHINESE_DEFINITION],
+                    });
+                } else if (attribute === TRADITIONAL_CHINESE_DEFINITION) {
+                    definitions.push({
+                        strong: strongsNum,
+                        dictionary: TRADITIONAL_CHINESE_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: transliteration,
+                        gloss: attributes[TRADITIONAL_CHINESE_GLOSS] || '',
+                        content: attributes[TRADITIONAL_CHINESE_DEFINITION],
+                    });
+                } else if (attribute === SPANISH_DEFINITION) {
+                    definitions.push({
+                        strong: strongsNum,
+                        dictionary: SPANISH_DEFINITION,
+                        lemma: attributes[ORIGINAL_WORD],
+                        transliteration: transliteration,
+                        gloss: attributes[SPANISH_GLOSS] || '',
+                        content: attributes[SPANISH_DEFINITION],
+                    });
                 }
             }
         }
-        return dictionaryEntries
-    }
-
-    getGreekDictionaryEntries(lexicon: any) {
-        const dictionaryEntries: IDictionaryEntry[] = []
-        const strongsNums = Object.keys(lexicon)
-        for (const strong of strongsNums) {
-            const entry = lexicon[strong]
-            const lemma = entry[LexiconEntryType.ORIGINAL_WORD]
-            const transliteration = entry[LexiconEntryType.GREEK_TRANSLITERATION]
-            const pronunciation = entry[LexiconEntryType.PRONUNCIATION]
-            for (const dictionary of GREEK_DICTIONARIES) {
-                if (entry[dictionary]) {
-                    const gloss = entry[DICTIONARY_TO_GLOSS[dictionary]]
-                    const content = this.getGreekContentStructure(entry[dictionary]);
-                    dictionaryEntries.push({
-                        strong,
-                        dictionary,
-                        lemma,
-                        transliteration,
-                        pronunciation,
-                        gloss,
-                        content
-                    })
-                }
-            }
-        }
-        return dictionaryEntries
-    }
-
-    getHebrewContentStructure(definitions: string[]) {
-        if (!definitions) {
-            return
-        }
-        const contents = definitions.map(
-            (definition: string): DocumentGroup<'orderedListItem'> => ({
-                type: 'group',
-                groupType: 'orderedListItem',
-                contents: [
-                    {
-                        type: 'phrase',
-                        content: definition
-                    }
-                ]
-            })
-        );
-        const content: DocumentRoot = {
-            type: 'root',
-            contents
-        };
-        return content;
-    }
-
-    getStringWithoutXMLTags(str: string) {
-        return str.replace(/<(?:.|\n)*?>/gm, '');
-    }
-
-    getGreekContentStructure(definition: string[] | undefined) {
-        if (!definition) {
-            return
-        }
-        const contents: DocumentElement[] = [];
-        definition.forEach((element: string) => {
-            const split = element.split('</b>');
-            if (split.length > 1) {
-                const boldPart = this.getStringWithoutXMLTags(split[0]);
-                const nonBoldPart = this.getStringWithoutXMLTags(split[1]);
-                const boldElement: DocumentGroup<'bold'> = {
-                    type: 'group',
-                    groupType: 'bold',
-                    contents: [
-                        {
-                            type: 'phrase',
-                            content: boldPart
-                        }
-                    ]
-                };
-                contents.push(boldElement);
-                const nonBoldElement: DocumentPhrase = {
-                    type: 'phrase',
-                    content: nonBoldPart
-                };
-                contents.push(nonBoldElement);
-                return;
-            }
-            const nonBoldElement: DocumentPhrase = {
-                type: 'phrase',
-                content: this.getStringWithoutXMLTags(element)
-            };
-            contents.push(nonBoldElement);
-        });
-        const content: DocumentRoot = {
-            type: 'root',
-            contents
-        };
-        return content;
+        return definitions;
     }
 
     toString() {
