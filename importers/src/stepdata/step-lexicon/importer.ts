@@ -27,7 +27,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
         const greekLexiconLines = fs
             .readFileSync(`${dirProjectRoot}/stepdata/step-lexicon/data/lexicon_greek.txt`)
             .toString();
-        const rawText = hebrewLexiconLines + greekLexiconLines
+        const rawText = hebrewLexiconLines + greekLexiconLines;
         const definitions = StepLexiconImporter.parseStrongsDefinitions(rawText);
         await Promise.all(
             definitions.map((definition) => this.bibleEngine.addDictionaryEntry(definition))
@@ -40,7 +40,7 @@ export class StepLexiconImporter extends BibleEngineImporter {
             .replace(/@sp_Definition/g, '@es_Definition');
         const entries = rawText.split('$=');
         const definitions: IDictionaryEntry[] = [];
-        const seenStrongsNums = new Set()
+        const seenStrongsNums = new Set();
         for (const entry of entries) {
             const strongsNum = entry.split('=', 1)[0].trim();
             if (seenStrongsNums.has(strongsNum)) {
