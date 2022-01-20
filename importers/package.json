@@ -25,6 +25,7 @@
         "random-words": "^1.1.0",
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
+        "ts-node": "^10.4.0",
         "winston": "^3.3.3"
     },
     "devDependencies": {
