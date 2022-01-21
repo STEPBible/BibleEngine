@@ -1,30 +1,23 @@
+import {
+  DictionaryEntryEntity, DocumentElement, IDictionaryEntry
+} from '@bible-engine/core'
+import { observer } from 'mobx-react/native'
 import React from 'react'
 import {
-  View,
-  StyleSheet,
-  Dimensions,
-  TouchableHighlight,
-  ScrollView,
+  Dimensions, ScrollView, StyleSheet, TouchableHighlight, View
 } from 'react-native'
-import Popover from './Popover'
-import {
-  IDictionaryEntry,
-  DocumentElement,
-  DictionaryEntryEntity,
-} from '@bible-engine/core'
+import { ActivityIndicator } from 'react-native-paper'
+import bibleStore from './BibleStore'
 import {
   Color,
   FontFamily,
-  FontSize,
-  Margin,
-  getDebugStyles,
+  FontSize, getDebugStyles, Margin
 } from './Constants'
-import Text from './Text'
-import StrongsNumber from './models/StrongsNumber'
-import bibleStore from './BibleStore'
-import { observer } from 'mobx-react/native'
-import { ActivityIndicator } from 'react-native-paper'
 import StrongsDefinition from './models/StrongsDefinition'
+import StrongsNumber from './models/StrongsNumber'
+import Popover from './Popover'
+import Text from './Text'
+import RenderHtml from 'react-native-render-html';
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -37,7 +30,7 @@ interface Props {
 
 interface State {
   popoverIsVisible: boolean
-  definitions: IDictionaryEntry[]
+  definitions: (IDictionaryEntry | null)[]
   loading: boolean
 }
 
@@ -69,7 +62,7 @@ class StrongsWord extends React.Component<Props, State> {
     const isHebrewStrongs = normalizedStrongs[0].id[0] === 'H'
     const dictionaries = isHebrewStrongs
       ? ['@BdbMedDef']
-      : ['@MounceShortDef', '@MounceMedDef']
+      : ['@MounceMedDef', '@FLsjDefs']
     try {
       const requests = await Promise.all(
         normalizedStrongs.map(strong =>
@@ -92,7 +85,7 @@ class StrongsWord extends React.Component<Props, State> {
         })
       }
     } catch (e) {
-      console.log('Couldnt fetch strongs num: ', strongs.join(', '))
+      console.log('Couldnt fetch strongs num: ', strongs.join(', '), e)
       console.error(e)
       throw e
     }
@@ -101,12 +94,6 @@ class StrongsWord extends React.Component<Props, State> {
   onPress = () => {
     this.setState({ ...this.state, popoverIsVisible: true })
     this.setDictionaryEntries(this.props.strongs)
-    setTimeout(() => {
-      this.setState({
-        ...this.state,
-        loadingMessage: 'Sorry, this is taking longer than usual...',
-      })
-    }, 4000)
   }
 
   closePopover = () => {
@@ -214,20 +201,13 @@ class StrongsWord extends React.Component<Props, State> {
   }
 
   renderDefinitionContent = (element: DictionaryEntryEntity) => {
-    if (
-      !element.content ||
-      !element.content.contents ||
-      !element.content.contents.length
-    ) {
-      return null
-    }
     return (
       <React.Fragment>
         <View style={styles.popover__content__definitions__entry}>
-          {element.content.contents.map(
-            (element: DocumentElement, index: number) =>
-              this.renderDocumentElement(element, index)
-          )}
+          <RenderHtml
+            contentWidth={Dimensions.get('window').width}
+            source={{ html: element.content || '' }}
+          />
         </View>
         <Text style={styles.strongsReference}>
           {`Strongs: ${element.strong}`}

@@ -1,20 +1,24 @@
-import { DictionaryEntryEntity, IDictionaryEntry } from '@bible-engine/core'
+import { DictionaryEntryEntity } from '@bible-engine/core'
 
 export default class StrongsDefinition {
   static merge(
-    definitions: (DictionaryEntryEntity | undefined)[]
+    definitions: DictionaryEntryEntity[]
   ): DictionaryEntryEntity | null {
     if (definitions.length === 0) return null
     const validDefinitions = definitions.filter(
-      (definition): definition is DictionaryEntryEntity =>
-        definition !== undefined
+      (definition) => definition !== undefined
     )
     if (validDefinitions.length === 0) return null
-    return validDefinitions.slice(1).reduce((mergedDefinition, definition) => {
-      mergedDefinition?.content?.contents.push(
-        ...(definition?.content?.contents || [])
-      )
-      return mergedDefinition
-    }, validDefinitions[0] || { content: { contents: [] } })
+    const content =
+      validDefinitions
+        .map((definition) =>
+          definition?.content
+            ?.replace(/<ref=/g, '<span attr=')
+            .replace(/<\/ref>/g, '</span>')
+            .replace(/<a /g, '<span ')
+            .replace(/<\/a>/g, '</span>')
+        )
+        .join('<br/>') || ''
+    return { ...validDefinitions[0], content }
   }
 }

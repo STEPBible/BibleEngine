@@ -2825,10 +2825,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@bible-engine/core@0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@bible-engine/core/-/core-0.2.0.tgz#2ce92346a9604844384bc6d5548e17ca7c27dd51"
-  integrity sha512-kv9gXE58K4+cCwYFZRTIGljmqO3srRMSsyGq9O+d58JsOtn/RgthIu0rVS9cwxpj6u2dxG6pepcXsxD9o7KKgw==
+"@bible-engine/core@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@bible-engine/core/-/core-1.0.0.tgz#d686e815a4ce6c1ff185706c1229fb2619a4484d"
+  integrity sha512-ed8SJ0qQ8N4MjWzQBYvAbX6DUuoV6VlFhRjYD1ZSIhwx7xvYRO4mmShWVBGrBrC366K16ONILlx0GaMWQ11pag==
   dependencies:
     bible-passage-reference-parser "^2.0.1"
     reflect-metadata "^0.1.13"
@@ -3695,10 +3695,10 @@
     css-to-react-native "^3.0.0"
     csstype "^3.0.8"
 
-"@native-html/transient-render-engine@11.2.2":
-  version "11.2.2"
-  resolved "https://registry.yarnpkg.com/@native-html/transient-render-engine/-/transient-render-engine-11.2.2.tgz#e8c20ae7feabc013cf1c9a08908ed92713ae4577"
-  integrity sha512-z0LgQStGJf4gCIeuD8oJiPbk+sUEQ9FOzHlDWwK+uVam+1Q5mmh6PqblCdTCP3IRGBtPLzMM0VZ9njm1TEvb8Q==
+"@native-html/transient-render-engine@11.2.3":
+  version "11.2.3"
+  resolved "https://registry.yarnpkg.com/@native-html/transient-render-engine/-/transient-render-engine-11.2.3.tgz#e4de0e7c8c023224a2dc27f3bd2b30d3984d94a4"
+  integrity sha512-zXwgA3gPUEmFs3I3syfnvDvS6WiUHXEE6jY09OBzK+trq7wkweOSFWIoyXiGkbXrozGYG0KY90YgPyr8Tg8Uyg==
   dependencies:
     "@native-html/css-processor" "1.11.0"
     "@types/ramda" "^0.27.44"
@@ -3707,7 +3707,7 @@
     domhandler "^4.2.2"
     domutils "^2.8.0"
     htmlparser2 "^7.1.2"
-    ramda "^0.27.1"
+    ramda "^0.27.2"
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -11639,10 +11639,10 @@ r2@^2.0.1:
     node-fetch "^2.0.0-alpha.8"
     typedarray-to-buffer "^3.1.2"
 
-ramda@^0.27.1:
-  version "0.27.1"
-  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.1.tgz#66fc2df3ef873874ffc2da6aa8984658abacf5c9"
-  integrity sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==
+ramda@^0.27.2:
+  version "0.27.2"
+  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.2.tgz#84463226f7f36dc33592f6f4ed6374c48306c3f1"
+  integrity sha512-SbiLPU40JuJniHexQSAgad32hfwd+DRUdwF2PlVuI5RZD0/vahUco7R8vD86J/tcEKKF9vZrUVwgtmGCqlCKyA==
 
 randomatic@^3.0.0:
   version "3.1.1"
@@ -11814,18 +11814,18 @@ react-native-reanimated@~2.3.1:
     react-native-screens "^3.4.0"
     string-hash-64 "^1.0.3"
 
-react-native-render-html@^6.3.1:
-  version "6.3.1"
-  resolved "https://registry.yarnpkg.com/react-native-render-html/-/react-native-render-html-6.3.1.tgz#04675c9f77e1a6f7e17ccea5880ff24962ad58c2"
-  integrity sha512-vEL3Q2JaxX1RtYw9R68qKUVCkSnjerms8ZrSNAnKbDTcm+PFrCCm8ko96GxZpmqt3t3I8Apkcz1zgEWBiXC8sg==
+react-native-render-html@^6.3.3:
+  version "6.3.3"
+  resolved "https://registry.yarnpkg.com/react-native-render-html/-/react-native-render-html-6.3.3.tgz#3519ee4a3fb9281f2f44014c1c350dade00a9cd1"
+  integrity sha512-tGZw+QbZKgcQNuhVHivfnKBdNLDk6ACBftZeUgBOGoXlmtAIBp7sYqCT11upV2zsGlbP2aVFv5B7EAQJJSOroA==
   dependencies:
     "@jsamr/counter-style" "^2.0.1"
     "@jsamr/react-native-li" "^2.3.0"
-    "@native-html/transient-render-engine" "11.2.2"
+    "@native-html/transient-render-engine" "11.2.3"
     "@types/ramda" "^0.27.40"
     "@types/urijs" "^1.19.15"
     prop-types "^15.5.7"
-    ramda "^0.27.1"
+    ramda "^0.27.2"
     stringify-entities "^3.1.0"
     urijs "^1.19.6"
 
