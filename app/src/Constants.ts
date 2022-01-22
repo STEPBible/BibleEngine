@@ -86,6 +86,8 @@ export interface BibleModule {
   title: string
   filename: string
   asset: Asset
+  hebrewLexicons: string[]
+  greekLexicons: string[]
 }
 
 export interface LexiconModule {
@@ -99,12 +101,24 @@ export const BIBLE_MODULES: BibleModule[] = [
     title: 'English Standard Version',
     filename: 'esv.db',
     asset: Asset.fromModule(require('../assets/esv.db')),
+    hebrewLexicons: ['@BdbMedDef'],
+    greekLexicons: ['@MounceMedDef', '@FLsjDefs']
   },
   {
     uid: '和合本 (简)',
     title: '和合本 (简体字)',
     filename: 'cuvs.db',
     asset: Asset.fromModule(require('../assets/cuvs.db')),
+    hebrewLexicons: ['@zh_Definition'],
+    greekLexicons: ['@zh_Definition']
+  },
+  {
+    uid: 'RV1909',
+    title: 'La Santa Biblia Reina-Valera 1909',
+    filename: 'spaRV1909.db',
+    asset: Asset.fromModule(require('../assets/spaRV1909.db')),
+    hebrewLexicons: ['@es_Definition', '@BdbMedDef'],
+    greekLexicons: ['@es_Definition', '@MounceMedDef', '@FLsjDefs']
   }
 ]
 

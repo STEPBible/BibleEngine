@@ -60,9 +60,10 @@ class StrongsWord extends React.Component<Props, State> {
     }
     let normalizedStrongs = strongs.map(strong => new StrongsNumber(strong))
     const isHebrewStrongs = normalizedStrongs[0].id[0] === 'H'
+    const module = bibleStore.getCurrentModule(bibleStore.versionUid)
     const dictionaries = isHebrewStrongs
-      ? ['@BdbMedDef']
-      : ['@MounceMedDef', '@FLsjDefs']
+      ? module.hebrewLexicons
+      : module.greekLexicons
     try {
       const requests = await Promise.all(
         normalizedStrongs.map(strong =>
