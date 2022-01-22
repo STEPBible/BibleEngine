@@ -35,6 +35,7 @@ export class SwordImporter extends BibleEngineImporter {
                     ...this.options.versionMeta,
                 },
                 bookMeta: this.options.bookMeta || swordModule.getBookMetadata(),
+                autoGenMissingParagraphs: this.options.autoGenMissingParagraphs,
             });
             await importer.run();
         } catch (error) {

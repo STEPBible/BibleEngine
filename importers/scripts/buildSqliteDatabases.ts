@@ -1,12 +1,12 @@
+import { OsisImporter } from './../src/bible/osis/index';
+import { BeDatabaseCreator, V11nImporter } from '../src';
 import { SwordImporter } from './../src/bible/sword/src/importer';
-import { zhsBookMetadata } from './../src/metadata/index';
-import { BeDatabaseCreator, OsisImporter, V11nImporter } from '../src';
-import { enBookMetadata } from '../src/metadata';
+import { esBookMetdata, enBookMetadata, zhsBookMetadata } from './../src/metadata/index';
 
 const LOCAL_CACHE_PATH = 'data/step-library';
 
 const main = async () => {
-    await Promise.all([createEsvDatabase(), createCuvDatabase()])
+    await Promise.all([createReinaValeraDatabase(), createEsvDatabase(), createCuvDatabase()]);
 };
 
 const createEsvDatabase = async () => {
@@ -27,7 +27,7 @@ const createEsvDatabase = async () => {
     });
     creator.addImporter(V11nImporter);
     await creator.createDatabase();
-}
+};
 
 const createCuvDatabase = async () => {
     const creator = new BeDatabaseCreator({
@@ -47,6 +47,27 @@ const createCuvDatabase = async () => {
     });
     creator.addImporter(V11nImporter);
     await creator.createDatabase();
-}
+};
+
+const createReinaValeraDatabase = async () => {
+    const creator = new BeDatabaseCreator({
+        name: 'cuv-connection',
+        type: 'better-sqlite3',
+        database: 'spaRV1909.db',
+    });
+    creator.addImporter(SwordImporter, {
+        sourcePath: `${LOCAL_CACHE_PATH}/spaRV1909eb.zip`,
+        bookMeta: esBookMetdata,
+        versionMeta: {
+            uid: 'RV1909',
+            title: 'Reina-Valera 1909',
+            isPlaintext: false,
+            hasStrongs: true,
+        },
+        autoGenMissingParagraphs: true,
+    });
+    creator.addImporter(V11nImporter);
+    await creator.createDatabase();
+};
 
 main().catch((error) => console.log(error));
