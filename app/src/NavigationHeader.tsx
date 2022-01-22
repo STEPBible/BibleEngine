@@ -16,10 +16,6 @@ interface Props {
 
 @observer
 class NavigationHeader extends React.Component<Props, {}> {
-  getBookName() {
-    if (!bibleStore.bookOsisId || !BOOK_DATA[bibleStore.bookOsisId]) return ''
-    return BOOK_DATA[bibleStore.bookOsisId].names.en[0]
-  }
   render() {
     return (
       <View style={styles.header}>

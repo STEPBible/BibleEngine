@@ -281,9 +281,11 @@ class BibleStore {
       !BOOK_DATA[this.bookOsisId] ||
       !this.cacheIsRestored
     )
-      return ''
-    const fullBookName = BOOK_DATA[this.bookOsisId].names.en[0]
-    return `${fullBookName} ${this.versionChapterNum}`
+    return ''
+    const title = this.books.find(
+      book => book.osisId === this.bookOsisId
+    )?.title || ''
+    return `${title} ${this.versionChapterNum}`
   }
 
   get versionUidToDisplay() {
