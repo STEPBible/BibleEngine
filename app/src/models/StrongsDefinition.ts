@@ -17,8 +17,12 @@ export default class StrongsDefinition {
             .replace(/<\/ref>/g, '</span>')
             .replace(/<a /g, '<span ')
             .replace(/<\/a>/g, '</span>')
+            .replace(/<Level[\d]>/g, '<br/>')
+            .replace(/<\/Level[\d]>/g, '')
+            .replace(/<greek>/g, '')
+            .replace(/<\/greek>/g, '')
         )
-        .join('<br/>') || ''
+        .join('<br/><br/>') || ''
     return { ...validDefinitions[0], content }
   }
 }
