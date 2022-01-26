@@ -229,7 +229,6 @@ class HomeScreen extends React.Component<{}, {}> {
                 !bibleStore.showSettings &&
                 !!this.state.previousRange
               }
-              color="#2F3030"
               small
               style={this.prevChapterButtonStyle(insets?.bottom || 0)}
               icon="chevron-left"
@@ -242,7 +241,6 @@ class HomeScreen extends React.Component<{}, {}> {
                 !bibleStore.showSettings &&
                 !!this.state.nextRange
               }
-              color="#2F3030"
               small
               style={this.nextChapterButtonStyle(insets?.bottom || 0)}
               icon="chevron-right"
@@ -286,7 +284,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   chapterButton: {
-    backgroundColor: '#F9F9F9',
     position: 'absolute',
   },
   phrase: { flexDirection: 'row', ...getDebugStyles() },

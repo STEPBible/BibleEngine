@@ -1,12 +1,12 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+import { TouchableRipple, Text } from 'react-native-paper'
 import { ScrollView } from 'react-native-gesture-handler'
 import { BibleVersionEntity } from '@bible-engine/core'
 import { observer } from 'mobx-react/native'
 
 import bibleStore from './BibleStore'
 import { BIBLE_MODULES, FontFamily } from './Constants'
-import { TouchableRipple } from 'react-native-paper'
 
 @observer
 class VersionScreen extends React.Component<any, any> {
@@ -62,7 +62,6 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   list__item__description: {
-    color: '#9B9B9B',
     fontFamily: FontFamily.OPEN_SANS,
     fontSize: 14,
     paddingBottom: 8,

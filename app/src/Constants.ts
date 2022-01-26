@@ -17,6 +17,12 @@ export const Settings = {
   FOOTNOTES_ENABLED: true,
 }
 
+export enum Theme {
+  AUTO = "auto",
+  DARK = "dark",
+  LIGHT = "light",
+}
+
 export enum Margin {
   EXTRA_SMALL = normalizeText(5),
   SMALL = normalizeText(10),
