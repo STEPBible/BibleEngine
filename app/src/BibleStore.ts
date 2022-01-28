@@ -9,11 +9,11 @@ import { Analytics, PageHit } from 'expo-analytics'
 import * as FileSystem from 'expo-file-system'
 import { action, observable } from 'mobx'
 import { AsyncTrunk, ignore, version } from 'mobx-sync'
-import { LayoutAnimation } from 'react-native'
+import { LayoutAnimation, Appearance } from 'react-native'
 import 'react-native-console-time-polyfill'
 import * as Sentry from 'sentry-expo'
 import { ConnectionOptions } from 'typeorm'
-import { BibleModule, BIBLE_MODULES, LexiconModule, LEXICON_MODULE, SQLITE_DIRECTORY } from './Constants'
+import { BibleModule, BIBLE_MODULES, LexiconModule, LEXICON_MODULE, SQLITE_DIRECTORY, Theme } from './Constants'
 import Fonts from './Fonts'
 import JsonAsset from './JsonAsset'
 
@@ -26,6 +26,7 @@ class BibleStore {
   DEFAULT_BOOK = 'Gen'
   DEFAULT_CHAPTER = 1
   DEFAULT_VERSION = 'ESV'
+  DEFAULT_THEME = Theme.AUTO
 
   @version(1) @observable isFirstLoad = true
   @version(1) @observable chapterContent = []
@@ -38,9 +39,11 @@ class BibleStore {
   @version(1) @observable nextRange?= {}
   @version(1) @observable previousRange?= {}
   @version(1) @observable fontScale = 1
-
+  @version(1) @observable theme = this.DEFAULT_THEME
+  
   @ignore @observable searchIndexAsset
-
+  
+  @ignore @observable isDarkTheme = true
   @ignore @observable loading = true
   @ignore @observable isConnected = null
   @ignore @observable fontsAreReady = false
@@ -254,6 +257,20 @@ class BibleStore {
   toggleSettings = () => {
     if (!this.settingsRef || !this.settingsRef.current) return
     this.settingsRef.current.open()
+  }
+
+  @action setTheme = (theme) => {
+    this.theme = theme;
+    this.setIsDarkTheme()
+  }
+
+  @action setIsDarkTheme() {
+    if (this.theme === Theme.AUTO) {
+      // get system color scheme if auto
+      this.isDarkTheme = Appearance.getColorScheme() === "dark";
+    } else {
+      this.isDarkTheme = this.theme === Theme.DARK
+    }
   }
 
   @action increaseFontSize = () => {

@@ -114,7 +114,10 @@ class CrossReference extends React.Component<Props, State> {
         <Popover
           isVisible={this.state.visible}
           fromView={this.touchable}
-          popoverStyle={styles.popover__background_container}
+          popoverStyle={Object.assign({},styles.popover__background_container, {
+            backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
+            color: bibleStore.isDarkTheme ? 'white' : 'black',
+          })}
           onRequestClose={() => this.closePopover()}
         >
           {this.renderPopoverContent()}

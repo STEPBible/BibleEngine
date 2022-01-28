@@ -166,7 +166,10 @@ class SearchScreen extends React.Component<{}, {}> {
             ref={view => {
               this.textInput = view
             }}
-            style={styles.search__input__text}
+            style={Object.assign({},styles.search__input__text,
+              {
+                color: bibleStore.isDarkTheme ? 'white' : 'black',
+              })}
             placeholder={'Search...'}
             placeholderTextColor={'#828282'}
             underlineColorAndroid={'#fff'}

@@ -18,6 +18,7 @@ import StrongsNumber from './models/StrongsNumber'
 import Popover from './Popover'
 import Text from './Text'
 import RenderHtml from 'react-native-render-html';
+import { green100 } from 'react-native-paper/lib/typescript/src/styles/colors'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -277,7 +278,10 @@ class StrongsWord extends React.Component<Props, State> {
           isVisible={this.state.popoverIsVisible}
           fromView={this.touchable}
           onRequestClose={() => this.closePopover()}
-          popoverStyle={styles.popover__background_container}
+          popoverStyle={Object.assign({},styles.popover__background_container, {
+            backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
+            color: bibleStore.isDarkTheme ? 'white' : 'black',
+          })}
         >
           {this.renderPopoverContent()}
         </Popover>
@@ -358,7 +362,8 @@ const styles = StyleSheet.create({
     ...getDebugStyles(),
   },
   strongWordText: {
-    color: Color.TYNDALE_BLUE,
+    borderBottomWidth: 1,
+    borderBottomColor: "gray",
     fontFamily: FontFamily.CARDO,
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.EXTRA_SMALL,
