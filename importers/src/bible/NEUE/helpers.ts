@@ -48,6 +48,7 @@ export const visitNode = (
         currentLevel2Section?: IBibleContentSection;
         currentLevel3Section?: IBibleContentSection;
         currentLevel4Section?: IBibleContentSection;
+        currentLinegroup?: IBibleContentGroup<'lineGroup'>;
         contentWithPendingNotes?: (IBibleContentPhrase | IBibleContentSection)[];
         documentRoot?: DocumentRoot;
         currentDocumentLevel1Section?: DocumentSection;
@@ -565,7 +566,7 @@ export const visitNode = (
             hasAttribute(node, 'class', 'fn')
         ) {
             groupType = 'indent';
-        }
+        } else if (node.nodeName === 'l') groupType = 'line';
 
         const childState = {
             ...localState,
@@ -586,6 +587,10 @@ export const visitNode = (
                 contents: [],
             };
 
+            if (groupType === 'line') {
+                newBibleGroup.modifier = (globalState.currentLinegroup?.contents.length || 0) + 1;
+            }
+
             if (localState.currentDocument) {
                 if (groupType === 'link') newGroup.modifier = getAttribute(node, 'href')!;
                 childState.currentDocument = newGroup.contents;
@@ -604,6 +609,7 @@ export const visitNode = (
                         groupType: 'lineGroup',
                         contents: [],
                     };
+                    globalState.currentLinegroup = lineGroupBibleGroup;
                     newBibleGroup.contents.push(lineGroupBibleGroup);
                     childState.currentContentGroup = lineGroupBibleGroup.contents;
                 } else {

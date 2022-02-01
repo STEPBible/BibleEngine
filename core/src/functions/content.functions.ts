@@ -159,10 +159,11 @@ export const generateBibleDocument = (
         joinToVersionRefId?: number;
     } = {
         normalizedChapter: 0,
-        normalizedVerse: -1, // we have zero-verses (psalms in some versions)
-        normalizedSubverse: 0,
+        normalizedVerse: 0,
+        normalizedSubverse: -1, // we have zero-sbuverses (psalms in some versions)
         versionChapter: 0,
-        versionVerse: -1, // we have zero-verses (psalms in some versions)
+        versionVerse: 0,
+        versionSubverse: -1, // we have zero-sbuverses (psalms in some versions)
     };
 
     for (const phrase of phrases) {
@@ -566,10 +567,12 @@ export const generateBibleDocument = (
             numbering.normalizedChapterIsStartingInRange =
                 phrase.normalizedReference.normalizedChapterNum;
             currentNumbering.normalizedChapter = phrase.normalizedReference.normalizedChapterNum;
+            currentNumbering.normalizedVerse = 0;
         }
         if (currentNumbering.normalizedVerse !== phrase.normalizedReference.normalizedVerseNum) {
             numbering.normalizedVerseIsStarting = phrase.normalizedReference.normalizedVerseNum;
             currentNumbering.normalizedVerse = phrase.normalizedReference.normalizedVerseNum;
+            currentNumbering.normalizedSubverse = -1;
         }
         if (
             currentNumbering.normalizedSubverse !== phrase.normalizedReference.normalizedSubverseNum
@@ -589,10 +592,12 @@ export const generateBibleDocument = (
                 numbering.versionChapterIsStarting = phrase.versionChapterNum;
             numbering.versionChapterIsStartingInRange = phrase.versionChapterNum;
             currentNumbering.versionChapter = phrase.versionChapterNum;
+            currentNumbering.versionVerse = 0;
         }
         if (currentNumbering.versionVerse !== phrase.versionVerseNum) {
             numbering.versionVerseIsStarting = phrase.versionVerseNum;
             currentNumbering.versionVerse = phrase.versionVerseNum;
+            currentNumbering.versionSubverse = -1;
         }
         if (currentNumbering.versionSubverse !== phrase.versionSubverseNum) {
             numbering.versionSubverseIsStarting = phrase.versionSubverseNum;
@@ -990,11 +995,7 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
             const inputPhrase: IBibleContentPhrase = {
                 // type: 'phrase',
                 content: phrase.content,
-                // versionChapterNum: phrase.versionChapterNum,
-                // versionVerseNum: phrase.versionVerseNum
             };
-            if (phrase.versionSubverseNum)
-                inputPhrase.versionSubverseNum = phrase.versionSubverseNum;
             if (phrase.sourceTypeId) inputPhrase.sourceTypeId = phrase.sourceTypeId;
             if (phrase.joinToRefId) inputPhrase.joinToRefId = phrase.joinToRefId;
             if (phrase.linebreak) inputPhrase.linebreak = true;
