@@ -24,7 +24,7 @@ export interface IBibleEngineImporter {
 }
 
 export class BibleEngineImporter {
-    constructor(protected bibleEngine: BibleEngine, protected options: IImporterOptions = {}) {}
+    constructor(protected bibleEngine: BibleEngine, public options: IImporterOptions = {}) {}
 
     import() {}
 

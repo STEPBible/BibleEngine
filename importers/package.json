@@ -25,7 +25,6 @@
         "random-words": "^1.1.0",
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
-        "ts-node": "^10.4.0",
         "winston": "^3.3.3"
     },
     "devDependencies": {
@@ -36,6 +35,7 @@
         "@types/rimraf": "^2.0.2",
         "@types/sax": "^1.2.0",
         "copyfiles": "^2.1.0",
+        "csv-parser": "^3.0.0",
         "xml-formatter": "^2.4.0"
     },
     "peerDependencies": {

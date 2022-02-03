@@ -95,7 +95,7 @@ export const generateNormalizedRangeFromVersionRange = (
         isNormalized: true,
         normalizedChapterNum: range.normalizedChapterNum || range.versionChapterNum,
         normalizedVerseNum: range.normalizedVerseNum || range.versionVerseNum,
-        normalizedSubverseNum: range.normalizedSubverseNum ?? range.versionSubverseNum,
+        normalizedSubverseNum: range.normalizedSubverseNum ?? range.versionSubverseNum ?? 1,
         normalizedChapterEndNum: range.normalizedChapterEndNum || range.versionChapterEndNum,
         normalizedVerseEndNum: range.normalizedVerseEndNum || range.versionVerseEndNum,
         normalizedSubverseEndNum: range.normalizedSubverseEndNum ?? range.versionSubverseEndNum,
