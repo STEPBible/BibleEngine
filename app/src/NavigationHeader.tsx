@@ -19,20 +19,18 @@ class NavigationHeader extends React.Component<Props, {}> {
   render() {
     return (
       <View style={styles.header}>
-        {!bibleStore.loading && (
-          <IconButton
-            disabled={bibleStore.showSettings}
-            style={styles.header__settings}
-            onPress={bibleStore.toggleSettings}
-            icon="dots-vertical"
-            size={25}
-            color="#9b9b9b"
-          />
-        )}
+        <IconButton
+          disabled={bibleStore.showSettings}
+          style={styles.header__settings}
+          onPress={bibleStore.toggleSettings}
+          icon="dots-vertical"
+          size={25}
+          color="#9b9b9b"
+        />
         <View style={styles.header__chips}>
           <TouchableRipple
             onPress={() => this.props.navigation.navigate('Books')}
-            style={Object.assign({},styles.header__chips__book, {
+            style={Object.assign({}, styles.header__chips__book, {
               backgroundColor: bibleStore.isDarkTheme ? '#333333' : '#EAEAEA',
             })}
           >
@@ -47,7 +45,7 @@ class NavigationHeader extends React.Component<Props, {}> {
           </TouchableRipple>
           <TouchableRipple
             onPress={() => this.props.navigation.navigate('Versions')}
-            style={Object.assign({},styles.header__chips__version, {
+            style={Object.assign({}, styles.header__chips__version, {
               backgroundColor: bibleStore.isDarkTheme ? '#333333' : '#EAEAEA',
             })}
           >

@@ -32,7 +32,6 @@ class HomeScreen extends React.Component<{}, {}> {
     fontScale: 1,
     chapterSections: [],
     previousRange: {},
-    loading: false,
     nextRange: {},
   }
 
@@ -48,10 +47,6 @@ class HomeScreen extends React.Component<{}, {}> {
       }
     })
     await bibleStore.initialize()
-    observe(bibleStore, 'loading', (value) => {
-      this.setState({ ...this.state, loading: value.newValue })
-      this.scrollToTop()
-    })
     observe(bibleStore, 'nextRange', (value) => {
       this.setState({ ...this.state, previousRange: value.newValue })
     })
@@ -60,6 +55,7 @@ class HomeScreen extends React.Component<{}, {}> {
     })
     observe(bibleStore, 'chapterSections', (value) => {
       this.setState({ ...this.state, chapterSections: value.newValue })
+      this.scrollToTop()
     })
     observe(bibleStore, 'fontScale', () => {
       // This component doesnt react to BibleStore.fontScale updates, for some reason
@@ -70,7 +66,6 @@ class HomeScreen extends React.Component<{}, {}> {
       ...this.state,
       fontScale: bibleStore.fontScale,
       chapterSections: bibleStore.chapterSections,
-      loading: bibleStore.loading,
       nextRange: bibleStore.nextRange,
       previousRange: bibleStore.previousRange,
     })
@@ -220,12 +215,11 @@ class HomeScreen extends React.Component<{}, {}> {
               contentContainerStyle={styles.container}
               onEndReached={bibleStore.loadAnotherSection}
               showsVerticalScrollIndicator={false}
-              ListEmptyComponent={this.state.loading && LoadingScreen}
+              ListEmptyComponent={LoadingScreen}
             />
             <FAB
               visible={
                 bibleStore.fontsAreReady &&
-                !this.state.loading &&
                 !bibleStore.showSettings &&
                 !!this.state.previousRange
               }
@@ -237,7 +231,6 @@ class HomeScreen extends React.Component<{}, {}> {
             <FAB
               visible={
                 bibleStore.fontsAreReady &&
-                !this.state.loading &&
                 !bibleStore.showSettings &&
                 !!this.state.nextRange
               }

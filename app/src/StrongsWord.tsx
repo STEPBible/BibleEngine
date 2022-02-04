@@ -43,7 +43,7 @@ class StrongsWord extends React.Component<Props, State> {
   state = {
     popoverIsVisible: false,
     definitions: [],
-    loading: true,
+    loading: false,
     loadingMessage: 'Rummaging around...',
   }
 
@@ -209,6 +209,7 @@ class StrongsWord extends React.Component<Props, State> {
           <RenderHtml
             contentWidth={Dimensions.get('window').width}
             source={{ html: element.content || '' }}
+            baseStyle={{color: bibleStore.isDarkTheme ? 'white' : 'black'}}
           />
         </View>
         <Text style={styles.strongsReference}>
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
   strongsReference: {
     fontFamily: FontFamily.CARDO_ITALIC,
     fontSize: FontSize.EXTRA_SMALL,
-    color: 'gray'
+    // color: 'gray'
   }
 })
 

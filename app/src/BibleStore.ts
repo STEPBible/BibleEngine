@@ -44,7 +44,7 @@ class BibleStore {
   @ignore @observable searchIndexAsset
   
   @ignore @observable isDarkTheme = true
-  @ignore @observable loading = true
+  @ignore @observable loading = false
   @ignore @observable isConnected = null
   @ignore @observable fontsAreReady = false
   @ignore @observable chapterSections = []
@@ -66,7 +66,6 @@ class BibleStore {
     this.chapterSections = this.chapterContent.slice(0, 1)
     const module = this.getCurrentModule(this.versionUid)
     await this.changeCurrentBibleVersion(module)
-    await this.setBooks(this.versionUid)
   }
 
   async loadSearchIndex() {
@@ -174,10 +173,10 @@ class BibleStore {
       await FileSystem.makeDirectoryAsync(SQLITE_DIRECTORY)
     }
   }
-
+  
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
     console.time('updateCurrentBibleReference')
-    this.loading = true
+    // this.loading = true
     this.showStrongs = false
     const rangeQuery = {
       versionChapterNum: range.normalizedChapterNum,
@@ -190,13 +189,15 @@ class BibleStore {
     this.bookOsisId = rangeQuery.bookOsisId
     this.chapterContent = []
     this.chapterSections = []
-
+    
     const chapter = await bibleEngine.getFullDataForReferenceRange(
       rangeQuery,
       true
     )
+
     let chapterContent: any = chapter.content.contents
     const { nextRange, previousRange } = chapter.contextRanges.normalizedChapter
+
     if (
       chapterContent &&
       chapterContent.length &&
@@ -212,15 +213,19 @@ class BibleStore {
         },
       ]
     }
+
     this.nextRange = nextRange
     this.previousRange = previousRange
 
     this.chapterContent = chapterContent
+    
     this.chapterSections = chapterContent.slice(0, 1)
-    this.loading = false
+    
+    // this.loading = false
     setTimeout(() => {
       this.showStrongs = true
     }, 100)
+    
     console.timeEnd('updateCurrentBibleReference')
     this.captureAnalyticsEvent()
   }
@@ -256,10 +261,12 @@ class BibleStore {
   }
 
   goToPreviousChapter = () => {
+    if(this.chapterSections.length === 0) return
     this.updateCurrentBibleReference(this.previousRange)
   }
 
   goToNextChapter = () => {
+    if(this.chapterSections.length === 0) return
     this.updateCurrentBibleReference(this.nextRange)
   }
 
