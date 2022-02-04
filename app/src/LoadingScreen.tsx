@@ -16,51 +16,51 @@ export default function LoadingScreen() {
         flex: 1,
       }}
     >
-      <SkeletonPlaceholder>
+      <SkeletonPlaceholder backgroundColor="#888888">
         <View
-          style={{ maxWidth: SMALL, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: SMALL, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: MEDIUM, height: 20, marginBottom: Margin.LARGE }}
+          style={{  borderRadius: 4, maxWidth: MEDIUM, height: 20, marginBottom: Margin.LARGE }}
         />
         <View
-          style={{ maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: SMALL, height: 20, marginBottom: Margin.LARGE }}
+          style={{  borderRadius: 4, maxWidth: SMALL, height: 20, marginBottom: Margin.LARGE }}
         />
         <View
-          style={{ maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: MEDIUM, height: 20, marginBottom: Margin.LARGE }}
+          style={{  borderRadius: 4, maxWidth: MEDIUM, height: 20, marginBottom: Margin.LARGE }}
         />
         <View
-          style={{ maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: SMALL, height: 20, marginBottom: Margin.LARGE }}
+          style={{  borderRadius: 4, maxWidth: SMALL, height: 20, marginBottom: Margin.LARGE }}
         />
         <View
-          style={{ maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: LARGE, height: 20, marginBottom: Margin.SMALL }}
         />
         <View
-          style={{ maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
+          style={{  borderRadius: 4, maxWidth: MEDIUM, height: 20, marginBottom: Margin.SMALL }}
         />
       </SkeletonPlaceholder>
     </View>
