@@ -110,10 +110,6 @@ class BibleStore {
     console.time('setLocalDatabase')
     const module = this.getCurrentModule(this.versionUid)
     try {
-      if (bibleEngine) {
-        this.closeDatabaseConnection(bibleEngine)
-        this.closeDatabaseConnection(lexiconEngine)
-      }
       await this.createSqliteDirectory()
       await Promise.all([
         await this.setupBibleModule(module),
@@ -129,10 +125,10 @@ class BibleStore {
       const LEXICON_ENGINE_OPTIONS: ConnectionOptions = {
         ...BIBLE_ENGINE_OPTIONS,
         database: LEXICON_MODULE.filename,
-        name: 'lexicon-engine'
+        name: 'lexicon-engine' 
       }
-      bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS)
-      lexiconEngine = new BibleEngine(LEXICON_ENGINE_OPTIONS)
+      bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS, {checkForExistingConnection: true})
+      lexiconEngine = new BibleEngine(LEXICON_ENGINE_OPTIONS, {checkForExistingConnection: true})
     } catch (e) {
       console.log('setLocalDatabase had exception', e)
       Sentry.Native.captureException(e)
@@ -148,9 +144,22 @@ class BibleStore {
   }
 
   async setupBibleModule(module: BibleModule | LexiconModule) {
+    const files = await FileSystem.readDirectoryAsync(`${FileSystem.documentDirectory}SQLite/`)
+    files.forEach(async file => {
+      if(file.startsWith(module.filenamebase) && !file.startsWith(module.filename)) {
+          await FileSystem.deleteAsync(`${FileSystem.documentDirectory}SQLite/${file}`, { idempotent: true })
+      }
+    })
+
     const destination = `${FileSystem.documentDirectory}SQLite/${module.filename}`
-    await FileSystem.deleteAsync(destination, { idempotent: true })
-    await FileSystem.downloadAsync(module.asset.uri, destination)
+    const fileObj = await FileSystem.getInfoAsync(destination)
+    if (!fileObj.exists || fileObj.size <= 12288) {
+      // if fileObj.size <= 12288, it's a default sqlitedb created by typeorm
+      await FileSystem.downloadAsync(
+        module.asset.uri, 
+        destination
+      )
+    }
   }
 
   async closeDatabaseConnection(bibleEngine: BibleEngine) {
