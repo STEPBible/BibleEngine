@@ -147,7 +147,7 @@ export class BibleEngine {
 
     async findConnection(dbConfig: ConnectionOptions) {
         try {
-            return getConnection(this.CONNECTION_NAME).manager;
+            return getConnection(dbConfig.name || this.CONNECTION_NAME).manager;
         } catch (error: any) {
             if (error?.name === 'ConnectionNotFoundError') {
                 return this.createConnection(dbConfig);
