@@ -2825,10 +2825,10 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
-"@bible-engine/core@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@bible-engine/core/-/core-1.0.0.tgz#d686e815a4ce6c1ff185706c1229fb2619a4484d"
-  integrity sha512-ed8SJ0qQ8N4MjWzQBYvAbX6DUuoV6VlFhRjYD1ZSIhwx7xvYRO4mmShWVBGrBrC366K16ONILlx0GaMWQ11pag==
+"@bible-engine/core@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@bible-engine/core/-/core-1.0.1.tgz#802e24d0276555ea875cbc40df0b4ae17c9eb5aa"
+  integrity sha512-MoGiv5hHRSbq9V5sG6IbVg6FXHOhRUubsdDtTC9eXBB5XX1CzgQzoVXLTjDGJ+pgg7Op6aw543brI0C/o0/leA==
   dependencies:
     bible-passage-reference-parser "^2.0.1"
     reflect-metadata "^0.1.13"
