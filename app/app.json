@@ -15,6 +15,7 @@
       "resizeMode": "cover",
       "backgroundColor": "#000000"
     },
+    "backgroundColor": "#000000",
     "userInterfaceStyle": "automatic",
     "updates": {
       "enabled": false,

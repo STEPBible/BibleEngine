@@ -25,7 +25,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "eject": "expo eject",
-    "test": "node_modules/.bin/jest"
+    "test": "node_modules/.bin/jest",
+    "build-staging": "EAS_NO_VCS=1 eas build -p=android --non-interactive --profile staging",
+    "copy-core": "cd ../core && rimraf ./lib && tsc && cp -R lib/* ../app/node_modules/@bible-engine/core/lib/"
   },
   "jest": {
     "preset": "jest-expo",
@@ -70,6 +72,7 @@
     "expo-font": "~10.0.4",
     "expo-keep-awake": "~10.0.1",
     "expo-sqlite": "~10.1.0",
+    "expo-system-ui": "~1.1.0",
     "expo-updates": "~0.11.5",
     "hoist-non-react-statics": "^3.3.0",
     "mobx": "^5.15.0",
