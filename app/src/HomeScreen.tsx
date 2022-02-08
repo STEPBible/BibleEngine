@@ -37,16 +37,15 @@ class HomeScreen extends React.Component<{}, {}> {
 
   constructor(props) {
     super(props)
-  }
-
-  async componentDidMount() {
     store.get(AsyncStorageKey.HAS_LAUNCHED).then(hasLaunched => {
       if (!hasLaunched) {
-        this.props.navigation.navigate('Onboarding')
+        props.navigation.navigate('Onboarding')
         bibleStore.loadSearchIndex()
       }
     })
-    await bibleStore.initialize()
+  }
+
+  async componentDidMount() {
     observe(bibleStore, 'nextRange', (value) => {
       this.setState({ ...this.state, previousRange: value.newValue })
     })
@@ -312,7 +311,6 @@ const styles = StyleSheet.create({
     ...getDebugStyles(),
   },
   verseNumber: {
-    color: 'black',
     fontSize: FontSize.EXTRA_SMALL,
     fontFamily: FontFamily.OPEN_SANS_SEMIBOLD,
     marginRight: 3,

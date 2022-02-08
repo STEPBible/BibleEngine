@@ -80,7 +80,7 @@ export default class Footnote extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <TouchableHighlight
-          ref={ref => (this.touchable = ref)}
+          ref={(ref) => (this.touchable = ref)}
           onPress={this.onPress}
           activeOpacity={0.5}
           underlayColor="#C5D8EA"
@@ -90,17 +90,23 @@ export default class Footnote extends React.Component<Props, State> {
             {this.props.notes[0].key}
           </Text>
         </TouchableHighlight>
-        <Popover
-          isVisible={this.state.popoverIsVisible}
-          fromView={this.touchable}
-          popoverStyle={Object.assign({},styles.popover__background_container, {
-            backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
-            color: bibleStore.isDarkTheme ? 'white' : 'black',
-          })}
-          onRequestClose={() => this.closePopover()}
-        >
-          {this.renderPopoverContent()}
-        </Popover>
+        {this.state.popoverIsVisible === false ? null : (
+          <Popover
+            isVisible={this.state.popoverIsVisible}
+            fromView={this.touchable}
+            popoverStyle={Object.assign(
+              {},
+              styles.popover__background_container,
+              {
+                backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
+                color: bibleStore.isDarkTheme ? 'white' : 'black',
+              }
+            )}
+            onRequestClose={() => this.closePopover()}
+          >
+            {this.renderPopoverContent()}
+          </Popover>
+        )}
       </React.Fragment>
     )
   }

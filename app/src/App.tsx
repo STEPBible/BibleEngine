@@ -2,7 +2,7 @@ import * as React from 'react'
 import { createAppContainer } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { StatusBar, Appearance } from 'react-native'
+import { StatusBar } from 'react-native'
 import {
   Provider as PaperProvider,
   DarkTheme as PaperDark,
@@ -44,9 +44,7 @@ const DarkTheme = {
 @observer
 class App extends React.Component<any, any> {
   async componentDidMount() {
-    bibleStore.setIsDarkTheme()
-    // update isDarkTheme when system color scheme changes
-    Appearance.addChangeListener(() => bibleStore.setIsDarkTheme())
+    await bibleStore.initialize()
   }
   render() {
     return (
@@ -56,7 +54,9 @@ class App extends React.Component<any, any> {
             theme={bibleStore.isDarkTheme ? DarkTheme : DefaultTheme}
           >
             <StatusBar hidden={true} />
-            <AppContainer theme={bibleStore.isDarkTheme ? 'dark' : 'light'} />
+            {bibleStore.cacheIsRestored === false ? null : (
+              <AppContainer theme={bibleStore.isDarkTheme ? 'dark' : 'light'} />
+            )}
           </PaperProvider>
         </GlobalContextProvider>
       </SafeAreaProvider>

@@ -18,7 +18,6 @@ import StrongsNumber from './models/StrongsNumber'
 import Popover from './Popover'
 import Text from './Text'
 import RenderHtml from 'react-native-render-html';
-import { green100 } from 'react-native-paper/lib/typescript/src/styles/colors'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -256,7 +255,7 @@ class StrongsWord extends React.Component<Props, State> {
     if (bibleStore.showStrongs === false) {
       return (
         <View>
-          <Text style={bibleStore.scaledFontSize(styles.phraseText)}>
+          <Text style={bibleStore.scaledFontSize(styles.strongWordText)}>
             {this.props.phrase}
           </Text>
         </View>
@@ -265,7 +264,7 @@ class StrongsWord extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <TouchableHighlight
-          ref={ref => (this.touchable = ref)}
+          ref={(ref) => (this.touchable = ref)}
           onPress={this.onPress}
           activeOpacity={0.5}
           underlayColor="#C5D8EA"
@@ -275,17 +274,23 @@ class StrongsWord extends React.Component<Props, State> {
             {this.props.phrase}
           </Text>
         </TouchableHighlight>
-        <Popover
-          isVisible={this.state.popoverIsVisible}
-          fromView={this.touchable}
-          onRequestClose={() => this.closePopover()}
-          popoverStyle={Object.assign({},styles.popover__background_container, {
-            backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
-            color: bibleStore.isDarkTheme ? 'white' : 'black',
-          })}
-        >
-          {this.renderPopoverContent()}
-        </Popover>
+        {this.state.popoverIsVisible === false ? null : (
+          <Popover
+            isVisible={this.state.popoverIsVisible}
+            fromView={this.touchable}
+            onRequestClose={() => this.closePopover()}
+            popoverStyle={Object.assign(
+              {},
+              styles.popover__background_container,
+              {
+                backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
+                color: bibleStore.isDarkTheme ? 'white' : 'black',
+              }
+            )}
+          >
+            {this.renderPopoverContent()}
+          </Popover>
+        )}
       </React.Fragment>
     )
   }

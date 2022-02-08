@@ -9,7 +9,7 @@ import { Analytics, PageHit } from 'expo-analytics'
 import * as FileSystem from 'expo-file-system'
 import { action, observable } from 'mobx'
 import { AsyncTrunk, ignore, version } from 'mobx-sync'
-import { LayoutAnimation, Appearance } from 'react-native'
+import { Appearance } from 'react-native'
 import 'react-native-console-time-polyfill'
 import * as Sentry from 'sentry-expo'
 import { ConnectionOptions } from 'typeorm'
@@ -23,7 +23,7 @@ let lexiconEngine: BibleEngine;
 let cache: AsyncTrunk
 
 class BibleStore {
-  DEFAULT_BOOK = 'Gen'
+  DEFAULT_BOOK = 'Matt'
   DEFAULT_CHAPTER = 1
   DEFAULT_VERSION = 'ESV'
   DEFAULT_THEME = Theme.AUTO
@@ -62,8 +62,11 @@ class BibleStore {
     await Fonts.load()
     this.fontsAreReady = true
     await cache.init()
+    this.setIsDarkTheme()
+    // update isDarkTheme when system color scheme changes
+    Appearance.addChangeListener(() => this.setIsDarkTheme())
     this.cacheIsRestored = true
-    this.chapterSections = this.chapterContent.slice(0, 1)
+
     const module = this.getCurrentModule(this.versionUid)
     await this.changeCurrentBibleVersion(module)
   }
@@ -85,6 +88,9 @@ class BibleStore {
 
   changeCurrentBibleVersion = async (module: BibleModule) => {
     try {
+      // show skeleton loader earlier because setLocalDatabase may take a long time to run
+      this.chapterSections = [] 
+
       this.versionUid = module.uid
       const newReference = {
         versionUid: this.versionUid,
@@ -92,8 +98,7 @@ class BibleStore {
         versionChapterNum: this.versionChapterNum,
       }
       await this.setLocalDatabase()
-      await this.updateCurrentBibleReference(newReference)
-      await this.setBooks(this.versionUid)
+      await Promise.all([this.setBooks(this.versionUid), this.updateCurrentBibleReference(newReference)])
     } catch (error) {
       console.log('changeCurrentBibleVersion failed', error)
       throw error
@@ -120,6 +125,7 @@ class BibleStore {
         driver: require('expo-sqlite'),
         synchronize: false,
         migrationsRun: false,
+        name: `${module.filenamebase}-engine`
       }
       const LEXICON_ENGINE_OPTIONS: ConnectionOptions = {
         ...BIBLE_ENGINE_OPTIONS,
@@ -146,7 +152,7 @@ class BibleStore {
     const files = await FileSystem.readDirectoryAsync(`${FileSystem.documentDirectory}SQLite/`)
     files.forEach(async file => {
       if(file.startsWith(module.filenamebase) && !file.startsWith(module.filename)) {
-          await FileSystem.deleteAsync(`${FileSystem.documentDirectory}SQLite/${file}`, { idempotent: true })
+        await FileSystem.deleteAsync(`${FileSystem.documentDirectory}SQLite/${file}`, { idempotent: true })
       }
     })
 
@@ -176,7 +182,6 @@ class BibleStore {
   
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
     console.time('updateCurrentBibleReference')
-    // this.loading = true
     this.showStrongs = false
     const rangeQuery = {
       versionChapterNum: range.normalizedChapterNum,
@@ -221,7 +226,6 @@ class BibleStore {
     
     this.chapterSections = chapterContent.slice(0, 1)
     
-    // this.loading = false
     setTimeout(() => {
       this.showStrongs = true
     }, 100)

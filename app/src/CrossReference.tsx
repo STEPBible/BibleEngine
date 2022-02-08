@@ -101,7 +101,7 @@ class CrossReference extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <TouchableHighlight
-          ref={ref => (this.touchable = ref)}
+          ref={(ref) => (this.touchable = ref)}
           onPress={this.onPress}
           activeOpacity={0.5}
           underlayColor="#C5D8EA"
@@ -111,17 +111,23 @@ class CrossReference extends React.Component<Props, State> {
             {this.props.crossReferences[0].key}
           </Text>
         </TouchableHighlight>
-        <Popover
-          isVisible={this.state.visible}
-          fromView={this.touchable}
-          popoverStyle={Object.assign({},styles.popover__background_container, {
-            backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
-            color: bibleStore.isDarkTheme ? 'white' : 'black',
-          })}
-          onRequestClose={() => this.closePopover()}
-        >
-          {this.renderPopoverContent()}
-        </Popover>
+        {this.state.visible === false ? null : (
+          <Popover
+            isVisible={this.state.visible}
+            fromView={this.touchable}
+            popoverStyle={Object.assign(
+              {},
+              styles.popover__background_container,
+              {
+                backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
+                color: bibleStore.isDarkTheme ? 'white' : 'black',
+              }
+            )}
+            onRequestClose={() => this.closePopover()}
+          >
+            {this.renderPopoverContent()}
+          </Popover>
+        )}
       </React.Fragment>
     )
   }
