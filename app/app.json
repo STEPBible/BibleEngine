@@ -18,8 +18,7 @@
     "backgroundColor": "#000000",
     "userInterfaceStyle": "automatic",
     "updates": {
-      "enabled": false,
-      "fallbackToCacheTimeout": 0
+      "enabled": false
     },
     "assetBundlePatterns": [
       "assets/*"

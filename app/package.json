@@ -73,7 +73,7 @@
     "expo-keep-awake": "~10.0.1",
     "expo-sqlite": "~10.1.0",
     "expo-system-ui": "~1.1.0",
-    "expo-updates": "~0.11.6",
+    "expo-updates": "0.11.6",
     "hoist-non-react-statics": "^3.3.0",
     "mobx": "^5.15.0",
     "mobx-react": "5.4.3",
