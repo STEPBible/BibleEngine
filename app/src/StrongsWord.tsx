@@ -203,7 +203,6 @@ class StrongsWord extends React.Component<Props, State> {
   }
 
   renderDefinitionContent = (element: DictionaryEntryEntity) => {
-
     return (
       <React.Fragment>
         <View style={styles.popover__content__definitions__entry}>
@@ -221,39 +220,6 @@ class StrongsWord extends React.Component<Props, State> {
         </Text>
       </React.Fragment>
     )
-  }
-
-  renderDocumentElement = (element: DocumentElement, index: number) => {
-    if (!element) {
-      return null
-    }
-    if (element.type === 'phrase' && element.content.length) {
-      return (
-        <Text
-          key={`doc-phrase-${index}`}
-          style={bibleStore.scaledFontSize(styles.documentPhrase)}
-        >
-          {element.content}
-        </Text>
-      )
-    }
-    if (element.type === 'group') {
-      if (element.groupType === 'bold') {
-        const phrases: string[] = element.contents.map(({ content }) => content)
-        return phrases.map((phrase, phraseIndex) => (
-          <Text
-            key={`bold-${phrase}-${phraseIndex}-${index}`}
-            style={bibleStore.scaledFontSize(styles.boldDocumentPhrase)}
-          >
-            {phrase}
-          </Text>
-        ))
-      }
-      return element.contents.map((element: DocumentElement, index: number) =>
-        this.renderDocumentElement(element, index)
-      )
-    }
-    return null
   }
 
   render() {
