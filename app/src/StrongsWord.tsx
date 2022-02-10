@@ -4,7 +4,8 @@ import {
 import { observer } from 'mobx-react/native'
 import React from 'react'
 import {
-  Dimensions, ScrollView, StyleSheet, TouchableHighlight, View
+  Dimensions, ScrollView, StyleSheet, TouchableHighlight, View,
+  Platform,
 } from 'react-native'
 import { ActivityIndicator } from 'react-native-paper'
 import bibleStore from './BibleStore'
@@ -375,6 +376,8 @@ const styles = StyleSheet.create({
     marginBottom: Margin.EXTRA_SMALL,
     marginLeft: 3,
     marginRight: 3,
+    textDecorationColor:  Platform.OS === 'ios' ? 'gray' : undefined,
+    textDecorationLine: Platform.OS === 'ios' ? 'underline' : undefined,
   },
   phraseText: {
     fontFamily: FontFamily.CARDO,
