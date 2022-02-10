@@ -203,13 +203,17 @@ class StrongsWord extends React.Component<Props, State> {
   }
 
   renderDefinitionContent = (element: DictionaryEntryEntity) => {
+
     return (
       <React.Fragment>
         <View style={styles.popover__content__definitions__entry}>
           <RenderHtml
             contentWidth={Dimensions.get('window').width}
             source={{ html: element.content || '' }}
-            baseStyle={{color: bibleStore.isDarkTheme ? 'white' : 'black'}}
+            baseStyle={{
+              color: bibleStore.isDarkTheme ? 'white' : 'black',
+              fontSize: bibleStore.fontScale * FontSize.SMALL
+            }}
           />
         </View>
         <Text style={styles.strongsReference}>
