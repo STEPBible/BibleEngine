@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     elevation: 20,
     flex: 1,
     paddingTop: 8,
-    maxHeight: Math.ceil(DEVICE_HEIGHT / 2.4),
+    maxHeight: Math.ceil(DEVICE_HEIGHT / 2.1),
     width: DEVICE_WIDTH,
   },
   sheet__fonts: {
