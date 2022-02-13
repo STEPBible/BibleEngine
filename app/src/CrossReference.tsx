@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, createRef } from 'react'
 import {
   View,
   FlatList,
@@ -14,6 +14,7 @@ import {
   IBibleCrossReference,
   IBibleReferenceRange,
 } from '@bible-engine/core'
+import Popover from 'react-native-popover-view';
 
 import {
   Color,
@@ -22,7 +23,6 @@ import {
   Margin,
   getDebugStyles,
 } from './Constants'
-import Popover from './Popover'
 import Database from './Database'
 import Text from './Text'
 import bibleStore from './BibleStore'
@@ -47,6 +47,10 @@ class CrossReference extends React.Component<Props, State> {
   state = {
     visible: false,
     verseContents: [],
+  }
+  constructor(props) {
+    super(props);
+    this.touchable = createRef();
   }
 
   onPress = async () => {
@@ -101,7 +105,7 @@ class CrossReference extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <TouchableHighlight
-          ref={(ref) => (this.touchable = ref)}
+          ref={this.touchable}
           onPress={this.onPress}
           activeOpacity={0.5}
           underlayColor="#C5D8EA"
@@ -113,14 +117,13 @@ class CrossReference extends React.Component<Props, State> {
         </TouchableHighlight>
         {this.state.visible === false ? null : (
           <Popover
-            isVisible={this.state.visible}
-            fromView={this.touchable}
+            isVisible={true}
+            from={this.touchable}
             popoverStyle={Object.assign(
               {},
               styles.popover__background_container,
               {
                 backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
-                color: bibleStore.isDarkTheme ? 'white' : 'black',
               }
             )}
             onRequestClose={() => this.closePopover()}

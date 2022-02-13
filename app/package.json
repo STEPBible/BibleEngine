@@ -84,6 +84,7 @@
     "react-native-dotenv": "^3.2.0",
     "react-native-gesture-handler": "~2.1.0",
     "react-native-paper": "^3.4.0",
+    "react-native-popover-view": "^4.1.0",
     "react-native-raw-bottom-sheet": "^2.2.0",
     "react-native-reanimated": "~2.3.1",
     "react-native-render-html": "^6.3.3",

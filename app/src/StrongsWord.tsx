@@ -2,12 +2,14 @@ import {
   DictionaryEntryEntity, DocumentElement, IDictionaryEntry
 } from '@bible-engine/core'
 import { observer } from 'mobx-react/native'
-import React from 'react'
+import React, { createRef } from 'react'
 import {
   Dimensions, ScrollView, StyleSheet, TouchableHighlight, View,
   Platform,
 } from 'react-native'
-import { ActivityIndicator } from 'react-native-paper'
+import Popover from 'react-native-popover-view';
+import RenderHtml from 'react-native-render-html';
+
 import bibleStore from './BibleStore'
 import {
   Color,
@@ -16,9 +18,7 @@ import {
 } from './Constants'
 import StrongsDefinition from './models/StrongsDefinition'
 import StrongsNumber from './models/StrongsNumber'
-import Popover from './Popover'
 import Text from './Text'
-import RenderHtml from 'react-native-render-html';
 
 const DEVICE_WIDTH = Dimensions.get('window').width
 const DEVICE_HEIGHT = Dimensions.get('window').height
@@ -45,6 +45,11 @@ class StrongsWord extends React.Component<Props, State> {
     definitions: [],
     loading: false,
     loadingMessage: 'Rummaging around...',
+  }
+
+  constructor(props) {
+    super(props);
+    this.touchable = createRef();
   }
 
   async componentDidMount() {
@@ -156,22 +161,7 @@ class StrongsWord extends React.Component<Props, State> {
     </View>
   )
 
-  renderPopoverContent = () => {
-    if (this.state.popoverIsVisible === false) return null
-    if (this.state.loading) {
-      return (
-        <View style={styles.popover__loading}>
-          <View style={{ height: 30, width: 30 }}>
-            <ActivityIndicator animating={true} color={Color.TYNDALE_BLUE} />
-          </View>
-          <Text
-            style={bibleStore.scaledFontSize(styles.popover__loading__text)}
-          >
-            {this.state.loadingMessage}
-          </Text>
-        </View>
-      )
-    }
+  renderPopoverContent = React.memo(() => {
     if (!this.state.definitions.length || !this.state.definitions[0]) {
       return (
         <View style={styles.popover__loading}>
@@ -200,7 +190,7 @@ class StrongsWord extends React.Component<Props, State> {
         <View style={{ flex: 2, height: 20 }} />
       </View>
     )
-  }
+  })
 
   renderDefinitionContent = (element: DictionaryEntryEntity) => {
     return (
@@ -235,7 +225,7 @@ class StrongsWord extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <TouchableHighlight
-          ref={(ref) => (this.touchable = ref)}
+          ref={this.touchable}
           onPress={this.onPress}
           activeOpacity={0.5}
           underlayColor="#C5D8EA"
@@ -255,19 +245,18 @@ class StrongsWord extends React.Component<Props, State> {
         </TouchableHighlight>
         {this.state.popoverIsVisible === false ? null : (
           <Popover
-            isVisible={this.state.popoverIsVisible}
-            fromView={this.touchable}
+            isVisible={true}
+            from={this.touchable}
             onRequestClose={() => this.closePopover()}
             popoverStyle={Object.assign(
               {},
               styles.popover__background_container,
               {
                 backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
-                color: bibleStore.isDarkTheme ? 'white' : 'black',
               }
             )}
           >
-            {this.renderPopoverContent()}
+            <this.renderPopoverContent></this.renderPopoverContent>
           </Popover>
         )}
       </React.Fragment>
