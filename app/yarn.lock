@@ -11832,6 +11832,11 @@ react-native-paper@^3.4.0:
     color "^3.1.2"
     react-native-safe-area-view "^0.14.6"
 
+react-native-popover-view@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-popover-view/-/react-native-popover-view-4.1.0.tgz#15ce307ac62f22673c15a054477301071c1d934f"
+  integrity sha512-tfCdOaBwR9R0gFxdhyRdndTT43dkg7mvsOQSf1G96xfv+p1d0sgiJN5bhMhLKfmnDIVGEhQJXAflL0t/3CT9Vg==
+
 react-native-raw-bottom-sheet@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/react-native-raw-bottom-sheet/-/react-native-raw-bottom-sheet-2.2.0.tgz#d11dabb86aadb014273767ef7b554924b13633c5"
