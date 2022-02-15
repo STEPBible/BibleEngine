@@ -241,7 +241,15 @@ class StrongsWord extends React.Component<Props, State> {
           underlayColor="#C5D8EA"
           style={styles.strongWord}
         >
-          <Text style={bibleStore.scaledFontSize(styles.strongWordText)}>
+          <Text
+            style={{
+              ...bibleStore.scaledFontSize(styles.strongWordText),
+              textDecorationColor: Platform.OS === 'ios' ?
+                bibleStore.isDarkTheme ? '#666666' : '#bbbbbb' :
+                undefined,
+              textDecorationLine: Platform.OS === 'ios' ? 'underline' : undefined,
+            }}
+          >
             {this.props.phrase}
           </Text>
         </TouchableHighlight>
@@ -346,8 +354,6 @@ const styles = StyleSheet.create({
     marginBottom: Margin.EXTRA_SMALL,
     marginLeft: 3,
     marginRight: 3,
-    textDecorationColor:  Platform.OS === 'ios' ? 'gray' : undefined,
-    textDecorationLine: Platform.OS === 'ios' ? 'underline' : undefined,
   },
   phraseText: {
     fontFamily: FontFamily.CARDO,
