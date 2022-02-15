@@ -108,8 +108,8 @@ export const BIBLE_MODULES: BibleModule[] = [
     uid: 'ESV',
     title: 'English Standard Version',
     filenamebase: "esv",
-    filename: 'esv-v1.db',
-    asset: Asset.fromModule(require(`../assets/esv-v1.db`)),
+    filename: 'esv_v1.db',
+    asset: Asset.fromModule(require(`../assets/esv_v1.db`)),
     hebrewLexicons: ['@BdbMedDef'],
     greekLexicons: ['@MounceMedDef', '@FLsjDefs']
   },
@@ -117,8 +117,8 @@ export const BIBLE_MODULES: BibleModule[] = [
     uid: '和合本 (简)',
     title: '和合本 (简体字)',
     filenamebase: "cuvs",
-    filename: 'cuvs-v1.db',
-    asset: Asset.fromModule(require(`../assets/cuvs-v1.db`)),
+    filename: 'cuvs_v1.db',
+    asset: Asset.fromModule(require(`../assets/cuvs_v1.db`)),
     hebrewLexicons: ['@zh_Definition'],
     greekLexicons: ['@zh_Definition']
   },
@@ -126,8 +126,8 @@ export const BIBLE_MODULES: BibleModule[] = [
     uid: 'RV1909',
     title: 'La Santa Biblia Reina-Valera 1909',
     filenamebase: 'spaRV1909',
-    filename: 'spaRV1909-v1.db',
-    asset: Asset.fromModule(require(`../assets/spaRV1909-v1.db`)),
+    filename: 'spaRV1909_v1.db',
+    asset: Asset.fromModule(require(`../assets/spaRV1909_v1.db`)),
     hebrewLexicons: ['@es_Definition', '@BdbMedDef'],
     greekLexicons: ['@es_Definition', '@MounceMedDef', '@FLsjDefs']
   }
@@ -135,8 +135,8 @@ export const BIBLE_MODULES: BibleModule[] = [
 
 export const LEXICON_MODULE: LexiconModule = {
   filenamebase: 'lexicons',
-  filename: 'lexicons-v1.db',
-  asset: Asset.fromModule(require(`../assets/lexicons-v1.db`)),
+  filename: 'lexicons_v1.db',
+  asset: Asset.fromModule(require(`../assets/lexicons_v1.db`)),
 }
 
 const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green']
