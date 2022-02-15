@@ -68,7 +68,7 @@
     "expo-asset": "~8.4.6",
     "expo-constants": "~13.0.1",
     "expo-device": "~4.1.0",
-    "expo-file-system": "~13.1.2",
+    "expo-file-system": "~13.1.4",
     "expo-font": "~10.0.4",
     "expo-keep-awake": "~10.0.1",
     "expo-sqlite": "~10.1.0",
