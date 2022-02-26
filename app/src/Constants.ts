@@ -84,8 +84,6 @@ export const STATUS_BAR_HEIGHT =
   Platform.OS === 'ios' ? IOS_STATUS_BAR_HEIGHT : Constants.statusBarHeight
 
 export const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`
-export const DATABASE_PATH = `${SQLITE_DIRECTORY}/bibles.db`
-export const LEXICONS_PATH = `${SQLITE_DIRECTORY}/lexicons.db`
 
 export interface BibleModule {
   uid: string
