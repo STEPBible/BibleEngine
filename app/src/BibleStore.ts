@@ -40,9 +40,9 @@ class BibleStore {
   @version(1) @observable previousRange?= {}
   @version(1) @observable fontScale = 1
   @version(1) @observable theme = this.DEFAULT_THEME
-  
+
   @ignore @observable searchIndexAsset
-  
+
   @ignore @observable isDarkTheme = true
   @ignore @observable loading = false
   @ignore @observable isConnected = null
@@ -89,7 +89,7 @@ class BibleStore {
   changeCurrentBibleVersion = async (module: BibleModule) => {
     try {
       // show skeleton loader earlier because setLocalDatabase may take a long time to run
-      this.chapterSections = [] 
+      this.chapterSections = []
 
       this.versionUid = module.uid
       const newReference = {
@@ -130,7 +130,7 @@ class BibleStore {
       const LEXICON_ENGINE_OPTIONS: ConnectionOptions = {
         ...BIBLE_ENGINE_OPTIONS,
         database: LEXICON_MODULE.filename,
-        name: 'lexicon-engine' 
+        name: 'lexicon-engine'
       }
       bibleEngine = new BibleEngine(BIBLE_ENGINE_OPTIONS, {checkForExistingConnection: true})
       lexiconEngine = new BibleEngine(LEXICON_ENGINE_OPTIONS, {checkForExistingConnection: true})
@@ -179,7 +179,7 @@ class BibleStore {
       await FileSystem.makeDirectoryAsync(SQLITE_DIRECTORY)
     }
   }
-  
+
   updateCurrentBibleReference = async (range: IBibleReferenceRangeQuery) => {
     console.time('updateCurrentBibleReference')
     this.showStrongs = false
@@ -194,7 +194,7 @@ class BibleStore {
     this.bookOsisId = rangeQuery.bookOsisId
     this.chapterContent = []
     this.chapterSections = []
-    
+
     const chapter = await bibleEngine.getFullDataForReferenceRange(
       rangeQuery,
       true
@@ -223,13 +223,13 @@ class BibleStore {
     this.previousRange = previousRange
 
     this.chapterContent = chapterContent
-    
+
     this.chapterSections = chapterContent.slice(0, 1)
-    
+
     setTimeout(() => {
       this.showStrongs = true
     }, 100)
-    
+
     console.timeEnd('updateCurrentBibleReference')
     this.captureAnalyticsEvent()
   }
