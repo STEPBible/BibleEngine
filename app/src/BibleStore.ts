@@ -158,10 +158,11 @@ class BibleStore {
 
     const destination = `${FileSystem.documentDirectory}SQLite/${module.filename}`
     const fileObj = await FileSystem.getInfoAsync(destination)
+    const fileUri = module.asset.localUri || module.asset.uri
     if (!fileObj.exists || fileObj.size <= 12288) {
       // if fileObj.size <= 12288, it's a default sqlitedb created by typeorm
       await FileSystem.downloadAsync(
-        module.asset.uri, 
+        fileUri,
         destination
       )
     }
