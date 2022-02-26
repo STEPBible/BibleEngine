@@ -161,7 +161,7 @@ class StrongsWord extends React.Component<Props, State> {
     </View>
   )
 
-  renderPopoverContent = React.memo(() => {
+  renderPopoverContent = () => {
     if (!this.state.definitions.length || !this.state.definitions[0]) {
       return (
         <View style={styles.popover__loading}>
@@ -190,7 +190,7 @@ class StrongsWord extends React.Component<Props, State> {
         <View style={{ flex: 2, height: 20 }} />
       </View>
     )
-  })
+  }
 
   renderDefinitionContent = (element: DictionaryEntryEntity) => {
     return (
@@ -256,7 +256,7 @@ class StrongsWord extends React.Component<Props, State> {
               }
             )}
           >
-            <this.renderPopoverContent></this.renderPopoverContent>
+            <this.renderPopoverContent />
           </Popover>
         )}
       </React.Fragment>
