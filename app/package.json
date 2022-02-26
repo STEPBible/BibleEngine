@@ -107,5 +107,11 @@
     "plugins": [
       "sentry-expo"
     ]
+  },
+  "standard-version": {
+    "skip": {
+      "tag": true,
+      "changelog": true
+    }
   }
 }
