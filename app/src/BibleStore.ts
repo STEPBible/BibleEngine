@@ -13,7 +13,7 @@ import { Appearance } from 'react-native'
 import 'react-native-console-time-polyfill'
 import * as Sentry from 'sentry-expo'
 import { ConnectionOptions } from 'typeorm'
-import { BibleModule, BIBLE_MODULES, LexiconModule, LEXICON_MODULE, SQLITE_DIRECTORY, Theme } from './Constants'
+import { BibleModule, BIBLE_MODULES, LexiconModule, LEXICON_MODULE, SQLITE_DIRECTORY, Theme, TYPEORM_DEFAULT_DB_SIZE } from './Constants'
 import Fonts from './Fonts'
 import JsonAsset from './JsonAsset'
 
@@ -158,11 +158,26 @@ class BibleStore {
 
     const destination = `${FileSystem.documentDirectory}SQLite/${module.filename}`
     const fileObj = await FileSystem.getInfoAsync(destination)
-    if (!fileObj.exists || fileObj.size <= 12288) {
+    console.log('uri: ', module.asset.uri)
+    console.log('destination: ', destination)
+    console.log('localUri: ', module.asset.localUri)
+    console.log('type: ', module.asset.type)
+    console.log('name: ', module.asset.name)
+    const shouldSetup = !fileObj.exists || fileObj.size <= TYPEORM_DEFAULT_DB_SIZE
+    console.log('shouldSetup', shouldSetup)
+    if (shouldSetup) {
       // if fileObj.size <= 12288, it's a default sqlitedb created by typeorm
-      if (module.asset.localUri) {
-        await FileSystem.moveAsync({
-          from: module.asset.localUri,
+      if (module.asset.uri.includes('file://')) {
+        try {
+          await FileSystem.moveAsync({
+            from: module.asset.uri,
+            to: destination,
+          })
+        } catch (error) {
+          console.error('failed to moveAsync, regular uri: ', error)
+        }
+        await FileSystem.copyAsync({
+          from: module.asset.uri,
           to: destination,
         })
       } else {
@@ -171,7 +186,6 @@ class BibleStore {
           destination,
         )
       }
-
     }
   }
 

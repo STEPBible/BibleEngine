@@ -84,6 +84,7 @@ export const STATUS_BAR_HEIGHT =
   Platform.OS === 'ios' ? IOS_STATUS_BAR_HEIGHT : Constants.statusBarHeight
 
 export const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`
+export const TYPEORM_DEFAULT_DB_SIZE = 12288
 
 export interface BibleModule {
   uid: string
