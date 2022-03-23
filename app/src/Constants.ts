@@ -110,7 +110,7 @@ export const BIBLE_MODULES: BibleModule[] = [
     filename: 'esv_v1.db',
     asset: Asset.fromModule(require(`../assets/esv_v1.db`)),
     hebrewLexicons: ['@BdbMedDef'],
-    greekLexicons: ['@MounceMedDef', '@FLsjDefs']
+    greekLexicons: ['@MounceMedDef']
   },
   {
     uid: '和合本 (简)',
@@ -128,7 +128,7 @@ export const BIBLE_MODULES: BibleModule[] = [
     filename: 'spaRV1909_v1.db',
     asset: Asset.fromModule(require(`../assets/spaRV1909_v1.db`)),
     hebrewLexicons: ['@es_Definition', '@BdbMedDef'],
-    greekLexicons: ['@es_Definition', '@MounceMedDef', '@FLsjDefs']
+    greekLexicons: ['@es_Definition', '@MounceMedDef']
   }
 ]
 
