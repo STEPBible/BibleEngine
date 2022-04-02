@@ -12,5 +12,10 @@ describe('StrongsNumber', () => {
       const strongsNum = new StrongsNumber(badStrongs)
       expect(strongsNum.id).toEqual('H0002')
     })
+    test('extended strongs are supported', () => {
+      const strongs = 'H1121a'
+      const strongsNum = new StrongsNumber(strongs)
+      expect(strongsNum.id).toEqual('H1121a')
+    })
   })
 })

@@ -1,14 +1,29 @@
 {
-  "builds": {
-    "android": {
-      "release": {
-        "workflow": "managed"
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "staging": {
+      "android": {
+        "buildType": "apk"
       }
     },
-    "ios": {
-      "release": {
-        "workflow": "managed"
+    "production": {
+      "node": "12.18.0",
+      "android": {
+        "buildType": "app-bundle"
       }
     }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "1476903313"
+      }
+    }
+  },
+  "cli": {
+    "version": ">= 0.34.1"
   }
 }

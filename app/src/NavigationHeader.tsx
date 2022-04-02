@@ -16,27 +16,23 @@ interface Props {
 
 @observer
 class NavigationHeader extends React.Component<Props, {}> {
-  getBookName() {
-    if (!bibleStore.bookOsisId || !BOOK_DATA[bibleStore.bookOsisId]) return ''
-    return BOOK_DATA[bibleStore.bookOsisId].names.en[0]
-  }
   render() {
     return (
       <View style={styles.header}>
-        {!bibleStore.loading && (
-          <IconButton
-            disabled={bibleStore.showSettings}
-            style={styles.header__settings}
-            onPress={bibleStore.toggleSettings}
-            icon="dots-vertical"
-            size={25}
-            color="#9b9b9b"
-          />
-        )}
+        <IconButton
+          disabled={bibleStore.showSettings}
+          style={styles.header__settings}
+          onPress={bibleStore.toggleSettings}
+          icon="dots-vertical"
+          size={25}
+          color="#9b9b9b"
+        />
         <View style={styles.header__chips}>
           <TouchableRipple
             onPress={() => this.props.navigation.navigate('Books')}
-            style={styles.header__chips__book}
+            style={Object.assign({}, styles.header__chips__book, {
+              backgroundColor: bibleStore.isDarkTheme ? '#333333' : '#EAEAEA',
+            })}
           >
             <React.Fragment>
               <Text style={styles.header__chips__book__text}>
@@ -49,7 +45,9 @@ class NavigationHeader extends React.Component<Props, {}> {
           </TouchableRipple>
           <TouchableRipple
             onPress={() => this.props.navigation.navigate('Versions')}
-            style={styles.header__chips__version}
+            style={Object.assign({}, styles.header__chips__version, {
+              backgroundColor: bibleStore.isDarkTheme ? '#333333' : '#EAEAEA',
+            })}
           >
             <React.Fragment>
               <Text style={styles.header__chips__version__text}>
@@ -114,7 +112,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 4,
-    backgroundColor: '#EAEAEA',
     justifyContent: 'center',
     marginLeft: 8,
     minWidth: 50,

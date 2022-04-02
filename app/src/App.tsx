@@ -1,11 +1,16 @@
 import * as React from 'react'
-import { useKeepAwake } from 'expo-keep-awake'
 import { createAppContainer } from 'react-navigation'
 import { createStackNavigator } from 'react-navigation-stack'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { StatusBar } from 'react-native'
-import { Provider as PaperProvider, DarkTheme } from 'react-native-paper'
+import {
+  Provider as PaperProvider,
+  DarkTheme as PaperDark,
+  DefaultTheme as PaperDefault,
+} from 'react-native-paper'
+import { observer } from 'mobx-react/native'
 
+import bibleStore from './BibleStore'
 import HomeScreen from './HomeScreen'
 import BookScreen from './BookScreen'
 import VersionScreen from './VersionScreen'
@@ -15,19 +20,51 @@ import OfflineLoadingScreen from './OfflineLoadingScreen'
 import OfflineSuccessScreen from './OfflineSuccessScreen'
 import { GlobalContextProvider } from './GlobalContext'
 
-export default function App() {
-  useKeepAwake()
-  return (
-    <SafeAreaProvider>
-      <PaperProvider theme={DarkTheme}>
-        <GlobalContextProvider>
-          <StatusBar hidden={true} />
-          <AppContainer />
-        </GlobalContextProvider>
-      </PaperProvider>
-    </SafeAreaProvider>
-  )
+const DefaultTheme = {
+  ...PaperDefault,
+  roundness: 2,
+  colors: {
+    ...PaperDefault.colors,
+    primary: 'black',
+    text: 'black',
+    accent: '#F9F9F9',
+  },
 }
+const DarkTheme = {
+  ...PaperDark,
+  roundness: 2,
+  colors: {
+    ...PaperDark.colors,
+    primary: 'white',
+    text: 'white',
+    accent: '#333333',
+  },
+}
+
+@observer
+class App extends React.Component<any, any> {
+  async componentDidMount() {
+    await bibleStore.initialize()
+  }
+  render() {
+    return (
+      <SafeAreaProvider>
+        <GlobalContextProvider>
+          <PaperProvider
+            theme={bibleStore.isDarkTheme ? DarkTheme : DefaultTheme}
+          >
+            <StatusBar hidden={true} />
+            {bibleStore.cacheIsRestored === false ? null : (
+              <AppContainer theme={bibleStore.isDarkTheme ? 'dark' : 'light'} />
+            )}
+          </PaperProvider>
+        </GlobalContextProvider>
+      </SafeAreaProvider>
+    )
+  }
+}
+
+export default App
 
 const AppStack = createStackNavigator(
   {
@@ -40,9 +77,6 @@ const AppStack = createStackNavigator(
     OfflineSuccess: OfflineSuccessScreen,
   },
   {
-    defaultNavigationOptions: {
-      headerTintColor: 'black',
-    },
     mode: 'modal',
   }
 )

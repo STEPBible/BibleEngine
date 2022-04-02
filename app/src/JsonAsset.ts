@@ -12,11 +12,21 @@ export default class JsonAsset {
 
   static async init(module: any, cacheFilename: string) {
     console.time(`JSON file initialization: ${cacheFilename}`)
-    const remoteUri = Asset.fromModule(module).uri
+    const asset = Asset.fromModule(module)
     const fileUri = `${FileSystem.documentDirectory}/${cacheFilename}`
     const { exists } = await FileSystem.getInfoAsync(fileUri)
     if (!exists) {
-      await FileSystem.downloadAsync(remoteUri, fileUri)
+      if (asset.uri.includes('file://')) {
+        await FileSystem.copyAsync({
+          from: asset.uri,
+          to: fileUri,
+        })
+      } else {
+        await FileSystem.downloadAsync(
+          asset.uri,
+          fileUri,
+        )
+      }
     }
     const text = await FileSystem.readAsStringAsync(fileUri)
     const json = JSON.parse(text)
