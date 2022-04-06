@@ -16,5 +16,6 @@
     },
     "peerDependencies": {
         "typeorm": "~0.2.34"
-    }
+    },
+    "sideEffects": false
 }
