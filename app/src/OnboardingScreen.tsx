@@ -25,8 +25,8 @@ export default class OnboardingScreen extends React.Component {
       button: 'NEXT',
     },
     {
-      image: require('../assets/hand.png'),
-      title: 'Tap Any Blue Word',
+      image: require('../assets/hand-transparent.png'),
+      title: 'Tap Any Underlined Word',
       body: `To unlock the original meaning`,
       button: 'GET STARTED',
     },

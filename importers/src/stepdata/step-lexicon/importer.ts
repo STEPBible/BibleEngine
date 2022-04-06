@@ -17,7 +17,6 @@ const TRADITIONAL_CHINESE_DEFINITION = '@zh_tw_Definition';
 const SPANISH_DEFINITION = '@es_Definition';
 const GREEK_SHORT_DEFINITION = '@MounceShortDef';
 const GREEK_DEFINITION = '@MounceMedDef';
-const EXTENDED_GREEK_DEFINITION = '@FLsjDefs';
 const TRANSLITERATION = '@StrTranslit';
 
 export class StepLexiconImporter extends BibleEngineImporter {
@@ -92,15 +91,6 @@ export class StepLexiconImporter extends BibleEngineImporter {
                         transliteration: attributes[TRANSLITERATION],
                         gloss: attributes[ENGLISH_GLOSS] || '',
                         content: attributes[GREEK_DEFINITION],
-                    });
-                } else if (attribute === EXTENDED_GREEK_DEFINITION) {
-                    definitions.push({
-                        strong: strongsNum,
-                        dictionary: EXTENDED_GREEK_DEFINITION,
-                        lemma: attributes[ORIGINAL_WORD],
-                        transliteration: attributes[TRANSLITERATION],
-                        gloss: attributes[ENGLISH_GLOSS] || '',
-                        content: attributes[EXTENDED_GREEK_DEFINITION],
                     });
                 } else if (attribute === SIMPLIFIED_CHINESE_DEFINITION) {
                     definitions.push({

@@ -1,5 +1,7 @@
 node_modules/
 /core/*.db
+*.aab
+*.ipa
 yarn-error.log
 core/output
 notes
@@ -10,7 +12,7 @@ lib/
 *ESV20*
 */dist/*
 *bible.db
-bibles.db
+*.db
 importers/scripts/NEUE
 greek_lexicon.txt
 hebrew_lexicon.txt
@@ -25,7 +27,6 @@ secrets.json
 output
 .env
 ChiUns.zip
-.vscode
 importers/scripts/data
 importers/src/bible/NEUE/data
 be-v11n-unsupported.log

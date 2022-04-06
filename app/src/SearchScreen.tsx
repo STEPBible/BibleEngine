@@ -148,16 +148,6 @@ class SearchScreen extends React.Component<{}, {}> {
       >
         Search Anything
       </Text>
-      <Text
-        style={{
-          fontFamily: FontFamily.OPEN_SANS,
-          fontSize: FontSize.MEDIUM,
-          marginTop: Margin.EXTRA_LARGE,
-          textAlign: 'center',
-        }}
-      >
-        {`Offline, flexible search\npowered by AI`}
-      </Text>
     </View>
   )
 
@@ -176,7 +166,10 @@ class SearchScreen extends React.Component<{}, {}> {
             ref={view => {
               this.textInput = view
             }}
-            style={styles.search__input__text}
+            style={Object.assign({},styles.search__input__text,
+              {
+                color: bibleStore.isDarkTheme ? 'white' : 'black',
+              })}
             placeholder={'Search...'}
             placeholderTextColor={'#828282'}
             underlineColorAndroid={'#fff'}

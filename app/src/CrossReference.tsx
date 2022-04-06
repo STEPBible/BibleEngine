@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, createRef } from 'react'
 import {
   View,
   FlatList,
@@ -14,6 +14,7 @@ import {
   IBibleCrossReference,
   IBibleReferenceRange,
 } from '@bible-engine/core'
+import Popover from 'react-native-popover-view';
 
 import {
   Color,
@@ -22,7 +23,6 @@ import {
   Margin,
   getDebugStyles,
 } from './Constants'
-import Popover from './Popover'
 import Database from './Database'
 import Text from './Text'
 import bibleStore from './BibleStore'
@@ -47,6 +47,10 @@ class CrossReference extends React.Component<Props, State> {
   state = {
     visible: false,
     verseContents: [],
+  }
+  constructor(props) {
+    super(props);
+    this.touchable = createRef();
   }
 
   onPress = async () => {
@@ -101,7 +105,7 @@ class CrossReference extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <TouchableHighlight
-          ref={ref => (this.touchable = ref)}
+          ref={this.touchable}
           onPress={this.onPress}
           activeOpacity={0.5}
           underlayColor="#C5D8EA"
@@ -111,14 +115,22 @@ class CrossReference extends React.Component<Props, State> {
             {this.props.crossReferences[0].key}
           </Text>
         </TouchableHighlight>
-        <Popover
-          isVisible={this.state.visible}
-          fromView={this.touchable}
-          popoverStyle={styles.popover__background_container}
-          onRequestClose={() => this.closePopover()}
-        >
-          {this.renderPopoverContent()}
-        </Popover>
+        {this.state.visible === false ? null : (
+          <Popover
+            isVisible={true}
+            from={this.touchable}
+            popoverStyle={Object.assign(
+              {},
+              styles.popover__background_container,
+              {
+                backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
+              }
+            )}
+            onRequestClose={() => this.closePopover()}
+          >
+            {this.renderPopoverContent()}
+          </Popover>
+        )}
       </React.Fragment>
     )
   }
@@ -143,12 +155,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.1)',
   },
   popover__background_container: {
-    // backgroundColor: 'yellow',
     overflow: 'hidden',
     width: DEVICE_WIDTH - 20,
   },
   popover__content: {
-    // backgroundColor: 'cyan',
     flex: 1,
     maxHeight: DEVICE_HEIGHT * 0.4,
     borderBottomColor: 'gray',
@@ -157,7 +167,6 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   popover__content__header: {
-    // backgroundColor: 'yellow',
     fontFamily: FontFamily.OPEN_SANS_LIGHT,
     fontSize: FontSize.MEDIUM,
     marginBottom: Margin.SMALL,

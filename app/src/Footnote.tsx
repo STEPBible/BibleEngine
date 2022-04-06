@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { createRef } from 'react'
 import {
   View,
   FlatList,
@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import { BibleEngine, IBibleNote } from '@bible-engine/core'
 import { observer } from 'mobx-react/native'
+import Popover from 'react-native-popover-view';
 
 import {
   Color,
@@ -19,8 +20,8 @@ import {
   DEBUG,
   getDebugStyles,
 } from './Constants'
+import { Footnote as FootNoteMethods } from './models/Footnote'
 import Text from './Text'
-import Popover from './Popover'
 import bibleStore from './BibleStore'
 
 const DEVICE_WIDTH = Dimensions.get('window').width
@@ -40,6 +41,10 @@ export default class Footnote extends React.Component<Props, State> {
   state = {
     popoverIsVisible: false,
   }
+  constructor(props) {
+    super(props);
+    this.touchable = createRef();
+  }
 
   onPress = () => {
     this.setState({ popoverIsVisible: true })
@@ -50,10 +55,7 @@ export default class Footnote extends React.Component<Props, State> {
   }
 
   getNoteText = (note: IBibleNote) => {
-    const noteText = note.content.contents
-      .map(phrase => phrase.content)
-      .join(' ')
-    return `${note.key}) ${noteText}`
+    return `${note.key}) ${ FootNoteMethods.getPlainText(note)}`
   }
 
   renderFootnote = ({ item }) => (
@@ -82,7 +84,7 @@ export default class Footnote extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <TouchableHighlight
-          ref={ref => (this.touchable = ref)}
+          ref={this.touchable}
           onPress={this.onPress}
           activeOpacity={0.5}
           underlayColor="#C5D8EA"
@@ -92,14 +94,22 @@ export default class Footnote extends React.Component<Props, State> {
             {this.props.notes[0].key}
           </Text>
         </TouchableHighlight>
-        <Popover
-          isVisible={this.state.popoverIsVisible}
-          fromView={this.touchable}
-          popoverStyle={styles.popover__background_container}
-          onRequestClose={() => this.closePopover()}
-        >
-          {this.renderPopoverContent()}
-        </Popover>
+        {this.state.popoverIsVisible === false ? null : (
+          <Popover
+            isVisible={true}
+            from={this.touchable}
+            popoverStyle={Object.assign(
+              {},
+              styles.popover__background_container,
+              {
+                backgroundColor: bibleStore.isDarkTheme ? '#333333' : 'white',
+              }
+            )}
+            onRequestClose={() => this.closePopover()}
+          >
+            {this.renderPopoverContent()}
+          </Popover>
+        )}
       </React.Fragment>
     )
   }
@@ -107,7 +117,7 @@ export default class Footnote extends React.Component<Props, State> {
 
 const styles = StyleSheet.create({
   touchable: {
-    marginLeft: -8,
+    marginLeft: -4,
   },
   text: {
     marginTop: -4,

@@ -1,5 +1,6 @@
 import normalizeText from './normalizeText'
 import { Analytics } from 'expo-analytics'
+import { Asset } from 'expo-asset'
 import { DefaultTheme } from 'react-native-paper'
 import Constants from 'expo-constants'
 import { Platform } from 'react-native'
@@ -14,6 +15,12 @@ export const Flags = {
 export const Settings = {
   CROSS_REFERENCES_ENABLED: true,
   FOOTNOTES_ENABLED: true,
+}
+
+export enum Theme {
+  AUTO = "auto",
+  DARK = "dark",
+  LIGHT = "light",
 }
 
 export enum Margin {
@@ -77,7 +84,59 @@ export const STATUS_BAR_HEIGHT =
   Platform.OS === 'ios' ? IOS_STATUS_BAR_HEIGHT : Constants.statusBarHeight
 
 export const SQLITE_DIRECTORY = `${FileSystem.documentDirectory}SQLite`
-export const DATABASE_PATH = `${SQLITE_DIRECTORY}/bibles.db`
+export const TYPEORM_DEFAULT_DB_SIZE = 12288
+
+export interface BibleModule {
+  uid: string
+  title: string
+  filenamebase: string
+  filename: string
+  asset: Asset
+  hebrewLexicons: string[]
+  greekLexicons: string[]
+}
+
+export interface LexiconModule {
+  filenamebase: string
+  filename: string
+  asset: Asset
+}
+
+export const BIBLE_MODULES: BibleModule[] = [
+  {
+    uid: 'ESV',
+    title: 'English Standard Version',
+    filenamebase: "esv",
+    filename: 'esv_v1.db',
+    asset: Asset.fromModule(require(`../assets/esv_v1.db`)),
+    hebrewLexicons: ['@BdbMedDef'],
+    greekLexicons: ['@MounceMedDef']
+  },
+  {
+    uid: '和合本 (简)',
+    title: '和合本 (简体字)',
+    filenamebase: "cuvs",
+    filename: 'cuvs_v1.db',
+    asset: Asset.fromModule(require(`../assets/cuvs_v1.db`)),
+    hebrewLexicons: ['@zh_Definition'],
+    greekLexicons: ['@zh_Definition']
+  },
+  {
+    uid: 'RV1909',
+    title: 'La Santa Biblia Reina-Valera 1909',
+    filenamebase: 'spaRV1909',
+    filename: 'spaRV1909_v1.db',
+    asset: Asset.fromModule(require(`../assets/spaRV1909_v1.db`)),
+    hebrewLexicons: ['@es_Definition', '@BdbMedDef'],
+    greekLexicons: ['@es_Definition', '@MounceMedDef']
+  }
+]
+
+export const LEXICON_MODULE: LexiconModule = {
+  filenamebase: 'lexicons',
+  filename: 'lexicons_v1.db',
+  asset: Asset.fromModule(require(`../assets/lexicons_v1.db`)),
+}
 
 const testingColors = ['magenta', 'cyan', 'red', 'orange', 'green']
 
