@@ -3,8 +3,14 @@ import { isTestMatching } from './v11n.functions';
 
 describe('isTestMatching', () => {
     const context: BibleBookPlaintext = new Map([
-        [1, new Map([[1, ['in the beginning', 'god created']], [2, ['let there be light']]])],
-        [2, new Map([[1, ['Test words with numbers 123 and more words']]])]
+        [
+            1,
+            new Map([
+                [1, [, 'in the beginning', 'god created']],
+                [2, [, 'let there be light']],
+            ]),
+        ],
+        [2, new Map([[1, [, 'Test words with numbers 123 and more words']]])],
     ]);
 
     test('should match exist test if reference exists', () => {
@@ -23,14 +29,14 @@ describe('isTestMatching', () => {
         expect(isTestMatching('Gen.1:3=Last', context)).toBe(false);
     });
     test('should fail test if base or compare reference is not existing', () => {
-        expect(isTestMatching('Gen.1:2>1:3', context)).toBe(false);
+        expect(isTestMatching('Gen.1:2>Gen.1:3', context)).toBe(false);
     });
     test('should correctly run the compare tests', () => {
-        expect(isTestMatching('Gen.1:1>1:2', context)).toBe(true);
-        expect(isTestMatching('Gen.1:1>2:1', context)).toBe(false);
-        expect(isTestMatching('Gen.1:1<2:1', context)).toBe(true);
-        expect(isTestMatching('Gen.1:1<1:2', context)).toBe(false);
-        expect(isTestMatching('Gen.1:1*2>2:1', context)).toBe(true);
-        expect(isTestMatching('Gen.1:1>1:2*2', context)).toBe(false);
+        expect(isTestMatching('Gen.1:1>Gen.1:2', context)).toBe(true);
+        expect(isTestMatching('Gen.1:1>Gen.2:1', context)).toBe(false);
+        expect(isTestMatching('Gen.1:1<Gen.2:1', context)).toBe(true);
+        expect(isTestMatching('Gen.1:1<Gen.1:2', context)).toBe(false);
+        expect(isTestMatching('Gen.1:1*2>Gen.2:1', context)).toBe(true);
+        expect(isTestMatching('Gen.1:1>Gen.1:2*2', context)).toBe(false);
     });
 });

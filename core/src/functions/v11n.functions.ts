@@ -958,7 +958,7 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
         const refBase: TestReference = {
             chapterNumber: +refBaseNumbers[0],
             verseNumber: +refBaseNumbers[1],
-            subverseNumber: refBaseAddition?.[0] ? +refBaseAddition[0] : 1,
+            subverseNumber: refBaseAddition?.[0] ? +refBaseAddition[0] : undefined,
             factor: refBaseFactorParts[1] ? +refBaseFactorParts[1] : 1,
         };
         const contextChapter = context.get(refBase.chapterNumber);
@@ -983,9 +983,10 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
                     (refBase.subverseNumber === 0 &&
                         !contextChapter.get(refBase.verseNumber)![0]) ||
                     // we assume a check for `.1=Exist` wants to know if subverses are created at all (which only make sense if there are more than one)
-                    //  => this case is handled above already
+                    (refBase.subverseNumber === 1 &&
+                        contextChapter.get(refBase.verseNumber)!.filter(Boolean).length <= 1) ||
                     // we assume a check for `.2=Exist` wants to test for a certain number of subverses to at least exists
-                    (refBase.subverseNumber &&
+                    (typeof refBase.subverseNumber !== 'undefined' &&
                         refBase.subverseNumber > 1 &&
                         contextChapter.get(refBase.verseNumber)!.filter(Boolean).length <
                             refBase.subverseNumber)
@@ -996,8 +997,9 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
                     contextChapter &&
                     contextChapter.has(refBase.verseNumber) &&
                     (typeof refBase.subverseNumber === 'undefined' ||
-                        refBase.subverseNumber === 1 ||
                         // see comment at `Exist`
+                        (refBase.subverseNumber === 1 &&
+                            contextChapter.get(refBase.verseNumber)!.filter(Boolean).length > 1) ||
                         (refBase.subverseNumber === 0 &&
                             contextChapter.get(refBase.verseNumber)![0]) ||
                         (refBase.subverseNumber > 1 &&
@@ -1013,7 +1015,9 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
             const refCompare: TestReference = {
                 chapterNumber: +refCompareNumbers[0],
                 verseNumber: +refCompareNumbers[1],
-                subverseNumber: refCompareReferenceParts[2] ? +refCompareReferenceParts[2] : 1,
+                subverseNumber: refCompareReferenceParts[2]
+                    ? +refCompareReferenceParts[2]
+                    : undefined,
                 factor: refCompareFactorParts[1] ? +refCompareFactorParts[1] : 1,
             };
             const contextCompareChapter = context.get(refCompare.chapterNumber);
@@ -1028,12 +1032,13 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
             // RADAR: currently the only rules that use an addition add together the psalm title with verse 1.
             //        since BibleEngine puts the title in 1.0, we just join the whole verse in that case for simplicity.
             const baseText =
-                refBase.subverseNumber && !refBaseAddition?.[1]
-                    ? baseVerse[refBase.subverseNumber]
+                typeof refBase.subverseNumber !== 'undefined' && !refBaseAddition?.[1]
+                    ? baseVerse[refBase.subverseNumber] ?? ''
                     : baseVerse.join(' ');
-            const compareText = refCompare.subverseNumber
-                ? compareVerse[refCompare.subverseNumber]
-                : compareVerse.join(' ');
+            const compareText =
+                typeof refCompare.subverseNumber !== 'undefined'
+                    ? compareVerse[refCompare.subverseNumber] ?? ''
+                    : compareVerse.join(' ');
 
             const baseLength = baseText.length * refBase.factor;
             const compareLength = compareText.length * refCompare.factor;
