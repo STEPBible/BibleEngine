@@ -1,9 +1,8 @@
 {
     "name": "BibleEngine Server",
-    "script": "src/main.ts",
-    "watch": true,
+    "script": "lib/main.js",
     "env": {
-        "NODE_ENV": "dev"
+        "NODE_ENV": "production"
     },
     "log_date_format": "YYYY-MM-DD HH:mm Z"
 }
