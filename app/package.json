@@ -101,7 +101,7 @@
     "typeorm": "~0.2.34"
   },
   "peerDependencies": {
-    "@bible-engine/core": "0.x"
+    "@bible-engine/core": "1.0.x"
   },
   "expo": {
     "plugins": [

@@ -1,4 +1,8 @@
-# Working with resources and databases in BibleEngine
+# @bible-engine/importers
+
+## Install
+
+The package can be installed via yarn or npm as usual.
 
 ## Create a database for preloading to a client or server use
 
@@ -6,8 +10,8 @@
 import {
     BeDatabaseCreator,
     V11nImporter,
-    NeueImporter,
-    SwordImporter
+    OsisImporter,
+    SwordImporter,
 } from '@bible-engine/importers';
 
 const creator = new BeDatabaseCreator({
@@ -17,12 +21,23 @@ const creator = new BeDatabaseCreator({
     username: 'bibleengine',
     password: 'bibleengine',
     database: 'bibleengine',
-    dropSchema: true
+    dropSchema: true,
 });
 
+// BibleEngine works without the versification rules form STEPData, however references won't be
+// internally normalized then, i.e. BibleEngine can't ensure that it returns the correct text when
+// switching or comparing versions. It's recommend to always use `V11nImporter` when creating
+// BibleEngine databases. This won't overwrite original version numbering, it "just" adds the
+// information which version-numbers refer to which text (which is identified by a normalized id).
 creator.addImporter(V11nImporter);
+
 creator.addImporter(SwordImporter, '../data/ESV2016_th.zip');
-creator.addImporter(NeueImporter);
+creator.addImporter(OsisImporter, {
+    sourcePath: '../data/ESV.osis.xml',
+    // you can pass/overwrite metadata that is not in the source file or that isn't properly parsed (yet)
+    versionMeta: {},
+    bookMeta: {},
+});
 
 creator.createDatabase();
 ```
@@ -39,7 +54,7 @@ const creator = new BeImportFileCreator(
         port: 3306,
         username: 'bibleengine',
         password: 'bibleengine',
-        database: 'bibleengine'
+        database: 'bibleengine',
     },
     './preload/bibles'
 );
@@ -68,13 +83,13 @@ const unzipResult = await this.zip.unzip(
 if (unzipResult === 0) {
     const versionData = await Filesystem.readFile({
         path: `${targetDir}/version.json`,
-        encoding: FilesystemEncoding.UTF8
-    }).then(file => JSON.parse(file.data));
+        encoding: FilesystemEncoding.UTF8,
+    }).then((file) => JSON.parse(file.data));
 
     const versionIndex: IBibleBook[] = await Filesystem.readFile({
         path: `${targetDir}/index.json`,
-        encoding: FilesystemEncoding.UTF8
-    }).then(file => JSON.parse(file.data));
+        encoding: FilesystemEncoding.UTF8,
+    }).then((file) => JSON.parse(file.data));
 
     const versionEntity = await bibleEngine.addVersion(versionData);
     for (const book of versionIndex) {
@@ -86,7 +101,7 @@ if (unzipResult === 0) {
         await bibleEngine.addBook({
             ...book,
             dataLocation: 'file',
-            versionId: versionEntity.id
+            versionId: versionEntity.id,
         });
 
         /*
@@ -94,8 +109,8 @@ if (unzipResult === 0) {
          */
         const bookData: BookWithContentForInput = await Filesystem.readFile({
             path: `${targetDir}/${book.osisId}.json`,
-            encoding: FilesystemEncoding.UTF8
-        }).then(file => JSON.parse(file.data));
+            encoding: FilesystemEncoding.UTF8,
+        }).then((file) => JSON.parse(file.data));
 
         await bibleEngine.addBookWithContent(versionEntity.id, bookData);
     }

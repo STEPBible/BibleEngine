@@ -37,6 +37,6 @@
         "random-words": "^1.1.0"
     },
     "peerDependencies": {
-        "@bible-engine/core": "0.x"
+        "@bible-engine/core": "1.0.x"
     }
 }

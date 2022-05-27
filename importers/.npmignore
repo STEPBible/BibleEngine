@@ -1,0 +1,7 @@
+scripts/*
+src/*
+**/tests/*
+*/*.js.map
+lib/bible/NEUE/data/*
+bible.db
+*.log

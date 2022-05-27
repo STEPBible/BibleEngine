@@ -1,15 +1,15 @@
 {
     "name": "@bible-engine/importers",
-    "version": "0.2.0",
+    "version": "1.0.4",
     "license": "MIT",
     "main": "lib/index.js",
     "scripts": {
         "test": "yarn jest --runInBand",
         "build": "rimraf ./lib && tsc && copyup './src/**/data/*' ./lib",
-        "devScript": "../node_modules/.bin/ts-node -T"
+        "devScript": "../node_modules/.bin/ts-node -T",
+        "prepublish": "yarn build"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.0.0",
         "archiver": "^3.0.0",
         "base64-js": "^1.3.0",
         "better-sqlite3": "^7.1.2",
@@ -39,6 +39,6 @@
         "xml-formatter": "^2.4.0"
     },
     "peerDependencies": {
-        "@bible-engine/core": "0.x"
+        "@bible-engine/core": "1.0.x"
     }
 }

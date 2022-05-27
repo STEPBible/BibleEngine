@@ -1,31 +1,25 @@
 # @bible-engine/core
 
-## Adding a bible
+## Writing data
 
-Please have a look at the example importer `importers/random-version/example.ts` to get a rough idea of the process. Importers for real bibles and/or formats can give you a good starting point, depending on your source format:
+If you want to create a BibleEngine database, your starting point should be the [importers](../importers) package which includes helper classes and importers for bible formats like `OSIS` and `sword`.
 
--   `NEUE`: HTML files (custom format)
--   `osis`: OSIS format _(coming soon)_
--   `NETS`: plain text _(coming soon)_
-
-If you want to want to start clean, go from here:
+However you can also use core methods directly for writing if you prefer that:
 
 ```typescript
-// since BibleEngine is currently not published you need to clone the repository
-// and add the package via `file:../BibleEngine/core` to your project (or use yarn link)
 import { BibleEngine } from '@bible-engine/core';
 
-const sqlBible = new BibleEngine({
+const bibleEngine = new BibleEngine({
     type: 'sqlite',
-    database: `${dirProjectRoot}/output/bible.db`
+    database: `${dirProjectRoot}/output/bible.db`,
 });
 
-const version = await sqlBible.addVersion(
+const version = await bibleEngine.addVersion(
     new BibleVersion({
         version: 'XSB',
         title: 'X Standard Bible',
         language: 'en-US',
-        chapterVerseSeparator: ':'
+        chapterVerseSeparator: ':',
     })
 );
 
@@ -38,36 +32,38 @@ for (const book of books) {
      */
     const contents = myParserMethod(book.file);
 
-    await sqlBible.addBookWithContent(version.id, {
+    await bibleEngine.addBookWithContent(version.id, {
         book: {
             number: book.num,
             osisId: getOsisIdFromBookGenericId(book.num),
             abbreviation: book.abbr,
             title: book.title,
-            type: 'ot'
+            type: 'ot',
         },
-        contents
+        contents,
     });
 }
 
-sqlBible.finalizeVersion(version.id);
-```
-
-## Using versification normalization
-
-If you want your bible to be converted to standard versification (version versification is still available, however the interal references use standard versification, thus verses can be matched correctly across all bibles) you need to run the `v11n-rules` importer before importing the bible:
-
-```shell
-cd core
-npx ts-node src/importers/v11n-rules/v11n-rules.ts
+bibleEngine.finalizeVersion(version.id);
 ```
 
 ## Reading from `BibleEngine`
 
-If you use `BibleEngine` outside of node, you need to adjust the import path as follows:
+If you want to read from a BibleEngine database or server, your starting point should be the [client](../client) package which takes care of using a local database with an automatic server-fallback (if data is missing or if you want to use the same code for web- and native app).
+
+Example for reading data from a local BibleEngine database using core-methods (e.g. if server-access is not needed):
 
 ```typescript
-import { BibleEngine } from '@bible-engine/core/browser/src';
-```
+import { BibleEngine } from '@bible-engine/core';
 
-Additionally your `tsconfig.json` needs to include the setting `"preserveSymlinks": true`
+const bibleEngine = new BibleEngine({
+    type: 'sqlite',
+    database: `${dirProjectRoot}/output/bible.db`,
+});
+
+const bibleData = await bibleEngine.getFullDataForReferenceRange({
+    versionUid: 'ESV',
+    bookOsisId: 'Gen',
+    versionChapterNum: 1,
+});
+```
