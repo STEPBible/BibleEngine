@@ -1,11 +1,10 @@
 import {
-    createConnection,
-    getConnection,
-    ConnectionOptions,
+    DataSource,
+    DataSourceOptions,
     Raw,
     EntityManager,
     Between,
-    FindConditions,
+    FindOptionsWhere,
     DatabaseType,
     Like,
 } from 'typeorm';
@@ -131,11 +130,11 @@ export interface BibleEngineOptions {
 
 export class BibleEngine {
     static DEBUG = false;
+    dataSource: DataSource;
     executeSqlSetOverride?: BibleEngineOptions['executeSqlSetOverride'];
     pDB: Promise<EntityManager>;
-    private readonly CONNECTION_NAME = 'bible-engine';
 
-    constructor(dbConfig: ConnectionOptions, options?: BibleEngineOptions) {
+    constructor(dbConfig: DataSourceOptions, options?: BibleEngineOptions) {
         if (options?.executeSqlSetOverride)
             this.executeSqlSetOverride = options.executeSqlSetOverride;
         if (options?.checkForExistingConnection) {
@@ -145,28 +144,22 @@ export class BibleEngine {
         this.pDB = this.createConnection(dbConfig);
     }
 
-    async findConnection(dbConfig: ConnectionOptions) {
-        try {
-            return getConnection(dbConfig.name || this.CONNECTION_NAME).manager;
-        } catch (error: any) {
-            if (error?.name === 'ConnectionNotFoundError') {
-                return this.createConnection(dbConfig);
-            }
-            throw error;
-        }
+    async findConnection(dbConfig: DataSourceOptions) {
+        if (this.dataSource) return this.dataSource.manager;
+        else return this.createConnection(dbConfig);
     }
 
-    async createConnection(dbConfig: ConnectionOptions) {
-        const connection = await createConnection({
+    async createConnection(dbConfig: DataSourceOptions) {
+        this.dataSource = new DataSource({
             entities: ENTITIES,
             synchronize: false,
             logging: ['error'],
-            name: this.CONNECTION_NAME,
             migrations: this.getMigrations(dbConfig.type).migrations,
             migrationsRun: true,
             ...dbConfig,
         });
-        return connection.manager;
+        await this.dataSource.initialize();
+        return this.dataSource.manager;
     }
 
     getMigrations(type: DatabaseType): any {
@@ -224,7 +217,7 @@ export class BibleEngine {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
 
-        let bookEntity: IBibleBookEntity | undefined = await db.findOne(BibleBookEntity, {
+        let bookEntity: IBibleBookEntity | null = await db.findOne(BibleBookEntity, {
             where: { versionId: version.id, osisId: bookInput.book.osisId },
         });
 
@@ -546,7 +539,7 @@ export class BibleEngine {
             range.isNormalized === true
                 ? <IBibleReferenceRangeNormalized>range
                 : await this.getNormalizedReferenceRange(range, book);
-        const where: FindConditions<BiblePhraseEntity> = {
+        const where: FindOptionsWhere<BiblePhraseEntity> = {
             id: Between(
                 generatePhraseId(normalizedRange),
                 generatePhraseId(generateEndReferenceFromRange(normalizedRange))
@@ -596,7 +589,9 @@ export class BibleEngine {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         const versionEntity = await db.findOne(BibleVersionEntity, {
-            uid: versionUid,
+            where: {
+                uid: versionUid,
+            },
         });
         if (!versionEntity) throw new Error(`version ${versionUid} is not available`);
 
@@ -629,7 +624,9 @@ export class BibleEngine {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         const versionEntity = await db.findOne(BibleVersionEntity, {
-            uid: versionUid,
+            where: {
+                uid: versionUid,
+            },
         });
         if (!versionEntity) throw new Error(`version ${versionUid} is not available`);
 
@@ -646,7 +643,7 @@ export class BibleEngine {
 
     async getReferenceRangeWithAllVersionProperties(
         range: IBibleReferenceRange,
-        versionBook?: BibleBookEntity
+        versionBook?: BibleBookEntity | null
     ): Promise<IBibleReferenceRange> {
         if (!versionBook) {
             if (!this.pDB) throw new NoDbConnectionError();
@@ -686,7 +683,7 @@ export class BibleEngine {
     async getVersion(versionUid: string) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        return db.findOne(BibleVersionEntity, { uid: versionUid });
+        return db.findOne(BibleVersionEntity, { where: { uid: versionUid } });
     }
 
     async getVersionLocalId(versionUid: string) {
@@ -702,7 +699,7 @@ export class BibleEngine {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         return lang
-            ? db.find(BibleVersionEntity, { language: Like(`${lang}%`) })
+            ? db.find(BibleVersionEntity, { where: { language: Like(`${lang}%`) } })
             : db.find(BibleVersionEntity);
     }
 
@@ -1389,7 +1386,7 @@ export class BibleEngine {
 
     private async getNormalizedReferenceRange(
         inputRange: IBibleReferenceRangeVersion,
-        book?: BibleBookEntity
+        book?: BibleBookEntity | null
     ): Promise<IBibleReferenceRangeNormalized> {
         if (isReferenceNormalized(inputRange)) return { ...inputRange, isNormalized: true };
 

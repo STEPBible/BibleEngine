@@ -1,4 +1,4 @@
-import { ConnectionOptions } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
 import { BibleEngineImporter } from './shared/Importer.interface';
 import { BibleEngine } from '@bible-engine/core';
 
@@ -10,7 +10,7 @@ export class BeDatabaseCreator {
     bibleEngine: BibleEngine;
     private importers: BibleEngineImporter[] = [];
 
-    constructor(dbConfig: ConnectionOptions) {
+    constructor(dbConfig: DataSourceOptions) {
         this.bibleEngine = new BibleEngine(dbConfig);
     }
 

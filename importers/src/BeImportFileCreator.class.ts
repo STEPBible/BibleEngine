@@ -1,4 +1,4 @@
-import { ConnectionOptions } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
 import * as archiver from 'archiver';
 import {
     BibleEngine,
@@ -6,7 +6,7 @@ import {
     IBibleVersion,
     NoDbConnectionError,
     V11nRuleEntity,
-    IV11nRule
+    IV11nRule,
 } from '@bible-engine/core';
 import { writeFileSync, createWriteStream } from 'fs';
 import { ensureDirSync } from 'fs-extra';
@@ -19,7 +19,7 @@ export interface BeFileCreatorOptions {
 export class BeImportFileCreator {
     private bibleEngine: BibleEngine;
 
-    constructor(dbConfig: ConnectionOptions, private destinationPath: string) {
+    constructor(dbConfig: DataSourceOptions, private destinationPath: string) {
         this.bibleEngine = new BibleEngine(dbConfig);
     }
 
@@ -37,9 +37,9 @@ export class BeImportFileCreator {
                     chapterVerseSeparator: versionEntity.chapterVerseSeparator,
                     hasStrongs: versionEntity.hasStrongs,
                     type: versionEntity.type,
-                    lastUpdate: versionEntity.lastUpdate
+                    lastUpdate: versionEntity.lastUpdate,
                 },
-                file: await this.createVersionFile(versionEntity.uid, options)
+                file: await this.createVersionFile(versionEntity.uid, options),
             });
         }
 
@@ -58,13 +58,13 @@ export class BeImportFileCreator {
             .select('v11n.*')
             .getRawMany()
             .then((_v11nRules: IV11nRule[]) =>
-                _v11nRules.map(v11nRule => {
+                _v11nRules.map((v11nRule) => {
                     const v11nRuleStripped: IV11nRule = {
                         sourceRefId: v11nRule.sourceRefId,
                         standardRefId: v11nRule.standardRefId,
                         actionId: v11nRule.actionId,
                         note: v11nRule.note,
-                        noteMarker: v11nRule.noteMarker
+                        noteMarker: v11nRule.noteMarker,
                     };
                     if (v11nRule.sourceTypeId)
                         v11nRuleStripped.sourceTypeId = v11nRule.sourceTypeId;
@@ -115,7 +115,7 @@ export class BeImportFileCreator {
                     title: bookData.book.title,
                     type: bookData.book.type,
                     longTitle: bookData.book.longTitle,
-                    chaptersCount: bookData.book.chaptersCount
+                    chaptersCount: bookData.book.chaptersCount,
                 });
             }
 
@@ -129,7 +129,7 @@ export class BeImportFileCreator {
 
             // pack everything
             const zipArchive = archiver('zip');
-            zipArchive.on('warning', function(err) {
+            zipArchive.on('warning', function (err) {
                 if (err.code === 'ENOENT') {
                     console.error(err);
                 } else {
@@ -139,7 +139,7 @@ export class BeImportFileCreator {
             });
 
             const output = createWriteStream(targetPath);
-            output.on('close', function() {
+            output.on('close', function () {
                 const bytes = zipArchive.pointer();
                 console.log(`${targetPath} was successfully created with ${bytes} total bytes`);
                 rmDirRecSync(targetDir);

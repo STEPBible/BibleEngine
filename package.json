@@ -1,6 +1,6 @@
 {
     "name": "@bible-engine/source",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "license": "MIT",
     "description": "BibleEngine mono-repo root package.json, used mainly to execute build scripts. This package is not published to npm.",
     "private": true,
@@ -12,7 +12,7 @@
         "typeorm": "yarn ts-node ./node_modules/typeorm/cli.js"
     },
     "dependencies": {
-        "typeorm": "~0.2.34"
+        "typeorm": "~0.3.6"
     },
     "devDependencies": {
         "@types/jest": "24.0.11",
