@@ -266,7 +266,13 @@ export class OsisImporter extends BibleEngineImporter {
                 context.currentVerse = 1;
                 context.currentSubverse = 1;
                 context.isCurrentVerseImplicit = true;
-                if (!this.context.hasParagraphsInSourceText) startNewParagraph(context);
+                // create paragraph for each chapter for sources without paragraphs and sections
+                if (
+                    !this.context.hasParagraphsInSourceText &&
+                    !this.context.hasSectionsInSourceText &&
+                    this.options.autoGenChapterParagraphs
+                )
+                    startNewParagraph(context);
                 break;
             }
             case OsisXmlNodeName.VERSE: {
