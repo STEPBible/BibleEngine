@@ -8,6 +8,7 @@ export interface IImporterOptions {
     bookMeta?: ImporterBookMetadata;
     skip?: { crossRefs?: boolean; notes?: boolean; strongs?: boolean };
     autoGenMissingParagraphs?: boolean;
+    autoGenChapterParagraphs?: boolean;
 }
 export type ImporterBookMetadata = Map<
     string,
