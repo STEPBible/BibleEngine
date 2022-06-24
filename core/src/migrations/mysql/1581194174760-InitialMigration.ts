@@ -5,7 +5,7 @@ export class InitialMigration1581194174760 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         await queryRunner.query(
-            'CREATE TABLE `bible_book` (`versionId` int NOT NULL, `osisId` varchar(255) NOT NULL, `abbreviation` varchar(255) NOT NULL, `number` int NOT NULL, `title` varchar(255) NOT NULL, `longTitle` varchar(255) NULL, `introduction` text NULL, `type` varchar(255) NOT NULL, `chaptersCount` text NOT NULL, `dataLocation` varchar(255) NOT NULL, PRIMARY KEY (`versionId`, `osisId`)) ENGINE=InnoDB',
+            'CREATE TABLE `bible_book` (`versionId` int NOT NULL, `osisId` varchar(100) NOT NULL, `abbreviation` varchar(255) NOT NULL, `number` int NOT NULL, `title` varchar(255) NOT NULL, `longTitle` varchar(255) NULL, `introduction` text NULL, `type` varchar(255) NOT NULL, `chaptersCount` text NOT NULL, `dataLocation` varchar(255) NOT NULL, PRIMARY KEY (`versionId`, `osisId`)) ENGINE=InnoDB',
             undefined
         );
         await queryRunner.query(
