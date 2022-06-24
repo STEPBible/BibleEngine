@@ -1,9 +1,9 @@
 import { BibleEngine, IBibleContentSection } from '@bible-engine/core';
-import { ConnectionOptions } from 'typeorm';
+import { DataSourceOptions } from 'typeorm';
 import { OsisImporter } from '..';
 import { enBookMetadata } from '../../../metadata';
 
-const CONNECTION_OPTIONS: ConnectionOptions = {
+const CONNECTION_OPTIONS: DataSourceOptions = {
     type: 'sqlite',
     database: ':memory:',
 };
