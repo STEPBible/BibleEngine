@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [1.0.3](https://github.com/STEPBible/BibleEngine/compare/v1.0.2...v1.0.3) (2022-06-24)
 
+### Bug Fixes
+
+* **core:** column length of BibleBook.osisId reduced to 100, otherwise composed index on the table is too long for that table in mysql
+
+### Chores
+
+* cleaned up old documentation and added some new examples to packages README
+* published `client` and `importers` packages to npm
+* updated version numbers and peerDependencies to reflect the now published 1.0.x npm packages
+
 ### 1.0.2 (2022-05-24)
 
 
