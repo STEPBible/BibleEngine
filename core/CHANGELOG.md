@@ -4,11 +4,13 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.1.0](https://github.com/STEPBible/BibleEngine/compare/v1.0.3...v1.1.0) (2022-06-27)
 
-### [1.0.3](https://github.com/STEPBible/BibleEngine/compare/v1.0.2...v1.0.3) (2022-06-24)
+Migrated to TypeORM 0.3
+
+## [1.0.3](https://github.com/STEPBible/BibleEngine/compare/v1.0.2...v1.0.3) (2022-06-24)
 
 ### Bug Fixes
 
-* **core:** column length of BibleBook.osisId reduced to 100, otherwise composed index on the table is too long for that table in mysql
+* column length of BibleBook.osisId reduced to 100, otherwise composed index on the table is too long for that table in mysql
 
 ### Chores
 
@@ -16,14 +18,14 @@ All notable changes to this project will be documented in this file. See [standa
 * published `client` and `importers` packages to npm
 * updated version numbers and peerDependencies to reflect the now published 1.0.x npm packages
 
-### 1.0.2 (2022-05-24)
+## 1.0.2 (2022-05-24)
 
 
 ### Bug Fixes
 
-* **core:** fixed failing tests and inconsistent typing for subverse handling in v11n ([ff06953](https://github.com/STEPBible/BibleEngine/commit/ff06953ac01c8b71a8c9f60cd804f483a9240e21))
+* fixed failing tests and inconsistent typing for subverse handling in v11n ([ff06953](https://github.com/STEPBible/BibleEngine/commit/ff06953ac01c8b71a8c9f60cd804f483a9240e21))
 
-### 1.0.1 (2022-02-04)
+## 1.0.1 (2022-02-04)
 ### Added
 - Support custom connection name overrides
 
