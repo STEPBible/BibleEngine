@@ -1,10 +1,10 @@
-import { startNewParagraph } from './paragraphs.functions';
 import { IBibleContentSection } from '@bible-engine/core';
 import { OsisXmlNodeType } from '../../../shared/osisTypes';
 import { OsisParseError } from '../errors/OsisParseError';
 import { OsisSection } from '../types';
 import { ParserContext } from './../entities/ParserContext';
 import { getCurrentContainer } from './helpers.functions';
+import { startNewParagraph } from './paragraphs.functions';
 
 export const startNewSection = (context: ParserContext, elementType: OsisSection) => {
     // since we have some osis files where subSections are ended too early, we only
@@ -29,14 +29,14 @@ export const startNewSection = (context: ParserContext, elementType: OsisSection
         ];
         const elementSectionOsisLevel = sectionOrder.indexOf(elementType);
         let currentSectionOsisLevel = sectionOrder.indexOf(
-            context.sectionStack[context.sectionStack.length - 1]
+            context.sectionStack[context.sectionStack.length - 1]!
         );
 
         while (elementSectionOsisLevel <= currentSectionOsisLevel) {
             context.sectionStack.pop();
             // also works when sectionStack is empty
             currentSectionOsisLevel = sectionOrder.indexOf(
-                context.sectionStack[context.sectionStack.length - 1]
+                context.sectionStack[context.sectionStack.length - 1]!
             );
 
             context.contentContainerStack.pop();
@@ -64,7 +64,7 @@ export const startNewSection = (context: ParserContext, elementType: OsisSection
 
 export const getCurrentSection = (context: ParserContext) => {
     for (let i = context.contentContainerStack.length - 1; i >= 0; i--) {
-        if (context.contentContainerStack[i].type === 'section') {
+        if (context.contentContainerStack[i]!.type === 'section') {
             return context.contentContainerStack[i] as IBibleContentSection;
         }
     }

@@ -29,20 +29,18 @@ export class StepLexiconImporter extends BibleEngineImporter {
             .toString();
         const rawText = hebrewLexiconLines + greekLexiconLines;
         const definitions = StepLexiconImporter.parseStrongsDefinitions(rawText);
-        await Promise.all(
-            definitions.map((definition) => this.bibleEngine.addDictionaryEntry(definition))
-        );
+        await this.bibleEngine.addDictionaryEntries(definitions);
     }
 
     static parseStrongsDefinitions(rawText: string): IDictionaryEntry[] {
         rawText = rawText
             .replace(/@sp_Gloss/g, '@es_Gloss')
             .replace(/@sp_Definition/g, '@es_Definition');
-        const entries = rawText.split('$=').filter(chunk => !!chunk.trim());
+        const entries = rawText.split('$=').filter((chunk) => !!chunk.trim());
         const definitions: IDictionaryEntry[] = [];
         const seenStrongsNums = new Set();
         for (const entry of entries) {
-            const strongsNum = entry.split('=', 1)[0].trim();
+            const strongsNum = entry.split('=', 1)[0]!.trim();
             if (seenStrongsNums.has(strongsNum)) {
                 continue;
             }
@@ -50,14 +48,14 @@ export class StepLexiconImporter extends BibleEngineImporter {
             const lines = entry.split('\n');
             const attributes: any = {};
             for (const line of lines) {
-                const key = line.split('=')[0].trim();
+                const key = line.split('=')[0]!.trim();
                 const value = line.split('=').slice(1).join('=').trim();
                 attributes[key] = value;
             }
             if (!strongsNum) {
-                throw new Error(entry)
+                throw new Error(entry);
             }
-            const isHebrewStrongs = strongsNum[0].toLowerCase() === 'h';
+            const isHebrewStrongs = strongsNum[0]!.toLowerCase() === 'h';
             const hebrewTransliteration = transliterate(attributes[ORIGINAL_WORD] || '', {
                 isSimple: true,
             });

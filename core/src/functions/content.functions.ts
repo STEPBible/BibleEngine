@@ -1,8 +1,20 @@
 import {
+    BibleBookEntity,
+    BibleParagraphEntity,
+    BiblePhraseEntity,
+    BibleSectionEntity,
+    BibleVersionEntity,
+} from '../entities';
+import {
     BibleBookPlaintext,
     BibleContentGeneratorContainer,
     BooleanModifiers,
     ContentGroupType,
+    DocumentElement,
+    DocumentGroup,
+    DocumentPhrase,
+    DocumentSection,
+    IBibleBook,
     IBibleContent,
     IBibleContentGeneratorGroup,
     IBibleContentGeneratorPhrase,
@@ -11,34 +23,26 @@ import {
     IBibleContentGroup,
     IBibleContentPhrase,
     IBibleContentSection,
+    IBibleNote,
+    IBibleNumbering,
     IBibleOutputRich,
     IBibleOutputRoot,
-    PhraseModifiers,
-    ValueModifiers,
-    IBibleNumbering,
     IBibleReferenceRange,
     IBibleReferenceRangeNormalized,
-    IBibleSection,
-    IBibleNote,
-    IBibleVersion,
-    IBibleBook,
     IBibleReferenceRangeQuery,
+    IBibleSection,
+    IBibleVersion,
+    PhraseModifiers,
+    ValueModifiers,
 } from '../models';
+import { StringModifiers } from '../models/BiblePhrase';
 import {
-    BiblePhraseEntity,
-    BibleParagraphEntity,
-    BibleSectionEntity,
-    BibleBookEntity,
-    BibleVersionEntity,
-} from '../entities';
-import {
+    generateRangeFromGenericSection,
     generateReferenceRangeLabel,
     slimDownCrossReference,
-    generateRangeFromGenericSection,
     slimDownReferenceRange,
 } from './reference.functions';
 import { getNormalizedChapterCountForOsisId, getNormalizedVerseCount } from './v11n.functions';
-import { StringModifiers } from '../models/BiblePhrase';
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
@@ -143,8 +147,8 @@ export const generateBibleDocument = (
     };
     if (!phrases.length) return rootGroup;
 
-    const firstPhraseId = phrases[0].id;
-    const lastPhraseId = phrases[phrases.length - 1].id;
+    const firstPhraseId = phrases[0]!.id;
+    const lastPhraseId = phrases[phrases.length - 1]!.id;
     let activeGroup: BibleContentGeneratorContainer = rootGroup;
     let previousPhrase: IBibleContentGeneratorPhrase | undefined;
 
@@ -308,7 +312,7 @@ export const generateBibleDocument = (
             .sort()
             .map((key) => +key)) {
             // look for the section where the phrase is in (if any) and open it if necessary
-            const section = context[level].startingSections.find(
+            const section = context[level]!.startingSections.find(
                 (_section) =>
                     phrase.id >= _section.phraseStartId &&
                     phrase.id <= _section.phraseEndId &&
@@ -357,6 +361,17 @@ export const generateBibleDocument = (
                     meta: newSectionMeta,
                     level,
                     contents: [],
+                    crossReferences: section.crossReferences?.length
+                        ? section.crossReferences.map((crossRef) => ({
+                              ...crossRef,
+                              label: generateReferenceRangeLabel(
+                                  crossRef.range,
+                                  bookAbbreviations[crossRef.range.bookOsisId] ||
+                                      crossRef.range.bookOsisId,
+                                  chapterVerseSeparator
+                              ),
+                          }))
+                        : undefined,
                     parent: activeGroup,
                 };
                 activeGroup.contents.push(newSection);
@@ -396,15 +411,21 @@ export const generateBibleDocument = (
 
         // loop through modifiers and check if active check if they need to be started
 
-        // force a specific order of modifiers:
+        // force a specific order of modifiers (if two modifiers start at the same time, this
+        // determines which is the outer or inner group):
         const modifiers: (keyof PhraseModifiers | 'person')[] = [
-            'indentLevel',
-            'quoteLevel',
+            // a title stands by its own by definition, so it's on the top of the list
             'title',
+            // since `lineGroup`, `indentLevel` and `line`|`*ListItem` has a bigger effect on the
+            // rendered document structure, it should be on the highest level of the hierarchy
             'lineGroup',
+            // `indentLevel` needs to be below `lineGroup` otherwise the styles don't work
+            // properly, especially in case of single-verse rendering
+            'indentLevel',
             'line',
             'unorderedListItem',
             'orderedListItem',
+            'quoteLevel',
             'emphasis',
             'bold',
             'italic',
@@ -595,11 +616,14 @@ export const generateBibleDocument = (
             currentNumbering.versionVerse = 0;
         }
         if (currentNumbering.versionVerse !== phrase.versionVerseNum) {
-            numbering.versionVerseIsStarting = phrase.versionVerseNum;
+            if (phrase.versionSubverseNum !== 0)
+                numbering.versionVerseIsStarting = phrase.versionVerseNum;
             currentNumbering.versionVerse = phrase.versionVerseNum;
             currentNumbering.versionSubverse = -1;
         }
         if (currentNumbering.versionSubverse !== phrase.versionSubverseNum) {
+            if (phrase.versionSubverseNum === 1)
+                numbering.versionVerseIsStarting = phrase.versionVerseNum;
             numbering.versionSubverseIsStarting = phrase.versionSubverseNum;
             currentNumbering.versionSubverse = phrase.versionSubverseNum;
         }
@@ -618,9 +642,18 @@ export const generateBibleDocument = (
                 ...crossRef,
                 label: generateReferenceRangeLabel(
                     crossRef.range,
-                    bookAbbreviations[crossRef.range.bookOsisId],
+                    bookAbbreviations[crossRef.range.bookOsisId] || crossRef.range.bookOsisId,
                     chapterVerseSeparator
                 ),
+            }));
+        }
+        if (phrase.notes?.length) {
+            outputPhrase.notes = phrase.notes.map((note) => ({
+                ...note,
+                content: {
+                    ...note.content,
+                    contents: normalizeDocumentContents(note.content.contents),
+                },
             }));
         }
 
@@ -665,15 +698,19 @@ export const generateContextSections = (
     const context: IBibleOutputRich['context'] = {};
 
     if (phrases.length) {
-        const firstPhraseId = phrases[0].id;
-        const lastPhraseId = phrases[phrases.length - 1].id;
+        const firstPhraseId = phrases[0]!.id;
+        const lastPhraseId = phrases[phrases.length - 1]!.id;
         for (const section of sections) {
             if (section.level > 1) {
                 let isSectionWithinParentLevel = false;
+                if (!context[section.level - 1])
+                    throw new Error(
+                        `missing context level ${section.level - 1} for section ${section.id}`
+                    );
                 for (const parentSection of [
-                    ...context[section.level - 1].startingSections,
-                    context[section.level - 1].wrappingSection,
-                    context[section.level - 1].endingPartialSection,
+                    ...context[section.level - 1]!.startingSections,
+                    context[section.level - 1]!.wrappingSection,
+                    context[section.level - 1]!.endingPartialSection,
                 ]) {
                     if (
                         parentSection &&
@@ -700,26 +737,26 @@ export const generateContextSections = (
 
             // check if this section is before the range
             if (section.phraseEndId < firstPhraseId)
-                context[section.level].previousSections.push(section);
+                context[section.level]!.previousSections.push(section);
             // check if this section is after the range
             else if (section.phraseStartId > lastPhraseId)
-                context[section.level].nextSections.push(section);
+                context[section.level]!.nextSections.push(section);
             // check if this section starts within the range
             else if (
                 section.phraseStartId >= firstPhraseId &&
                 section.phraseStartId <= lastPhraseId
             )
-                context[section.level].startingSections.push(section);
+                context[section.level]!.startingSections.push(section);
             // check if this section ends within the range
             else if (
                 section.phraseStartId < firstPhraseId &&
                 section.phraseEndId >= firstPhraseId &&
                 section.phraseEndId <= lastPhraseId
             )
-                context[section.level].endingPartialSection = section;
+                context[section.level]!.endingPartialSection = section;
             else {
                 // this section wraps the entire range (by exclusion above)
-                context[section.level].wrappingSection = section;
+                context[section.level]!.wrappingSection = section;
             }
         }
     }
@@ -742,8 +779,8 @@ export const generateContextRanges = (
     };
 
     if (phrases.length) {
-        const firstPhraseId = phrases[0].id;
-        const lastPhraseId = phrases[phrases.length - 1].id;
+        const firstPhraseId = phrases[0]!.id;
+        const lastPhraseId = phrases[phrases.length - 1]!.id;
 
         // paragraph context ranges
         for (const paragraph of paragraphs) {
@@ -781,10 +818,10 @@ export const generateContextRanges = (
         }
         if (
             paragraphs.length === 1 &&
-            (paragraphs[0].phraseStartId < firstPhraseId ||
-                paragraphs[0].phraseEndId > lastPhraseId)
+            (paragraphs[0]!.phraseStartId < firstPhraseId ||
+                paragraphs[0]!.phraseEndId > lastPhraseId)
         ) {
-            contextRanges.paragraph.completeRange = generateRangeFromGenericSection(paragraphs[0]);
+            contextRanges.paragraph.completeRange = generateRangeFromGenericSection(paragraphs[0]!);
         }
 
         // context ranges for chapter (version & normalized)
@@ -909,58 +946,110 @@ export const generateContextRanges = (
         for (const sectionLevel of Object.keys(context).map((_sectionLevel) => +_sectionLevel)) {
             if (!contextRanges.sections[sectionLevel]) contextRanges.sections[sectionLevel] = {};
 
-            if (context[sectionLevel] && context[sectionLevel].wrappingSection) {
+            if (context[sectionLevel] && context[sectionLevel]!.wrappingSection) {
                 contextRanges.sections[
                     sectionLevel
-                ].completeRange = generateRangeFromGenericSection(
-                    context[sectionLevel].wrappingSection!
+                ]!.completeRange = generateRangeFromGenericSection(
+                    context[sectionLevel]!.wrappingSection!
                 );
-            } else if (context[sectionLevel].endingPartialSection) {
+            } else if (context[sectionLevel]!.endingPartialSection) {
                 contextRanges.sections[
                     sectionLevel
-                ].completeStartingRange = generateRangeFromGenericSection(
-                    context[sectionLevel].endingPartialSection!
+                ]!.completeStartingRange = generateRangeFromGenericSection(
+                    context[sectionLevel]!.endingPartialSection!
                 );
-            } else if (context[sectionLevel].startingSections.length > 0) {
+            } else if (context[sectionLevel]!.startingSections.length > 0) {
                 // => if there is a wrapping section, there can't be startingSections on the
                 //    same level
-                if (context[sectionLevel].startingSections[0].phraseStartId < firstPhraseId) {
+                if (context[sectionLevel]!.startingSections[0]!.phraseStartId < firstPhraseId) {
                     contextRanges.sections[
                         sectionLevel
-                    ].completeStartingRange = generateRangeFromGenericSection(
-                        context[sectionLevel].startingSections[0]
+                    ]!.completeStartingRange = generateRangeFromGenericSection(
+                        context[sectionLevel]!.startingSections[0]!
                     );
                 }
                 if (
-                    context[sectionLevel].startingSections[
-                        context[sectionLevel].startingSections.length - 1
-                    ].phraseEndId > lastPhraseId
+                    context[sectionLevel]!.startingSections[
+                        context[sectionLevel]!.startingSections.length - 1
+                    ]!.phraseEndId > lastPhraseId
                 ) {
                     contextRanges.sections[
                         sectionLevel
-                    ].completeEndingRange = generateRangeFromGenericSection(
-                        context[sectionLevel].startingSections[
-                            context[sectionLevel].startingSections.length - 1
-                        ]
+                    ]!.completeEndingRange = generateRangeFromGenericSection(
+                        context[sectionLevel]!.startingSections[
+                            context[sectionLevel]!.startingSections.length - 1
+                        ]!
                     );
                 }
             }
 
-            if (context[sectionLevel] && context[sectionLevel].previousSections.length)
+            if (context[sectionLevel]! && context[sectionLevel]!.previousSections.length)
                 contextRanges.sections[
                     sectionLevel
-                ].previousRange = generateRangeFromGenericSection(
-                    context[sectionLevel].previousSections[
-                        context[sectionLevel].previousSections.length - 1
-                    ]
+                ]!.previousRange = generateRangeFromGenericSection(
+                    context[sectionLevel]!.previousSections[
+                        context[sectionLevel]!.previousSections.length - 1
+                    ]!
                 );
-            if (context[sectionLevel] && context[sectionLevel].nextSections.length)
-                contextRanges.sections[sectionLevel].nextRange = generateRangeFromGenericSection(
-                    context[sectionLevel].nextSections[0]
+            if (context[sectionLevel]! && context[sectionLevel]!.nextSections.length)
+                contextRanges.sections[sectionLevel]!.nextRange = generateRangeFromGenericSection(
+                    context[sectionLevel]!.nextSections[0]!
                 );
         }
     }
     return contextRanges;
+};
+
+/**
+ * normalizes document contents to only use necessary properties (similar to
+ * `stripUnnecessaryDataFromBibleContent`) and to only use the value "after" in `phrase.skipSpace`
+ * @param {DocumentElement[]} contents
+ * @returns {DocumentElement[]}
+ */
+export const normalizeDocumentContents = (
+    contents: DocumentElement[],
+    context: { currentPhrase?: DocumentPhrase } = {}
+) => {
+    const inputData: DocumentElement[] = [];
+    for (const obj of contents) {
+        if (obj.type === 'phrase') {
+            const inputPhrase: DocumentPhrase = {
+                content: obj.content,
+            };
+            if (obj.linebreak) inputPhrase.linebreak = true;
+            if (obj.skipSpace) {
+                if (obj.skipSpace === 'before' || obj.skipSpace === 'both') {
+                    if (context.currentPhrase) context.currentPhrase.skipSpace = 'after';
+                    if (obj.skipSpace === 'both') inputPhrase.skipSpace = 'after';
+                } else {
+                    inputPhrase.skipSpace = obj.skipSpace;
+                }
+            }
+            if (obj.bibleReference) inputPhrase.bibleReference = obj.bibleReference;
+            context.currentPhrase = inputPhrase;
+            inputData.push(inputPhrase);
+        } else if (obj.type === 'group') {
+            const inputGroup: DocumentGroup<ContentGroupType> = {
+                type: 'group',
+                groupType: obj.groupType,
+                modifier: obj.modifier,
+                contents: <(DocumentGroup<ContentGroupType> | DocumentPhrase)[]>(
+                    normalizeDocumentContents(obj.contents, context)
+                ),
+            };
+            inputData.push(inputGroup);
+        } else if (obj.type === 'section') {
+            const inputSection: DocumentSection = {
+                type: 'section',
+                contents: normalizeDocumentContents(obj.contents, context),
+            };
+            if (obj.level !== undefined) inputSection.level = obj.level;
+            if (obj.title) inputSection.title = obj.title;
+            if (obj.subTitle) inputSection.subTitle = obj.subTitle;
+            inputData.push(inputSection);
+        }
+    }
+    return inputData;
 };
 
 export const stripUnnecessaryDataFromBibleBook = (
@@ -1066,11 +1155,13 @@ export const stripUnnecessaryDataFromBibleContextData = (
     }
 
     for (const level of Object.keys(context).map((_level) => +_level)) {
+        if (!contextRanges['sections'][level])
+            throw new Error(`missing section level ${level} in contextRanges`);
         for (const rangeType of <(keyof IBibleOutputRich['contextRanges']['sections'][0])[]>(
-            Object.keys(contextRanges['sections'][level])
+            Object.keys(contextRanges['sections'][level]!)
         )) {
-            contextRanges['sections'][level][rangeType] = slimDownReferenceRange(
-                contextRanges['sections'][level][rangeType]!
+            contextRanges['sections'][level]![rangeType] = slimDownReferenceRange(
+                contextRanges['sections'][level]![rangeType]!
             );
         }
 
@@ -1087,11 +1178,17 @@ export const stripUnnecessaryDataFromBibleContextData = (
                 slimSection.crossReferences = section.crossReferences.map(slimDownCrossReference);
             return slimSection;
         };
-        if (context[level].wrappingSection)
-            context[level].wrappingSection = slimDownBibleSection(context[level].wrappingSection!);
-        context[level].startingSections = context[level].startingSections.map(slimDownBibleSection);
-        context[level].nextSections = context[level].nextSections.map(slimDownBibleSection);
-        context[level].previousSections = context[level].previousSections.map(slimDownBibleSection);
+        if (context[level]!.wrappingSection)
+            context[level]!.wrappingSection = slimDownBibleSection(
+                context[level]!.wrappingSection!
+            );
+        context[level]!.startingSections = context[level]!.startingSections.map(
+            slimDownBibleSection
+        );
+        context[level]!.nextSections = context[level]!.nextSections.map(slimDownBibleSection);
+        context[level]!.previousSections = context[level]!.previousSections.map(
+            slimDownBibleSection
+        );
     }
 };
 

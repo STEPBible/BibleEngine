@@ -4,5 +4,7 @@ export * from './bible/NEUE';
 export * from './bible/osis';
 export * from './bible/sword';
 export * from './bible/csv';
+export * from './bible/dbl';
+export * from './bible/usx';
 export * from './stepdata/v11n-rules';
 export * from './stepdata/step-lexicon';

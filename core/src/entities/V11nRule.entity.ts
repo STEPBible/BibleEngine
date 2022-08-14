@@ -1,18 +1,18 @@
 import {
-    Entity,
-    Column,
     AfterLoad,
     BeforeInsert,
     BeforeUpdate,
-    PrimaryGeneratedColumn,
+    Column,
+    Entity,
     Index,
+    PrimaryGeneratedColumn,
 } from 'typeorm';
-import { IV11nRule, IBibleReference, IBibleReferenceNormalized } from '../models';
 import {
-    generateReferenceId,
     generateNormalizedRangeFromVersionRange,
+    generateReferenceId,
     parseReferenceId,
 } from '../functions/reference.functions';
+import { IBibleReference, IBibleReferenceNormalized, IV11nRule } from '../models';
 
 @Entity('v11n_rule')
 export class V11nRuleEntity implements IV11nRule {
@@ -129,7 +129,7 @@ export class V11nRuleEntity implements IV11nRule {
         // numbers in it, so we need to do some manual object conversion
         if (this.sourceRef)
             this.sourceRefId = generateReferenceId(
-                generateNormalizedRangeFromVersionRange(this.sourceRef)
+                generateNormalizedRangeFromVersionRange(this.sourceRef, 1)
             );
         if (this.standardRef) this.standardRefId = generateReferenceId(this.standardRef);
 

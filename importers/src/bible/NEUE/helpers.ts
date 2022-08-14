@@ -1,21 +1,24 @@
-import { TreeElement, DefaultNode } from './models/parse5';
 import {
+    BibleReferenceParser,
     BookWithContentForInput,
+    ContentGroupType,
+    DocumentElement,
+    DocumentGroup,
+    DocumentPhrase,
     DocumentRoot,
     DocumentSection,
-    DocumentPhrase,
-    DocumentGroup,
-    DocumentElement,
-    ContentGroupType,
-    BibleReferenceParser,
-    getReferencesFromText,
-    IBibleContentSection,
-    IBibleContentPhrase,
     IBibleContent,
     IBibleContentGroup,
-    IBibleReferenceRangeQuery,
+    IBibleContentPhrase,
+    IBibleContentSection,
 } from '@bible-engine/core';
-import { startsWithPunctuationChar } from '../../shared/helpers.functions';
+import {
+    endsWithNoSpaceAfterChar,
+    getPhrasesFromParsedReferences,
+    getReferencesFromText,
+    startsWithNoSpaceBeforeChar,
+} from '../../shared/helpers.functions';
+import { DefaultNode, TreeElement } from './models/parse5';
 
 export const getAttribute = (node: TreeElement, name: string) => {
     const attr = node.attrs.find((_attr) => _attr.name === name);
@@ -196,9 +199,10 @@ export const visitNode = (
     ) {
         const verseRef = getTextFromNode(node);
         const verseParts = verseRef.split(',');
+        if (!verseParts[1]) throw new Error(`error parsing verseParts[1]: ${verseRef}`);
         if (verseParts.length > 1) {
             globalState.currentBackupChapterNumber = globalState.currentChapterNumber;
-            globalState.currentChapterNumber = +verseParts[0];
+            globalState.currentChapterNumber = +verseParts[0]!;
             globalState.currentVerseNumber = +verseParts[1];
         } else {
             globalState.currentVerseNumber = +verseRef;
@@ -279,7 +283,7 @@ export const visitNode = (
 
             if (
                 newNote.contents.length === 1 &&
-                newNote.contents[0].type === 'phrase' &&
+                newNote.contents[0]!.type === 'phrase' &&
                 (<DocumentPhrase>newNote.contents[0]).bibleReference
             ) {
                 // if the note only consists of one phrase with a bible reference, we add it as a
@@ -297,11 +301,20 @@ export const visitNode = (
             }
         }
     } else if (node.nodeName === '#text') {
-        const text = node.value
+        let text = node.value
             .trim()
             // .replace(/\r?\n|\r/g, ' ')
             .replace(/\s{2,}/g, ' ')
-            .replace('[SELA]', '♪');
+            .replace('[SELA]', '♪')
+            // this replace all quotes to german top/bottom quotes. it's a very simple replace
+            // mechanism, however it works surprisingly well for the NEUE source data, i couldn't
+            // find any incorrectly replaced quotes.
+            // RADAR: that could easily brake when the formatting of the source data changes.
+            .replace(/(^| )"/g, '$1„')
+            .replace(/(^| )'/g, '$1‚')
+            .replace(/"/g, '“')
+            .replace(/'/g, '‘');
+
         if (!text) return;
 
         if (localState.currentDocument) {
@@ -309,7 +322,9 @@ export const visitNode = (
                 type: 'phrase',
                 content: text,
             };
-            if (startsWithPunctuationChar(text)) newPhrase.skipSpace = 'before';
+            if (startsWithNoSpaceBeforeChar(text)) newPhrase.skipSpace = 'before';
+            if (endsWithNoSpaceAfterChar(text))
+                newPhrase.skipSpace = newPhrase.skipSpace === 'before' ? 'both' : 'after';
 
             // if this is a bible-note:
             if (
@@ -340,86 +355,13 @@ export const visitNode = (
             );
 
             if (textReferences.length) {
-                // sort reference by starting indices
-                textReferences.sort((a, b) => a.indices[0] - b.indices[0]);
-
-                let currentIndex = 0;
-                for (const ref of textReferences) {
-                    const refText = newPhrase.content.slice(ref.indices[0], ref.indices[1]).trim();
-
-                    if (currentIndex > ref.indices[0])
-                        throw new Error(
-                            `reference entities overlap at ${globalState.currentChapterNumber}:` +
-                                `${globalState.currentVerseNumber} with refText ${refText} ` +
-                                `between currentIndex ${currentIndex} and indices[0] ` +
-                                `${ref.indices[0]}`
-                        );
-
-                    if (currentIndex < ref.indices[0]) {
-                        // create phrase from text at range currentIndex to start of reference
-                        const fillText = newPhrase.content
-                            .slice(currentIndex, ref.indices[0])
-                            .trim();
-                        if (fillText) {
-                            const fillPhrase: DocumentPhrase = {
-                                type: 'phrase',
-                                content: fillText,
-                            };
-                            if (startsWithPunctuationChar(fillText))
-                                fillPhrase.skipSpace = 'before';
-                            localState.currentDocument.push(fillPhrase);
-                        }
-                    }
-
-                    // create phrase from reference with crossRef attached to it
-                    //
-                    // This is reference is "hard-coded" into the serialized document in the DB, and
-                    // we can only use the version numbmers here (normalization is not available at
-                    // this point). In order to be able to use this data across installations (e.g.
-                    // in a client-server use-case), we use the universal versionUid instead of
-                    // versionId.
-                    const bibleReference: IBibleReferenceRangeQuery = {
-                        bookOsisId: ref.start.b,
-                        versionUid: globalState.versionUid,
-                        versionChapterNum: ref.start.c,
-                    };
-                    if (
-                        ref.type === 'v' ||
-                        ref.type === 'cv' ||
-                        ref.type === 'bcv' ||
-                        ref.type === 'integer' ||
-                        (ref.type === 'range' && ref.start.type !== 'c' && ref.start.type !== 'bc')
-                    ) {
-                        bibleReference.versionVerseNum = ref.start.v;
-                        if (ref.start.v !== ref.end.v || ref.start.c !== ref.end.c)
-                            bibleReference.versionVerseEndNum = ref.end.v;
-                    }
-                    if (ref.start.c !== ref.end.c) {
-                        bibleReference.versionChapterEndNum = ref.end.c;
-                    }
-                    const refPhrase: DocumentPhrase = {
-                        type: 'phrase',
-                        content: refText,
-                        bibleReference,
-                    };
-                    if (startsWithPunctuationChar(refText)) refPhrase.skipSpace = 'before';
-                    localState.currentDocument.push(refPhrase);
-
-                    currentIndex = ref.indices[1];
-                }
-
-                if (currentIndex <= newPhrase.content.length - 1) {
-                    // create phrase from text after last reference
-                    const endText = newPhrase.content.slice(currentIndex).trim();
-                    if (endText) {
-                        const endPhrase: DocumentPhrase = {
-                            type: 'phrase',
-                            content: endText,
-                        };
-                        if (startsWithPunctuationChar(endText)) endPhrase.skipSpace = 'before';
-                        localState.currentDocument.push(endPhrase);
-                    }
-                }
+                localState.currentDocument.push(
+                    ...getPhrasesFromParsedReferences(
+                        newPhrase.content,
+                        textReferences,
+                        globalState.versionUid
+                    )
+                );
             } else localState.currentDocument.push(newPhrase);
         } else if (globalState.bookData && localState.currentContentGroup) {
             if (!globalState.currentChapterNumber || !globalState.currentVerseNumber)
@@ -437,14 +379,17 @@ export const visitNode = (
             if (textByNotes.length > 1) {
                 for (let i = 0; i < textByNotes.length; i++) {
                     if (i === textByNotes.length - 1) {
-                        const phraseText = textByNotes[i].trim();
+                        const phraseText = textByNotes[i]!.trim();
                         if (phraseText) {
                             const phrase: IBibleContentPhrase = {
                                 ...numbers,
                                 type: 'phrase',
                                 content: phraseText,
                             };
-                            if (startsWithPunctuationChar(phraseText)) phrase.skipSpace = 'before';
+                            if (startsWithNoSpaceBeforeChar(phraseText))
+                                phrase.skipSpace = 'before';
+                            if (endsWithNoSpaceAfterChar(phraseText))
+                                phrase.skipSpace = phrase.skipSpace === 'before' ? 'both' : 'after';
                             localState.currentContentGroup.push(phrase);
                         }
                     } else {
@@ -458,21 +403,24 @@ export const visitNode = (
                         //        "last word approach" for now.
 
                         // last word should get a note (if index is -1 it gets 0 which is correct)
-                        let lastWordIndex = textByNotes[i].lastIndexOf(' ') + 1;
+                        let lastWordIndex = textByNotes[i]!.lastIndexOf(' ') + 1;
                         if (lastWordIndex > 0) {
-                            const startingText = textByNotes[i].slice(0, lastWordIndex - 1).trim();
+                            const startingText = textByNotes[i]!.slice(0, lastWordIndex - 1).trim();
                             if (startingText) {
                                 const phrase: IBibleContentPhrase = {
                                     ...numbers,
                                     type: 'phrase',
                                     content: startingText,
                                 };
-                                if (startsWithPunctuationChar(startingText))
+                                if (startsWithNoSpaceBeforeChar(startingText))
                                     phrase.skipSpace = 'before';
+                                if (endsWithNoSpaceAfterChar(startingText))
+                                    phrase.skipSpace =
+                                        phrase.skipSpace === 'before' ? 'both' : 'after';
                                 localState.currentContentGroup.push(phrase);
                             }
                         }
-                        const textWithNote = textByNotes[i].slice(lastWordIndex).trim();
+                        const textWithNote = textByNotes[i]!.slice(lastWordIndex).trim();
                         const phraseWithPendingNote: IBibleContentPhrase = {
                             ...numbers,
                             type: 'phrase',
@@ -480,8 +428,11 @@ export const visitNode = (
                         };
                         // there are cases when `textWithNote` is an empty string (i.e. when right
                         // after a group node)
-                        if (!textWithNote || startsWithPunctuationChar(textWithNote))
+                        if (!textWithNote || startsWithNoSpaceBeforeChar(textWithNote))
                             phraseWithPendingNote.skipSpace = 'before';
+                        if (endsWithNoSpaceAfterChar(textWithNote))
+                            phraseWithPendingNote.skipSpace =
+                                phraseWithPendingNote.skipSpace === 'before' ? 'both' : 'after';
                         localState.currentContentGroup.push(phraseWithPendingNote);
                         if (!globalState.contentWithPendingNotes)
                             globalState.contentWithPendingNotes = [];
@@ -494,8 +445,10 @@ export const visitNode = (
                     content: text,
                     ...numbers,
                 };
-                if (startsWithPunctuationChar(text)) newBiblePhrase.skipSpace = 'before';
-
+                if (startsWithNoSpaceBeforeChar(text)) newBiblePhrase.skipSpace = 'before';
+                if (endsWithNoSpaceAfterChar(text))
+                    newBiblePhrase.skipSpace =
+                        newBiblePhrase.skipSpace === 'before' ? 'both' : 'after';
                 localState.currentContentGroup.push(newBiblePhrase);
             }
         } else throw new Error(`can't find container for text node`);
@@ -521,7 +474,7 @@ export const visitNode = (
             } else if (
                 lastElement.type === 'group' &&
                 lastElement.contents.length === 1 &&
-                lastElement.contents[0].type === 'phrase'
+                lastElement.contents[0]!.type === 'phrase'
             ) {
                 const lastPhrase = lastElement.contents[0] as IBibleContentPhrase;
                 lastPhrase.linebreak = true;

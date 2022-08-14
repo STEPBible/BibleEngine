@@ -9,8 +9,11 @@ export function parseStrongsNums(tagLemma: string) {
 }
 
 export function normalizeStrongsNum(strongsNum: string): string {
+    if (!strongsNum.length) {
+        throw new Error(`failed normalizing empty strong number`);
+    }
     const lastCharacter: any = strongsNum[strongsNum.length - 1];
-    const startingletter = strongsNum[0].toUpperCase();
+    const startingletter = strongsNum[0]!.toUpperCase();
     const numberPortion = !isNaN(lastCharacter)
         ? strongsNum.substring(1)
         : strongsNum.substring(1, strongsNum.length - 1);

@@ -1,8 +1,8 @@
-import { IBibleReferenceRangeNormalized, IBiblePhraseRef } from '../models';
+import { IBiblePhraseRef, IBibleReferenceRangeNormalized } from '../models';
 import {
     generateEndReferenceFromRange,
     generatePhraseId,
-    generateReferenceId
+    generateReferenceId,
 } from './reference.functions';
 
 /**
@@ -18,12 +18,12 @@ export const generateBookSectionsSql = (
 ) => {
     const bookPhraseIdStart = generatePhraseId({
         bookOsisId: range.bookOsisId,
-        isNormalized: true
+        isNormalized: true,
     });
     const bookPhraseIdEnd = generatePhraseId({
         bookOsisId: range.bookOsisId,
         normalizedChapterNum: 999,
-        isNormalized: true
+        isNormalized: true,
     });
 
     const colVersion = `${tableAlias}.versionId`;
@@ -135,18 +135,36 @@ export const generatePhraseIdVersionSql = (versionId: number, tableAlias: string
  * @returns {string} SQL
  */
 export const generateReferenceIdSql = (range: IBibleReferenceRangeNormalized, col = 'id') => {
+    const refStart: IBibleReferenceRangeNormalized = {
+        ...range,
+        normalizedSubverseNum:
+            range.normalizedChapterNum && range.normalizedVerseNum
+                ? range.normalizedSubverseNum ?? 0
+                : undefined,
+    };
     const refEnd: IBibleReferenceRangeNormalized = {
         isNormalized: true,
         bookOsisId: range.bookOsisId,
         normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
-        normalizedVerseNum:
-        range.normalizedVerseEndNum ? range.normalizedVerseEndNum :
-        (range.normalizedVerseNum && !range.normalizedChapterEndNum)
-                ? range.normalizedVerseNum
-                : 999,
-        normalizedSubverseNum: range.normalizedSubverseEndNum || 99
+        normalizedVerseNum: range.normalizedVerseEndNum
+            ? range.normalizedVerseEndNum
+            : range.normalizedVerseNum && !range.normalizedChapterEndNum
+            ? range.normalizedVerseNum
+            : 999,
+        normalizedSubverseNum:
+            typeof range.normalizedSubverseEndNum === 'number' &&
+            !isNaN(range.normalizedSubverseEndNum)
+                ? range.normalizedSubverseEndNum
+                : typeof range.normalizedSubverseNum === 'number' &&
+                  !isNaN(range.normalizedSubverseNum) &&
+                  !range.normalizedChapterEndNum &&
+                  !range.normalizedVerseEndNum
+                ? range.normalizedSubverseNum
+                : 99,
     };
-    let sql = `${col} BETWEEN '${generateReferenceId(range)}' AND '${generateReferenceId(refEnd)}'`;
+    let sql = `${col} BETWEEN '${generateReferenceId(refStart)}' AND '${generateReferenceId(
+        refEnd
+    )}'`;
 
     return sql;
 };

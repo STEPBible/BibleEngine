@@ -1,17 +1,17 @@
-import { resolve } from 'path';
-import { createReadStream } from 'fs';
-import { createInterface } from 'readline';
 import {
-    V11nRuleEntity,
+    getBookGenericIdFromOsisId,
     getOsisIdFromBookString,
     getSourceTypeId,
-    getBookGenericIdFromOsisId,
+    V11nRuleEntity,
 } from '@bible-engine/core';
+import { createReadStream } from 'fs';
+import { resolve } from 'path';
+import { createInterface } from 'readline';
 import { BibleEngineImporter } from '../../shared/Importer.interface';
 
 const DEBUG = false;
 
-const replaceNoteVars = (note: string) => {
+const replaceNoteVars = (note?: string) => {
     if (!note) return undefined;
     return note.replace(/%(.*)%(.*)/, (_, text: string, ref: string) => {
         for (const phraseEntry of V11nRuleEntity.notePhrases.entries()) {
@@ -51,6 +51,7 @@ export class V11nImporter extends BibleEngineImporter {
                 }
 
                 // get action and normalize
+                if (!row[3]) throw new Error(`v11n import error: missing row[3] for row ${row[1]}`);
                 let action = row[3].replace('Verse', 'verse');
                 if (action.slice(-1) === '*') action = action.slice(0, -1);
                 if (action === 'Psalm Title') action = 'Keep verse';
@@ -65,13 +66,26 @@ export class V11nImporter extends BibleEngineImporter {
                     throw new Error(`invalid action ${action}`);
 
                 const sourceRef = row[1].replace('Title', '1.0').split('.');
-                const sourceBookOsisId = getOsisIdFromBookString(sourceRef[0]);
+                const sourceBookOsisId = getOsisIdFromBookString(sourceRef[0]!);
+                if (!sourceRef[1])
+                    throw new Error(`v11n import error: missing sourceRef[1]: ${sourceRef}`);
                 const sourceRefNumbers = sourceRef[1].split(':');
+                if (!sourceRefNumbers[1])
+                    throw new Error(
+                        `v11n import error: missing sourceRefNumbers[1]: ${sourceRefNumbers}`
+                    );
                 const sourceRefVerseInfo = sourceRefNumbers[1].split('.');
 
+                if (!row[2]) throw new Error(`v11n import error: missing row[2] for row ${row[1]}`);
                 const standardRef = row[2].replace('Title', '1.0').split('.');
-                const standardBookOsisId = getOsisIdFromBookString(standardRef[0]);
+                const standardBookOsisId = getOsisIdFromBookString(standardRef[0]!);
+                if (!standardRef[1])
+                    throw new Error(`v11n import error: missing standardRef[1]: ${standardRef}`);
                 const standardRefNumbers = standardRef[1].split(':');
+                if (!standardRefNumbers[1])
+                    throw new Error(
+                        `v11n import error: missing standardRefNumbers[1]: ${standardRefNumbers}`
+                    );
                 let standardRefVerse = standardRefNumbers[1];
                 let standardRefVersePartIndicator: string | undefined = standardRefVerse.substr(-1);
                 if (/[a-z]/.test(standardRefVersePartIndicator)) {
@@ -103,7 +117,7 @@ export class V11nImporter extends BibleEngineImporter {
                         );
                     ruleNotSupported = true;
                 }
-                if (isNaN(+sourceRefNumbers[0]) || isNaN(+standardRefNumbers[0])) {
+                if (isNaN(+sourceRefNumbers[0]!) || isNaN(+standardRefNumbers[0]!)) {
                     if (DEBUG)
                         console.log(`invalid chapter number in ${row[1]} ${action} ${row[2]}`);
                     ruleNotSupported = true;
@@ -120,12 +134,12 @@ export class V11nImporter extends BibleEngineImporter {
 
                 if (ruleNotSupported) {
                     ignoredRules++;
-                    if (ignoredRulesSourceTypes.indexOf(row[0]) === -1)
-                        ignoredRulesSourceTypes.push(row[0]);
+                    if (ignoredRulesSourceTypes.indexOf(row[0]!) === -1)
+                        ignoredRulesSourceTypes.push(row[0]!);
                     if (sourceBookOsisId && getBookGenericIdFromOsisId(sourceBookOsisId) <= 66) {
                         ignoredRulesNonAp++;
-                        if (ignoredRulesNonApSourceTypes.indexOf(row[0]) === -1)
-                            ignoredRulesNonApSourceTypes.push(row[0]);
+                        if (ignoredRulesNonApSourceTypes.indexOf(row[0]!) === -1)
+                            ignoredRulesNonApSourceTypes.push(row[0]!);
                     }
                     return;
                 }
@@ -134,19 +148,19 @@ export class V11nImporter extends BibleEngineImporter {
                     new V11nRuleEntity({
                         sourceRef: {
                             bookOsisId: sourceBookOsisId as string,
-                            versionChapterNum: +sourceRefNumbers[0],
-                            versionVerseNum: +sourceRefVerseInfo[0],
-                            versionSubverseNum: +sourceRef[2],
+                            versionChapterNum: +sourceRefNumbers[0]!,
+                            versionVerseNum: +sourceRefVerseInfo[0]!,
+                            versionSubverseNum: sourceRef[2] ? +sourceRef[2] : undefined,
                         },
                         standardRef: {
                             bookOsisId: standardBookOsisId as string,
-                            normalizedChapterNum: +standardRefNumbers[0],
+                            normalizedChapterNum: +standardRefNumbers[0]!,
                             normalizedVerseNum: +standardRefVerse,
-                            normalizedSubverseNum: +standardRef[2],
+                            normalizedSubverseNum: standardRef[2] ? +standardRef[2] : undefined,
                             partIndicator: standardRefVersePartIndicator,
                         },
                         action,
-                        noteMarker: row[4],
+                        noteMarker: row[4] || '[+]',
                         note,
                         noteSecondary: replaceNoteVars(row[6]),
                         noteAncientVersions: row[7],

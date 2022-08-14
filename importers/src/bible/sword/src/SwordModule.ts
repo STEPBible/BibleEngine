@@ -1,10 +1,10 @@
-import ModuleIndex from './ModuleIndex';
+import { ImporterBookMetadata } from '../../../shared/Importer.interface';
+import BlobReader from './BlobReader';
 import ModuleConfig from './ModuleConfig';
+import ModuleIndex from './ModuleIndex';
+import { BookXML, ChapterPosition, ChapterXML, VerseXML } from './types';
 import VerseScheme from './VerseScheme';
 const verseKey = require('./VerseMetadata');
-import BlobReader from './BlobReader';
-import { ChapterPosition, ChapterXML, BookXML, VerseXML } from './types';
-import { ImporterBookMetadata } from '../../../shared/Importer.interface';
 
 /**
  * Set of files which encapsulates a Bible version.
@@ -27,7 +27,7 @@ export default class SwordModule {
         const buffer = Buffer.alloc(blob.byteLength);
         const view = new Uint8Array(blob);
         for (let i = 0; i < buffer.length; i += 1) {
-            buffer[i] = view[i];
+            buffer[i] = view[i]!;
         }
         return buffer;
     }
@@ -90,7 +90,7 @@ export default class SwordModule {
             const xmlResult = this.getXMLForBook(bookName);
             return {
                 osisId: bookName,
-                fullName: bookFullNames[i],
+                fullName: bookFullNames[i] || bookName,
                 bookNum: i + 1,
                 chapters: xmlResult,
             };

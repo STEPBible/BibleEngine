@@ -1,44 +1,52 @@
-import { startNewSection } from './functions/sections.functions';
-import path from 'path';
-import { readFileSync, createReadStream } from 'fs';
+import { createReadStream, readFileSync } from 'fs';
 import { decodeStream, encodeStream } from 'iconv-lite';
+import path from 'path';
 import { parser } from 'sax';
+import { getCurrentSection, startNewSection } from './functions/sections.functions';
 
 import {
+    BibleReferenceParser,
+    DocumentGroup,
+    DocumentPhrase,
+    DocumentRoot,
+    generateVersionReferenceId,
     IBibleContentGroup,
     IBibleContentPhrase,
     IBibleCrossReference,
     IBibleNote,
-    DocumentRoot,
-    DocumentPhrase,
-    DocumentGroup,
-    generateVersionReferenceId,
 } from '@bible-engine/core';
 
-import { BibleEngineImporter, IImporterOptions } from '../../shared/Importer.interface';
-import { startsWithPunctuationChar, streamToString } from '../../shared/helpers.functions';
-import { OsisXmlNode, OsisXmlNodeType, OsisXmlNodeName } from '../../shared/osisTypes';
-import { ITagWithType, TagType } from './types';
-import Logger from '../../shared/Logger';
-import { ParserContext } from './entities/ParserContext';
 import {
-    getParsedBookChapterVerseRef,
+    endsWithNoSpaceAfterChar,
+    getBibleReferenceFromParsedReference,
+    getPhrasesFromParsedReferences,
+    getReferencesFromText,
+    startsWithNoSpaceBeforeChar,
+    streamToString,
+} from '../../shared/helpers.functions';
+import { BibleEngineImporter, IImporterOptions } from '../../shared/Importer.interface';
+import Logger from '../../shared/Logger';
+import { OsisXmlNode, OsisXmlNodeName, OsisXmlNodeType } from '../../shared/osisTypes';
+import { ParserContext } from './entities/ParserContext';
+import { OsisParseError } from './errors/OsisParseError';
+import {
     getCurrentContainer,
+    getParsedBookChapterVerseRef,
     isBeginningOfSection,
     isInsideDocumentHeader,
     isInsideIgnoredContent,
 } from './functions/helpers.functions';
 import {
-    isBeginningOfParagraph,
-    createParagraph,
-    startNewParagraph,
-    sourceTextHasParagraphs,
     closeCurrentParagraph,
+    createParagraph,
+    isBeginningOfParagraph,
+    sourceTextHasParagraphs,
+    startNewParagraph,
 } from './functions/paragraphs.functions';
 import { parseStrongsNums } from './functions/strongs.functions';
-import { stackHasParagraph, validateGroup } from './functions/validators.functions';
 import { updateContextWithTitleText } from './functions/titles.functions';
-import { OsisParseError } from './errors/OsisParseError';
+import { stackHasParagraph, validateGroup } from './functions/validators.functions';
+import { ITagWithType, TagType } from './types';
 
 const STRICT_MODE_ENABLED = true;
 
@@ -144,7 +152,10 @@ export class OsisImporter extends BibleEngineImporter {
         // the following also means that only `div` tags without a type will
         // have the `DIVISION` type
         if (elementType === 'div' && tag.attributes.type) elementType = tag.attributes.type;
-        if (elementType === 'note' && tag.attributes.type === OsisXmlNodeType.CROSS_REFERENCE)
+        if (
+            (elementType === 'note' && tag.attributes.type === OsisXmlNodeType.CROSS_REFERENCE) ||
+            (elementType === 'title' && tag.attributes.type === OsisXmlNodeType.PARALLEL)
+        )
             elementType = OsisXmlNodeType.CROSS_REFERENCE;
         const stackTag: ITagWithType = { ...tag, type: elementType };
 
@@ -167,35 +178,53 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.REFERENCE: {
-                if (!tag.attributes.osisRef) {
-                    return Logger.error('Invalid cross reference verse found', context);
-                }
+                // references in document-nodes are handled in `parseTextNode`
+                if (this.isInsideNoteOrIntroduction()) return;
+
                 if (tag.attributes.osisRef === this.getCurrentOsisVerse()) {
                     Logger.verbose('Ignoring self-referencing cross reference', context);
                     return;
                 }
                 if (!context.crossRefBuffer) {
-                    return Logger.error('Reference found outside cross ref block', context);
+                    Logger.verbose('Reference found outside cross ref block', context);
+                    return;
                 }
-                if (!context.crossRefBuffer.refs) {
-                    return Logger.error(
-                        `Corrupted cross ref buffer found: ${JSON.stringify(
-                            context.crossRefBuffer
-                        )}`,
-                        context
-                    );
-                }
-                const osisRef = getParsedBookChapterVerseRef(tag.attributes.osisRef);
+
                 const crossRef: IBibleCrossReference = {
                     key: context.crossRefBuffer?.key,
-                    range: osisRef,
+                    range: tag.attributes.osisRef
+                        ? getParsedBookChapterVerseRef(tag.attributes.osisRef)
+                        : { bookOsisId: '' },
                 };
-                context.crossRefBuffer.refs.push(crossRef);
+
+                if (this.isInsideSectionCrossRefs()) {
+                    const currentSection = getCurrentSection(context);
+                    if (!currentSection || !currentSection.crossReferences) {
+                        return Logger.error('section cross reference without section', context);
+                    }
+                    currentSection.crossReferences.push(crossRef);
+                } else if (this.options.crossRefConnectToPhrase === 'before') {
+                    const currentPhrase = this.getCurrentPhrase(context, true);
+                    if (!currentPhrase || !currentPhrase.crossReferences)
+                        return Logger.error('cross reference without phrase', context);
+                    currentPhrase.crossReferences?.push(crossRef);
+                } else {
+                    if (!context.crossRefBuffer.refs) {
+                        return Logger.error(
+                            `Corrupted cross ref buffer found: ${JSON.stringify(
+                                context.crossRefBuffer
+                            )}`,
+                            context
+                        );
+                    }
+                    context.crossRefBuffer.refs.push(crossRef);
+                }
                 break;
             }
             case OsisXmlNodeName.OSIS_ROOT: {
                 if (!tag.attributes.osisIDWork || !tag.attributes['xml:lang'])
                     throw new OsisParseError(`missing osisIDWork or xml:lang attribute`, context);
+
                 context.version = {
                     uid: tag.attributes.osisIDWork,
                     language: tag.attributes['xml:lang'],
@@ -203,6 +232,24 @@ export class OsisImporter extends BibleEngineImporter {
                     chapterVerseSeparator: ':',
                     ...this.options.versionMeta,
                 };
+
+                try {
+                    const bcv_parser = require(`bible-passage-reference-parser/js/${context.version.language}_bcv_parser`)
+                        .bcv_parser;
+                    const bcv: BibleReferenceParser = new bcv_parser({});
+                    bcv.set_options({
+                        punctuation_strategy:
+                            this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
+                        invalid_passage_strategy: 'include',
+                        invalid_sequence_strategy: 'include',
+                        passage_existence_strategy: 'bc',
+                        consecutive_combination_strategy: 'separate',
+                    });
+                    context.bcv = bcv;
+                } catch (e) {
+                    Logger.warning('missing language file for bible-reference-parser', context);
+                }
+
                 break;
             }
             case OsisXmlNodeType.BOOK: {
@@ -256,6 +303,11 @@ export class OsisImporter extends BibleEngineImporter {
                 if (!tag.attributes.osisID)
                     throw new OsisParseError('chapter tag without osisID', context);
                 const numbers = tag.attributes.osisID.split('.');
+                if (!numbers[1])
+                    throw new OsisParseError(
+                        `missing chapter in osisId ${tag.attributes.osisID}`,
+                        context
+                    );
                 context.currentChapter++;
                 if (+numbers[1] !== context.currentChapter)
                     throw new OsisParseError(
@@ -284,7 +336,12 @@ export class OsisImporter extends BibleEngineImporter {
                     throw new OsisParseError('verse tag without osisID', context);
 
                 const refs = tag.attributes.osisID.split(' ');
-                const numbers = refs[0].split('.');
+                const numbers = refs[0]!.split('.');
+                if (!numbers[1] || !numbers[2])
+                    throw new OsisParseError(
+                        `missing chapter or verse in osisId ${refs[0]}`,
+                        context
+                    );
 
                 // sometimes there is a verse 1 tag, sometimes not. sometimes the same verse number
                 // has two verse tags when a section splits a verse
@@ -301,7 +358,12 @@ export class OsisImporter extends BibleEngineImporter {
                     );
 
                 if (refs.length > 1) {
-                    const numbersEnd = refs[refs.length - 1].split('.');
+                    const numbersEnd = refs[refs.length - 1]!.split('.');
+                    if (!numbersEnd[1] || !numbersEnd[2])
+                        throw new OsisParseError(
+                            `missing chapter in osisId ${refs[refs.length - 1]}`,
+                            context
+                        );
                     if (+numbersEnd[1] !== context.currentChapter)
                         throw new OsisParseError(
                             `verse spans across chapters is currently not supported: ${tag.attributes.osisID}`,
@@ -437,18 +499,34 @@ export class OsisImporter extends BibleEngineImporter {
                 if (context.crossRefBuffer) {
                     Logger.verbose(
                         `
-                        cross reference buffer not cleared, combining with next ref
-                        existing refs: ${JSON.stringify(context.crossRefBuffer.refs)}
-                        new refs found: ${JSON.stringify(tag.attributes)}
-                        `,
+                            cross reference buffer not cleared, combining with next ref
+                            existing refs: ${JSON.stringify(context.crossRefBuffer.refs)}
+                            new refs found: ${JSON.stringify(tag.attributes)}
+                            `,
                         context
                     );
                     break;
                 }
+                // we use `crossRefBuffer` for all cases, since we need to access the `key` later
                 context.crossRefBuffer = {
                     key: tag.attributes.n,
-                    refs: [],
                 };
+
+                if (this.isInsideSectionCrossRefs()) {
+                    const currentSection = getCurrentSection(context);
+                    if (!currentSection)
+                        throw new OsisParseError('cross reference without section', context);
+                    Logger.info('saving cross refs for section', context);
+                    currentSection.crossReferences = [];
+                } else if (this.options.crossRefConnectToPhrase === 'before') {
+                    const currentPhrase = this.getCurrentPhrase(context, true);
+                    if (!currentPhrase) {
+                        throw new OsisParseError('cross reference without phrase', context);
+                    }
+                    currentPhrase.crossReferences = [];
+                } else {
+                    context.crossRefBuffer.refs = [];
+                }
                 break;
             }
             case OsisXmlNodeName.WORD: {
@@ -496,16 +574,34 @@ export class OsisImporter extends BibleEngineImporter {
                         currentContainer.contents.push(paragraph);
                     } else currentContainer.contents.push(titleGroup);
                     context.contentContainerStack.push(titleGroup);
-                } else if (!context.hasSectionsInSourceText) {
+                } else if (
+                    !context.hasSectionsInSourceText &&
+                    tag.attributes.type !== OsisXmlNodeType.SCOPE
+                ) {
                     // Since titles should always be attached to a section,
                     // versions with titles but not sections need artifical sections
-                    startNewSection(
-                        context,
+                    const sectionType =
                         tag.attributes.level === 'sub'
                             ? OsisXmlNodeType.SECTION_SUB
-                            : OsisXmlNodeType.SECTION
-                    );
+                            : OsisXmlNodeType.SECTION;
+
+                    // DISABLED: subsequent titles will now just replace the preivous title. the
+                    //           concatenated titles looked weird, especially when passages are
+                    //           viewed in isolation (if we don't create a new section, a
+                    //           subsequent title tag will just be added to the exising title of
+                    //           the current section). if we always create a new section on title,
+                    //           the higher level sections in the source will be ignored since they
+                    //           don't have content. we leave the code here, in case the previous
+                    //           behavior is needed in the future.
+                    //
+                    // const currentSection = getCurrentSection(context);
+                    // // we only create a new section if there is no current section or the current one already has content
+                    // // (this way subsequent title tags will be concatenated instead of closing and reopening sections)
+                    // if (!currentSection || currentSection.contents.length) {
+                    startNewSection(context, sectionType);
+                    // }
                 }
+
                 // section title is handled in parseTextNode
                 break;
             }
@@ -593,6 +689,7 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeType.BOOK_GROUP:
+            case OsisXmlNodeName.CELL:
             case OsisXmlNodeName.DATE:
             case OsisXmlNodeName.DESCRIPTION:
             case OsisXmlNodeName.DIVISION:
@@ -605,6 +702,8 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.PUBLISHER:
             case OsisXmlNodeName.REF_SYSTEM:
             case OsisXmlNodeName.RIGHTS:
+            case OsisXmlNodeName.SALUTE:
+            case OsisXmlNodeName.SPEAKER:
             case OsisXmlNodeType.SWORD_MILESTONE:
             case OsisXmlNodeName.TEXTUAL_VARIATION:
             case OsisXmlNodeName.TYPE:
@@ -616,8 +715,8 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             default: {
-                if (!elementType) {
-                    Logger.warning(`unrecognized osis xml tag: ${elementType}`, context);
+                if (!elementType || elementType.indexOf('disabled') === -1) {
+                    Logger.warning(`unrecognized opening osis xml tag: ${elementType}`, context);
                 }
             }
         }
@@ -845,7 +944,12 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 // we handle the cross ref in parseTextNode
-                if (context.crossRefBuffer?.refs?.length === 0) {
+                if (
+                    this.options.crossRefConnectToPhrase === 'before' ||
+                    this.isInsideSectionCrossRefs()
+                ) {
+                    delete context.crossRefBuffer;
+                } else if (context.crossRefBuffer?.refs?.length === 0) {
                     Logger.verbose(
                         'Ignoring cross reference block with no actual references',
                         context
@@ -930,6 +1034,7 @@ export class OsisImporter extends BibleEngineImporter {
                 // is handled in parseTextNode
                 break;
             }
+            case OsisXmlNodeName.CELL:
             case OsisXmlNodeName.DATE:
             case OsisXmlNodeName.DESCRIPTION:
             case OsisXmlNodeName.DIVISION:
@@ -942,6 +1047,8 @@ export class OsisImporter extends BibleEngineImporter {
             case OsisXmlNodeName.PUBLISHER:
             case OsisXmlNodeName.REF_SYSTEM:
             case OsisXmlNodeName.RIGHTS:
+            case OsisXmlNodeName.SALUTE:
+            case OsisXmlNodeName.SPEAKER:
             case OsisXmlNodeType.SWORD_MILESTONE:
             case OsisXmlNodeName.TEXTUAL_VARIATION:
             case OsisXmlNodeName.TYPE:
@@ -954,7 +1061,12 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             default: {
-                Logger.warning(`unrecognized closing osis xml tag: ${currentTag.type}`, context);
+                if (!currentTag.type || currentTag.type.indexOf('disabled') === -1) {
+                    Logger.warning(
+                        `unrecognized closing osis xml tag: ${currentTag.type}`,
+                        context
+                    );
+                }
             }
         }
 
@@ -980,6 +1092,7 @@ export class OsisImporter extends BibleEngineImporter {
             return;
         }
         const currentTag = this.getCurrentTag(context);
+        const versionUid = this.options.versionMeta?.uid || context.version?.uid;
 
         if (
             context.hierarchicalTagStack.find((tag) => tag.name === OsisXmlNodeName.REVISION_DESC)
@@ -997,11 +1110,69 @@ export class OsisImporter extends BibleEngineImporter {
             }
             return;
         }
+        const isInDocumentNode = this.isInsideNoteOrIntroduction();
         if (
             currentTag.type === OsisXmlNodeType.CROSS_REFERENCE ||
-            currentTag.name === OsisXmlNodeName.REFERENCE
+            (!isInDocumentNode &&
+                context.crossRefBuffer &&
+                currentTag.name === OsisXmlNodeName.REFERENCE)
         ) {
-            // Can ignore text inside. only need xml attributes
+            // Fix missing osisRefs of the last added reference
+            if (currentTag.name === OsisXmlNodeName.REFERENCE) {
+                let currentCrossRefContainer: IBibleCrossReference[] | undefined;
+                if (this.isInsideSectionCrossRefs()) {
+                    const currentSection = getCurrentSection(context);
+                    if (currentSection?.crossReferences?.length)
+                        currentCrossRefContainer = currentSection.crossReferences;
+                } else if (this.options.crossRefConnectToPhrase === 'before') {
+                    const currentPhrase = this.getCurrentPhrase(context);
+                    if (currentPhrase && currentPhrase.crossReferences?.length)
+                        currentCrossRefContainer = currentPhrase.crossReferences;
+                } else {
+                    if (context.crossRefBuffer?.refs?.length)
+                        currentCrossRefContainer = context.crossRefBuffer.refs;
+                }
+                if (currentCrossRefContainer?.length) {
+                    const currentCrossRef = currentCrossRefContainer[
+                        currentCrossRefContainer.length - 1
+                    ]!;
+                    // we check if the label was already set. this can happen if we ignored a reference tag earlier
+                    // however the parser will still come to this text node which would
+                    // overwrite the label of the previous reference in this cross ref group
+                    if (!currentCrossRef.label) {
+                        currentCrossRef.label = trimmedText;
+                        if (!currentCrossRef.range.bookOsisId) {
+                            // we remove the ref with the missing range and create new ones (since there can be multiple)
+                            currentCrossRefContainer.pop();
+                            if (context.bcv && versionUid && context.currentBook?.osisId) {
+                                const crossRefs = getReferencesFromText(context.bcv, trimmedText, {
+                                    bookOsisId: context.currentBook.osisId,
+                                    chapterNum: context.currentChapter,
+                                });
+                                for (const crossRef of crossRefs) {
+                                    currentCrossRefContainer.push({
+                                        label: trimmedText.slice(
+                                            crossRef.indices[0],
+                                            crossRef.indices[1]
+                                        ),
+                                        range: getBibleReferenceFromParsedReference(
+                                            crossRef,
+                                            versionUid
+                                        ),
+                                    });
+                                }
+                                if (!crossRefs.length) {
+                                    throw new OsisParseError(
+                                        `can't parse references in "${trimmedText}"`,
+                                        context
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // else: we ignore content in cross-reference blocks that are not a reference
             return;
         }
         if (currentTag.attributes.type === OsisXmlNodeType.PSALM_BOOK_TITLE) {
@@ -1011,13 +1182,18 @@ export class OsisImporter extends BibleEngineImporter {
 
         let currentContainer = getCurrentContainer(context);
 
-        if (this.isInsideNoteOrIntroduction()) {
+        if (isInDocumentNode) {
             const phrase: DocumentPhrase = {
                 type: 'phrase',
                 content: trimmedText,
             };
+            if (startsWithNoSpaceBeforeChar(trimmedText)) phrase.skipSpace = 'before';
+            if (endsWithNoSpaceAfterChar(trimmedText))
+                phrase.skipSpace = phrase.skipSpace === 'before' ? 'both' : 'after';
+
             // Strongs numbers inside notes are not supported
             delete context.strongsBuffer;
+
             if (currentTag && currentTag.name === OsisXmlNodeName.CATCH_WORD) {
                 const group: DocumentGroup<'bold'> = {
                     type: 'group',
@@ -1025,7 +1201,49 @@ export class OsisImporter extends BibleEngineImporter {
                     contents: [phrase],
                 };
                 currentContainer.contents.push(group);
-            } else currentContainer.contents.push(phrase);
+                return;
+            }
+
+            if (
+                currentTag &&
+                currentTag.name === OsisXmlNodeName.REFERENCE &&
+                currentTag.attributes.osisRef
+            ) {
+                // at this point the UID should be known, either by `versionMeta` or by parsing the xml header
+                if (!versionUid) throw new OsisParseError("can't determin version uid", context);
+                phrase.bibleReference = {
+                    ...getParsedBookChapterVerseRef(currentTag.attributes.osisRef),
+                    versionId: undefined,
+                    versionUid,
+                };
+            } else {
+                if (context.bcv && context.currentBook) {
+                    // at this point the UID should be known, either by `versionMeta` or by parsing the xml header
+                    if (!versionUid)
+                        throw new OsisParseError("can't determin version uid", context);
+
+                    const localRefMatcher =
+                        context.version?.language === 'en'
+                            ? /(^| )(chapter|ch\.|v\.|verse|verses) ([0-9,:\-–; ]|(and|to|chapter|ch\.|v\.|verse|verses))+/gi
+                            : context.version?.language === 'de'
+                            ? /(Kapitel|V\.|Vers) ([0-9,\.\-–; ]|(und|bis|Kapitel|V\.|Vers))+/g
+                            : undefined;
+                    const refs = getReferencesFromText(context.bcv, trimmedText, {
+                        bookOsisId: context.currentBook.osisId,
+                        chapterNum: context.currentChapter,
+                        localRefMatcher,
+                    });
+                    if (refs.length) {
+                        currentContainer.contents.push(
+                            ...getPhrasesFromParsedReferences(trimmedText, refs, versionUid)
+                        );
+                        return;
+                    }
+                }
+            }
+
+            currentContainer.contents.push(phrase);
+
             return;
         }
 
@@ -1054,9 +1272,15 @@ export class OsisImporter extends BibleEngineImporter {
             versionVerseNum: context.currentVerse,
             versionSubverseNum: context.currentSubverse,
         };
-        if (startsWithPunctuationChar(trimmedText)) phrase.skipSpace = 'before';
+        if (startsWithNoSpaceBeforeChar(trimmedText)) phrase.skipSpace = 'before';
+        if (endsWithNoSpaceAfterChar(trimmedText))
+            phrase.skipSpace = phrase.skipSpace === 'before' ? 'both' : 'after';
         if (context.crossRefBuffer) {
-            phrase.crossReferences = context.crossRefBuffer.refs;
+            if (
+                this.options.crossRefConnectToPhrase === 'after' &&
+                context.crossRefBuffer.refs?.length
+            )
+                phrase.crossReferences = context.crossRefBuffer.refs;
             delete context.crossRefBuffer;
         }
         if (context.strongsBuffer) {
@@ -1104,7 +1328,7 @@ export class OsisImporter extends BibleEngineImporter {
             return;
         }
         const rootContainer = context.contentContainerStack[0];
-        if (rootContainer.type !== 'root')
+        if (rootContainer?.type !== 'root')
             throw new OsisParseError(`book content has no root`, context);
         context.books.push({
             book: context.currentBook,
@@ -1114,7 +1338,10 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     getCurrentTag(context: ParserContext) {
-        return context.hierarchicalTagStack[context.hierarchicalTagStack.length - 1];
+        if (!context.hierarchicalTagStack.length) {
+            throw new OsisParseError(`unexpected empty tag stack`, context);
+        }
+        return context.hierarchicalTagStack[context.hierarchicalTagStack.length - 1]!;
     }
 
     getCurrentPhrase(context: ParserContext, createIfMissing = false) {
@@ -1161,7 +1388,9 @@ export class OsisImporter extends BibleEngineImporter {
     isInsideNoteOrIntroduction() {
         return this.context.hierarchicalTagStack.find(
             (tag) =>
-                tag.name === OsisXmlNodeName.NOTE || tag.type === OsisXmlNodeType.BOOK_INTRODUCTION
+                (tag.name === OsisXmlNodeName.NOTE &&
+                    tag.attributes.type !== OsisXmlNodeType.CROSS_REFERENCE) ||
+                tag.type === OsisXmlNodeType.BOOK_INTRODUCTION
         );
     }
 
@@ -1170,6 +1399,14 @@ export class OsisImporter extends BibleEngineImporter {
             (tag) =>
                 tag.name === OsisXmlNodeName.TITLE &&
                 (!tag.attributes.canonical || tag.attributes.canonical === 'false')
+        );
+    }
+
+    isInsideSectionCrossRefs() {
+        return this.context.hierarchicalTagStack.find(
+            (tag) =>
+                tag.name === OsisXmlNodeName.TITLE &&
+                tag.attributes.type === OsisXmlNodeType.PARALLEL
         );
     }
 

@@ -1,13 +1,13 @@
-import * as winston from 'winston'
+import * as winston from 'winston';
 import { ParserContext } from '../bible/osis/entities/ParserContext';
 import { getErrorMessageWithContext } from '../bible/osis/functions/logging.functions';
-type LogLevel = 'verbose' | 'info' | 'warning' | 'error'
+import { LogLevel } from './Importer.interface';
 
 class Logger {
     logger: winston.Logger;
 
     constructor() {
-        const level: LogLevel = (process.env.LOG as LogLevel) || 'warning';
+        const level: LogLevel = (process.env.LOG as LogLevel) || 'warn';
         this.logger = winston.createLogger({
             level,
             format: winston.format.combine(
@@ -35,4 +35,4 @@ class Logger {
     }
 }
 
-export default new Logger()
+export default new Logger();

@@ -106,12 +106,12 @@ export type BibleReferenceBCV = {
     b: 'string';
     c: number;
     v: number;
-    type: 'integer' | 'bc' | 'c' | 'bcv' | 'cv' | 'v';
+    type: 'integer' | 'bc' | 'c' | 'bcv' | 'cv' | 'v' | 'bv';
 };
 
 export type BibleReferenceParsedEntity = {
     osis: string;
-    type: 'range' | 'integer' | 'bc' | 'c' | 'bcv' | 'cv' | 'v';
+    type: 'range' | 'integer' | 'bc' | 'c' | 'bcv' | 'cv' | 'v' | 'bv';
     indices: [number, number];
     start: BibleReferenceBCV;
     end: BibleReferenceBCV;
@@ -125,6 +125,7 @@ export interface BibleReferenceParser {
         invalid_passage_strategy?: 'include' | 'ignore';
         invalid_sequence_strategy?: 'include' | 'ignore';
         passage_existence_strategy?: 'b' | 'bc' | 'bcv' | 'bv' | 'c' | 'cv' | 'v' | 'none';
+        consecutive_combination_strategy: 'separate' | 'combine';
     }) => void;
 }
 

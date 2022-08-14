@@ -26,7 +26,8 @@
         "random-words": "^1.1.0",
         "reflect-metadata": "^0.1.12",
         "rimraf": "^2.6.3",
-        "winston": "^3.3.3"
+        "winston": "^3.8.1",
+        "xml2js": "^0.4.23"
     },
     "devDependencies": {
         "@types/archiver": "^2.1.2",
@@ -35,6 +36,7 @@
         "@types/parse5": "4",
         "@types/rimraf": "^2.0.2",
         "@types/sax": "^1.2.0",
+        "@types/xml2js": "^0.4.11",
         "copyfiles": "^2.1.0",
         "xml-formatter": "^2.4.0"
     },
