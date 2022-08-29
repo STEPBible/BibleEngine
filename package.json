@@ -8,7 +8,6 @@
         "postinstall": "yarn run buildAll",
         "heroku": "node server/lib/heroku.js",
         "buildAll": "yarn workspace @bible-engine/core run build && yarn workspace @bible-engine/importers run build && yarn workspace @bible-engine/server run generateApiClient && yarn workspace @bible-engine/server run build && yarn workspace @bible-engine/client run build",
-        "test:app": "yarn workspace @bible-engine/core run test",
         "typeorm": "yarn ts-node ./node_modules/typeorm/cli.js"
     },
     "dependencies": {
@@ -31,9 +30,6 @@
             "importers",
             "server",
             "client"
-        ],
-        "nohoist": [
-            "app"
         ]
     }
 }

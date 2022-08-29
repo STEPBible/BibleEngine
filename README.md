@@ -24,7 +24,6 @@ Additional features:
 -   [@bible-engine/client](https://github.com/STEPBible/BibleEngine/tree/master/client): client for reading from a _BibleEngine_ database or server
 -   [@bible-engine/importers](https://github.com/STEPBible/BibleEngine/tree/master/importers): for creating a _BibleEngine_ database and import data from different data sources
 -   [@bible-engine/server](https://github.com/STEPBible/BibleEngine/tree/master/server): implementation example for a _BibleEngine_ server
--   [@bible-engine/app](https://github.com/STEPBible/BibleEngine/tree/master/app): react-native app
 
 ## Contributing
 
