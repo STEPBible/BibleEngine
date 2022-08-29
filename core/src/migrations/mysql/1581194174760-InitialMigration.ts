@@ -9,7 +9,7 @@ export class InitialMigration1581194174760 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            'CREATE TABLE `bible_version` (`id` int NOT NULL AUTO_INCREMENT, `uid` varchar(255) NOT NULL, `title` varchar(255) NOT NULL, `description` text NULL, `language` varchar(5) NOT NULL, `copyrightShort` varchar(255) NULL, `copyrightLong` text NULL, `chapterVerseSeparator` varchar(255) NOT NULL, `hasStrongs` tinyint NULL, `isPlaintext` tinyint NULL, `lastUpdate` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `dataLocation` varchar(255) NOT NULL, UNIQUE INDEX `IDX_9adc280fa0230af76df7a0be0d` (`uid`), PRIMARY KEY (`id`)) ENGINE=InnoDB',
+            'CREATE TABLE `bible_version` (`id` int NOT NULL AUTO_INCREMENT, `uid` varchar(255) NOT NULL, `title` varchar(255) NOT NULL, `description` text NULL, `language` varchar(15) NOT NULL, `copyrightShort` varchar(255) NULL, `copyrightLong` text NULL, `chapterVerseSeparator` varchar(255) NOT NULL, `hasStrongs` tinyint NULL, `isPlaintext` tinyint NULL, `lastUpdate` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), `dataLocation` varchar(255) NOT NULL, UNIQUE INDEX `IDX_9adc280fa0230af76df7a0be0d` (`uid`), PRIMARY KEY (`id`)) ENGINE=InnoDB',
             undefined
         );
         await queryRunner.query(

@@ -1,4 +1,5 @@
 import {
+    BibleReferenceParser,
     ContentGroupType,
     DocumentRoot,
     IBibleBook,
@@ -29,6 +30,7 @@ export interface IParserContext {
     isCurrentVerseImplicit: boolean;
     noteBuffer?: IBibleNote;
     referenceBuffer?: IBibleReferenceRange;
+    bcv?: BibleReferenceParser;
 }
 
 export type UsxXmlNodeName =
@@ -40,7 +42,8 @@ export type UsxXmlNodeName =
     | 'note'
     | 'char'
     | 'table'
-    | 'ref';
+    | 'ref'
+    | 'optbreak';
 export enum UsxXmlNodeStyle {
     BOOK = 'id',
     BOOK_HEADING = 'h',
@@ -78,6 +81,7 @@ export enum UsxXmlNodeStyle {
     INTRODUCTION_OUTLINE_LEVEL1 = 'io1',
     INTRODUCTION_OUTLINE_LEVEL2 = 'io2',
     INTRODUCTION_OUTLINE_LEVEL3 = 'io3',
+    INTRODUCTION_BLANK_LINE = 'ib',
     LIST_ITEM = 'li',
     LIST_ITEM_LEVEL1 = 'li1',
     LIST_ITEM_LEVEL2 = 'li2',
@@ -126,6 +130,7 @@ export enum UsxXmlNodeStyle {
     SECTION_LEVEL4 = 's4',
     SECTION_MAJOR = 'ms',
     SECTION_MAJOR_LEVEL1 = 'ms1',
+    SECTION_MAJOR_LEVEL2 = 'ms2',
     SECTION_MAJOR_REFERENCES = 'mr',
     SECTION_PARALLEL_REFERENCES = 'r',
     SECTION_SPEAKER = 'sp',
@@ -162,6 +167,7 @@ export type TagType = UsxXmlNodeName | UsxXmlNodeStyle;
 export const SECTION_TAGS = [
     UsxXmlNodeStyle.SECTION_MAJOR,
     UsxXmlNodeStyle.SECTION_MAJOR_LEVEL1,
+    UsxXmlNodeStyle.SECTION_MAJOR_LEVEL2,
     UsxXmlNodeStyle.SECTION_LEVEL1,
     UsxXmlNodeStyle.SECTION_LEVEL2,
     UsxXmlNodeStyle.SECTION_LEVEL3,
@@ -175,6 +181,7 @@ export const SECTION_TAGS = [
 
 export const SECTION_TAGS_NORMALIZED = [
     UsxXmlNodeStyle.SECTION_MAJOR_LEVEL1,
+    UsxXmlNodeStyle.SECTION_MAJOR_LEVEL2,
     UsxXmlNodeStyle.SECTION_LEVEL1,
     UsxXmlNodeStyle.SECTION_LEVEL2,
     UsxXmlNodeStyle.SECTION_LEVEL3,
@@ -234,8 +241,10 @@ export const IGNORED_TAGS: TagType[] = [
     UsxXmlNodeStyle.NOTE_CHAR_PREVIOUS_REFERENCE,
     UsxXmlNodeStyle.INTRODUCTION_TITLE_LEVEL2,
     UsxXmlNodeStyle.INTRODUCTION_TITLE_AT_END,
-    UsxXmlNodeStyle.PROPER_NAME,
-    UsxXmlNodeStyle.WORDLIST_ITEM,
+    UsxXmlNodeStyle.INTRODUCTION_BLANK_LINE,
+    UsxXmlNodeStyle.TABLE_HEADING1,
+    UsxXmlNodeStyle.TABLE_HEADING2,
+    UsxXmlNodeStyle.TABLE_HEADING3,
 ];
 
 export interface UsxXmlNode {

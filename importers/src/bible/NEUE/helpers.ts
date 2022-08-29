@@ -199,11 +199,10 @@ export const visitNode = (
     ) {
         const verseRef = getTextFromNode(node);
         const verseParts = verseRef.split(',');
-        if (!verseParts[1]) throw new Error(`error parsing verseParts[1]: ${verseRef}`);
         if (verseParts.length > 1) {
             globalState.currentBackupChapterNumber = globalState.currentChapterNumber;
             globalState.currentChapterNumber = +verseParts[0]!;
-            globalState.currentVerseNumber = +verseParts[1];
+            globalState.currentVerseNumber = +verseParts[1]!;
         } else {
             globalState.currentVerseNumber = +verseRef;
             if (globalState.currentBackupChapterNumber) {
@@ -341,7 +340,6 @@ export const visitNode = (
                 }
             }
 
-            const localRefRegex = /(Kapitel|V\.|Vers) ([0-9,.\-–; ]|(und|bis|Kapitel|V\.|Vers))+/g;
             const textReferences = getReferencesFromText(
                 globalState.refParser,
                 newPhrase.content,
@@ -349,7 +347,7 @@ export const visitNode = (
                     ? {
                           bookOsisId: globalState.bookData.book.osisId,
                           chapterNum: globalState.currentChapterNumber,
-                          localRefMatcher: localRefRegex,
+                          language: 'de',
                       }
                     : undefined
             );

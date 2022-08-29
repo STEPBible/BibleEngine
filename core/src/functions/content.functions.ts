@@ -1124,6 +1124,7 @@ export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBi
                 contents: stripUnnecessaryDataFromBibleContent(obj.contents),
             };
             if (obj.level !== undefined) inputSection.level = obj.level;
+            if (obj.isChapterLabel) inputSection.isChapterLabel = obj.isChapterLabel;
             if (obj.title) inputSection.title = obj.title;
             if (obj.subTitle) inputSection.subTitle = obj.subTitle;
             if (obj.description) inputSection.description = obj.description;

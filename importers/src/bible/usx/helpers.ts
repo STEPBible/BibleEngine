@@ -208,7 +208,7 @@ export function isInsideDocument(context: IParserContext) {
 }
 
 export function isInsideIgnoredContent(context: IParserContext) {
-    return !!context.hierarchicalTagStack.find((tag) => IGNORED_TAGS.includes(tag.type));
+    return !!context.hierarchicalTagStack.find((tag) => isTagIgnored(tag.type));
 }
 
 export function isInsideGroup(groupType: ContentGroupType, context: IParserContext) {
@@ -234,6 +234,10 @@ export function isNoteContainerTag(
 
 export function isSectionTag(tagType: TagType): tagType is typeof SECTION_TAGS[number] {
     return SECTION_TAGS.indexOf(tagType as typeof SECTION_TAGS[number]) !== -1;
+}
+
+export function isTagIgnored(tagType: TagType) {
+    return IGNORED_TAGS.includes(tagType);
 }
 
 export function startDocument(context: IParserContext) {

@@ -235,7 +235,9 @@ export class BibleEngine {
                 // not only the length of the array, since there might be skipped verses in versions
                 // however `chaptersCount` needs to contain the last verse number not number of
                 // unskipped verses within a chapter
-                chaptersCount.push(Array.from(verses.keys()).pop() || 0);
+                // there are occurences of verses in the wrong order in source files so we need to
+                // specifically look for the max key in `verses`
+                chaptersCount.push(verses.size ? Math.max(...verses.keys()) : 0);
             }
         }
 
@@ -488,8 +490,7 @@ export class BibleEngine {
             .leftJoinAndSelect('section.crossReferences', 'crossReference')
             .where(generateBookSectionsSql(rangeNormalized, 'section'))
             // sections are inserted in order, so its safe to sort by generated id
-            .orderBy('section.level')
-            .addOrderBy('section.id')
+            .orderBy({ 'section.level': 'ASC', 'section.id': 'ASC' })
             .getMany();
 
         /* GENERATE STRUCTURED DATA */
@@ -1315,6 +1316,7 @@ export class BibleEngine {
                                 phraseEndId: sectionLastPhraseId,
                                 level: localState.sectionLevel,
                                 title: content.title,
+                                subTitle: content.subTitle,
                                 crossReferences:
                                     content.crossReferences && !skip.crossRefs
                                         ? content.crossReferences.map((crossRef) => ({

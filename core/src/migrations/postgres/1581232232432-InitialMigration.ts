@@ -9,7 +9,7 @@ export class InitialMigration1581232232432 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_version" ("id" SERIAL NOT NULL, "uid" character varying NOT NULL, "title" character varying NOT NULL, "description" text, "language" character varying(5) NOT NULL, "copyrightShort" character varying, "copyrightLong" text, "chapterVerseSeparator" character varying NOT NULL, "hasStrongs" boolean, "isPlaintext" boolean, "lastUpdate" TIMESTAMP NOT NULL DEFAULT now(), "dataLocation" character varying NOT NULL, CONSTRAINT "PK_1e25d91018d5e2ba49fcfed0cc4" PRIMARY KEY ("id"))`,
+            `CREATE TABLE "bible_version" ("id" SERIAL NOT NULL, "uid" character varying NOT NULL, "title" character varying NOT NULL, "description" text, "language" character varying(15) NOT NULL, "copyrightShort" character varying, "copyrightLong" text, "chapterVerseSeparator" character varying NOT NULL, "hasStrongs" boolean, "isPlaintext" boolean, "lastUpdate" TIMESTAMP NOT NULL DEFAULT now(), "dataLocation" character varying NOT NULL, CONSTRAINT "PK_1e25d91018d5e2ba49fcfed0cc4" PRIMARY KEY ("id"))`,
             undefined
         );
         await queryRunner.query(

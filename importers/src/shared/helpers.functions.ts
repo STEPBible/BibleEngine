@@ -16,7 +16,27 @@ import { ImporterBookMetadata } from './Importer.interface';
  * @returns {boolean}
  */
 export function startsWithNoSpaceBeforeChar(string: string) {
-    return ['.', ',', ':', '?', '!', ';', ')'].indexOf(string.trim().slice(0, 1)) !== -1;
+    return (
+        [
+            // latin
+            '.',
+            ',',
+            ':',
+            '?',
+            '!',
+            ';',
+            ')',
+            // arabic
+            'و',
+            // chinese
+            '；',
+            '，',
+            '。',
+            '、',
+            '：',
+            '！',
+        ].indexOf(string.trim().slice(0, 1)) !== -1
+    );
 }
 
 /**
@@ -25,7 +45,7 @@ export function startsWithNoSpaceBeforeChar(string: string) {
  * @returns {boolean}
  */
 export function endsWithNoSpaceAfterChar(string: string) {
-    return ['('].indexOf(string.trim().slice(-1)) !== -1;
+    return ['(', '╵'].indexOf(string.trim().slice(-1)) !== -1;
 }
 
 export function matchAll(string: string, regexp: RegExp) {
@@ -172,7 +192,7 @@ export const getPhrasesFromParsedReferences = (
  *
  * @param {BibleReferenceParser} parser
  * @param {string} text
- * @param { { bookOsisId: string; chapterNum: number; localRefMatcher?: RegExp; }} [context]
+ * @param { { bookOsisId: string; chapterNum: number; language?: string; localRefMatcher?: RegExp; }} [context]
  * @returns {BibleReferenceParsedEntity[]}
  */
 export const getReferencesFromText = (
@@ -182,11 +202,7 @@ export const getReferencesFromText = (
     context?: {
         bookOsisId: string;
         chapterNum?: number;
-        /**
-         * BCV parser does only detect local refs at the beginning of the string. This additional
-         * regex can be provided to help the parser find all of them
-         * example (german): `/(Kapitel|V\.|Vers) ([0-9,.\-; ]|(und|bis|Kapitel|V\.|Vers))+/g`
-         */
+        language?: string;
         localRefMatcher?: RegExp;
     }
 ) => {
@@ -198,18 +214,29 @@ export const getReferencesFromText = (
         ? `${context.bookOsisId} ${context.chapterNum}`
         : context.bookOsisId;
 
-    if (context && context.localRefMatcher) {
+    //  BCV parser does only detect local refs at the beginning of the string. This additional
+    //  regex can be provided to help the parser find all of them
+    //  example (german): `/(Kapitel|V\.|Vers) ([0-9,.\-; ]|(und|bis|Kapitel|V\.|Vers))+/g`
+    // normalize language to consist of only two letters and lowercase if it is defined, otherwise leave it undefined
+    const languageNormalied = context?.language?.toLowerCase().substring(0, 2);
+    const localRefMatcher: RegExp | undefined = context?.localRefMatcher
+        ? context.localRefMatcher
+        : languageNormalied === 'en'
+        ? /(^| )(chapter|ch\.|v\.|verse|verses) ([0-9,:\-–; ]|(and|to|chapter|ch\.|v\.|verse|verses))+/gi
+        : languageNormalied === 'de'
+        ? /(Kapitel|V\.|Vers) ([0-9,\.\-–; ]|(und|bis|Kapitel|V\.|Vers))+/g
+        : undefined;
+
+    if (context && localRefMatcher) {
         // since for some reason the BCV parser does only match local/context-refs at the beginning
         // of the string/text, we detect them manually in a first run
-        const localRefs = text.match(context.localRefMatcher);
-        console.dir(localRefs, { depth: 10 });
+        const localRefs = text.match(localRefMatcher);
         if (localRefs) {
             let lastRefIndex = 0;
             for (const localRef of localRefs) {
                 const parsedLocalEntities = parser
                     .parse_with_context(localRef, contextOsisString)
                     .parsed_entities();
-                console.dir(parsedLocalEntities, { depth: 10 });
                 if (parsedLocalEntities[0]) {
                     // we need to make sure to only search from where we last stopped in case
                     // a reference occurs multiple times in the search-string
@@ -234,13 +261,13 @@ export const getReferencesFromText = (
     }
 
     const parsedEntities =
-        context && !context.localRefMatcher
+        context && !localRefMatcher
             ? parser.parse_with_context(text, contextOsisString).parsed_entities()
             : parser.parse(text).parsed_entities();
 
     for (const parsedEntity of parsedEntities) {
         outer_loop: for (const entity of <BibleReferenceParsedEntity[]>parsedEntity.entities) {
-            if (context && context.localRefMatcher) {
+            if (context && localRefMatcher) {
                 let isEntityAlreadyMatched = false;
                 // make sure we don't match a reference that we already did within localRefs
                 for (const existingEntity of entities) {

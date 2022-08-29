@@ -1,9 +1,10 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync } from 'fs';
 import { parser } from 'sax';
 import * as winston from 'winston';
 
 import {
     BibleEngine,
+    BibleReferenceParser,
     DocumentElement,
     DocumentPhrase,
     generateVersionReferenceId,
@@ -24,6 +25,8 @@ import {
 
 import {
     endsWithNoSpaceAfterChar,
+    getPhrasesFromParsedReferences,
+    getReferencesFromText,
     startsWithNoSpaceBeforeChar,
 } from '../../shared/helpers.functions';
 import {
@@ -41,6 +44,7 @@ import {
     isInsideGroup,
     isInsideIgnoredContent,
     isInTag,
+    isTagIgnored,
     startDocument,
     startGroupContainer,
     startLine,
@@ -85,6 +89,23 @@ export class UsxImporter extends BibleEngineImporter {
                 sectionStack: [],
                 isCurrentVerseImplicit: false,
             };
+            try {
+                const bcv_parser = require(`bible-passage-reference-parser/js/${context.version.language
+                    .substring(0, 2)
+                    .toLowerCase()}_bcv_parser`).bcv_parser;
+                const bcv: BibleReferenceParser = new bcv_parser({});
+                bcv.set_options({
+                    punctuation_strategy:
+                        this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
+                    invalid_passage_strategy: 'include',
+                    invalid_sequence_strategy: 'include',
+                    passage_existence_strategy: 'bc',
+                    consecutive_combination_strategy: 'separate',
+                });
+                context.bcv = bcv;
+            } catch (e) {
+                this.log('warn', 'missing language file for bible-reference-parser', context);
+            }
             const xmlStream = parser(true);
             xmlStream.ontext = (text: string) => {
                 if (encounteredError) {
@@ -141,9 +162,6 @@ export class UsxImporter extends BibleEngineImporter {
             if (!context.contentContainerStack[0])
                 throw new UsxParseError(`missing book content for ${book.title}`, context);
 
-            // TODO: remove
-            writeFileSync('test.json', JSON.stringify(context.contentContainerStack[0].contents));
-
             await this.bibleEngine.addBookWithContent(
                 version,
                 {
@@ -157,9 +175,6 @@ export class UsxImporter extends BibleEngineImporter {
                     skipStrongs: this.options.skip?.strongs,
                 }
             );
-
-            // // TODO: remove
-            // if (osisId === 'Josh') break;
         }
 
         return this.bibleEngine.finalizeVersion(version.id);
@@ -174,8 +189,8 @@ export class UsxImporter extends BibleEngineImporter {
 
         if (tag.isSelfClosing) {
             context.openedSelfClosingTag = tag;
-            // stop if this is actually a closing tag
-            if (tag.attributes.eid) return;
+            // stop if this is actually a closing tag or an ignored tag
+            if (tag.attributes.eid || isTagIgnored(tag.type)) return;
         } else {
             context.hierarchicalTagStack.push(tag);
         }
@@ -257,7 +272,6 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.NOTE_EXTENDED:
             case UsxXmlNodeStyle.NOTE_FOOTNOTE:
             case UsxXmlNodeStyle.NOTE_INTRODUCTORY:
-            case UsxXmlNodeStyle.SECTION_MAJOR_REFERENCES:
             case UsxXmlNodeStyle.SECTION_PARALLEL_REFERENCES:
             case UsxXmlNodeStyle.SECTION_DIVISION_REFERENCES:
                 if (tag.type === UsxXmlNodeStyle.NOTE_INTRODUCTORY && tag.isSelfClosing) break;
@@ -326,9 +340,14 @@ export class UsxImporter extends BibleEngineImporter {
                 if (
                     !lastParagraph ||
                     lastParagraph.type !== 'group' ||
-                    lastParagraph.groupType !== 'paragraph'
+                    (lastParagraph.groupType !== 'paragraph' && lastParagraph.groupType !== 'line')
                 )
-                    throw new UsxParseError(`tried to continue non-existing paragraph`, context);
+                    throw new UsxParseError(
+                        `tried to continue paragraph but found ${
+                            (lastParagraph as any)?.groupType
+                        }`,
+                        context
+                    );
                 context.contentContainerStack.push(lastParagraph);
                 break;
             }
@@ -341,6 +360,7 @@ export class UsxImporter extends BibleEngineImporter {
                 break;
             }
             case UsxXmlNodeStyle.SECTION_MAJOR_LEVEL1:
+            case UsxXmlNodeStyle.SECTION_MAJOR_LEVEL2:
             case UsxXmlNodeStyle.SECTION_LEVEL1:
             case UsxXmlNodeStyle.SECTION_LEVEL2:
             case UsxXmlNodeStyle.SECTION_LEVEL3:
@@ -435,9 +455,6 @@ export class UsxImporter extends BibleEngineImporter {
                 startGroupContainer('quote', context);
                 break;
             case UsxXmlNodeStyle.BOLD:
-            case UsxXmlNodeStyle.TABLE_HEADING1:
-            case UsxXmlNodeStyle.TABLE_HEADING2:
-            case UsxXmlNodeStyle.TABLE_HEADING3:
                 startGroupContainer('bold', context);
                 break;
             case UsxXmlNodeStyle.EMPHASIS:
@@ -470,6 +487,7 @@ export class UsxImporter extends BibleEngineImporter {
                 if (
                     paratextLoc &&
                     !isInTag(UsxXmlNodeStyle.SECTION_MAJOR, context) &&
+                    !isInTag(UsxXmlNodeStyle.SECTION_MAJOR_REFERENCES, context) &&
                     !(
                         isInTag(UsxXmlNodeStyle.SECTION_DIVISION_REFERENCES, context) &&
                         !isInTag(UsxXmlNodeStyle.CROSS_REFERENCE, context)
@@ -487,17 +505,24 @@ export class UsxImporter extends BibleEngineImporter {
                         if (refStartEnd[1]) {
                             const endChapterVerse = refStartEnd[1].split(':');
                             if (endChapterVerse[1]) {
-                                endChapter = +endChapterVerse[0]!;
-                                endVerse = +endChapterVerse[1];
+                                if (!startChapterVerse[1])
+                                    throw new UsxParseError(
+                                        `Missing starting verse in reference: ${paratextLoc}`,
+                                        context
+                                    );
+                                endChapter = parseInt(endChapterVerse[0]!);
+                                endVerse = parseInt(endChapterVerse[1]);
+                            } else if (!startChapterVerse[1]) {
+                                endChapter = parseInt(endChapterVerse[0]!);
                             } else {
-                                endVerse = +refStartEnd[1];
+                                endVerse = parseInt(endChapterVerse[0]!);
                             }
                         }
                         context.referenceBuffer = {
                             bookOsisId: osisId,
-                            versionChapterNum: +startChapterVerse[0]!,
+                            versionChapterNum: parseInt(startChapterVerse[0]!),
                             versionVerseNum: startChapterVerse[1]
-                                ? +startChapterVerse[1]
+                                ? parseInt(startChapterVerse[1])
                                 : undefined,
                             versionChapterEndNum: endChapter,
                             versionVerseEndNum: endVerse,
@@ -505,12 +530,24 @@ export class UsxImporter extends BibleEngineImporter {
                     }
                 }
                 break;
+            case 'optbreak': {
+                // we currently only see this in the context of a table-cell. since we currently
+                // don't support tables (and render each row as a line), a linebreak within a cell
+                // does not produce a desired outcome, so we ignore `optbreak` for now
+
+                // const phrase = getCurrentBiblePhrase(context);
+                // if (!phrase)
+                //     throw new UsxParseError(`linebreak failed: can't find phrase`, context);
+                // phrase.linebreak = true;
+                break;
+            }
             // tags that don't need any action:
             case 'usx':
             case 'table':
             case UsxXmlNodeStyle.NOTE_CHAR_TEXT:
             // tags that are handled in `parseTextNode`:
             case UsxXmlNodeStyle.NOTE_CHAR_VERSENUMBER:
+            case UsxXmlNodeStyle.SECTION_MAJOR_REFERENCES:
             // tags that we chose to ignore (for now):
             case UsxXmlNodeStyle.TRANSLITERATED:
             case UsxXmlNodeStyle.ORDINAL_NUMBER_TEXT:
@@ -521,6 +558,8 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.TABLE_CELL2_RIGHT:
             case UsxXmlNodeStyle.TABLE_CELL3:
             case UsxXmlNodeStyle.NOTE_ADDITIONAL_PARAGRAPH:
+            case UsxXmlNodeStyle.PROPER_NAME:
+            case UsxXmlNodeStyle.WORDLIST_ITEM:
                 break;
             default:
                 this.log('warn', `unhandled tag ${tag.type}`);
@@ -540,7 +579,11 @@ export class UsxImporter extends BibleEngineImporter {
             isInsideIgnoredContent(context) ||
             // we ignore introduction major title, however we still need it to start the document
             currentTag.type === UsxXmlNodeStyle.INTRODUCTION_TITLE ||
-            currentTag.type === UsxXmlNodeStyle.INTRODUCTION_TITLE_LEVEL1
+            currentTag.type === UsxXmlNodeStyle.INTRODUCTION_TITLE_LEVEL1 ||
+            // we ignore the self reference within `SECTION_DIVISION_REFERENCES` (so that the
+            // division references are properly detected as section cross references)
+            (isInTag(UsxXmlNodeStyle.SECTION_DIVISION_REFERENCES, context) &&
+                !isInTag(UsxXmlNodeStyle.CROSS_REFERENCE, context))
             // ||
             // // we ignore chapter label texts, however we still want notes inside of it
             // currentTag.type === UsxXmlNodeStyle.CHAPTER_LABEL
@@ -550,23 +593,41 @@ export class UsxImporter extends BibleEngineImporter {
         const currentContainer = getCurrentContainer(context);
 
         if (isInsideDocument(context)) {
-            const phrase: DocumentPhrase = { type: 'phrase', content: trimmedText };
-            if (startsWithNoSpaceBeforeChar(trimmedText)) phrase.skipSpace = 'before';
-            if (endsWithNoSpaceAfterChar(trimmedText))
-                phrase.skipSpace = phrase.skipSpace === 'before' ? 'both' : 'after';
-            if (context.referenceBuffer) {
-                phrase.bibleReference = {
-                    ...context.referenceBuffer,
-                    versionId: undefined,
-                    versionUid: this.options.versionMeta.uid,
-                };
-                delete context.referenceBuffer;
+            if (
+                isInTag(UsxXmlNodeStyle.CROSS_REFERENCE, context) &&
+                (!isInTag('ref', context) || !context.referenceBuffer) &&
+                context.bcv
+            ) {
+                const refs = getReferencesFromText(context.bcv, trimmedText, {
+                    bookOsisId: context.book.osisId,
+                    chapterNum: context.currentChapter,
+                    language: context.version.language,
+                });
+                if (refs.length) {
+                    currentContainer.contents.push(
+                        ...getPhrasesFromParsedReferences(trimmedText, refs, context.version.uid)
+                    );
+                    return;
+                }
+            } else {
+                const phrase: DocumentPhrase = { type: 'phrase', content: trimmedText };
+                if (startsWithNoSpaceBeforeChar(trimmedText)) phrase.skipSpace = 'before';
+                if (endsWithNoSpaceAfterChar(trimmedText))
+                    phrase.skipSpace = phrase.skipSpace === 'before' ? 'both' : 'after';
+                if (context.referenceBuffer) {
+                    phrase.bibleReference = {
+                        ...context.referenceBuffer,
+                        versionId: undefined,
+                        versionUid: this.options.versionMeta.uid,
+                    };
+                    delete context.referenceBuffer;
+                }
+                const phraseContainer: DocumentElement =
+                    currentTag.type === UsxXmlNodeStyle.NOTE_CHAR_VERSENUMBER
+                        ? { type: 'group', groupType: 'italic', contents: [phrase] }
+                        : phrase;
+                currentContainer.contents.push(phraseContainer);
             }
-            const phraseContainer: DocumentElement =
-                currentTag.type === UsxXmlNodeStyle.NOTE_CHAR_VERSENUMBER
-                    ? { type: 'group', groupType: 'italic', contents: [phrase] }
-                    : phrase;
-            currentContainer.contents.push(phraseContainer);
         } else {
             if (context.referenceBuffer)
                 throw new UsxParseError(`reference outside of document`, context);
@@ -580,6 +641,16 @@ export class UsxImporter extends BibleEngineImporter {
                         : trimmedText;
                 if (currentSection.title) currentSection.title += ' ' + titleText;
                 else currentSection.title = titleText;
+            } else if (isInTag(UsxXmlNodeStyle.SECTION_MAJOR_REFERENCES, context)) {
+                const currentSection = getCurrentSection(context);
+                if (!currentSection)
+                    throw new UsxParseError(
+                        `missing section container (parsing major references)`,
+                        context
+                    );
+                // we don't use `trimmedText` here since we want to use the text as it is in the source file
+                if (currentSection.subTitle) currentSection.subTitle += text;
+                else currentSection.subTitle = text;
             } else {
                 if (!context.currentChapter || !context.currentVerse)
                     throw new UsxParseError(`saving phrase without numbering ${text}`, context);
@@ -650,22 +721,10 @@ export class UsxImporter extends BibleEngineImporter {
         if (isInsideIgnoredContent(context)) return;
 
         switch (currentTag.type) {
-            case 'chapter':
-            case UsxXmlNodeStyle.CHAPTER:
-                context.currentChapter = undefined;
-                context.currentVerse = undefined;
-                context.currentSubverse = undefined;
-                break;
-            case 'verse':
-            case UsxXmlNodeStyle.VERSE:
-                context.currentVerse = undefined;
-                context.currentSubverse = undefined;
-                break;
             case UsxXmlNodeStyle.NOTE_ENDNOTE:
             case UsxXmlNodeStyle.NOTE_EXTENDED:
             case UsxXmlNodeStyle.NOTE_FOOTNOTE:
             case UsxXmlNodeStyle.NOTE_INTRODUCTORY:
-            case UsxXmlNodeStyle.SECTION_MAJOR_REFERENCES:
             case UsxXmlNodeStyle.SECTION_PARALLEL_REFERENCES:
             case UsxXmlNodeStyle.SECTION_DIVISION_REFERENCES:
             case UsxXmlNodeStyle.CROSS_REFERENCE: {
@@ -692,9 +751,19 @@ export class UsxImporter extends BibleEngineImporter {
                             !(
                                 (_content.type === 'phrase' || !_content.type) &&
                                 (_content.bibleReference ||
-                                    [';', ',', '(', ')', '–', '-', 'و'].indexOf(
-                                        _content.content
-                                    ) !== -1)
+                                    [
+                                        ';',
+                                        ',',
+                                        '.',
+                                        '(',
+                                        ')',
+                                        '–',
+                                        '-',
+                                        'و',
+                                        '；',
+                                        '，',
+                                        '。',
+                                    ].indexOf(_content.content) !== -1)
                             )
                     ) === -1
                 ) {
@@ -708,15 +777,17 @@ export class UsxImporter extends BibleEngineImporter {
 
                 if (
                     isInSectionTag(context) ||
-                    currentTag.type === UsxXmlNodeStyle.SECTION_MAJOR_REFERENCES ||
                     currentTag.type === UsxXmlNodeStyle.SECTION_PARALLEL_REFERENCES ||
                     currentTag.type === UsxXmlNodeStyle.SECTION_DIVISION_REFERENCES
                 ) {
                     const currentSection = getCurrentSection(context);
                     if (!currentSection)
                         throw new UsxParseError(`missing section for note`, context);
-                    if (crossRefs) currentSection.crossReferences = crossRefs;
-                    else currentSection.description = content;
+                    if (crossRefs) {
+                        if (currentSection.crossReferences)
+                            currentSection.crossReferences.push(...crossRefs);
+                        else currentSection.crossReferences = crossRefs;
+                    } else currentSection.description = content;
                 } else {
                     const type = currentTag.type;
                     // const type = isInTag(UsxXmlNodeStyle.CHAPTER_LABEL, context)
@@ -802,9 +873,6 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.SELAH:
             case UsxXmlNodeStyle.QUOTE:
             case UsxXmlNodeStyle.BOLD:
-            case UsxXmlNodeStyle.TABLE_HEADING1:
-            case UsxXmlNodeStyle.TABLE_HEADING2:
-            case UsxXmlNodeStyle.TABLE_HEADING3:
             case UsxXmlNodeStyle.EMPHASIS:
             case UsxXmlNodeStyle.ITALIC:
             case UsxXmlNodeStyle.WORDS_OF_JESUS:

@@ -1,11 +1,11 @@
 import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
     BeforeInsert,
     BeforeUpdate,
+    Column,
+    Entity,
     Index,
-    UpdateDateColumn
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
 } from 'typeorm';
 import { DocumentRoot, IBibleVersion } from '../models';
 
@@ -18,7 +18,7 @@ export class BibleVersionEntity implements IBibleVersion {
     @Column()
     uid: string;
 
-    @Column({nullable: true})
+    @Column({ nullable: true })
     abbreviation?: string;
 
     @Column()
@@ -27,7 +27,7 @@ export class BibleVersionEntity implements IBibleVersion {
     @Column({ nullable: true, type: 'simple-json' })
     description?: DocumentRoot;
 
-    @Column({ length: 5 })
+    @Column({ length: 15 })
     language: string;
 
     @Column({ nullable: true })
@@ -45,7 +45,7 @@ export class BibleVersionEntity implements IBibleVersion {
     @Column({ nullable: true })
     isPlaintext?: boolean;
 
-    @Column({nullable: true, type: 'varchar'})
+    @Column({ nullable: true, type: 'varchar' })
     type?: IBibleVersion['type'];
 
     @UpdateDateColumn()

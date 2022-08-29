@@ -228,7 +228,6 @@ export class DblImporter extends BibleEngineImporter {
         }
 
         const versionMeta: IBibleVersion = {
-            ...this.options.versionMeta,
             uid: parsedMetadata.identification.abbreviation,
             abbreviation: parsedMetadata.identification.abbreviationLocal,
             title: parsedMetadata.identification.nameLocal,
@@ -248,6 +247,7 @@ export class DblImporter extends BibleEngineImporter {
                 parsedMetadata.type.audience === 'Liturgical'
                     ? 'formal'
                     : 'dynamic',
+            ...this.options.versionMeta,
         };
 
         if (parsedCopyright.copyright.fullStatement?.statementContent) {

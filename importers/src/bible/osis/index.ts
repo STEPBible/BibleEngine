@@ -1222,16 +1222,10 @@ export class OsisImporter extends BibleEngineImporter {
                     if (!versionUid)
                         throw new OsisParseError("can't determin version uid", context);
 
-                    const localRefMatcher =
-                        context.version?.language === 'en'
-                            ? /(^| )(chapter|ch\.|v\.|verse|verses) ([0-9,:\-–; ]|(and|to|chapter|ch\.|v\.|verse|verses))+/gi
-                            : context.version?.language === 'de'
-                            ? /(Kapitel|V\.|Vers) ([0-9,\.\-–; ]|(und|bis|Kapitel|V\.|Vers))+/g
-                            : undefined;
                     const refs = getReferencesFromText(context.bcv, trimmedText, {
                         bookOsisId: context.currentBook.osisId,
                         chapterNum: context.currentChapter,
-                        localRefMatcher,
+                        language: context.version?.language,
                     });
                     if (refs.length) {
                         currentContainer.contents.push(
