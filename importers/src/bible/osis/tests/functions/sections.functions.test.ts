@@ -1,13 +1,13 @@
 import { resolve } from 'path';
+import { SUB_SECTIONS_PARSED } from '../fixtures/subSectionsParsed';
 import { getContextFromSource } from '../utils';
 import { getCurrentSection } from './../../functions/sections.functions';
-import { SUB_SECTIONS_PARSED } from '../fixtures/subSectionsParsed';
 
 it('parses hierarchical sections', async () => {
     const sourcePath = resolve(__dirname) + '/../fixtures/subSections.xml';
     const context = await getContextFromSource(sourcePath);
 
-    expect(context.books[0]).toStrictEqual(SUB_SECTIONS_PARSED.books[0]);
+    expect(context.books[0]!).toStrictEqual(SUB_SECTIONS_PARSED.books[0]!);
 
     // this test works since we only close sections when another one opens.
     // so context still has the section stack.

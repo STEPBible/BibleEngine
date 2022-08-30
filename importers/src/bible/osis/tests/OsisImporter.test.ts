@@ -1,14 +1,14 @@
-import { PARSED_SWORD_PARAGRAPHS } from './fixtures/OsisImporter.fixtures';
-import { resolve } from 'path';
-import { getContextFromSource } from './utils';
 import { IBibleContentSection } from '@bible-engine/core';
+import { resolve } from 'path';
+import { PARSED_SWORD_PARAGRAPHS } from './fixtures/OsisImporter.fixtures';
+import { getContextFromSource } from './utils';
 
 describe('OSIS Parser', () => {
     it('wraps each section in a paragraph, if no paragraphs exist in the source text', async () => {
         const sourcePath = resolve(__dirname) + '/fixtures/sectionsButNoParagraphs.xml';
         const context = await getContextFromSource(sourcePath);
         expect(context.books.length);
-        const SECTION = context.books[0].contents[0] as IBibleContentSection;
+        const SECTION = context.books[0]!.contents[0] as IBibleContentSection;
         expect(SECTION.type).toBe('section');
         const PARAGRAPH: any = SECTION.contents[0];
         expect(PARAGRAPH.groupType).toBe('paragraph');
@@ -17,7 +17,7 @@ describe('OSIS Parser', () => {
         const sourcePath = resolve(__dirname) + '/fixtures/sectionsPlusParagraphs.xml';
         const context = await getContextFromSource(sourcePath);
         expect(context.books.length);
-        const SECTION = context.books[0].contents[0] as IBibleContentSection;
+        const SECTION = context.books[0]!.contents[0] as IBibleContentSection;
         expect(SECTION.type).toBe('section');
         const PARAGRAPH: any = SECTION.contents[0];
         expect(PARAGRAPH.groupType).toBe('paragraph');
