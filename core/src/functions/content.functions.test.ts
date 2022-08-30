@@ -1,14 +1,8 @@
+import { BibleParagraphEntity, BiblePhraseEntity, BibleSectionEntity } from '../entities';
 import {
-    IBibleOutputRich,
-    IBibleVersion,
-    IBibleOutputRoot,
-    IBibleContent,
-    IBibleContentPhrase,
-    IBibleContentGroup,
-    IBibleContentSection
+    IBibleContent, IBibleContentGroup, IBibleContentPhrase, IBibleContentSection, IBibleOutputRich, IBibleOutputRoot, IBibleVersion
 } from '../models';
 import { generateBibleDocument } from './content.functions';
-import { BibleParagraphEntity, BiblePhraseEntity, BibleSectionEntity } from '../entities';
 
 describe('generateBibleDocument', () => {
     let doc: IBibleOutputRoot;
@@ -167,14 +161,14 @@ describe('generateBibleDocument', () => {
             version.chapterVerseSeparator,
             { versionUid: version.uid, bookOsisId: 'Gen' }
         );
-        item1 = doc.contents[0];
-        item1_1 = (item1 as IBibleContentSection).contents[0];
-        item1_1_1 = (item1_1 as IBibleContentGroup<'paragraph'>).contents[0];
-        item1_1_2 = (item1_1 as IBibleContentGroup<'paragraph'>).contents[1];
-        item1_1_2_1 = (item1_1_2 as IBibleContentGroup<'quote'>).contents[0];
-        item1_1_2_2 = (item1_1_2 as IBibleContentGroup<'quote'>).contents[1];
-        item2 = doc.contents[1];
-        item2_1 = (item2 as IBibleContentSection).contents[0];
+        item1 = doc!.contents![0]!;
+        item1_1 = (item1 as IBibleContentSection).contents![0]!;
+        item1_1_1 = (item1_1 as IBibleContentGroup<'paragraph'>)!.contents[0]!;
+        item1_1_2 = (item1_1 as IBibleContentGroup<'paragraph'>)!.contents[1]!;
+        item1_1_2_1 = (item1_1_2 as IBibleContentGroup<'quote'>)!.contents[0]!;
+        item1_1_2_2 = (item1_1_2 as IBibleContentGroup<'quote'>)!.contents[1]!;
+        item2 = doc.contents![1]!;
+        item2_1 = (item2 as IBibleContentSection).contents![0]!;
     });
 
     test('should return a root output node', () => {
@@ -216,7 +210,7 @@ describe('generateBibleDocument', () => {
             item1_1_1.crossReferences &&
             item1_1_1.crossReferences.length > 0
         ) {
-            expect(item1_1_1.crossReferences[0].label).toBe('Ps 23:5-7');
+            expect(item1_1_1.crossReferences[0]!.label).toBe('Ps 23:5-7');
         }
     });
 });
