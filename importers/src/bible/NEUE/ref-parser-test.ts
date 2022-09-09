@@ -1,3 +1,5 @@
+// This file is just a playground script for testing out the ref-parser
+
 import {
     BibleReferenceParser,
     DocumentPhrase,

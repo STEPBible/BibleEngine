@@ -190,7 +190,7 @@ export function isInNoteContainerTag(context: IParserContext) {
 export function isInSectionTag(context: IParserContext) {
     for (let tagIndex = context.hierarchicalTagStack.length - 1; tagIndex >= 0; tagIndex--) {
         const tag = context.hierarchicalTagStack[tagIndex]!;
-        if (isSectionTag(tag.type)) return true;
+        if (isSectionTag(tag.type, context.enableChapterLabels)) return true;
     }
     return false;
 }
@@ -232,7 +232,11 @@ export function isNoteContainerTag(
     return NOTE_CONTAINER_TAGS.indexOf(tagType as typeof NOTE_CONTAINER_TAGS[number]) !== -1;
 }
 
-export function isSectionTag(tagType: TagType): tagType is typeof SECTION_TAGS[number] {
+export function isSectionTag(
+    tagType: TagType,
+    enableChapterLabels?: boolean
+): tagType is typeof SECTION_TAGS[number] {
+    if (!enableChapterLabels && tagType === UsxXmlNodeStyle.CHAPTER_LABEL) return false;
     return SECTION_TAGS.indexOf(tagType as typeof SECTION_TAGS[number]) !== -1;
 }
 
@@ -315,16 +319,6 @@ export function startLine(context: IParserContext, elementType: TagType) {
     };
 
     const lineNr = getNumberOfLinesInGroup(currentLinegroup) + 1;
-    //     currentLinegroup.contents.reduce((acc, cur) => {
-    //     if (
-    //         cur.type === 'group' &&
-    //         (cur.groupType === 'line' || cur.groupType === 'unorderedListItem')
-    //     )
-    //         return acc + 1;
-    //     else if (cur.type === 'group' && cur.groupType === 'indent')
-    //         return acc + cur.contents.length;
-    //     else return acc;
-    // }, 1);
 
     // create line object
     if (POETRY_LINES.indexOf(elementType) !== -1) startGroupContainer('line', context, lineNr);

@@ -46,9 +46,6 @@ import { getNormalizedChapterCountForOsisId, getNormalizedVerseCount } from './v
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
- * @param {IBibleContent[]} contents
- * @param {BibleBookPlaintext} _accChapters
- * @returns {IBibleBookPlaintext}
  */
 export const convertBibleInputToBookPlaintext = (
     contents: IBibleContent[],
@@ -127,10 +124,6 @@ export const convertBibleInputToBookPlaintext = (
 
 /**
  * turns list of phrases, paragraphs and sections into a structured bible document
- * @param {BiblePhraseEntity[]} phrases
- * @param {BibleParagraphEntity[]} paragraphs
- * @param {IBibleOutputRich['context']} context
- * @returns {IBibleContentGeneratorRoot}
  */
 export const generateBibleDocument = (
     phrases: BiblePhraseEntity[],
@@ -1003,8 +996,6 @@ export const generateContextRanges = (
 /**
  * normalizes document contents to only use necessary properties (similar to
  * `stripUnnecessaryDataFromBibleContent`) and to only use the value "after" in `phrase.skipSpace`
- * @param {DocumentElement[]} contents
- * @returns {DocumentElement[]}
  */
 export const normalizeDocumentContents = (
     contents: DocumentElement[],
@@ -1071,8 +1062,6 @@ export const stripUnnecessaryDataFromBibleBook = (
 
 /**
  * remove everything from 'data' that is not needed for input, mainly to reduce JSON size
- * @param {IBibleContent[]} data
- * @returns {IBibleContent[]}
  */
 export const stripUnnecessaryDataFromBibleContent = (data: IBibleContent[]): IBibleContent[] => {
     const inputData: IBibleContent[] = [];

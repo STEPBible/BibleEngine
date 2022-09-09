@@ -10,42 +10,56 @@ import {
 import { IContentPhrase } from '@bible-engine/core/lib/models/ContentPhrase';
 import { ImporterBookMetadata } from './Importer.interface';
 
+const PUNCTUATION_NO_SPACE_BEFORE = [
+    // latin
+    '.',
+    ',',
+    ':',
+    '?',
+    '!',
+    ';',
+    ')',
+    ']',
+    // arabic
+    'و',
+    // chinese
+    '；',
+    '，',
+    '。',
+    '、',
+    '：',
+    '！',
+];
+
+const PUNCTUATION_NO_SPACE_AFTER = ['(', '[', '╵'];
+
+const PUNCTUATION_OTHER = ['–', '-'];
+
 /**
  * determines if the string starts with a character that (usually) doesn't have a space before of it
- * @param {string} string
- * @returns {boolean}
  */
 export function startsWithNoSpaceBeforeChar(string: string) {
-    return (
-        [
-            // latin
-            '.',
-            ',',
-            ':',
-            '?',
-            '!',
-            ';',
-            ')',
-            // arabic
-            'و',
-            // chinese
-            '；',
-            '，',
-            '。',
-            '、',
-            '：',
-            '！',
-        ].indexOf(string.trim().slice(0, 1)) !== -1
-    );
+    return PUNCTUATION_NO_SPACE_BEFORE.indexOf(string.trim().slice(0, 1)) !== -1;
 }
 
 /**
  * determines if the string ends with a character that (usually) doesn't have a space after of it
- * @param {string} string
- * @returns {boolean}
  */
 export function endsWithNoSpaceAfterChar(string: string) {
-    return ['(', '╵'].indexOf(string.trim().slice(-1)) !== -1;
+    return PUNCTUATION_NO_SPACE_AFTER.indexOf(string.trim().slice(-1)) !== -1;
+}
+
+/**
+ * determines if the string consists only of a punctuation character
+ */
+export function isOnlyPunctuationChar(string: string) {
+    return (
+        [
+            ...PUNCTUATION_NO_SPACE_AFTER,
+            ...PUNCTUATION_NO_SPACE_BEFORE,
+            ...PUNCTUATION_OTHER,
+        ].indexOf(string.trim()) !== -1
+    );
 }
 
 export function matchAll(string: string, regexp: RegExp) {
@@ -189,11 +203,6 @@ export const getPhrasesFromParsedReferences = (
 
 /**
  * returns all bible references within the given text
- *
- * @param {BibleReferenceParser} parser
- * @param {string} text
- * @param { { bookOsisId: string; chapterNum: number; language?: string; localRefMatcher?: RegExp; }} [context]
- * @returns {BibleReferenceParsedEntity[]}
  */
 export const getReferencesFromText = (
     /** parser that needs to be configured to the language of `text` */

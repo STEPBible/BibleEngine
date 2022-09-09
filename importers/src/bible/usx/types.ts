@@ -15,6 +15,7 @@ import {
 export interface IParserContext {
     version: IBibleVersion;
     book: IBibleBook;
+    enableChapterLabels?: boolean;
     currentChapter?: number;
     currentVerse?: number;
     currentVerseJoinToVersionRef?: IBibleReference;
@@ -46,8 +47,10 @@ export type UsxXmlNodeName =
     | 'optbreak';
 export enum UsxXmlNodeStyle {
     BOOK = 'id',
+    FILE_ENCODING = 'ide',
     BOOK_HEADING = 'h',
-    BOOK_TITLE = 'mt1',
+    BOOK_TITLE = 'mt',
+    BOOK_TITLE_LEVEL1 = 'mt1',
     BOOK_TITLE_LEVEL2 = 'mt2',
     BOOK_TITLE_LEVEL3 = 'mt3',
     CHAPTER = 'c',
@@ -160,6 +163,7 @@ export enum UsxXmlNodeStyle {
     PROPER_NAME = 'pn',
     WORDLIST_ITEM = 'w',
     KEYWORD = 'k',
+    ACROSTIC_FIRST_CHARACTER = 'qac',
 }
 
 export type TagType = UsxXmlNodeName | UsxXmlNodeStyle;
@@ -198,36 +202,15 @@ export const NOTE_CONTAINER_TAGS = [
     UsxXmlNodeStyle.SECTION_DIVISION_REFERENCES,
 ] as const;
 
-// CURRENTLY NOT NEEDED
-// export const LINE_TAGS: TagType[] = [
-//     UsxXmlNodeStyle.INTRODUCTION_LIST_ITEM,
-//     UsxXmlNodeStyle.INTRODUCTION_LIST_ITEM_LEVEL1,
-//     UsxXmlNodeStyle.INTRODUCTION_LIST_ITEM_LEVEL2,
-//     UsxXmlNodeStyle.LIST_ITEM,
-//     UsxXmlNodeStyle.LIST_ITEM_LEVEL1,
-//     UsxXmlNodeStyle.LIST_ITEM_LEVEL2,
-//     UsxXmlNodeStyle.LIST_ITEM_LEVEL3,
-//     UsxXmlNodeStyle.LIST_ITEM_LEVEL4,
-//     UsxXmlNodeStyle.POETRY,
-//     UsxXmlNodeStyle.POETRY_LEVEL1,
-//     UsxXmlNodeStyle.POETRY_LEVEL2,
-//     UsxXmlNodeStyle.POETRY_LEVEL3,
-//     UsxXmlNodeStyle.POETRY_EMBEDDED,
-//     UsxXmlNodeStyle.POETRY_EMBEDDED_LEVEL1,
-//     UsxXmlNodeStyle.POETRY_EMBEDDED_LEVEL2,
-//     UsxXmlNodeStyle.POETRY_CENTERED,
-//     UsxXmlNodeStyle.POETRY_RIGHT,
-//     UsxXmlNodeStyle.POETRY_ACROSTIC_HEADING,
-//     UsxXmlNodeStyle.TABLE_ROW,
-// ]
-
 export const IGNORED_TAGS: TagType[] = [
     'book',
     UsxXmlNodeStyle.BOOK,
+    UsxXmlNodeStyle.FILE_ENCODING,
     UsxXmlNodeStyle.BOOK_HEADING,
     // // RADAR: this sometimes has notes attached
     // UsxXmlNodeStyle.CHAPTER_LABEL,
     UsxXmlNodeStyle.BOOK_TITLE,
+    UsxXmlNodeStyle.BOOK_TITLE_LEVEL1,
     UsxXmlNodeStyle.BOOK_TITLE_LEVEL2,
     UsxXmlNodeStyle.BOOK_TITLE_LEVEL3,
     UsxXmlNodeStyle.REM,
@@ -236,8 +219,6 @@ export const IGNORED_TAGS: TagType[] = [
     UsxXmlNodeStyle.TOC3,
     UsxXmlNodeStyle.NOTE_CHAR_ORIGIN,
     UsxXmlNodeStyle.NOTE_CHAR_LABEL,
-    // UsxXmlNodeStyle.SECTION_MAJOR,
-    // UsxXmlNodeStyle.SECTION_MAJOR_REFERENCES,
     UsxXmlNodeStyle.NOTE_CHAR_PREVIOUS_REFERENCE,
     UsxXmlNodeStyle.INTRODUCTION_TITLE_LEVEL2,
     UsxXmlNodeStyle.INTRODUCTION_TITLE_AT_END,

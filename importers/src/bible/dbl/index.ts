@@ -103,9 +103,6 @@ function genPlaintextFromXHTMLNodes(nodes: IXHTMLNode<XHTMLNodeType>[]): string 
  * returns the character that separates chapter and verses in the given language. Currently this
  * returns ':' for most languages. For RTL languages, a special unicode character is appended
  * that prevents the text direction to flip within the reference.
- * @param language the language code (only the first two letters are used)
- * @param direction the writing direction of the language (LTR | RTL)
- * @returns {string}
  */
 function getChapterVerseSeparatorFromLanguage(language: string, direction: 'LTR' | 'RTL' = 'LTR') {
     const langNormalized = language.slice(0, 2);
@@ -275,7 +272,10 @@ export class DblImporter extends BibleEngineImporter {
 
         const usxImporter = new UsxImporter(this.bibleEngine, {
             ...this.options,
-            versionMeta,
+            versionMeta: {
+                ...versionMeta,
+                ...this.options.versionMeta,
+            },
             bookMeta,
         });
 

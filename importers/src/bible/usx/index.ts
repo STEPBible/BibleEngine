@@ -10,6 +10,7 @@ import {
     generateVersionReferenceId,
     getOsisIdFromParatextId,
     IBibleBook,
+    IBibleContentGroup,
     IBibleContentPhrase,
     IBibleCrossReference,
     IBibleNote,
@@ -27,6 +28,7 @@ import {
     endsWithNoSpaceAfterChar,
     getPhrasesFromParsedReferences,
     getReferencesFromText,
+    isOnlyPunctuationChar,
     startsWithNoSpaceBeforeChar,
 } from '../../shared/helpers.functions';
 import {
@@ -83,6 +85,7 @@ export class UsxImporter extends BibleEngineImporter {
             const context: IParserContext = {
                 version: this.options.versionMeta,
                 book,
+                enableChapterLabels: this.options.enableChapterLabels,
                 contentContainerStack: [{ type: 'book', contents: [] }],
                 hierarchicalTagStack: [],
                 skipClosingTags: [],
@@ -353,7 +356,7 @@ export class UsxImporter extends BibleEngineImporter {
             }
             case UsxXmlNodeStyle.PARAGRAPH_BREAK: {
                 // we interpret paragraph-break tags as effectively re-starting a paragraph.
-                // if there is no paragraph open currently open currently we ignore this tag.
+                // if there is no paragraph currently open we ignore this tag.
                 if (isInsideGroup('paragraph', context)) {
                     startNewParagraph(context);
                 }
@@ -379,9 +382,11 @@ export class UsxImporter extends BibleEngineImporter {
                 startSection(context, UsxXmlNodeStyle.SECTION_LEVEL1);
                 break;
             case UsxXmlNodeStyle.CHAPTER_LABEL:
-                startSection(context, UsxXmlNodeStyle.SECTION_LEVEL3);
-                const chapterSection = getCurrentSection(context);
-                chapterSection!.isChapterLabel = true;
+                if (context.enableChapterLabels) {
+                    startSection(context, UsxXmlNodeStyle.SECTION_LEVEL3);
+                    const chapterSection = getCurrentSection(context);
+                    chapterSection!.isChapterLabel = true;
+                }
                 break;
             case UsxXmlNodeStyle.POETRY_ACROSTIC_HEADING:
             case UsxXmlNodeStyle.SECTION_SPEAKER:
@@ -389,11 +394,36 @@ export class UsxImporter extends BibleEngineImporter {
                 startSection(context, UsxXmlNodeStyle.SECTION_LEVEL4);
                 break;
             case UsxXmlNodeStyle.TITLE_CANONICAL: {
-                closeAllGroups(context);
                 // if the canonical title is outside of verse 1 (i.e. we set the verse number implicitly on chapter start), we number it as `1.0`
                 if (context.isCurrentVerseImplicit) context.currentSubverse = 0;
-                startNewParagraph(context);
-                startGroupContainer('title', context);
+
+                // if the previous element was also a canonical title, add a linebreak to it and
+                // continue the paragraph
+                const currentContainer = getCurrentContainer(context);
+                const lastParagraph = currentContainer.contents.length
+                    ? currentContainer.contents[currentContainer.contents.length - 1]!
+                    : null;
+                const lastContentInParagraph =
+                    lastParagraph?.type === 'group' &&
+                    lastParagraph.groupType === 'paragraph' &&
+                    lastParagraph.contents.length
+                        ? lastParagraph.contents[lastParagraph.contents.length - 1]!
+                        : null;
+                if (
+                    lastContentInParagraph?.type === 'group' &&
+                    lastContentInParagraph.groupType === 'title'
+                ) {
+                    lastContentInParagraph.contents.push({ content: '', linebreak: true });
+                    context.contentContainerStack.push(
+                        lastParagraph as IBibleContentGroup<'paragraph'>
+                    );
+                    context.contentContainerStack.push(lastContentInParagraph);
+                } else {
+                    closeAllGroups(context);
+                    startNewParagraph(context);
+                    startGroupContainer('title', context);
+                }
+
                 break;
             }
             case UsxXmlNodeStyle.POETRY:
@@ -455,6 +485,7 @@ export class UsxImporter extends BibleEngineImporter {
                 startGroupContainer('quote', context);
                 break;
             case UsxXmlNodeStyle.BOLD:
+            case UsxXmlNodeStyle.ACROSTIC_FIRST_CHARACTER:
                 startGroupContainer('bold', context);
                 break;
             case UsxXmlNodeStyle.EMPHASIS:
@@ -583,10 +614,10 @@ export class UsxImporter extends BibleEngineImporter {
             // we ignore the self reference within `SECTION_DIVISION_REFERENCES` (so that the
             // division references are properly detected as section cross references)
             (isInTag(UsxXmlNodeStyle.SECTION_DIVISION_REFERENCES, context) &&
-                !isInTag(UsxXmlNodeStyle.CROSS_REFERENCE, context))
-            // ||
-            // // we ignore chapter label texts, however we still want notes inside of it
-            // currentTag.type === UsxXmlNodeStyle.CHAPTER_LABEL
+                !isInTag(UsxXmlNodeStyle.CROSS_REFERENCE, context)) ||
+            // if we ignore chapter label texts, we still parse notes inside of it and attach them
+            // to the following phrase
+            (!context.enableChapterLabels && currentTag.type === UsxXmlNodeStyle.CHAPTER_LABEL)
         )
             return;
 
@@ -746,24 +777,17 @@ export class UsxImporter extends BibleEngineImporter {
                 // check if document only consist of references and convert to cross reference
                 if (
                     content.contents.length &&
+                    // tests the non-existance of anything other than a bible-reference-phrase or a
+                    // phrase that is just a punctuation character
                     content.contents.findIndex(
                         (_content) =>
                             !(
-                                (_content.type === 'phrase' || !_content.type) &&
-                                (_content.bibleReference ||
-                                    [
-                                        ';',
-                                        ',',
-                                        '.',
-                                        '(',
-                                        ')',
-                                        '–',
-                                        '-',
-                                        'و',
-                                        '；',
-                                        '，',
-                                        '。',
-                                    ].indexOf(_content.content) !== -1)
+                                // any phrase that is a bible reference or just a punctuation character
+                                (
+                                    (_content.type === 'phrase' || !_content.type) &&
+                                    (_content.bibleReference ||
+                                        isOnlyPunctuationChar(_content.content))
+                                )
                             )
                     ) === -1
                 ) {
@@ -789,10 +813,12 @@ export class UsxImporter extends BibleEngineImporter {
                         else currentSection.crossReferences = crossRefs;
                     } else currentSection.description = content;
                 } else {
-                    const type = currentTag.type;
-                    // const type = isInTag(UsxXmlNodeStyle.CHAPTER_LABEL, context)
-                    //     ? 'cl'
-                    //     : currentTag.type;
+                    // if we arrive here, chapter labels are not imported as sections, so we attach
+                    // it's notes to the following content
+                    const type = isInTag(UsxXmlNodeStyle.CHAPTER_LABEL, context)
+                        ? 'cl'
+                        : currentTag.type;
+
                     const note: IBibleNote = {
                         type,
                         key: currentTag.attributes.caller,
@@ -800,9 +826,8 @@ export class UsxImporter extends BibleEngineImporter {
                     };
 
                     if (
-                        currentTag.type === UsxXmlNodeStyle.NOTE_INTRODUCTORY
-                        // ||
-                        // isInTag(UsxXmlNodeStyle.CHAPTER_LABEL, context)
+                        currentTag.type === UsxXmlNodeStyle.NOTE_INTRODUCTORY ||
+                        isInTag(UsxXmlNodeStyle.CHAPTER_LABEL, context)
                     ) {
                         // those notes need to be attached to the following content
                         context.noteBuffer = note;
@@ -873,6 +898,7 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.SELAH:
             case UsxXmlNodeStyle.QUOTE:
             case UsxXmlNodeStyle.BOLD:
+            case UsxXmlNodeStyle.ACROSTIC_FIRST_CHARACTER:
             case UsxXmlNodeStyle.EMPHASIS:
             case UsxXmlNodeStyle.ITALIC:
             case UsxXmlNodeStyle.WORDS_OF_JESUS:

@@ -121,11 +121,6 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
             versionId: phraseRef.versionId!,
             phraseNum: phraseRef.phraseNum!,
         };
-
-        // if (this.strongsJoined) this.strongs = this.strongsJoined.split(',');
-        // if (this.modifiersJson) this.modifiers = JSON.parse(this.modifiersJson);
-
-        // if (!this.versionSubverseNum) delete this.versionSubverseNum;
     }
 
     @BeforeInsert()

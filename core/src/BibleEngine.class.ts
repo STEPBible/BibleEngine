@@ -26,6 +26,7 @@ import {
     generateBibleDocument,
     generateContextRanges,
     generateContextSections,
+    normalizeDocumentContents,
     stripUnnecessaryDataFromBibleBook,
     stripUnnecessaryDataFromBibleContent,
     stripUnnecessaryDataFromBibleContextData,
@@ -38,6 +39,7 @@ import {
     generatePhraseId,
     generateReferenceId,
     isReferenceNormalized,
+    MAX_SUBVERSE_NUMBER,
     parsePhraseId,
 } from './functions/reference.functions';
 import {
@@ -415,10 +417,27 @@ export class BibleEngine {
     async getBooksForVersion(versionId: number) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        return db.find(BibleBookEntity, {
-            where: { versionId },
-            order: { number: 'ASC' },
-        });
+        return db
+            .find(BibleBookEntity, {
+                where: { versionId },
+                order: { number: 'ASC' },
+            })
+            .then((books) =>
+                books.map(
+                    (book) =>
+                        ({
+                            ...book,
+                            introduction: book.introduction
+                                ? {
+                                      type: 'root',
+                                      contents: normalizeDocumentContents(
+                                          book.introduction.contents
+                                      ),
+                                  }
+                                : undefined,
+                        } as BibleBookEntity)
+                )
+            );
     }
 
     async getBooksForVersionUid(versionUid: string) {
@@ -1414,18 +1433,6 @@ export class BibleEngine {
                 } else await insertQb.execute();
             }
 
-            // for (let index = 0; index < globalState.sectionStack.length; index += chunkSize) {
-            //     const insertQb = db
-            //         .createQueryBuilder()
-            //         .insert()
-            //         .into(BibleSectionEntity)
-            //         .values(globalState.sectionStack.slice(index, index + chunkSize));
-            //     if (this.executeSqlSetOverride) {
-            //         const [statement, values] = insertQb.getQueryAndParameters();
-            //         sqlSet.push({ statement, values });
-            //     } else await insertQb.execute();
-            // }
-
             if (BibleEngine.DEBUG) console.timeEnd('db_set');
 
             if (BibleEngine.DEBUG) console.time('db_write');
@@ -1514,17 +1521,8 @@ export class BibleEngine {
             normalizedSubverseNum: standardRefStart.normalizedSubverseNum ?? 0,
             normalizedChapterEndNum: standardRefEnd.normalizedChapterNum,
             normalizedVerseEndNum: standardRefEnd.normalizedVerseNum,
-            normalizedSubverseEndNum: standardRefEnd.normalizedSubverseNum ?? 99,
+            normalizedSubverseEndNum: standardRefEnd.normalizedSubverseNum ?? MAX_SUBVERSE_NUMBER,
         };
-
-        // const phraseStart = await entityManager.findOne(BiblePhrase, {
-        //     where: {
-        //         id: Raw(col => generatePhraseIdSql(pontentialNormalizedRange, col)),
-        //         versionChapterNum: range.versionChapterNum,
-        //         // if there was no verseNum we would have returned above already
-        //         versionVerseNum: range.versionVerseNum
-        //     }
-        // });
 
         const { phraseIdStart } = await db
             .createQueryBuilder(BiblePhraseEntity, 'phrase')

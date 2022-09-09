@@ -585,7 +585,7 @@ export class OsisImporter extends BibleEngineImporter {
                             ? OsisXmlNodeType.SECTION_SUB
                             : OsisXmlNodeType.SECTION;
 
-                    // DISABLED: subsequent titles will now just replace the preivous title. the
+                    // DISABLED: subsequent titles will now just replace the previous title. the
                     //           concatenated titles looked weird, especially when passages are
                     //           viewed in isolation (if we don't create a new section, a
                     //           subsequent title tag will just be added to the exising title of

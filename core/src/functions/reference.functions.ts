@@ -10,17 +10,18 @@ import {
 import { pad } from './utils.functions';
 import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from './v11n.functions';
 
+// due to the way we save phrase ids as a big integers, there are maximum values for each part
+// the following constants are ordered as they appear in the phrase id (total 15 digits)
+export const MAX_BOOK_NUMBER = 99;
+export const MAX_CHAPTER_NUMBER = 999;
+export const MAX_VERSE_NUMBER = 999;
+export const MAX_SUBVERSE_NUMBER = 99;
+export const MAX_VERSION_ID = 999;
+export const MAX_PHRASE_NUMBER = 99;
+
 /**
  * generates a bible reference range object with the version properties set such that it includes
  * the previous and next chapter of the given range (if exisiting)
- *
- * @param {IBibleReferenceRange} {
- *     versionId,
- *     bookOsisId,
- *     versionChapterNum,
- *     versionChapterEndNum
- * }
- * @returns {IBibleReferenceRange}
  */
 export const generateContextRangeFromVersionRange = ({
     versionId,
@@ -40,9 +41,9 @@ export const generateContextRangeFromVersionRange = ({
             ? versionChapterEndNum + 1
             : versionChapterNum + 1;
         contextRange.versionVerseNum = 0;
-        contextRange.versionVerseEndNum = 999;
+        contextRange.versionVerseEndNum = MAX_VERSE_NUMBER;
         contextRange.versionSubverseNum = 0;
-        contextRange.versionSubverseEndNum = 99;
+        contextRange.versionSubverseEndNum = MAX_SUBVERSE_NUMBER;
     }
     return contextRange;
 };
@@ -51,9 +52,6 @@ export const generateContextRangeFromVersionRange = ({
  * generates a bible reference object that references the end part of a range object (note: this
  * does not return correct version end-numbers for chapters or verses, but the max value 999
  * instead)
- *
- * @param {IBibleReferenceRangeNormalized} range
- * @returns {IBiblePhraseRef}
  */
 export const generateEndReferenceFromRange = (
     range: IBibleReferenceRangeNormalized
@@ -61,20 +59,21 @@ export const generateEndReferenceFromRange = (
     return {
         isNormalized: true,
         bookOsisId: range.bookOsisId,
-        normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
+        normalizedChapterNum:
+            range.normalizedChapterEndNum || range.normalizedChapterNum || MAX_CHAPTER_NUMBER,
         normalizedVerseNum: range.normalizedVerseEndNum
             ? range.normalizedVerseEndNum
             : range.normalizedVerseNum && !range.normalizedChapterEndNum
             ? range.normalizedVerseNum
-            : 999,
+            : MAX_VERSE_NUMBER,
         normalizedSubverseNum:
             typeof range.normalizedSubverseEndNum !== 'undefined'
                 ? range.normalizedSubverseEndNum
                 : typeof range.normalizedSubverseNum !== 'undefined' && !range.normalizedVerseEndNum
                 ? range.normalizedSubverseNum
-                : 99,
-        versionId: range.versionId || 999,
-        phraseNum: 99,
+                : MAX_SUBVERSE_NUMBER,
+        versionId: range.versionId || MAX_VERSION_ID,
+        phraseNum: MAX_PHRASE_NUMBER,
     };
 };
 
@@ -82,9 +81,6 @@ export const generateEndReferenceFromRange = (
  * this generates a normalized reference object using the version numbers. This does not do
  * normalization! This should only be used if we know that version numbers are identical to the
  * normalized numbers.
- *
- * @param {IBibleReference} range
- * @returns {IBibleReferenceNormalized}
  */
 export const generateNormalizedRangeFromVersionRange = (
     range: IBibleReferenceRange,
@@ -105,8 +101,6 @@ export const generateNormalizedRangeFromVersionRange = (
 
 /**
  * encodes a bible phrase reference object into an integer to use in database operations
- * @param {IBiblePhraseRef} reference
- * @returns {number}
  */
 export const generatePhraseId = (reference: IBiblePhraseRef): number => {
     let refId = '' + generateReferenceId(reference);
@@ -120,11 +114,6 @@ export const generatePhraseId = (reference: IBiblePhraseRef): number => {
 /**
  * local method to generate an integer reference from osisId, chapter, verse and
  * subverse
- * @param bookNumber
- * @param chapter
- * @param verse
- * @param subverse
- * @returns {number}
  */
 const _generateReferenceId = (
     osisId: string,
@@ -145,8 +134,6 @@ const _generateReferenceId = (
 
 /**
  * encodes a normalized reference object into an integer to use in database operations
- * @param {IBibleReferenceNormalized} reference
- * @returns {number}
  */
 export const generateReferenceId = (reference: IBibleReferenceNormalized): number => {
     return _generateReferenceId(
@@ -159,8 +146,6 @@ export const generateReferenceId = (reference: IBibleReferenceNormalized): numbe
 
 /**
  * encodes a version reference object into an integer to use in database operations
- * @param {IBibleReferenceVersion} reference
- * @returns {number}
  */
 export const generateVersionReferenceId = (reference: IBibleReference): number => {
     return _generateReferenceId(
@@ -173,9 +158,6 @@ export const generateVersionReferenceId = (reference: IBibleReference): number =
 
 /**
  * Generates a range object from two phrase ids
- * @param {number} phraseStartId
- * @param {number} phraseEndId
- * @returns {IBibleReferenceRangeNormalized}
  */
 export const generateRangeFromGenericSection = (
     genericSection: IBibleSectionGeneric
@@ -195,11 +177,6 @@ export const generateRangeFromGenericSection = (
 
 /**
  * returns a readable string of the reference range
- *
- * @param {IBibleReferenceRange} range
- * @param {string} bookAbbreviation
- * @param {string} chapterVerseSeparator
- * @returns {string}
  */
 export const generateReferenceRangeLabel = (
     range: IBibleReferenceRange,
@@ -221,8 +198,6 @@ export const generateReferenceRangeLabel = (
 /**
  * checks if there is any normalized property set (thus it has been normalized) or else if there is
  * no version number set (thus it does not need normalization)
- * @param {IBibleReference} ref
- * @returns {boolean}
  */
 export const isReferenceNormalized = (ref: IBibleReference) =>
     // if *ChaperNum is not set we know that there is no other **Num set
@@ -230,8 +205,6 @@ export const isReferenceNormalized = (ref: IBibleReference) =>
 
 /**
  * parses a database phrase id into a bible phrase reference object
- * @param {number} id database phrase id
- * @returns {IBiblePhraseRef}
  */
 export const parsePhraseId = (id: number): IBiblePhraseRef => {
     let _id = id;
@@ -252,8 +225,6 @@ export const parsePhraseId = (id: number): IBiblePhraseRef => {
 
 /**
  * parses a database reference id into a normalized bible reference object
- * @param {number} id
- * @returns {IBibleReferenceNormalized}
  */
 export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
     let _id = id;
@@ -281,8 +252,6 @@ export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
 
 /**
  * returns cross reference object with only the necessary data
- * @param {IBibleCrossReference} { key, range, label }
- * @returns {IBibleCrossReference}
  */
 export const slimDownCrossReference = ({
     key,
@@ -298,8 +267,6 @@ export const slimDownCrossReference = ({
  * returns reference range with only necessary data. also 'versionId', and 'isNormalized' are
  * removed. BibleEngine will detect if the range is normalized, so we can savely strip the property
  * (its main purpose is to enable normalization checks on TS level)
- * @param {IBibleReferenceRange} range
- * @returns {IBibleReferenceRange}
  */
 export const slimDownReferenceRange = (range: IBibleReferenceRange) => {
     const refRange: IBibleReferenceRange = {

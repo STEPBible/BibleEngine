@@ -10,6 +10,12 @@ export interface IImporterOptions {
     skip?: { crossRefs?: boolean; notes?: boolean; strongs?: boolean };
     autoGenMissingParagraphs?: boolean;
     autoGenChapterParagraphs?: boolean;
+    /** this is an experimental feature which mostly fails when chapter labels are used parallel
+     *  to sections. apart from that, especially when used in infinite scroll context, chapter
+     *  labels don't really make sense. Enable this if your source file uses chapter labels instead
+     *  of sections, e.g. in Psalms.
+     */
+    enableChapterLabels?: boolean;
     crossRefConnectToPhrase?: 'before' | 'after';
     noteConnectToPhrase?: 'before' | 'after';
     logLevel?: LogLevel;
