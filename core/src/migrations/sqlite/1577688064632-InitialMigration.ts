@@ -9,7 +9,7 @@ export class InitialMigration1577688064632 implements MigrationInterface {
             undefined
         );
         await queryRunner.query(
-            `CREATE TABLE "bible_version" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "uid" varchar NOT NULL, "title" varchar NOT NULL, "description" text, "language" varchar(5) NOT NULL, "copyrightShort" varchar, "copyrightLong" text, "chapterVerseSeparator" varchar NOT NULL, "hasStrongs" boolean, "isPlaintext" boolean, "lastUpdate" datetime NOT NULL DEFAULT (datetime('now')), "dataLocation" varchar NOT NULL)`,
+            `CREATE TABLE "bible_version" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "uid" varchar NOT NULL, "title" varchar NOT NULL, "description" text, "language" varchar(15) NOT NULL, "copyrightShort" varchar, "copyrightLong" text, "chapterVerseSeparator" varchar NOT NULL, "hasStrongs" boolean, "isPlaintext" boolean, "lastUpdate" datetime NOT NULL DEFAULT (datetime('now')), "dataLocation" varchar NOT NULL)`,
             undefined
         );
         await queryRunner.query(

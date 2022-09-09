@@ -1,75 +1,77 @@
 import {
+    Between,
+    DatabaseType,
     DataSource,
     DataSourceOptions,
-    Raw,
     EntityManager,
-    Between,
     FindOptionsWhere,
-    DatabaseType,
     Like,
+    Raw,
 } from 'typeorm';
 
 import {
-    ENTITIES,
-    BibleVersionEntity,
-    BiblePhraseEntity,
     BibleBookEntity,
-    BibleSectionEntity,
     BibleCrossReferenceEntity,
-    DictionaryEntryEntity,
-    BibleParagraphEntity,
-    V11nRuleEntity,
     BibleNoteEntity,
+    BibleParagraphEntity,
+    BiblePhraseEntity,
+    BibleSectionEntity,
+    BibleVersionEntity,
+    DictionaryEntryEntity,
+    ENTITIES,
+    V11nRuleEntity,
 } from './entities';
 import {
-    parsePhraseId,
-    generatePhraseId,
-    generateNormalizedRangeFromVersionRange,
-    isReferenceNormalized,
-    generateReferenceId,
-    generateEndReferenceFromRange,
-} from './functions/reference.functions';
-import {
-    generatePhraseIdSql,
-    generateReferenceIdSql,
-    generateBookSectionsSql,
-    generateParagraphSql,
-} from './functions/sql.functions';
-import {
-    stripUnnecessaryDataFromBibleContent,
-    generateBibleDocument,
     convertBibleInputToBookPlaintext,
+    generateBibleDocument,
     generateContextRanges,
     generateContextSections,
-    stripUnnecessaryDataFromBibleVersion,
+    normalizeDocumentContents,
     stripUnnecessaryDataFromBibleBook,
-    stripUnnecessaryDataFromBibleReferenceRange,
+    stripUnnecessaryDataFromBibleContent,
     stripUnnecessaryDataFromBibleContextData,
+    stripUnnecessaryDataFromBibleReferenceRange,
+    stripUnnecessaryDataFromBibleVersion,
 } from './functions/content.functions';
+import {
+    generateEndReferenceFromRange,
+    generateNormalizedRangeFromVersionRange,
+    generatePhraseId,
+    generateReferenceId,
+    isReferenceNormalized,
+    MAX_SUBVERSE_NUMBER,
+    parsePhraseId,
+} from './functions/reference.functions';
+import {
+    generateBookSectionsSql,
+    generateParagraphSql,
+    generatePhraseIdSql,
+    generateReferenceIdSql,
+} from './functions/sql.functions';
 import { isTestMatching } from './functions/v11n.functions';
+import mysqlMigrations from './migrations/mysql';
+import postgresMigrations from './migrations/postgres';
+import sqliteMigrations from './migrations/sqlite';
 import {
     BibleBookPlaintext,
-    IDictionaryEntry,
-    IBibleVersion,
-    IBibleReferenceRange,
-    IBibleOutputRich,
-    IBibleReferenceRangeNormalized,
+    BiblePlaintext,
     BookWithContentForInput,
-    PhraseModifiers,
-    IBibleReferenceNormalized,
-    IBiblePhraseRef,
-    IBiblePhraseWithNumbers,
-    IBibleReferenceRangeQuery,
-    IBibleReferenceVersion,
-    IBibleReferenceRangeVersion,
     IBibleBookEntity,
     IBibleContent,
     IBibleContentGroup,
-    BiblePlaintext,
+    IBibleOutputRich,
+    IBiblePhraseRef,
+    IBiblePhraseWithNumbers,
+    IBibleReferenceNormalized,
+    IBibleReferenceRange,
+    IBibleReferenceRangeNormalized,
+    IBibleReferenceRangeQuery,
+    IBibleReferenceRangeVersion,
+    IBibleReferenceVersion,
+    IBibleVersion,
+    IDictionaryEntry,
+    PhraseModifiers,
 } from './models';
-import sqliteMigrations from './migrations/sqlite';
-import postgresMigrations from './migrations/postgres';
-import mysqlMigrations from './migrations/mysql';
 
 export class NoDbConnectionError extends Error {
     constructor() {
@@ -235,7 +237,9 @@ export class BibleEngine {
                 // not only the length of the array, since there might be skipped verses in versions
                 // however `chaptersCount` needs to contain the last verse number not number of
                 // unskipped verses within a chapter
-                chaptersCount.push(Array.from(verses.keys()).pop() || 0);
+                // there are occurences of verses in the wrong order in source files so we need to
+                // specifically look for the max key in `verses`
+                chaptersCount.push(verses.size ? Math.max(...verses.keys()) : 0);
             }
         }
 
@@ -328,16 +332,33 @@ export class BibleEngine {
         return bookImportPhraseRange;
     }
 
-    async addDictionaryEntry(dictionaryEntry: IDictionaryEntry) {
+    async addDictionaryEntries(dictionaryEntries: IDictionaryEntry[]) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        return db.save(new DictionaryEntryEntity(dictionaryEntry));
+        await db.save(DictionaryEntryEntity, dictionaryEntries, { chunk: 100 });
+        if (
+            this.dataSource.options.type === 'mysql' ||
+            this.dataSource.options.type === 'mariadb'
+        ) {
+            // https://stackoverflow.com/questions/60059084/what-does-using-join-buffer-block-nested-loop-mean-with-explain-mysql-command
+            // https://bugs.mysql.com/bug.php?id=69721
+            await db.query('OPTIMIZE TABLE `dictionary_entry`');
+        }
     }
 
     async addV11nRules(rules: V11nRuleEntity[]) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        return db.save(rules, { chunk: rules.length / 500 });
+        await db.save(rules, { chunk: 100 });
+        if (
+            this.dataSource.options.type === 'mysql' ||
+            this.dataSource.options.type === 'mariadb'
+        ) {
+            // https://stackoverflow.com/questions/60059084/what-does-using-join-buffer-block-nested-loop-mean-with-explain-mysql-command
+            // https://bugs.mysql.com/bug.php?id=69721
+            await db.query('OPTIMIZE TABLE `v11n_rule`');
+        }
+        return;
     }
 
     async addVersion(version: IBibleVersion) {
@@ -347,7 +368,24 @@ export class BibleEngine {
     }
 
     async finalizeVersion(versionId: number) {
-        this.normalizeCrossReferencesForVersion(versionId);
+        await this.normalizeCrossReferencesForVersion(versionId);
+        if (
+            this.dataSource.options.type === 'mysql' ||
+            this.dataSource.options.type === 'mariadb'
+        ) {
+            // https://stackoverflow.com/questions/60059084/what-does-using-join-buffer-block-nested-loop-mean-with-explain-mysql-command
+            // https://bugs.mysql.com/bug.php?id=69721
+            const db = await this.pDB;
+            await db.query('OPTIMIZE TABLE `bible_book`');
+            await db.query('OPTIMIZE TABLE `bible_cross_reference`');
+            await db.query('OPTIMIZE TABLE `bible_note`');
+            await db.query('OPTIMIZE TABLE `bible_paragraph`');
+            await db.query('OPTIMIZE TABLE `bible_phrase`');
+            await db.query('OPTIMIZE TABLE `bible_phrase_original_word`');
+            await db.query('OPTIMIZE TABLE `bible_section`');
+            await db.query('OPTIMIZE TABLE `bible_version`');
+        }
+        return;
     }
 
     async generateBookMetadata(book: BibleBookEntity) {
@@ -379,10 +417,27 @@ export class BibleEngine {
     async getBooksForVersion(versionId: number) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        return db.find(BibleBookEntity, {
-            where: { versionId },
-            order: { number: 'ASC' },
-        });
+        return db
+            .find(BibleBookEntity, {
+                where: { versionId },
+                order: { number: 'ASC' },
+            })
+            .then((books) =>
+                books.map(
+                    (book) =>
+                        ({
+                            ...book,
+                            introduction: book.introduction
+                                ? {
+                                      type: 'root',
+                                      contents: normalizeDocumentContents(
+                                          book.introduction.contents
+                                      ),
+                                  }
+                                : undefined,
+                        } as BibleBookEntity)
+                )
+            );
     }
 
     async getBooksForVersionUid(versionUid: string) {
@@ -450,10 +505,11 @@ export class BibleEngine {
             .getMany();
         const sections = await db
             .createQueryBuilder(BibleSectionEntity, 'section')
+            .select()
+            .leftJoinAndSelect('section.crossReferences', 'crossReference')
             .where(generateBookSectionsSql(rangeNormalized, 'section'))
             // sections are inserted in order, so its safe to sort by generated id
-            .orderBy('level')
-            .addOrderBy('id')
+            .orderBy({ 'section.level': 'ASC', 'section.id': 'ASC' })
             .getMany();
 
         /* GENERATE STRUCTURED DATA */
@@ -526,7 +582,7 @@ export class BibleEngine {
             take: 1,
             select: ['id'],
         });
-        return lastPhrase.length ? parsePhraseId(lastPhrase[0].id).phraseNum! + 1 : 1;
+        return lastPhrase.length ? parsePhraseId(lastPhrase[0]!.id).phraseNum! + 1 : 1;
     }
 
     async getPhrases(
@@ -1053,6 +1109,10 @@ export class BibleEngine {
                     !content.quoteWho
                 ) {
                     const lastPhrase = globalState.phraseStack[globalState.phraseStack.length - 1];
+                    if (!lastPhrase)
+                        throw new Error(
+                            `missing last phrase when parsing ${book.osisId} ${content.versionChapterNum}:${content.versionVerseNum}`
+                        );
                     if (lastContent.skipSpace === 'both') lastPhrase.skipSpace = 'before';
                     else if (lastContent.skipSpace === 'after') lastPhrase.skipSpace = undefined;
                     else if (content.skipSpace === 'before') {
@@ -1182,7 +1242,7 @@ export class BibleEngine {
                 else if (content.groupType === 'orderedListItem')
                     childState.modifierState.orderedListItem = (content as IBibleContentGroup<'orderedListItem'>).modifier;
                 else if (content.groupType === 'unorderedListItem')
-                    childState.modifierState.orderedListItem = (content as IBibleContentGroup<'orderedListItem'>).modifier;
+                    childState.modifierState.unorderedListItem = (content as IBibleContentGroup<'unorderedListItem'>).modifier;
                 const {
                     firstPhraseId: groupFirstPhraseId,
                     lastPhraseId: groupLastPhraseId,
@@ -1221,7 +1281,7 @@ export class BibleEngine {
                 ) {
                     const lastGroupPhrase =
                         globalState.phraseStack[globalState.phraseStack.length - 1];
-                    lastGroupPhrase.linebreak = true;
+                    lastGroupPhrase!.linebreak = true;
                 }
             } else if (
                 (content.type === 'group' && content.groupType === 'paragraph') ||
@@ -1275,8 +1335,19 @@ export class BibleEngine {
                                 phraseEndId: sectionLastPhraseId,
                                 level: localState.sectionLevel,
                                 title: content.title,
-                                crossReferences: content.crossReferences,
+                                subTitle: content.subTitle,
+                                crossReferences:
+                                    content.crossReferences && !skip.crossRefs
+                                        ? content.crossReferences.map((crossRef) => ({
+                                              ...crossRef,
+                                              range: {
+                                                  ...crossRef.range,
+                                                  versionId: book.versionId,
+                                              },
+                                          }))
+                                        : undefined,
                                 description: content.description,
+                                isChapterLabel: content.isChapterLabel,
                             })
                         );
                     }
@@ -1362,22 +1433,11 @@ export class BibleEngine {
                 } else await insertQb.execute();
             }
 
-            for (let index = 0; index < globalState.sectionStack.length; index += chunkSize) {
-                const insertQb = db
-                    .createQueryBuilder()
-                    .insert()
-                    .into(BibleSectionEntity)
-                    .values(globalState.sectionStack.slice(index, index + chunkSize));
-                if (this.executeSqlSetOverride) {
-                    const [statement, values] = insertQb.getQueryAndParameters();
-                    sqlSet.push({ statement, values });
-                } else await insertQb.execute();
-            }
-
             if (BibleEngine.DEBUG) console.timeEnd('db_set');
 
             if (BibleEngine.DEBUG) console.time('db_write');
             if (this.executeSqlSetOverride) await this.executeSqlSetOverride(sqlSet);
+            await db.save(BibleSectionEntity, globalState.sectionStack, { chunk: chunkSize });
             if (BibleEngine.DEBUG) console.timeEnd('db_write');
         }
 
@@ -1458,20 +1518,11 @@ export class BibleEngine {
             bookOsisId: range.bookOsisId,
             normalizedChapterNum: standardRefStart.normalizedChapterNum,
             normalizedVerseNum: standardRefStart.normalizedVerseNum,
-            normalizedSubverseNum: standardRefStart.normalizedSubverseNum,
+            normalizedSubverseNum: standardRefStart.normalizedSubverseNum ?? 0,
             normalizedChapterEndNum: standardRefEnd.normalizedChapterNum,
             normalizedVerseEndNum: standardRefEnd.normalizedVerseNum,
-            normalizedSubverseEndNum: standardRefEnd.normalizedSubverseNum,
+            normalizedSubverseEndNum: standardRefEnd.normalizedSubverseNum ?? MAX_SUBVERSE_NUMBER,
         };
-
-        // const phraseStart = await entityManager.findOne(BiblePhrase, {
-        //     where: {
-        //         id: Raw(col => generatePhraseIdSql(pontentialNormalizedRange, col)),
-        //         versionChapterNum: range.versionChapterNum,
-        //         // if there was no verseNum we would have returned above already
-        //         versionVerseNum: range.versionVerseNum
-        //     }
-        // });
 
         const { phraseIdStart } = await db
             .createQueryBuilder(BiblePhraseEntity, 'phrase')
@@ -1557,7 +1608,7 @@ export class BibleEngine {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
         // go through each bible book seperately
-        for (const book of await db.find(BibleBookEntity)) {
+        for (const book of await db.find(BibleBookEntity, { where: { versionId } })) {
             // fetch all cross reference for that version and book
             for (const cRef of await db.find(BibleCrossReferenceEntity, {
                 where: {
@@ -1568,10 +1619,15 @@ export class BibleEngine {
                 },
             })) {
                 // get normalized reference range
-                // we know that this crossRef has a versionId since we queried for it
                 const normalizedRange = await this.getNormalizedReferenceRange(
-                    // prettier-ignore
-                    <IBibleReferenceRangeVersion>cRef.range,
+                    {
+                        versionId,
+                        bookOsisId: book.osisId,
+                        versionChapterNum: cRef.versionChapterNum,
+                        versionVerseNum: cRef.versionVerseNum,
+                        versionChapterEndNum: cRef.versionChapterEndNum,
+                        versionVerseEndNum: cRef.versionVerseEndNum,
+                    },
                     book
                 );
                 if (cRef.versionChapterNum)
@@ -1582,8 +1638,13 @@ export class BibleEngine {
                     cRef.range.normalizedChapterEndNum = normalizedRange.normalizedChapterEndNum;
                 if (cRef.versionVerseEndNum)
                     cRef.range.normalizedVerseEndNum = normalizedRange.normalizedVerseEndNum;
+
+                // we need to call `prepare` manually since typeOrm can't detect that the entity
+                // has changed (in other words: it does not run the method before change
+                // detection) and therefore does not execute an update
+                cRef.prepare();
                 // and save cross reference back to db
-                db.save(cRef);
+                await db.save(cRef);
             }
         }
     }

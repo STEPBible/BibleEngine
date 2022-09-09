@@ -1,6 +1,6 @@
-import { DocumentRoot } from './Document';
-import { IContentSection } from './ContentSection';
 import { IBibleCrossReference } from './BibleCrossReference';
+import { IContentSection } from './ContentSection';
+import { DocumentRoot } from './Document';
 
 export interface IBibleSectionGeneric {
     phraseStartId: number;
@@ -10,6 +10,7 @@ export interface IBibleSectionGeneric {
 export interface IBibleSectionBase extends IContentSection {
     description?: DocumentRoot;
     crossReferences?: IBibleCrossReference[];
+    isChapterLabel?: boolean;
 }
 
 export interface IBibleSection extends IBibleSectionGeneric, IBibleSectionBase {}

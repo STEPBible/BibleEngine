@@ -4,6 +4,7 @@ import {
     IBibleBook,
     IBibleCrossReference,
     IBibleReference,
+    BibleReferenceParser,
 } from '@bible-engine/core';
 import { OsisXmlNodeType } from '../../../shared/osisTypes';
 import { ParserStackItem, TagType, ITagWithType } from './../types';
@@ -18,7 +19,7 @@ export class ParserContext {
     currentSubverse?: number;
     crossRefBuffer?: {
         key?: string;
-        refs: IBibleCrossReference[];
+        refs?: IBibleCrossReference[];
     };
     strongsBuffer?: string[];
     contentContainerStack: ParserStackItem[] = [];
@@ -34,4 +35,5 @@ export class ParserContext {
     hasSectionsInSourceText: boolean;
     hasParagraphsInSourceText: boolean;
     autoGenMissingParagraphs?: boolean;
+    bcv?: BibleReferenceParser;
 }

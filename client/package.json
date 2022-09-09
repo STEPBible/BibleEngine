@@ -12,6 +12,6 @@
         "whatwg-fetch": "^3.6.2"
     },
     "peerDependencies": {
-        "@bible-engine/core": "1.1.x"
+        "@bible-engine/core": "1.x"
     }
 }

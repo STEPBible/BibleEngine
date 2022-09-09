@@ -1,7 +1,5 @@
 /**
  * runs getMinimizedDbObject on all members of the given array
- * @param {any[]} dbObjects
- * @returns {any[]}
  */
 export const generateMinimizedDbObjects = (dbObjects: any[]) => {
     return dbObjects.map(generateMinimizedDbObject);
@@ -10,9 +8,6 @@ export const generateMinimizedDbObjects = (dbObjects: any[]) => {
 /**
  * generates a shallow copy of the given object with only the properties that are needed to retain
  * the data inside (in order to reduce the JSON size)
- *
- * @param {*} dbObject
- * @returns {*}
  */
 export const generateMinimizedDbObject = (dbObject: any) => {
     const strippedObject: any = {};
@@ -30,7 +25,6 @@ export const generateMinimizedDbObject = (dbObject: any) => {
 
 /**
  * generates a random uppercase char
- * @returns {string}
  */
 export const generateRandomChar = (): string => {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; // abcdefghijklmnopqrstuvwxyz0123456789
@@ -45,17 +39,14 @@ export const isNode =
 
 /**
  * checks if the given variable is an object
- * @param {*} variable
- * @return boolean
  */
 export const isObject = (variable: any) => typeof variable === 'object' && variable !== null;
 
 /**
  * returns a zero-padded string of a number
- * @param {number} n the number to be padded
- * @param {number} width the length or the resulting string
- * @param {string} [z='0'] padding character
- * @returns {string}
+ * @param n the number to be padded
+ * @param width the length or the resulting string
+ * @param z padding character (defaults to '0')
  */
 export const pad = (n: number, width: number, z?: string): string => {
     z = z || '0';

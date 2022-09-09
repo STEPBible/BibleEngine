@@ -1,8 +1,8 @@
 // import { BibleEngine } from '../../BibleEngine.class';
-import { resolve } from 'path';
-import { createReadStream } from 'fs';
-import { createInterface } from 'readline';
 import { IBibleReference } from '@bible-engine/core';
+import { createReadStream } from 'fs';
+import { resolve } from 'path';
+import { createInterface } from 'readline';
 
 // const dirProjectRoot = resolve(__dirname + '/../../..');
 
@@ -97,13 +97,13 @@ const getReferenceFromLineNr = (nr: number): IBibleReference | false => {
     // throw new Error(`there is no reference index for line ${nr}`);
 
     const [bookNum, chapterNum, verseNum] = refNumString.split('|');
-    const bookOsisId = bookNum2Osis.get(+bookNum);
+    const bookOsisId = bookNum2Osis.get(+bookNum!);
     if (!bookOsisId) throw new Error(`invalid book number ${bookNum}`);
 
     return {
         bookOsisId,
-        versionChapterNum: +chapterNum,
-        versionVerseNum: +verseNum,
+        versionChapterNum: chapterNum ? +chapterNum : undefined,
+        versionVerseNum: verseNum ? +verseNum : undefined,
     };
 };
 

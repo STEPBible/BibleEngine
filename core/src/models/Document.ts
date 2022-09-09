@@ -4,7 +4,7 @@ import { IContentPhrase } from './ContentPhrase';
 import { IBibleReferenceRangeQuery } from './BibleReference';
 
 export interface DocumentPhrase extends IContentPhrase {
-    readonly type: 'phrase';
+    readonly type?: 'phrase';
     bibleReference?: IBibleReferenceRangeQuery;
 }
 

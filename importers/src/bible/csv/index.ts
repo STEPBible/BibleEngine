@@ -1,11 +1,6 @@
-import { createReadStream } from 'fs';
 import * as csv from 'csv-parser';
+import { createReadStream } from 'fs';
 
-import {
-    BibleEngineImporter,
-    IImporterOptions,
-    ImporterBookMetadata,
-} from '../../shared/Importer.interface';
 import {
     BibleEngine,
     BookWithContentForInput,
@@ -13,6 +8,11 @@ import {
     IBibleContentPhrase,
     IBibleVersion,
 } from '@bible-engine/core';
+import {
+    BibleEngineImporter,
+    IImporterOptions,
+    ImporterBookMetadata,
+} from '../../shared/Importer.interface';
 
 type Row = {
     osisId: string;
@@ -121,7 +121,7 @@ export class CsvImporter extends BibleEngineImporter {
 
                 const verseContent: (IBibleContentPhrase | IBibleContentGroup<'italic'>)[] = [];
                 const getSkipSpaceParamter = (text: string) =>
-                    ['.', ',', ';', '!', '?', ':'].indexOf(text[0]) !== -1 ? 'before' : undefined;
+                    ['.', ',', ';', '!', '?', ':'].indexOf(text[0]!) !== -1 ? 'before' : undefined;
 
                 // since our current requirement only requires detecting strings enclosed in <i></i>,
                 // we use this very simple brute-force method of splitting the string at the start
@@ -135,9 +135,10 @@ export class CsvImporter extends BibleEngineImporter {
                         versionVerseNum: +row.verse === 0 ? 1 : +row.verse,
                         versionSubverseNum: +row.verse === 0 ? 0 : 1,
                     };
-                    const textPlainFirst = textSplit.length === 1 ? textSplit[0].trim() : undefined;
-                    const textItalic = textSplit.length > 1 ? textSplit[0].trim() : undefined;
-                    const textPlainSecond = textSplit.length > 1 ? textSplit[1].trim() : undefined;
+                    const textPlainFirst =
+                        textSplit.length === 1 ? textSplit[0]!.trim() : undefined;
+                    const textItalic = textSplit.length > 1 ? textSplit[0]!.trim() : undefined;
+                    const textPlainSecond = textSplit.length > 1 ? textSplit[1]!.trim() : undefined;
                     if (textPlainFirst)
                         verseContent.push({
                             ...phraseTmpl,

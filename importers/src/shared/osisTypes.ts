@@ -22,6 +22,7 @@ export interface OsisXmlNode {
 }
 
 export enum OsisXmlNodeType {
+    ANNOTATE_REF = 'annotateRef',
     BOOK_GROUP = 'bookGroup',
     BOLD = 'bold',
     BOOK = 'book',
@@ -37,6 +38,7 @@ export enum OsisXmlNodeType {
     PARALLEL = 'parallel',
     PSALM = 'psalm',
     PSALM_BOOK_TITLE = 'x-psalm-book',
+    SCOPE = 'scope',
     SECTION = 'section',
     SECTION_MAJOR = 'majorSection',
     SECTION_SUB = 'subSection',
@@ -89,6 +91,8 @@ export enum OsisXmlNodeName {
     REVISION_DESC = 'revisionDesc',
     RIGHTS = 'rights',
     ROW = 'row',
+    SALUTE = 'salute',
+    SPEAKER = 'speaker',
     TABLE = 'table',
     TEXTUAL_VARIATION = 'rdg',
     TITLE = 'title',

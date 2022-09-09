@@ -1,16 +1,15 @@
-import { IBibleReferenceRangeNormalized, IBiblePhraseRef } from '../models';
+import { IBiblePhraseRef, IBibleReferenceRangeNormalized } from '../models';
 import {
     generateEndReferenceFromRange,
     generatePhraseId,
-    generateReferenceId
+    generateReferenceId,
+    MAX_CHAPTER_NUMBER,
+    MAX_SUBVERSE_NUMBER,
+    MAX_VERSE_NUMBER,
 } from './reference.functions';
 
 /**
  * generates SQL for a range-query on the section table
- *
- * @param {IBibleReferenceRangeNormalized} range
- * @param {string} tableAlias
- * @returns {string} SQL
  */
 export const generateBookSectionsSql = (
     range: IBibleReferenceRangeNormalized,
@@ -18,12 +17,12 @@ export const generateBookSectionsSql = (
 ) => {
     const bookPhraseIdStart = generatePhraseId({
         bookOsisId: range.bookOsisId,
-        isNormalized: true
+        isNormalized: true,
     });
     const bookPhraseIdEnd = generatePhraseId({
         bookOsisId: range.bookOsisId,
-        normalizedChapterNum: 999,
-        isNormalized: true
+        normalizedChapterNum: MAX_CHAPTER_NUMBER,
+        isNormalized: true,
     });
 
     const colVersion = `${tableAlias}.versionId`;
@@ -50,8 +49,6 @@ export const generateBookSectionsSql = (
 
 /**
  * generates SQL-WHERE to filter for all paragraphs "in touch" with the range
- * @param {IBibleReferenceRangeNormalized} range
- * @param {string} tableAlias
  */
 export const generateParagraphSql = (
     range: IBibleReferenceRangeNormalized & { versionId: number },
@@ -99,10 +96,6 @@ export const generateParagraphSql = (
 
 /**
  * generates SQL for a range-query on the id of the phrases table
- *
- * @param {IBibleReferenceRangeNormalized} range
- * @param {string} [col='id']
- * @returns {string} SQL
  */
 export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, tableAlias: string) => {
     const refEnd = generateEndReferenceFromRange(range);
@@ -119,9 +112,6 @@ export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, table
 
 /**
  * generates SQL-WHERE for the mod-query on the phraseId-integer to filter for a specific version
- *
- * @param {number} versionId
- * @param {string} [col='id']
  */
 export const generatePhraseIdVersionSql = (versionId: number, tableAlias: string) =>
     // `cast(${col} % 100000 / 100 as UNSIGNED) = ${versionId}`;
@@ -129,24 +119,39 @@ export const generatePhraseIdVersionSql = (versionId: number, tableAlias: string
 
 /**
  * generates SQL for a range-query for reference ids
- *
- * @param {IBibleReferenceRangeNormalized} range
- * @param {string} [col='id']
- * @returns {string} SQL
  */
 export const generateReferenceIdSql = (range: IBibleReferenceRangeNormalized, col = 'id') => {
+    const refStart: IBibleReferenceRangeNormalized = {
+        ...range,
+        normalizedSubverseNum:
+            range.normalizedChapterNum && range.normalizedVerseNum
+                ? range.normalizedSubverseNum ?? 0
+                : undefined,
+    };
     const refEnd: IBibleReferenceRangeNormalized = {
         isNormalized: true,
         bookOsisId: range.bookOsisId,
-        normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
-        normalizedVerseNum:
-        range.normalizedVerseEndNum ? range.normalizedVerseEndNum :
-        (range.normalizedVerseNum && !range.normalizedChapterEndNum)
-                ? range.normalizedVerseNum
-                : 999,
-        normalizedSubverseNum: range.normalizedSubverseEndNum || 99
+        normalizedChapterNum:
+            range.normalizedChapterEndNum || range.normalizedChapterNum || MAX_CHAPTER_NUMBER,
+        normalizedVerseNum: range.normalizedVerseEndNum
+            ? range.normalizedVerseEndNum
+            : range.normalizedVerseNum && !range.normalizedChapterEndNum
+            ? range.normalizedVerseNum
+            : MAX_VERSE_NUMBER,
+        normalizedSubverseNum:
+            typeof range.normalizedSubverseEndNum === 'number' &&
+            !isNaN(range.normalizedSubverseEndNum)
+                ? range.normalizedSubverseEndNum
+                : typeof range.normalizedSubverseNum === 'number' &&
+                  !isNaN(range.normalizedSubverseNum) &&
+                  !range.normalizedChapterEndNum &&
+                  !range.normalizedVerseEndNum
+                ? range.normalizedSubverseNum
+                : MAX_SUBVERSE_NUMBER,
     };
-    let sql = `${col} BETWEEN '${generateReferenceId(range)}' AND '${generateReferenceId(refEnd)}'`;
+    let sql = `${col} BETWEEN '${generateReferenceId(refStart)}' AND '${generateReferenceId(
+        refEnd
+    )}'`;
 
     return sql;
 };

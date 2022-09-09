@@ -3,7 +3,7 @@
  * Documentation: https://wiki.crosswire.org/DevTools:conf_Files
  */
 
-import { SwordMetadataKey, SwordFilterOptions } from './types';
+import { SwordFilterOptions, SwordMetadataKey } from './types';
 
 export default class ModuleConfig {
     about: string;
@@ -19,7 +19,7 @@ export default class ModuleConfig {
 
     constructor(config: string) {
         const lines = config.split(/[\r\n]+/g);
-        this.moduleName = lines[0].slice(1, -1);
+        this.moduleName = lines[0]!.slice(1, -1);
         this.globalOptionFilters = [];
 
         lines.forEach((line: string) => {
@@ -30,34 +30,34 @@ export default class ModuleConfig {
             }
             switch (key) {
                 case SwordMetadataKey.OPTION_FILTER: {
-                    this.globalOptionFilters.push(value);
+                    this.globalOptionFilters.push(value || '');
                     if (value === SwordFilterOptions.OSIS_STRONGS) {
                         this.hasStrongs = true;
                     }
                     break;
                 }
                 case SwordMetadataKey.VERSIFICATION: {
-                    this.versification = value.toLowerCase();
+                    this.versification = (value || '').toLowerCase();
                     break;
                 }
                 case SwordMetadataKey.ENCODING: {
-                    this.encoding = value;
+                    this.encoding = value || '';
                     break;
                 }
                 case SwordMetadataKey.LANGUAGE: {
-                    this.language = value;
+                    this.language = value || '';
                     break;
                 }
                 case SwordMetadataKey.IN_DEPTH_DESCRIPTION: {
-                    this.about = value;
+                    this.about = value || '';
                     break;
                 }
                 case SwordMetadataKey.SHORT_COPYRIGHT: {
-                    this.shortCopyright = value;
+                    this.shortCopyright = value || '';
                     break;
                 }
                 case SwordMetadataKey.DESCRIPTION: {
-                    this.description = value;
+                    this.description = value || '';
                 }
             }
         });

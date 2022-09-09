@@ -4,7 +4,7 @@ import { BibleBookPlaintext } from '../models';
  * @description OSIS book ID with chapter/verse statistics and English names
  */
 export type BookData = {
-    [key: string]: { genericId: number; names: { [key: string]: string[] } };
+    [key: string]: { genericId: number; paratextId: string; names: { [key: string]: string[] } };
 };
 export const BOOK_DATA: BookData = {
     /*
@@ -12,44 +12,54 @@ export const BOOK_DATA: BookData = {
     */
     Gen: {
         genericId: 1,
+        paratextId: 'GEN',
         names: { en: ['Genesis', 'Ge', 'Gen'] },
     },
     Exod: {
         genericId: 2,
+        paratextId: 'EXO',
         names: { en: ['Exodus', 'Ex', 'Exo'] },
     },
     Lev: {
         genericId: 3,
+        paratextId: 'LEV',
         names: { en: ['Leviticus', 'Le', 'Lev'] },
     },
     Num: {
         genericId: 4,
+        paratextId: 'NUM',
         names: { en: ['Numbers', 'Nu', 'Num'] },
     },
     Deut: {
         genericId: 5,
+        paratextId: 'DEU',
         names: { en: ['Deuteronomy', 'Dt', 'Deut', 'Deu', 'De'] },
     },
     Josh: {
         genericId: 6,
+        paratextId: 'JOS',
         names: { en: ['Joshua', 'Js', 'Jos', 'Jos', 'Josh'] },
     },
     Judg: {
         genericId: 7,
+        paratextId: 'JDG',
         names: { en: ['Judges', 'Jg', 'Jdg', 'Jdgs'] },
     },
     Ruth: {
         genericId: 8,
+        paratextId: 'RUT',
         names: { en: ['Ruth', 'Ru', 'Rut'] },
     },
     '1Sam': {
         genericId: 9,
+        paratextId: '1SA',
         names: {
             en: ['1 Samuel', '1S', '1 Sam', '1Sam', '1 Sa', '1Sa', 'I Samuel', 'I Sam', 'I Sa'],
         },
     },
     '2Sam': {
         genericId: 10,
+        paratextId: '2SA',
         names: {
             en: [
                 '2 Samuel',
@@ -67,12 +77,14 @@ export const BOOK_DATA: BookData = {
     },
     '1Kgs': {
         genericId: 11,
+        paratextId: '1KI',
         names: {
             en: ['1 Kings', '1K', '1 Kin', '1Kin', '1 Ki', 'IK', '1Ki', 'I Kings', 'I Kin', 'I Ki'],
         },
     },
     '2Kgs': {
         genericId: 12,
+        paratextId: '2KI',
         names: {
             en: [
                 '2 Kings',
@@ -90,6 +102,7 @@ export const BOOK_DATA: BookData = {
     },
     '1Chr': {
         genericId: 13,
+        paratextId: '1CH',
         names: {
             en: [
                 '1 Chronicles',
@@ -106,6 +119,7 @@ export const BOOK_DATA: BookData = {
     },
     '2Chr': {
         genericId: 14,
+        paratextId: '2CH',
         names: {
             en: [
                 '2 Chronicles',
@@ -123,34 +137,42 @@ export const BOOK_DATA: BookData = {
     },
     Ezra: {
         genericId: 15,
+        paratextId: 'EZR',
         names: { en: ['Ezra', 'Ezr'] },
     },
     Neh: {
         genericId: 16,
+        paratextId: 'NEH',
         names: { en: ['Nehemiah', 'Ne', 'Neh', 'Neh', 'Ne'] },
     },
     Esth: {
         genericId: 17,
+        paratextId: 'EST',
         names: { en: ['Esther', 'Es', 'Est', 'Esth'] },
     },
     Job: {
         genericId: 18,
+        paratextId: 'JOB',
         names: { en: ['Job', 'Jb', 'Job'] },
     },
     Ps: {
         genericId: 19,
+        paratextId: 'PSA',
         names: { en: ['Psalm', 'Ps', 'Psa'] },
     },
     Prov: {
         genericId: 20,
+        paratextId: 'PRO',
         names: { en: ['Proverbs', 'Pr', 'Prov', 'Pro'] },
     },
     Eccl: {
         genericId: 21,
+        paratextId: 'ECC',
         names: { en: ['Ecclesiastes', 'Ec', 'Ecc', 'Qohelet'] },
     },
     Song: {
         genericId: 22,
+        paratextId: 'SNG',
         names: {
             en: [
                 'Song of Songs',
@@ -167,70 +189,87 @@ export const BOOK_DATA: BookData = {
     },
     Isa: {
         genericId: 23,
+        paratextId: 'ISA',
         names: { en: ['Isaiah', 'Is', 'Isa'] },
     },
     Jer: {
         genericId: 24,
+        paratextId: 'JER',
         names: { en: ['Jeremiah', 'Je', 'Jer'] },
     },
     Lam: {
         genericId: 25,
+        paratextId: 'LAM',
         names: { en: ['Lamentations', 'La', 'Lam', 'Lament'] },
     },
     Ezek: {
         genericId: 26,
+        paratextId: 'EZK',
         names: { en: ['Ezekiel', 'Ek', 'Ezek', 'Eze', 'Ezk'] },
     },
     Dan: {
         genericId: 27,
+        paratextId: 'DAN',
         names: { en: ['Daniel', 'Da', 'Dan', 'Dl', 'Dnl'] },
     },
     Hos: {
         genericId: 28,
+        paratextId: 'HOS',
         names: { en: ['Hosea', 'Ho', 'Hos'] },
     },
     Joel: {
         genericId: 29,
+        paratextId: 'JOL',
         names: { en: ['Joel', 'Jl', 'Joel', 'Joe', 'Jol'] },
     },
     Amos: {
         genericId: 30,
+        paratextId: 'AMO',
         names: { en: ['Amos', 'Am', 'Amos', 'Amo'] },
     },
     Obad: {
         genericId: 31,
+        paratextId: 'OBA',
         names: { en: ['Obadiah', 'Ob', 'Oba', 'Obd', 'Odbh'] },
     },
     Jonah: {
         genericId: 32,
+        paratextId: 'JON',
         names: { en: ['Jonah', 'Jh', 'Jon', 'Jnh'] },
     },
     Mic: {
         genericId: 33,
+        paratextId: 'MIC',
         names: { en: ['Micah', 'Mi', 'Mic'] },
     },
     Nah: {
         genericId: 34,
+        paratextId: 'NAM',
         names: { en: ['Nahum', 'Na', 'Nah', 'Nah', 'Na', 'Nam'] },
     },
     Hab: {
         genericId: 35,
+        paratextId: 'HAB',
         names: { en: ['Habakkuk', 'Hb', 'Hab', 'Hk', 'Habk'] },
     },
     Zeph: {
         genericId: 36,
+        paratextId: 'ZEP',
         names: { en: ['Zephaniah', 'Zp', 'Zep', 'Zeph'] },
     },
     Hag: {
         genericId: 37,
+        paratextId: 'HAG',
         names: { en: ['Haggai', 'Ha', 'Hag', 'Hagg'] },
     },
     Zech: {
         genericId: 38,
+        paratextId: 'ZEC',
         names: { en: ['Zechariah', 'Zc', 'Zech', 'Zec'] },
     },
     Mal: {
         genericId: 39,
+        paratextId: 'MAL',
         names: { en: ['Malachi', 'Ml', 'Mal', 'Mlc'] },
     },
 
@@ -240,30 +279,37 @@ export const BOOK_DATA: BookData = {
 
     Matt: {
         genericId: 40,
+        paratextId: 'MAT',
         names: { en: ['Matthew', 'Mt', 'Matt', 'Mat'] },
     },
     Mark: {
         genericId: 41,
+        paratextId: 'MRK',
         names: { en: ['Mark', 'Mk', 'Mar', 'Mrk'] },
     },
     Luke: {
         genericId: 42,
+        paratextId: 'LUK',
         names: { en: ['Luke', 'Lk', 'Luk', 'Lu'] },
     },
     John: {
         genericId: 43,
+        paratextId: 'JHN',
         names: { en: ['John', 'Jn', 'Joh', 'Jo', 'Jhn'] },
     },
     Acts: {
         genericId: 44,
+        paratextId: 'ACT',
         names: { en: ['Acts', 'Ac', 'Act'] },
     },
     Rom: {
         genericId: 45,
+        paratextId: 'ROM',
         names: { en: ['Romans', 'Ro', 'Rom', 'Rmn', 'Rmns'] },
     },
     '1Cor': {
         genericId: 46,
+        paratextId: '1CO',
         names: {
             en: [
                 '1 Corinthians',
@@ -281,6 +327,7 @@ export const BOOK_DATA: BookData = {
     },
     '2Cor': {
         genericId: 47,
+        paratextId: '2CO',
         names: {
             en: [
                 '2 Corinthians',
@@ -298,22 +345,27 @@ export const BOOK_DATA: BookData = {
     },
     Gal: {
         genericId: 48,
+        paratextId: 'GAL',
         names: { en: ['Galatians', 'Ga', 'Gal', 'Gltns'] },
     },
     Eph: {
         genericId: 49,
+        paratextId: 'EPH',
         names: { en: ['Ephesians', 'Ep', 'Eph', 'Ephn'] },
     },
     Phil: {
         genericId: 50,
+        paratextId: 'PHP',
         names: { en: ['Philippians', 'Pp', 'Phi', 'Phil', 'Phi', 'Php'] },
     },
     Col: {
         genericId: 51,
+        paratextId: 'COL',
         names: { en: ['Colossians', 'Co', 'Col', 'Colo', 'Cln', 'Clns'] },
     },
     '1Thess': {
         genericId: 52,
+        paratextId: '1TH',
         names: {
             en: [
                 '1 Thessalonians',
@@ -336,6 +388,7 @@ export const BOOK_DATA: BookData = {
     },
     '2Thess': {
         genericId: 53,
+        paratextId: '2TH',
         names: {
             en: [
                 '2 Thessalonians',
@@ -359,6 +412,7 @@ export const BOOK_DATA: BookData = {
     },
     '1Tim': {
         genericId: 54,
+        paratextId: '1TI',
         names: {
             en: [
                 '1 Timothy',
@@ -376,6 +430,7 @@ export const BOOK_DATA: BookData = {
     },
     '2Tim': {
         genericId: 55,
+        paratextId: '2TI',
         names: {
             en: [
                 '2 Timothy',
@@ -394,28 +449,34 @@ export const BOOK_DATA: BookData = {
     },
     Titus: {
         genericId: 56,
+        paratextId: 'TIT',
         names: { en: ['Titus', 'Ti', 'Tit', 'Tt', 'Ts'] },
     },
     Phlm: {
         genericId: 57,
+        paratextId: 'PHM',
         names: { en: ['Philemon', 'Pm', 'Phile', 'Phile', 'Philm', 'Pm', 'Phm'] },
     },
     Heb: {
         genericId: 58,
+        paratextId: 'HEB',
         names: { en: ['Hebrews', 'He', 'Heb', 'Hw'] },
     },
     Jas: {
         genericId: 59,
+        paratextId: 'JAS',
         names: { en: ['James', 'Jm', 'Jam', 'Jas', 'Ja'] },
     },
     '1Pet': {
         genericId: 60,
+        paratextId: '1PE',
         names: {
             en: ['1 Peter', '1P', '1 Pet', '1Pet', 'IPe', '1P', 'I Peter', 'I Pet', 'I Pe', '1Pe'],
         },
     },
     '2Pet': {
         genericId: 61,
+        paratextId: '2PE',
         names: {
             en: [
                 '2 Peter',
@@ -433,14 +494,17 @@ export const BOOK_DATA: BookData = {
     },
     '1John': {
         genericId: 62,
+        paratextId: '1JN',
         names: { en: ['1 John', '1J', '1 Jn', '1Jn', '1 Jo', 'IJo', 'I John', 'I Jo', 'I Jn'] },
     },
     '2John': {
         genericId: 63,
+        paratextId: '2JN',
         names: { en: ['2 John', '2J', '2 Jn', '2Jn', '2 Jo', 'IIJo', 'II John', 'II Jo', 'II Jn'] },
     },
     '3John': {
         genericId: 64,
+        paratextId: '3JN',
         names: {
             en: [
                 '3 John',
@@ -458,10 +522,12 @@ export const BOOK_DATA: BookData = {
     },
     Jude: {
         genericId: 65,
+        paratextId: 'JUD',
         names: { en: ['Jude', 'Jude', 'Jude'] },
     },
     Rev: {
         genericId: 66,
+        paratextId: 'REV',
         names: { en: ['Revelation', 'Re', 'Rev', 'Rvltn'] },
     },
 
@@ -471,74 +537,92 @@ export const BOOK_DATA: BookData = {
 
     Tob: {
         genericId: 70,
+        paratextId: 'TOB',
         names: { en: ['Tobit'] },
     },
     Jdt: {
         genericId: 71,
+        paratextId: 'JDT',
         names: { en: ['Judith'] },
     },
     AddEsth: {
         genericId: 72,
+        paratextId: 'ADE',
         names: { en: ['Additions to Esther'] },
     },
     Wis: {
         genericId: 73,
+        paratextId: 'WIS',
         names: { en: ['Wisdom', 'Wisdom of Solomon'] },
     },
     Sir: {
         genericId: 74,
+        paratextId: 'SIR',
         names: { en: ['Sirach', 'Ecclesiasticus'] },
     },
     Bar: {
         genericId: 75,
+        paratextId: 'BAR',
         names: { en: ['Baruch'] },
     },
     EpJer: {
         genericId: 76,
+        paratextId: 'LJE',
         names: { en: ['Letter of Jeremiah', 'Lje'] },
     },
     PrAzar: {
         genericId: 77,
+        paratextId: 'S3Y',
         names: { en: ['Prayer of Azariah'] },
     },
     Sus: {
         genericId: 78,
+        paratextId: 'SUS',
         names: { en: ['Susanna'] },
     },
     Bel: {
         genericId: 79,
+        paratextId: 'BEL',
         names: { en: ['Bel and the Dragon'] },
     },
     '1Macc': {
         genericId: 80,
+        paratextId: '1MA',
         names: { en: ['1 Maccabees'] },
     },
     '2Macc': {
         genericId: 81,
+        paratextId: '2MA',
         names: { en: ['2 Maccabees'] },
     },
     '3Macc': {
         genericId: 82,
+        paratextId: '3MA',
         names: { en: ['3 Maccabees'] },
     },
     '4Macc': {
         genericId: 83,
+        paratextId: '4MA',
         names: { en: ['4 Maccabees'] },
     },
     PrMan: {
         genericId: 84,
+        paratextId: 'MAN',
         names: { en: ['Prayer of Manasseh', 'Song of the Three Children'] },
     },
     '1Esd': {
         genericId: 85,
+        paratextId: '1ES',
         names: { en: ['1 Esdras'] },
     },
     '2Esd': {
         genericId: 86,
+        paratextId: '2ES',
         names: { en: ['2 Esdras', '5 Ezra'] },
     },
     Ps151: {
         genericId: 87,
+        paratextId: 'PS2',
         names: { en: ['Psalm'] },
     },
 };
@@ -879,18 +963,31 @@ export const getBookGenericIdFromOsisId = (osisId: string, checkAlternatives = f
     if (!BOOK_DATA[osisId]) {
         if (checkAlternatives) {
             const fallbackOsisId = getOsisIdFromBookString(osisId);
-            if (fallbackOsisId) return BOOK_DATA[fallbackOsisId].genericId;
+            if (fallbackOsisId && BOOK_DATA[fallbackOsisId])
+                return BOOK_DATA[fallbackOsisId]!.genericId;
         }
         throw new Error(`invalid osis id '${osisId}'`);
     }
-    return BOOK_DATA[osisId].genericId;
+    return BOOK_DATA[osisId]!.genericId;
 };
 
-export const getNormalizedChapterCountForOsisId = (osisId: string) =>
-    NORMALIZED_VERSE_NUMS[getBookGenericIdFromOsisId(osisId) - 1].length;
+export const getNormalizedChapterCountForOsisId = (osisId: string) => {
+    const genericBookId = getBookGenericIdFromOsisId(osisId);
+    if (!NORMALIZED_VERSE_NUMS[genericBookId - 1])
+        throw new Error(`corrupted NORMALIZED_VERSE_NUMS for osisId ${osisId}`);
+    return NORMALIZED_VERSE_NUMS[genericBookId - 1]!.length;
+};
 
-export const getNormalizedVerseCount = (osisId: string, chapterNum: number) =>
-    NORMALIZED_VERSE_NUMS[getBookGenericIdFromOsisId(osisId) - 1][chapterNum - 1];
+export const getNormalizedVerseCount = (osisId: string, chapterNum: number): number => {
+    const genericBookId = getBookGenericIdFromOsisId(osisId);
+    if (!NORMALIZED_VERSE_NUMS[genericBookId - 1])
+        throw new Error(`corrupted NORMALIZED_VERSE_NUMS for osisId ${osisId}`);
+    if (!NORMALIZED_VERSE_NUMS[genericBookId - 1]![chapterNum - 1])
+        throw new Error(
+            `corrupted NORMALIZED_VERSE_NUMS for osisId ${osisId}, missing chapter ${chapterNum}`
+        );
+    return NORMALIZED_VERSE_NUMS[genericBookId - 1]![chapterNum - 1]!;
+};
 
 export const getOsisIdFromBookGenericId = (bookGenericId: number) => {
     if (
@@ -902,13 +999,13 @@ export const getOsisIdFromBookGenericId = (bookGenericId: number) => {
     )
         throw new Error(`invalid generic book id ${bookGenericId}`);
 
-    let osisId: string;
+    let osisId: string | undefined;
     if (bookGenericId <= 39) osisId = OT_BOOKS[bookGenericId - 1];
     else if (bookGenericId <= 66) osisId = NT_BOOKS[bookGenericId - OT_BOOKS.length - 1];
     else osisId = AP_BOOKS[bookGenericId - 70];
 
     // safeguard in case this file becomes inconsistent / corrupted
-    if (bookGenericId !== getBookGenericIdFromOsisId(osisId))
+    if (!osisId || bookGenericId !== getBookGenericIdFromOsisId(osisId))
         throw new Error(`standardV11n data got corrupted`);
 
     return osisId;
@@ -918,10 +1015,17 @@ export const getOsisIdFromBookString = (bookString: string, language = 'en') => 
     if (BOOK_DATA[bookString]) return bookString;
     else {
         for (const _osisId of Object.keys(BOOK_DATA)) {
-            if (BOOK_DATA[_osisId].names[language].includes(bookString)) return _osisId;
+            if (BOOK_DATA[_osisId]!.names[language]?.includes(bookString)) return _osisId;
         }
     }
     return false;
+};
+
+export const getOsisIdFromParatextId = (paratextId: string) => {
+    for (const _osisId of Object.keys(BOOK_DATA)) {
+        if (BOOK_DATA[_osisId]!.paratextId === paratextId) return _osisId;
+    }
+    return null;
 };
 
 export const getSourceTypeFromId = (sourceTypeId: number) => sourceTypes.get(sourceTypeId);
@@ -946,17 +1050,25 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
         // if we have a failing test we can always return false since tests are always "match-all"
 
         let testParts = testString.match(/(.*)([=<>])(.*)/);
-        if (!testParts) {
+        if (!testParts || !testParts[1]) {
             throw new Error(`v11n rule test parse error: ${testString}`);
         }
 
         const refBaseFactorParts = testParts[1].split('*');
-        const refBaseReferenceParts = refBaseFactorParts[0].split('.');
+        const refBaseReferenceParts = refBaseFactorParts[0]!.split('.');
+        if (!refBaseReferenceParts[1])
+            throw new Error(
+                `v11n rule test parse error in refBaseReferenceParts[1]: ${refBaseFactorParts[0]}`
+            );
         const refBaseNumbers = refBaseReferenceParts[1].split(':');
+        if (!refBaseNumbers[1])
+            throw new Error(
+                `v11n rule test parse error in refBaseNumbers[1]: ${refBaseReferenceParts[1]}`
+            );
         const refBaseAddition = refBaseReferenceParts[2]?.split('+');
 
         const refBase: TestReference = {
-            chapterNumber: +refBaseNumbers[0],
+            chapterNumber: +refBaseNumbers[0]!,
             verseNumber: +refBaseNumbers[1],
             subverseNumber: refBaseAddition?.[0] ? +refBaseAddition[0] : undefined,
             factor: refBaseFactorParts[1] ? +refBaseFactorParts[1] : 1,
@@ -1009,11 +1121,21 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
                     return false;
             }
         } else {
+            if (!testParts[3])
+                throw new Error(`v11n rule test parse error for testParts[3]: ${testString}`);
             const refCompareFactorParts = testParts[3].split('*');
-            const refCompareReferenceParts = refCompareFactorParts[0].split('.');
+            const refCompareReferenceParts = refCompareFactorParts[0]!.split('.');
+            if (!refCompareReferenceParts[1])
+                throw new Error(
+                    `v11n rule test parse error for refCompareReferenceParts[1]: ${refCompareFactorParts[0]}`
+                );
             const refCompareNumbers = refCompareReferenceParts[1].split(':');
+            if (!refCompareNumbers[1])
+                throw new Error(
+                    `v11n rule test parse error for refCompareNumbers[1]: ${refCompareReferenceParts[1]}`
+                );
             const refCompare: TestReference = {
-                chapterNumber: +refCompareNumbers[0],
+                chapterNumber: +refCompareNumbers[0]!,
                 verseNumber: +refCompareNumbers[1],
                 subverseNumber: refCompareReferenceParts[2]
                     ? +refCompareReferenceParts[2]

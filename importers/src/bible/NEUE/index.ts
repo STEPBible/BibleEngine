@@ -21,6 +21,7 @@ export class NeueImporter extends BibleEngineImporter {
             invalid_passage_strategy: 'include',
             invalid_sequence_strategy: 'include',
             passage_existence_strategy: 'bc',
+            consecutive_combination_strategy: 'separate',
         });
 
         const versionUid = 'NEUE';

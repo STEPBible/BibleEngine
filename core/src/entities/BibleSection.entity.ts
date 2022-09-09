@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, Index } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { DocumentRoot, IBibleSectionEntity } from '../models';
 import { BibleCrossReferenceEntity } from './BibleCrossReference.entity';
-import { IBibleSectionEntity, DocumentRoot } from '../models';
 
 @Entity('bible_section')
 @Index(['versionId', 'phraseStartId', 'phraseEndId'])
@@ -35,13 +35,12 @@ export class BibleSectionEntity implements IBibleSectionEntity {
     @Column({ nullable: true, type: 'simple-json' })
     description?: DocumentRoot;
 
-    @OneToMany(
-        () => BibleCrossReferenceEntity,
-        crossReference => crossReference.section,
-        {
-            cascade: true
-        }
-    )
+    @Column({ nullable: true })
+    isChapterLabel?: boolean;
+
+    @OneToMany(() => BibleCrossReferenceEntity, (crossReference) => crossReference.section, {
+        cascade: true,
+    })
     @JoinColumn()
     crossReferences?: BibleCrossReferenceEntity[];
 
@@ -54,7 +53,7 @@ export class BibleSectionEntity implements IBibleSectionEntity {
             Object.assign(this, section);
             if (section.crossReferences)
                 this.crossReferences = section.crossReferences.map(
-                    crossReference => new BibleCrossReferenceEntity(crossReference, true)
+                    (crossReference) => new BibleCrossReferenceEntity(crossReference, true)
                 );
         }
     }

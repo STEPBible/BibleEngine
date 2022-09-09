@@ -12,14 +12,15 @@ export default class BlobReader {
         verses: types.VerseMetadata[],
         encoding: string
     ): types.ChapterXML {
+        if (!verses[0]) throw new Error(`empty verses array passed to 'getXMLforChapter'`);
         const { chapter } = verses[0];
         if (!positions[chapter - 1]) {
             throw new Error(`can't find chapter ${chapter} in this module`);
         }
         // Assumption is that all verses must have same chapter
-        const { bookStartPos } = positions[chapter - 1];
-        const { startPos } = positions[chapter - 1];
-        const { length } = positions[chapter - 1];
+        const { bookStartPos } = positions[chapter - 1]!;
+        const { startPos } = positions[chapter - 1]!;
+        const { length } = positions[chapter - 1]!;
         const chapterStartPos = bookStartPos + startPos;
         const chapterEndPos = chapterStartPos + length;
         const blob = testamentBlob.slice(bookStartPos, chapterEndPos);
@@ -63,8 +64,15 @@ export default class BlobReader {
         blob: Uint8Array,
         encoding: string
     ) {
-        const verseStart = startPos + positions[verse.chapter - 1].verses[verse.verse - 1].startPos;
-        const verseEnd = verseStart + positions[verse.chapter - 1].verses[verse.verse - 1].length;
+        if (!positions[verse.chapter - 1] || !positions[verse.chapter - 1]!.verses[verse.verse - 1])
+            throw new Error(
+                `missing chapter positions for chapter ${verse.chapter - 1} and verse ${
+                    verse.verse - 1
+                }`
+            );
+        const verseStart =
+            startPos + positions[verse.chapter - 1]!.verses[verse.verse - 1]!.startPos;
+        const verseEnd = verseStart + positions[verse.chapter - 1]!.verses[verse.verse - 1]!.length;
         return this.blobToString(blob.slice(verseStart, verseEnd), encoding);
     }
 
@@ -78,7 +86,9 @@ export default class BlobReader {
         let verseStart = 0;
         const verseEnd = startPos;
         if (chapter !== 1) {
-            verseStart = positions[chapter - 2].startPos + positions[chapter - 2].length;
+            if (!positions[chapter - 2])
+                throw new Error(`missing chapter positions for chapter ${chapter - 2}`);
+            verseStart = positions[chapter - 2]!.startPos + positions[chapter - 2]!.length;
         }
         const introBlob = blob.slice(verseStart, verseEnd);
         const introText = this.blobToString(introBlob, encoding);

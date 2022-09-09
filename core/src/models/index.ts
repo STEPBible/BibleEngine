@@ -7,7 +7,7 @@ import {
     IBibleContentGeneratorSection,
     IBibleVerse,
     BibleContentGeneratorContainer,
-    IBibleOutputRoot
+    IBibleOutputRoot,
 } from './BibleOutput';
 import {
     IBibleReference,
@@ -18,7 +18,8 @@ import {
     IBibleReferenceRangeQuery,
     IBibleReferenceVersion,
     IBibleReferenceRangeVersion,
-    BibleReferenceParser
+    BibleReferenceParser,
+    BibleReferenceParsedEntity,
 } from './BibleReference';
 import { IBibleBook, IBibleBookEntity } from './BibleBook';
 import { IBibleSection, IBibleSectionGeneric, IBibleSectionEntity } from './BibleSection';
@@ -27,14 +28,14 @@ import {
     PhraseModifiers,
     ValueModifiers,
     BooleanModifiers,
-    IBiblePhraseWithNumbers
+    IBiblePhraseWithNumbers,
 } from './BiblePhrase';
 import {
     IBibleContent,
     IBibleContentGroup,
     IBibleContentPhrase,
     IBibleContentSection,
-    IBibleNumbering
+    IBibleNumbering,
 } from './BibleContent';
 import { BibleBookPlaintext, BibleChapterPlaintext, BiblePlaintext } from './BibleBookPlaintext';
 import {
@@ -42,7 +43,7 @@ import {
     DocumentElement,
     DocumentGroup,
     DocumentPhrase,
-    DocumentSection
+    DocumentSection,
 } from './Document';
 import { IBibleVersion } from './BibleVersion';
 import { IDictionaryEntry } from './DictionaryEntry';
@@ -58,6 +59,7 @@ export {
     BibleChapterPlaintext,
     BibleContentGenerator,
     BibleContentGeneratorContainer,
+    BibleReferenceParsedEntity,
     BibleReferenceParser,
     BookWithContentForInput,
     BooleanModifiers,
@@ -101,5 +103,5 @@ export {
     IDictionaryEntry,
     IV11nRule,
     PhraseModifiers,
-    ValueModifiers
+    ValueModifiers,
 };

@@ -1,11 +1,7 @@
 import { getCurrentContainer } from '../../functions/helpers.functions';
 import { ParserContext } from './../../entities/ParserContext';
 import {
-    isBeginningOfParagraph,
-    createParagraph,
-    sourceTextHasParagraphs,
-    closeCurrentParagraph,
-    startNewParagraph,
+    closeCurrentParagraph, createParagraph, isBeginningOfParagraph, sourceTextHasParagraphs, startNewParagraph
 } from './../../functions/paragraphs.functions';
 
 describe('isBeginningOfParagraph', () => {
@@ -34,7 +30,7 @@ describe('startNewParagraph', () => {
         startNewParagraph(context);
         const currentContainer: any = getCurrentContainer(context);
         expect(isBeginningOfParagraph(context)).toBe(true);
-        expect(currentContainer).toBe(context.contentContainerStack[0].contents[0]);
+        expect(currentContainer).toBe(context.contentContainerStack[0]!.contents[0]);
     });
 });
 

@@ -1,20 +1,20 @@
 import {
-    Entity,
-    Column,
-    JoinColumn,
-    OneToMany,
-    PrimaryColumn,
     AfterLoad,
     BeforeInsert,
     BeforeUpdate,
+    Column,
+    Entity,
     Index,
+    JoinColumn,
+    OneToMany,
+    PrimaryColumn,
 } from 'typeorm';
-import { BibleCrossReferenceEntity } from './BibleCrossReference.entity';
-import { BibleNoteEntity } from './BibleNote.entity';
 import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
-import { PhraseModifiers, IBiblePhraseRef } from '../models';
+import { IBiblePhraseRef, PhraseModifiers } from '../models';
 import { IBiblePhraseWithNumbers } from '../models/BiblePhrase';
 import { IContentPhrase } from '../models/ContentPhrase';
+import { BibleCrossReferenceEntity } from './BibleCrossReference.entity';
+import { BibleNoteEntity } from './BibleNote.entity';
 
 @Entity('bible_phrase', { withoutRowid: true })
 export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
@@ -121,11 +121,6 @@ export class BiblePhraseEntity implements IBiblePhraseWithNumbers {
             versionId: phraseRef.versionId!,
             phraseNum: phraseRef.phraseNum!,
         };
-
-        // if (this.strongsJoined) this.strongs = this.strongsJoined.split(',');
-        // if (this.modifiersJson) this.modifiers = JSON.parse(this.modifiersJson);
-
-        if (!this.versionSubverseNum) delete this.versionSubverseNum;
     }
 
     @BeforeInsert()

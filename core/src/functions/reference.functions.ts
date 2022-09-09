@@ -1,27 +1,27 @@
 import {
-    IBibleReferenceRange,
+    IBibleCrossReference,
+    IBiblePhraseRef,
     IBibleReference,
     IBibleReferenceNormalized,
-    IBiblePhraseRef,
+    IBibleReferenceRange,
     IBibleReferenceRangeNormalized,
     IBibleSectionGeneric,
-    IBibleCrossReference,
 } from '../models';
 import { pad } from './utils.functions';
 import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from './v11n.functions';
-import { BibleReferenceParser, BibleReferenceParsedEntity } from '../models/BibleReference';
+
+// due to the way we save phrase ids as a big integers, there are maximum values for each part
+// the following constants are ordered as they appear in the phrase id (total 15 digits)
+export const MAX_BOOK_NUMBER = 99;
+export const MAX_CHAPTER_NUMBER = 999;
+export const MAX_VERSE_NUMBER = 999;
+export const MAX_SUBVERSE_NUMBER = 99;
+export const MAX_VERSION_ID = 999;
+export const MAX_PHRASE_NUMBER = 99;
 
 /**
  * generates a bible reference range object with the version properties set such that it includes
  * the previous and next chapter of the given range (if exisiting)
- *
- * @param {IBibleReferenceRange} {
- *     versionId,
- *     bookOsisId,
- *     versionChapterNum,
- *     versionChapterEndNum
- * }
- * @returns {IBibleReferenceRange}
  */
 export const generateContextRangeFromVersionRange = ({
     versionId,
@@ -41,9 +41,9 @@ export const generateContextRangeFromVersionRange = ({
             ? versionChapterEndNum + 1
             : versionChapterNum + 1;
         contextRange.versionVerseNum = 0;
-        contextRange.versionVerseEndNum = 999;
+        contextRange.versionVerseEndNum = MAX_VERSE_NUMBER;
         contextRange.versionSubverseNum = 0;
-        contextRange.versionSubverseEndNum = 99;
+        contextRange.versionSubverseEndNum = MAX_SUBVERSE_NUMBER;
     }
     return contextRange;
 };
@@ -52,9 +52,6 @@ export const generateContextRangeFromVersionRange = ({
  * generates a bible reference object that references the end part of a range object (note: this
  * does not return correct version end-numbers for chapters or verses, but the max value 999
  * instead)
- *
- * @param {IBibleReferenceRangeNormalized} range
- * @returns {IBiblePhraseRef}
  */
 export const generateEndReferenceFromRange = (
     range: IBibleReferenceRangeNormalized
@@ -62,20 +59,21 @@ export const generateEndReferenceFromRange = (
     return {
         isNormalized: true,
         bookOsisId: range.bookOsisId,
-        normalizedChapterNum: range.normalizedChapterEndNum || range.normalizedChapterNum || 999,
+        normalizedChapterNum:
+            range.normalizedChapterEndNum || range.normalizedChapterNum || MAX_CHAPTER_NUMBER,
         normalizedVerseNum: range.normalizedVerseEndNum
             ? range.normalizedVerseEndNum
             : range.normalizedVerseNum && !range.normalizedChapterEndNum
             ? range.normalizedVerseNum
-            : 999,
+            : MAX_VERSE_NUMBER,
         normalizedSubverseNum:
             typeof range.normalizedSubverseEndNum !== 'undefined'
                 ? range.normalizedSubverseEndNum
                 : typeof range.normalizedSubverseNum !== 'undefined' && !range.normalizedVerseEndNum
                 ? range.normalizedSubverseNum
-                : 99,
-        versionId: range.versionId || 999,
-        phraseNum: 99,
+                : MAX_SUBVERSE_NUMBER,
+        versionId: range.versionId || MAX_VERSION_ID,
+        phraseNum: MAX_PHRASE_NUMBER,
     };
 };
 
@@ -83,19 +81,18 @@ export const generateEndReferenceFromRange = (
  * this generates a normalized reference object using the version numbers. This does not do
  * normalization! This should only be used if we know that version numbers are identical to the
  * normalized numbers.
- *
- * @param {IBibleReference} range
- * @returns {IBibleReferenceNormalized}
  */
 export const generateNormalizedRangeFromVersionRange = (
-    range: IBibleReferenceRange
+    range: IBibleReferenceRange,
+    subverseDefault: number | undefined = undefined
 ): IBibleReferenceRangeNormalized => {
     return {
         ...range,
         isNormalized: true,
         normalizedChapterNum: range.normalizedChapterNum || range.versionChapterNum,
         normalizedVerseNum: range.normalizedVerseNum || range.versionVerseNum,
-        normalizedSubverseNum: range.normalizedSubverseNum ?? range.versionSubverseNum ?? 1,
+        normalizedSubverseNum:
+            range.normalizedSubverseNum ?? range.versionSubverseNum ?? subverseDefault,
         normalizedChapterEndNum: range.normalizedChapterEndNum || range.versionChapterEndNum,
         normalizedVerseEndNum: range.normalizedVerseEndNum || range.versionVerseEndNum,
         normalizedSubverseEndNum: range.normalizedSubverseEndNum ?? range.versionSubverseEndNum,
@@ -104,8 +101,6 @@ export const generateNormalizedRangeFromVersionRange = (
 
 /**
  * encodes a bible phrase reference object into an integer to use in database operations
- * @param {IBiblePhraseRef} reference
- * @returns {number}
  */
 export const generatePhraseId = (reference: IBiblePhraseRef): number => {
     let refId = '' + generateReferenceId(reference);
@@ -119,11 +114,6 @@ export const generatePhraseId = (reference: IBiblePhraseRef): number => {
 /**
  * local method to generate an integer reference from osisId, chapter, verse and
  * subverse
- * @param bookNumber
- * @param chapter
- * @param verse
- * @param subverse
- * @returns {number}
  */
 const _generateReferenceId = (
     osisId: string,
@@ -144,8 +134,6 @@ const _generateReferenceId = (
 
 /**
  * encodes a normalized reference object into an integer to use in database operations
- * @param {IBibleReferenceNormalized} reference
- * @returns {number}
  */
 export const generateReferenceId = (reference: IBibleReferenceNormalized): number => {
     return _generateReferenceId(
@@ -158,8 +146,6 @@ export const generateReferenceId = (reference: IBibleReferenceNormalized): numbe
 
 /**
  * encodes a version reference object into an integer to use in database operations
- * @param {IBibleReferenceVersion} reference
- * @returns {number}
  */
 export const generateVersionReferenceId = (reference: IBibleReference): number => {
     return _generateReferenceId(
@@ -172,9 +158,6 @@ export const generateVersionReferenceId = (reference: IBibleReference): number =
 
 /**
  * Generates a range object from two phrase ids
- * @param {number} phraseStartId
- * @param {number} phraseEndId
- * @returns {IBibleReferenceRangeNormalized}
  */
 export const generateRangeFromGenericSection = (
     genericSection: IBibleSectionGeneric
@@ -194,11 +177,6 @@ export const generateRangeFromGenericSection = (
 
 /**
  * returns a readable string of the reference range
- *
- * @param {IBibleReferenceRange} range
- * @param {string} bookAbbreviation
- * @param {string} chapterVerseSeparator
- * @returns {string}
  */
 export const generateReferenceRangeLabel = (
     range: IBibleReferenceRange,
@@ -209,7 +187,7 @@ export const generateReferenceRangeLabel = (
     if (range.versionChapterNum) label += ` ${range.versionChapterNum}`;
     if (range.versionVerseNum) label += `${chapterVerseSeparator}${range.versionVerseNum}`;
     if (range.versionChapterEndNum || range.versionVerseEndNum) label += '-';
-    if (range.versionChapterEndNum) {
+    if (range.versionChapterEndNum && range.versionChapterEndNum !== range.versionChapterNum) {
         label += `${range.versionChapterEndNum}`;
         if (range.versionVerseEndNum) label += chapterVerseSeparator;
     }
@@ -218,99 +196,8 @@ export const generateReferenceRangeLabel = (
 };
 
 /**
- * returns all bible references within the given text
- *
- * @param {BibleReferenceParser} parser
- * @param {string} text
- * @param { { bookOsisId: string; chapterNum: number; localRefMatcher?: RegExp; }} [context]
- * @returns {BibleReferenceParsedEntity[]}
- */
-export const getReferencesFromText = (
-    /** parser that needs to be configured to the language of `text` */
-    parser: BibleReferenceParser,
-    text: string,
-    context?: {
-        bookOsisId: string;
-        chapterNum?: number;
-        /**
-         * BCV parser does only detect local refs at the beginning of the string. This additional
-         * regex can be provided to help the parser find all of them
-         * example (german): `/(Kapitel|V\.|Vers) ([0-9,.\-; ]|(und|bis|Kapitel|V\.|Vers))+/g`
-         */
-        localRefMatcher?: RegExp;
-    }
-) => {
-    const entities: BibleReferenceParsedEntity[] = [];
-
-    const contextOsisString = !context
-        ? ''
-        : context.chapterNum
-        ? `${context.bookOsisId} ${context.chapterNum}`
-        : context.bookOsisId;
-
-    if (context && context.localRefMatcher) {
-        // since for some reason the BCV parser does only match local/context-refs at the beginning
-        // of the string/text, we detect them manually in a first run
-        const localRefs = text.match(context.localRefMatcher);
-
-        if (localRefs) {
-            let lastRefIndex = 0;
-            for (const localRef of localRefs) {
-                const parsedLocalEntities = parser
-                    .parse_with_context(localRef, contextOsisString)
-                    .parsed_entities();
-                if (parsedLocalEntities[0]) {
-                    for (const entity of <BibleReferenceParsedEntity[]>(
-                        parsedLocalEntities[0].entities
-                    )) {
-                        // we need to make sure to only search from where we last stopped in case
-                        // a reference occurs multiple times in the search-string
-                        const localRefIndex = text.indexOf(localRef, lastRefIndex);
-                        lastRefIndex = entity.indices[1] + localRefIndex;
-                        entities.push({
-                            ...entity,
-                            indices: [
-                                entity.indices[0] + localRefIndex,
-                                entity.indices[1] + localRefIndex,
-                            ],
-                        });
-                    }
-                }
-            }
-        }
-    }
-
-    const parsedEntities =
-        context && !context.localRefMatcher
-            ? parser.parse_with_context(text, contextOsisString).parsed_entities()
-            : parser.parse(text).parsed_entities();
-
-    if (parsedEntities[0]) {
-        outer_loop: for (const entity of <BibleReferenceParsedEntity[]>parsedEntities[0].entities) {
-            if (context && context.localRefMatcher) {
-                let isEntityAlreadyMatched = false;
-                // make sure we don't match a reference that we already did within localRefs
-                for (const existingEntity of entities) {
-                    if (existingEntity.indices[0] === entity.indices[0]) {
-                        isEntityAlreadyMatched = true;
-                        break;
-                    }
-                }
-                if (isEntityAlreadyMatched) continue;
-            }
-
-            entities.push(entity);
-        }
-    }
-
-    return entities;
-};
-
-/**
  * checks if there is any normalized property set (thus it has been normalized) or else if there is
  * no version number set (thus it does not need normalization)
- * @param {IBibleReference} ref
- * @returns {boolean}
  */
 export const isReferenceNormalized = (ref: IBibleReference) =>
     // if *ChaperNum is not set we know that there is no other **Num set
@@ -318,8 +205,6 @@ export const isReferenceNormalized = (ref: IBibleReference) =>
 
 /**
  * parses a database phrase id into a bible phrase reference object
- * @param {number} id database phrase id
- * @returns {IBiblePhraseRef}
  */
 export const parsePhraseId = (id: number): IBiblePhraseRef => {
     let _id = id;
@@ -340,8 +225,6 @@ export const parsePhraseId = (id: number): IBiblePhraseRef => {
 
 /**
  * parses a database reference id into a normalized bible reference object
- * @param {number} id
- * @returns {IBibleReferenceNormalized}
  */
 export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
     let _id = id;
@@ -369,8 +252,6 @@ export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
 
 /**
  * returns cross reference object with only the necessary data
- * @param {IBibleCrossReference} { key, range, label }
- * @returns {IBibleCrossReference}
  */
 export const slimDownCrossReference = ({
     key,
@@ -386,8 +267,6 @@ export const slimDownCrossReference = ({
  * returns reference range with only necessary data. also 'versionId', and 'isNormalized' are
  * removed. BibleEngine will detect if the range is normalized, so we can savely strip the property
  * (its main purpose is to enable normalization checks on TS level)
- * @param {IBibleReferenceRange} range
- * @returns {IBibleReferenceRange}
  */
 export const slimDownReferenceRange = (range: IBibleReferenceRange) => {
     const refRange: IBibleReferenceRange = {

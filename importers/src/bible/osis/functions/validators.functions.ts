@@ -19,7 +19,7 @@ export function validateGroup(
 
 export function stackHasParagraph(context: ParserContext, currentContainer: ParserStackItem) {
     for (let i = context.contentContainerStack.length - 1; i >= 0; i--) {
-        const container = context.contentContainerStack[i];
+        const container = context.contentContainerStack[i]!;
         if (container.type === 'group' && container.groupType === 'paragraph') return true;
 
         if (container !== currentContainer) {

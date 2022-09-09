@@ -102,7 +102,7 @@ export default class ModuleIndex {
         const buffer = Buffer.alloc(blob.byteLength);
         const view = new Uint8Array(blob);
         for (let i = 0; i < buffer.length; i += 1) {
-            buffer[i] = view[i];
+            buffer[i] = view[i]!;
         }
         return buffer;
     }
@@ -204,7 +204,7 @@ export default class ModuleIndex {
                         bookStartPos = 0;
                         if (booknum < inBookPositions.length) {
                             // console.log('inBookPositions.startPos', inBookPositions[booknum].startPos, booknum, inBookPositions.length);
-                            bookStartPos = inBookPositions[booknum].startPos;
+                            bookStartPos = inBookPositions[booknum]!.startPos;
                         }
                         chapt.startPos = chapterStartPos;
                         chapt.booknum = b;
