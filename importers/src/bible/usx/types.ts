@@ -202,6 +202,12 @@ export const NOTE_CONTAINER_TAGS = [
     UsxXmlNodeStyle.SECTION_DIVISION_REFERENCES,
 ] as const;
 
+export const CROSS_REFERENCE_CONTAINER_TAGS = [
+    UsxXmlNodeStyle.CROSS_REFERENCE,
+    UsxXmlNodeStyle.SECTION_DIVISION_REFERENCES,
+    UsxXmlNodeStyle.SECTION_PARALLEL_REFERENCES,
+] as const;
+
 export const IGNORED_TAGS: TagType[] = [
     'book',
     UsxXmlNodeStyle.BOOK,

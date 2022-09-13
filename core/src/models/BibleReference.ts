@@ -115,6 +115,8 @@ export type BibleReferenceParsedEntity = {
     indices: [number, number];
     start: BibleReferenceBCV;
     end: BibleReferenceBCV;
+    valid?: { valid: boolean };
+    entities?: BibleReferenceParsedEntity[];
 };
 
 export interface BibleReferenceParser {

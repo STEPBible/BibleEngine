@@ -8,6 +8,7 @@ import {
 } from '@bible-engine/core';
 import { writeFileSync } from 'fs';
 import {
+    CROSS_REFERENCE_CONTAINER_TAGS,
     IGNORED_TAGS,
     IParserContext,
     NOTE_CONTAINER_TAGS,
@@ -171,10 +172,28 @@ export function getCurrentTag(context: IParserContext) {
     return context.hierarchicalTagStack[context.hierarchicalTagStack.length - 1]!;
 }
 
+export function isCrossRefContainerTag(
+    tagType: TagType
+): tagType is typeof CROSS_REFERENCE_CONTAINER_TAGS[number] {
+    return (
+        CROSS_REFERENCE_CONTAINER_TAGS.indexOf(
+            tagType as typeof CROSS_REFERENCE_CONTAINER_TAGS[number]
+        ) !== -1
+    );
+}
+
 export function isInTag(tagType: TagType, context: IParserContext) {
     for (let tagIndex = context.hierarchicalTagStack.length - 1; tagIndex >= 0; tagIndex--) {
         const tag = context.hierarchicalTagStack[tagIndex]!;
         if (tag.type === tagType) return true;
+    }
+    return false;
+}
+
+export function isInCrossRefContainerTag(context: IParserContext) {
+    for (let tagIndex = context.hierarchicalTagStack.length - 1; tagIndex >= 0; tagIndex--) {
+        const tag = context.hierarchicalTagStack[tagIndex]!;
+        if (isCrossRefContainerTag(tag.type)) return true;
     }
     return false;
 }

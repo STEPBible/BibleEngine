@@ -10,6 +10,13 @@ import {
 import { IContentPhrase } from '@bible-engine/core/lib/models/ContentPhrase';
 import { ImporterBookMetadata } from './Importer.interface';
 
+// we need to be careful with interpreting quotation marks, since german uses a 99-66 pattern, while
+// other languages use 66-99. However since the german starting marks are at the bottom, the two
+// "99"s can be distinguished (see further comments below).
+//
+// Additionally the characters "«" and "»" are used oppositely in different languages, wo we also
+// put them in the "other" category.
+
 const PUNCTUATION_NO_SPACE_BEFORE = [
     // latin
     '.',
@@ -20,6 +27,12 @@ const PUNCTUATION_NO_SPACE_BEFORE = [
     ';',
     ')',
     ']',
+    // non-german ending quotation marks (which can be used since the german starting quotation marks are at the bottom)
+    '’',
+    '”',
+    // we can't add german ending quotation marks here (“ or ‘), because the same character is used
+    // in english for starting quotes
+    //
     // arabic
     'و',
     // chinese
@@ -31,9 +44,44 @@ const PUNCTUATION_NO_SPACE_BEFORE = [
     '！',
 ];
 
-const PUNCTUATION_NO_SPACE_AFTER = ['(', '[', '╵'];
+const PUNCTUATION_NO_SPACE_AFTER = [
+    // we can't add starting quotation marks here (“ or ‘), because the same character is used for
+    // closing quotation marks in german
+    '(',
+    '[',
+    '╵',
+    // german starting quotation marks
+    '„',
+    '‚',
+];
 
-const PUNCTUATION_OTHER = ['–', '-'];
+const PUNCTUATION_OTHER = ['–', '-', "'", '"', '«', '»', '‹', '›', '“', '‘', '‟', '‛'];
+
+const PUNCTUATION_CHARS = [
+    ...PUNCTUATION_NO_SPACE_BEFORE,
+    ...PUNCTUATION_NO_SPACE_AFTER,
+    ...PUNCTUATION_OTHER,
+];
+
+// list of words in different languages that are equivalent to "cf." (compare) / "see" / "also"
+// (this list is used to convert notes that essentially contain only cross-references into actual
+// cross-references)
+const CROSS_REFERENCE_WORDS = [
+    'cf.',
+    'cf',
+    'compare',
+    'see',
+    'also',
+    'see also',
+    'siehe',
+    'auch',
+    'siehe auch',
+    'vgl',
+    'vgl.',
+    'voir',
+    'voir aussi',
+    'comparer',
+];
 
 /**
  * determines if the string starts with a character that (usually) doesn't have a space before of it
@@ -53,12 +101,17 @@ export function endsWithNoSpaceAfterChar(string: string) {
  * determines if the string consists only of a punctuation character
  */
 export function isOnlyPunctuationChar(string: string) {
+    return PUNCTUATION_CHARS.indexOf(string.trim()) !== -1;
+}
+
+/**
+ * determines if the string contains only of words that are pointing to cross-references (e.g.
+ * "cf." or "see") or just punctuation (i.e. there is no actual content besides the references)
+ */
+export function isOnlyCrossReferenceWordOrPunctuation(string: string) {
     return (
-        [
-            ...PUNCTUATION_NO_SPACE_AFTER,
-            ...PUNCTUATION_NO_SPACE_BEFORE,
-            ...PUNCTUATION_OTHER,
-        ].indexOf(string.trim()) !== -1
+        CROSS_REFERENCE_WORDS.indexOf(string.trim().toLowerCase()) !== -1 ||
+        isOnlyPunctuationChar(string)
     );
 }
 
@@ -213,7 +266,13 @@ export const getReferencesFromText = (
         chapterNum?: number;
         language?: string;
         localRefMatcher?: RegExp;
-    }
+    },
+    keepInvalidRefs = true,
+    invalidRefsCallback?: (
+        fullText: string,
+        refText: string,
+        parsedRef: BibleReferenceParsedEntity
+    ) => void
 ) => {
     const entities: BibleReferenceParsedEntity[] = [];
 
@@ -227,14 +286,16 @@ export const getReferencesFromText = (
     //  regex can be provided to help the parser find all of them
     //  example (german): `/(Kapitel|V\.|Vers) ([0-9,.\-; ]|(und|bis|Kapitel|V\.|Vers))+/g`
     // normalize language to consist of only two letters and lowercase if it is defined, otherwise leave it undefined
-    const languageNormalied = context?.language?.toLowerCase().substring(0, 2);
+    const languageNormalized = context?.language?.toLowerCase().substring(0, 2);
     const localRefMatcher: RegExp | undefined = context?.localRefMatcher
         ? context.localRefMatcher
-        : languageNormalied === 'en'
-        ? /(^| )(chapter|ch\.|v\.|verse|verses) ([0-9,:\-–; ]|(and|to|chapter|ch\.|v\.|verse|verses))+/gi
-        : languageNormalied === 'de'
-        ? /(Kapitel|V\.|Vers) ([0-9,\.\-–; ]|(und|bis|Kapitel|V\.|Vers))+/g
-        : undefined;
+        : languageNormalized === 'en'
+        ? /(^|\s)(chapter|ch\.|v\.|verse|verses)\s([0-9,:\-–;\s]|(and|to|chapter|ch\.|v\.|verse|verses))+/gi
+        : languageNormalized === 'de'
+        ? /(Kapitel|V\.|Vers)\s([0-9,\.\-–;\s]|(und|bis|Kapitel|V\.|Vers))+/g
+        : languageNormalized === 'fr'
+        ? /(chapitre|ch\.|v\.|verset|versets)\s([0-9,\.\-–;\s]|(et|chapitre|ch\.|v\.|verset|versets))+/gi
+        : /(c\.|ch\.|v\.|vs)\s([0-9,\.:\-–;\s]|(c\.|ch\.|v\.|vs))+/gi;
 
     if (context && localRefMatcher) {
         // since for some reason the BCV parser does only match local/context-refs at the beginning
@@ -280,7 +341,10 @@ export const getReferencesFromText = (
                 let isEntityAlreadyMatched = false;
                 // make sure we don't match a reference that we already did within localRefs
                 for (const existingEntity of entities) {
-                    if (existingEntity.indices[0] === entity.indices[0]) {
+                    if (
+                        existingEntity.indices[0] === entity.indices[0] ||
+                        existingEntity.indices[1] === entity.indices[1]
+                    ) {
                         isEntityAlreadyMatched = true;
                         break;
                     }
@@ -288,6 +352,21 @@ export const getReferencesFromText = (
                 if (isEntityAlreadyMatched) continue;
             }
 
+            if (
+                !keepInvalidRefs &&
+                ((entity.valid && !entity.valid.valid) ||
+                    (entity.entities?.length &&
+                        entity.entities[0]!.valid &&
+                        !entity.entities[0]!.valid.valid))
+            ) {
+                if (invalidRefsCallback && entity.type !== 'bv')
+                    invalidRefsCallback(
+                        text,
+                        text.slice(entity.indices[0], entity.indices[1]),
+                        entity
+                    );
+                continue;
+            }
             entities.push(entity);
         }
     }

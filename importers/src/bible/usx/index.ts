@@ -28,7 +28,7 @@ import {
     endsWithNoSpaceAfterChar,
     getPhrasesFromParsedReferences,
     getReferencesFromText,
-    isOnlyPunctuationChar,
+    isOnlyCrossReferenceWordOrPunctuation,
     startsWithNoSpaceBeforeChar,
 } from '../../shared/helpers.functions';
 import {
@@ -40,6 +40,7 @@ import {
     getCurrentContainer,
     getCurrentSection,
     getCurrentTag,
+    isInCrossRefContainerTag,
     isInNoteContainerTag,
     isInSectionTag,
     isInsideDocument,
@@ -625,7 +626,7 @@ export class UsxImporter extends BibleEngineImporter {
 
         if (isInsideDocument(context)) {
             if (
-                isInTag(UsxXmlNodeStyle.CROSS_REFERENCE, context) &&
+                isInCrossRefContainerTag(context) &&
                 (!isInTag('ref', context) || !context.referenceBuffer) &&
                 context.bcv
             ) {
@@ -652,6 +653,33 @@ export class UsxImporter extends BibleEngineImporter {
                         versionUid: this.options.versionMeta.uid,
                     };
                     delete context.referenceBuffer;
+                } else if (context.bcv) {
+                    const refs = getReferencesFromText(
+                        context.bcv,
+                        trimmedText,
+                        {
+                            bookOsisId: context.book.osisId,
+                            chapterNum: context.currentChapter,
+                            language: context.version.language,
+                        },
+                        false,
+                        (text, refText, entity) => {
+                            this.log(
+                                'info',
+                                `ignored invalid cross reference '${refText}' in '${text}' (parsed as ${entity.start.b} ${entity.start.c}:${entity.start.v})`
+                            );
+                        }
+                    );
+                    if (refs.length) {
+                        currentContainer.contents.push(
+                            ...getPhrasesFromParsedReferences(
+                                trimmedText,
+                                refs,
+                                this.options.versionMeta.uid
+                            )
+                        );
+                        return;
+                    }
                 }
                 const phraseContainer: DocumentElement =
                     currentTag.type === UsxXmlNodeStyle.NOTE_CHAR_VERSENUMBER
@@ -786,7 +814,7 @@ export class UsxImporter extends BibleEngineImporter {
                                 (
                                     (_content.type === 'phrase' || !_content.type) &&
                                     (_content.bibleReference ||
-                                        isOnlyPunctuationChar(_content.content))
+                                        isOnlyCrossReferenceWordOrPunctuation(_content.content))
                                 )
                             )
                     ) === -1

@@ -640,15 +640,7 @@ export const generateBibleDocument = (
                 ),
             }));
         }
-        if (phrase.notes?.length) {
-            outputPhrase.notes = phrase.notes.map((note) => ({
-                ...note,
-                content: {
-                    ...note.content,
-                    contents: normalizeDocumentContents(note.content.contents),
-                },
-            }));
-        }
+        if (phrase.notes?.length) outputPhrase.notes = phrase.notes;
 
         if (Object.keys(numbering).length) {
             // we have no suitable numberingGroup => a new outputGroupPhrases needs to be created
@@ -669,11 +661,12 @@ export const generateBibleDocument = (
             if (numberingGroupSection) numberingGroupSection.numberingInternal = numbering;
         }
 
-        if (outputPhrase.skipSpace === 'before') {
-            delete outputPhrase.skipSpace;
-            if (previousPhrase) {
-                previousPhrase.skipSpace = 'after';
-            }
+        // normalize `skipSpace` to only use the value 'after' - it's trivial to normalize at this
+        // point and makes it easier to handle later when rendering the content
+        if (outputPhrase.skipSpace === 'before' || outputPhrase.skipSpace === 'both') {
+            if (outputPhrase.skipSpace === 'both') outputPhrase.skipSpace = 'after';
+            else delete outputPhrase.skipSpace;
+            if (previousPhrase) previousPhrase.skipSpace = 'after';
         }
 
         // finally we can add our phrase to the data structure

@@ -245,6 +245,12 @@ export class BibleEngine {
 
         let bookImportPhraseRange: { firstPhraseId?: number; lastPhraseId?: number } | undefined;
 
+        if (bookInput.book.introduction)
+            bookInput.book.introduction = {
+                type: 'root',
+                contents: normalizeDocumentContents(bookInput.book.introduction.contents),
+            };
+
         if (options.entityManager) {
             // mark the book as importing (and save missing book meta-data)
 
@@ -417,27 +423,10 @@ export class BibleEngine {
     async getBooksForVersion(versionId: number) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        return db
-            .find(BibleBookEntity, {
-                where: { versionId },
-                order: { number: 'ASC' },
-            })
-            .then((books) =>
-                books.map(
-                    (book) =>
-                        ({
-                            ...book,
-                            introduction: book.introduction
-                                ? {
-                                      type: 'root',
-                                      contents: normalizeDocumentContents(
-                                          book.introduction.contents
-                                      ),
-                                  }
-                                : undefined,
-                        } as BibleBookEntity)
-                )
-            );
+        return db.find(BibleBookEntity, {
+            where: { versionId },
+            order: { number: 'ASC' },
+        });
     }
 
     async getBooksForVersionUid(versionUid: string) {
@@ -1184,7 +1173,18 @@ export class BibleEngine {
 
                 if (content.notes && !skip.notes) {
                     for (const note of content.notes) {
-                        globalState.noteStack.push(new BibleNoteEntity(note, phraseId));
+                        globalState.noteStack.push(
+                            new BibleNoteEntity(
+                                {
+                                    ...note,
+                                    content: {
+                                        type: 'root',
+                                        contents: normalizeDocumentContents(note.content.contents),
+                                    },
+                                },
+                                phraseId
+                            )
+                        );
                     }
                 }
                 if (content.crossReferences && !skip.crossRefs) {
@@ -1346,7 +1346,14 @@ export class BibleEngine {
                                               },
                                           }))
                                         : undefined,
-                                description: content.description,
+                                description: content.description
+                                    ? {
+                                          type: 'root',
+                                          contents: normalizeDocumentContents(
+                                              content.description.contents
+                                          ),
+                                      }
+                                    : undefined,
                                 isChapterLabel: content.isChapterLabel,
                             })
                         );
@@ -1618,33 +1625,45 @@ export class BibleEngine {
                     ),
                 },
             })) {
-                // get normalized reference range
-                const normalizedRange = await this.getNormalizedReferenceRange(
-                    {
-                        versionId,
-                        bookOsisId: book.osisId,
-                        versionChapterNum: cRef.versionChapterNum,
-                        versionVerseNum: cRef.versionVerseNum,
-                        versionChapterEndNum: cRef.versionChapterEndNum,
-                        versionVerseEndNum: cRef.versionVerseEndNum,
-                    },
-                    book
-                );
-                if (cRef.versionChapterNum)
-                    cRef.range.normalizedChapterNum = normalizedRange.normalizedChapterNum;
-                if (cRef.versionVerseNum)
-                    cRef.range.normalizedVerseNum = normalizedRange.normalizedVerseNum;
-                if (cRef.versionChapterEndNum)
-                    cRef.range.normalizedChapterEndNum = normalizedRange.normalizedChapterEndNum;
-                if (cRef.versionVerseEndNum)
-                    cRef.range.normalizedVerseEndNum = normalizedRange.normalizedVerseEndNum;
+                try {
+                    // get normalized reference range
+                    const normalizedRange = await this.getNormalizedReferenceRange(
+                        {
+                            versionId,
+                            bookOsisId: book.osisId,
+                            versionChapterNum: cRef.versionChapterNum,
+                            versionVerseNum: cRef.versionVerseNum,
+                            versionChapterEndNum: cRef.versionChapterEndNum,
+                            versionVerseEndNum: cRef.versionVerseEndNum,
+                        },
+                        book
+                    );
+                    if (cRef.versionChapterNum)
+                        cRef.range.normalizedChapterNum = normalizedRange.normalizedChapterNum;
+                    if (cRef.versionVerseNum)
+                        cRef.range.normalizedVerseNum = normalizedRange.normalizedVerseNum;
+                    if (cRef.versionChapterEndNum)
+                        cRef.range.normalizedChapterEndNum =
+                            normalizedRange.normalizedChapterEndNum;
+                    if (cRef.versionVerseEndNum)
+                        cRef.range.normalizedVerseEndNum = normalizedRange.normalizedVerseEndNum;
 
-                // we need to call `prepare` manually since typeOrm can't detect that the entity
-                // has changed (in other words: it does not run the method before change
-                // detection) and therefore does not execute an update
-                cRef.prepare();
-                // and save cross reference back to db
-                await db.save(cRef);
+                    // we need to call `prepare` manually since typeOrm can't detect that the entity
+                    // has changed (in other words: it does not run the method before change
+                    // detection) and therefore does not execute an update
+                    cRef.prepare();
+                    // and save cross reference back to db
+                    await db.save(cRef);
+                } catch (e) {
+                    // we can't avoid that there are invalid cross references, either due to errors
+                    // in the source file or due to ambiguities when parsing references from text.
+                    // Since a reference that can't be normalized can not be displayed, its best to
+                    // just delete it and log the error
+                    console.error(
+                        `removed cross reference ${cRef.normalizedRefId} for phrase|section ${cRef.phraseId}|${cRef.sectionId} since normalization failed`
+                    );
+                    await db.remove(cRef);
+                }
             }
         }
     }
