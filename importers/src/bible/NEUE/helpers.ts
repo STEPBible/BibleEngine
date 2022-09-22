@@ -16,6 +16,7 @@ import {
     endsWithNoSpaceAfterChar,
     getPhrasesFromParsedReferences,
     getReferencesFromText,
+    isOnlyCrossReferenceWordOrPunctuation,
     startsWithNoSpaceBeforeChar,
 } from '../../shared/helpers.functions';
 import { DefaultNode, TreeElement } from './models/parse5';
@@ -280,20 +281,35 @@ export const visitNode = (
                         `${expectedNoteReference}`
                 );
 
+            // check if document only consist of references and convert to cross reference
             if (
-                newNote.contents.length === 1 &&
-                newNote.contents[0]!.type === 'phrase' &&
-                (<DocumentPhrase>newNote.contents[0]).bibleReference
+                newNote.contents.length &&
+                // tests the non-existance of anything other than a bible-reference-phrase or a
+                // phrase that is just a punctuation character
+                newNote.contents.findIndex(
+                    (_content) =>
+                        !(
+                            // any phrase that is a bible reference or just a punctuation character
+                            (
+                                (_content.type === 'phrase' || !_content.type) &&
+                                (_content.bibleReference ||
+                                    isOnlyCrossReferenceWordOrPunctuation(_content.content))
+                            )
+                        )
+                ) === -1
             ) {
-                // if the note only consists of one phrase with a bible reference, we add it as a
-                // cross reference instead
                 if (!firstContentWithPendingNote.crossReferences)
                     firstContentWithPendingNote.crossReferences = [];
-                firstContentWithPendingNote.crossReferences.push({
-                    key: '*',
-                    label: (<DocumentPhrase>newNote.contents[0]).content,
-                    range: (<DocumentPhrase>newNote.contents[0]).bibleReference!,
-                });
+
+                firstContentWithPendingNote.crossReferences.push(
+                    ...newNote.contents
+                        .filter((_content) => !!(_content as DocumentPhrase).bibleReference)
+                        .map((_content) => ({
+                            key: '*',
+                            label: (_content as DocumentPhrase).content,
+                            range: (_content as DocumentPhrase).bibleReference!,
+                        }))
+                );
             } else {
                 if (!firstContentWithPendingNote.notes) firstContentWithPendingNote.notes = [];
                 firstContentWithPendingNote.notes.push({ content: newNote });

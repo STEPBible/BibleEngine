@@ -3,6 +3,7 @@ import {
     BibleReferenceParser,
     BOOK_DATA,
     DocumentPhrase,
+    getNormalizedVerseCount,
     IBibleReferenceRangeQuery,
     NT_BOOKS,
     OT_BOOKS,
@@ -171,8 +172,12 @@ export const getBibleReferenceFromParsedReference = (
         (ref.type === 'range' && ref.start.type !== 'c' && ref.start.type !== 'bc')
     ) {
         bibleReference.versionVerseNum = ref.start.v;
-        if (ref.start.v !== ref.end.v || ref.start.c !== ref.end.c)
-            bibleReference.versionVerseEndNum = ref.end.v;
+        if (ref.start.v !== ref.end.v || ref.start.c !== ref.end.c) {
+            bibleReference.versionVerseEndNum =
+                ref.end.v === 999
+                    ? getNormalizedVerseCount(ref.start.b, ref.end.c || ref.start.c)
+                    : ref.end.v;
+        }
     }
     if (ref.start.c !== ref.end.c) {
         bibleReference.versionChapterEndNum = ref.end.c;

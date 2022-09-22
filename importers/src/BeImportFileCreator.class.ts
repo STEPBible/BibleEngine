@@ -1,19 +1,24 @@
-import { DataSourceOptions } from 'typeorm';
-import * as archiver from 'archiver';
 import {
+    aesGcmEncrypt,
     BibleEngine,
     IBibleBook,
     IBibleVersion,
+    IV11nRule,
     NoDbConnectionError,
     V11nRuleEntity,
-    IV11nRule,
 } from '@bible-engine/core';
-import { writeFileSync, createWriteStream } from 'fs';
+import * as archiver from 'archiver';
+import { createWriteStream, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { ensureDirSync } from 'fs-extra';
 import { sync as rmDirRecSync } from 'rimraf';
+import { DataSourceOptions } from 'typeorm';
+const crypto = require('crypto').webcrypto;
 
 export interface BeFileCreatorOptions {
-    skipCompression: boolean;
+    skipCompression?: boolean;
+    includeVersions?: string[];
+    encryptVersions?: string[];
+    encryptionKey?: string;
 }
 
 export class BeImportFileCreator {
@@ -27,6 +32,9 @@ export class BeImportFileCreator {
         const createdVersions: { file: string; version: IBibleVersion }[] = [];
 
         for (const versionEntity of await this.bibleEngine.getVersions()) {
+            if (options?.includeVersions && !options.includeVersions.includes(versionEntity.uid))
+                continue;
+
             createdVersions.push({
                 version: {
                     uid: versionEntity.uid,
@@ -94,7 +102,7 @@ export class BeImportFileCreator {
         const targetFile = `${versionData.version.uid}.bef`;
         const targetPath = `${this.destinationPath}/${targetFile}`;
 
-        const p = new Promise<string>((pResolve, pReject) => {
+        const p = new Promise<string>(async (pResolve, pReject) => {
             // create version directory
             ensureDirSync(targetDir);
 
@@ -139,11 +147,25 @@ export class BeImportFileCreator {
             });
 
             const output = createWriteStream(targetPath);
-            output.on('close', function () {
+            output.on('close', async function () {
                 const bytes = zipArchive.pointer();
-                console.log(`${targetPath} was successfully created with ${bytes} total bytes`);
                 rmDirRecSync(targetDir);
-                pResolve(targetFile);
+                if (options?.encryptVersions?.includes(versionUid) && options?.encryptionKey) {
+                    const encData = await aesGcmEncrypt(
+                        crypto,
+                        readFileSync(targetPath),
+                        options.encryptionKey
+                    );
+                    writeFileSync(`${targetPath}.enc`, Buffer.from(encData));
+                    unlinkSync(targetPath);
+                    console.log(
+                        `${targetPath}.enc was successfully created with ${encData.byteLength} total bytes`
+                    );
+                    pResolve(`${targetFile}.enc`);
+                } else {
+                    console.log(`${targetPath} was successfully created with ${bytes} total bytes`);
+                    pResolve(targetFile);
+                }
             });
 
             zipArchive.pipe(output);

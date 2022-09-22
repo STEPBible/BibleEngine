@@ -8,7 +8,7 @@ import { SwordFilterOptions, SwordMetadataKey } from './types';
 export default class ModuleConfig {
     about: string;
     description: string;
-    encoding: string;
+    encoding: BufferEncoding;
     globalOptionFilters: string[];
     hasStrongs: boolean;
     language: string;
@@ -41,7 +41,23 @@ export default class ModuleConfig {
                     break;
                 }
                 case SwordMetadataKey.ENCODING: {
-                    this.encoding = value || '';
+                    this.encoding =
+                        value &&
+                        [
+                            'ascii',
+                            'utf8',
+                            'utf-8',
+                            'utf16le',
+                            'ucs2',
+                            'ucs-2',
+                            'base64',
+                            'base64url',
+                            'latin1',
+                            'binary',
+                            'hex',
+                        ].indexOf(value) !== -1
+                            ? (value as BufferEncoding)
+                            : 'utf8';
                     break;
                 }
                 case SwordMetadataKey.LANGUAGE: {

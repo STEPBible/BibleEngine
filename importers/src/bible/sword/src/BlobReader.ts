@@ -10,7 +10,7 @@ export default class BlobReader {
         testamentBlob: Uint8Array,
         positions: types.ChapterPosition[],
         verses: types.VerseMetadata[],
-        encoding: string
+        encoding: BufferEncoding
     ): types.ChapterXML {
         if (!verses[0]) throw new Error(`empty verses array passed to 'getXMLforChapter'`);
         const { chapter } = verses[0];
@@ -62,7 +62,7 @@ export default class BlobReader {
         startPos: number,
         positions: types.ChapterPosition[],
         blob: Uint8Array,
-        encoding: string
+        encoding: BufferEncoding
     ) {
         if (!positions[verse.chapter - 1] || !positions[verse.chapter - 1]!.verses[verse.verse - 1])
             throw new Error(
@@ -81,7 +81,7 @@ export default class BlobReader {
         startPos: number,
         positions: types.ChapterPosition[],
         chapter: number,
-        encoding: string
+        encoding: BufferEncoding
     ) {
         let verseStart = 0;
         const verseEnd = startPos;
@@ -95,7 +95,7 @@ export default class BlobReader {
         return introText;
     }
 
-    static blobToString(blob: Uint8Array, encoding: string) {
+    static blobToString(blob: Uint8Array, encoding: BufferEncoding) {
         return Buffer.from(blob).toString(encoding);
     }
 

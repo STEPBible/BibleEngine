@@ -53,3 +53,38 @@ export const pad = (n: number, width: number, z?: string): string => {
     let nStr = n + '';
     return nStr.length >= width ? nStr : new Array(width - nStr.length + 1).join(z) + n;
 };
+
+/**
+ * Encrypts a buffer using AES-GCM with supplied password, for decryption with aesGcmDecrypt().
+ * (c) Chris Veness MIT Licence, converted to work on Buffers by Chris Metz
+ */
+export async function aesGcmEncrypt(crypto: Crypto, buffer: ArrayBuffer, password: string) {
+    const pwUtf8 = new TextEncoder().encode(password); // encode password as UTF-8
+    const pwHash = await crypto.subtle.digest('SHA-256', pwUtf8); // hash the password
+    const iv = crypto.getRandomValues(new Uint8Array(12)); // get 96-bit random iv
+    const alg = { name: 'AES-GCM', iv: iv }; // specify algorithm to use
+    const key = await crypto.subtle.importKey('raw', pwHash, alg, false, ['encrypt']); // generate key from pw
+    const ctBuffer = await crypto.subtle.encrypt(alg, key, buffer);
+
+    var tmp = new Uint8Array(12 + ctBuffer.byteLength);
+    tmp.set(iv, 0);
+    tmp.set(new Uint8Array(ctBuffer), 12);
+    return tmp.buffer;
+}
+
+/**
+ * Decrypts buffer encrypted with aesGcmEncrypt() using supplied password.
+ * (c) Chris Veness MIT Licence, converted to work on Buffers by Chris Metz
+ */
+export async function aesGcmDecrypt(
+    crypto: Crypto,
+    buffer: ArrayBuffer,
+    password: string
+): Promise<ArrayBuffer> {
+    const pwUtf8 = new TextEncoder().encode(password); // encode password as UTF-8
+    const pwHash = await crypto.subtle.digest('SHA-256', pwUtf8); // hash the password
+    const iv = buffer.slice(0, 12);
+    const alg = { name: 'AES-GCM', iv: iv }; // specify algorithm to use
+    const key = await crypto.subtle.importKey('raw', pwHash, alg, false, ['decrypt']); // generate key from pw
+    return crypto.subtle.decrypt(alg, key, buffer.slice(12)); // decrypt ciphertext using key
+}

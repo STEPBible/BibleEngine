@@ -250,6 +250,27 @@ export const parseReferenceId = (id: number): IBibleReferenceNormalized => {
     return ref;
 };
 
+export const parseNumbersFromPhraseId = (id: number) => {
+    let _id = id;
+
+    const phraseNum = _id % 100;
+    _id -= phraseNum;
+    _id /= 100;
+    const versionId = _id % 1000;
+    _id -= versionId;
+    _id /= 1000;
+    const subverse = _id % 100;
+    _id -= subverse;
+    _id /= 100;
+    const verse = _id % 1000;
+    _id -= verse;
+    _id /= 1000;
+    const chapter = _id % 1000;
+    _id -= chapter;
+
+    return { chapter, verse, subverse, phraseNum };
+};
+
 /**
  * returns cross reference object with only the necessary data
  */

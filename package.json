@@ -15,7 +15,7 @@
     },
     "devDependencies": {
         "@types/jest": "24.0.11",
-        "@types/node": "12.12.31",
+        "@types/node": "18.7.18",
         "jest": "24.5.0",
         "rimraf": "^2.6.3",
         "sqlite3": "5.0.2",

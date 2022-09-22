@@ -6,13 +6,13 @@ import {
     getReferencesFromText,
 } from '../../shared/helpers.functions';
 
-const bcv_parser = require('bible-passage-reference-parser/js/fr_bcv_parser').bcv_parser;
+const bcv_parser = require('bible-passage-reference-parser/js/en_bcv_parser').bcv_parser;
 const bcv: BibleReferenceParser = new bcv_parser({});
 bcv.set_options({
-    // punctuation_strategy: 'us',
+    punctuation_strategy: 'us',
     invalid_passage_strategy: 'include',
     invalid_sequence_strategy: 'include',
-    passage_existence_strategy: 'bcv',
+    passage_existence_strategy: 'bc',
     consecutive_combination_strategy: 'separate',
 });
 // const localRefRegEx = /(Kapitel|V\.|Vers) ([0-9,.\-–; ]|(und|bis|Kapitel|V\.|Vers))+/g;
@@ -37,10 +37,12 @@ bcv.set_options({
 // const testString =
 //     'L’auteur joue sans doute sur les deux sens. De même à la fin du v. 22 et au v. 20.';
 // const testString = '1 Ch 16.34 ; Esd 3.11 ; Ps 100.5 ; 107.1 ; 118.1 ; 136 ; Jr 33.11';
-const testString = 'Pour les v. 12-14, voir le chapitre 35.';
+// const testString = 'Pour les v. 12-14, voir le chapitre 35.';
+const testString =
+    'The books commonly known as 1 &amp; 2 Samuel and 1 &amp; 2 Kings are really one long book.';
 
-const localOsisId = 'Gen';
-const localChapterNum = 2;
+const localOsisId = '1Sam';
+const localChapterNum = undefined;
 
 const references = getReferencesFromText(
     bcv,
@@ -49,7 +51,7 @@ const references = getReferencesFromText(
         bookOsisId: localOsisId,
         chapterNum: localChapterNum,
         // localRefMatcher: localRefRegEx,
-        language: 'fr',
+        language: 'en',
     },
     false,
     (...para) => {
@@ -59,6 +61,6 @@ const references = getReferencesFromText(
 
 console.dir(references, { depth: 10 });
 
-const phrases = getPhrasesFromParsedReferences(testString, references, 'NEUE');
+const phrases = getPhrasesFromParsedReferences(testString, references, 'NIV11');
 
 console.dir(phrases, { depth: 7 });

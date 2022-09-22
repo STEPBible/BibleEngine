@@ -39,10 +39,55 @@ import { StringModifiers } from '../models/BiblePhrase';
 import {
     generateRangeFromGenericSection,
     generateReferenceRangeLabel,
+    parseNumbersFromPhraseId,
     slimDownCrossReference,
     slimDownReferenceRange,
 } from './reference.functions';
 import { getNormalizedChapterCountForOsisId, getNormalizedVerseCount } from './v11n.functions';
+
+export type PhraseVersionNumbersById = {
+    [index: number]: { chapter: number; verse: number; subverse: number; phraseNum: number };
+};
+
+function comparePhraseIdsByVersionNumbering(
+    phraseIdA: number,
+    phraseIdB: number,
+    phraseVersionNumbersById: PhraseVersionNumbersById
+) {
+    let phraseVersionNumberA = phraseVersionNumbersById[phraseIdA];
+    let phraseVersionNumberB = phraseVersionNumbersById[phraseIdB];
+    if (!phraseVersionNumberA && !phraseVersionNumberB) return phraseIdA - phraseIdB;
+    if (!phraseVersionNumberA) phraseVersionNumberA = parseNumbersFromPhraseId(phraseIdA);
+    if (!phraseVersionNumberB) phraseVersionNumberB = parseNumbersFromPhraseId(phraseIdB);
+
+    if (phraseVersionNumberA.chapter !== phraseVersionNumberB.chapter)
+        return phraseVersionNumberA.chapter - phraseVersionNumberB.chapter;
+
+    if (phraseVersionNumberA.verse !== phraseVersionNumberB.verse)
+        return phraseVersionNumberA.verse - phraseVersionNumberB.verse;
+
+    if (phraseVersionNumberA.subverse !== phraseVersionNumberB.subverse)
+        return phraseVersionNumberA.subverse - phraseVersionNumberB.subverse;
+
+    return phraseVersionNumberA.phraseNum - phraseVersionNumberB.phraseNum;
+}
+
+function isVersionPhraseAfter(
+    phraseIdA: number,
+    phraseIdB: number,
+    phraseVersionNumbersById: PhraseVersionNumbersById
+) {
+    return comparePhraseIdsByVersionNumbering(phraseIdA, phraseIdB, phraseVersionNumbersById) > 0;
+}
+
+function isVersionPhraseAfterOrEqual(
+    phraseIdA: number,
+    phraseIdB: number,
+    phraseVersionNumbersById: PhraseVersionNumbersById
+) {
+    if (phraseIdA === phraseIdB) return true;
+    return comparePhraseIdsByVersionNumbering(phraseIdA, phraseIdB, phraseVersionNumbersById) > 0;
+}
 
 /**
  * turns BibleEngine input-data into a plain two-level Map of chapters and verses with plain text
@@ -131,7 +176,8 @@ export const generateBibleDocument = (
     context: IBibleOutputRich['context'],
     bookAbbreviations: { [index: string]: string },
     chapterVerseSeparator: string,
-    rangeQuery: IBibleReferenceRangeQuery
+    rangeQuery: IBibleReferenceRangeQuery,
+    phraseVersionNumbersById: PhraseVersionNumbersById
 ): IBibleOutputRoot => {
     const rootGroup: IBibleContentGeneratorRoot = {
         type: 'root',
@@ -179,12 +225,18 @@ export const generateBibleDocument = (
             let isPhraseInGroup = true;
             if (_group.type === 'section') {
                 // check if the current phrase is within the group-section
-                isPhraseInGroup = _group.meta.phraseEndId >= phrase.id;
+                isPhraseInGroup = isVersionPhraseAfterOrEqual(
+                    _group.meta.phraseEndId,
+                    phrase.id,
+                    phraseVersionNumbersById
+                );
             } else if (_group.type === 'group') {
                 if (_group.groupType === 'paragraph') {
-                    isPhraseInGroup =
-                        (<IBibleContentGeneratorGroup<'paragraph'>>_group).meta.phraseEndId >=
-                        phrase.id;
+                    isPhraseInGroup = isVersionPhraseAfterOrEqual(
+                        (<IBibleContentGeneratorGroup<'paragraph'>>_group).meta.phraseEndId,
+                        phrase.id,
+                        phraseVersionNumbersById
+                    );
                 } else if (_group.groupType === 'indent') {
                     // => this group has a level (numeric) modifier
                     // check if the current phrase has the same or higher level
@@ -307,15 +359,27 @@ export const generateBibleDocument = (
             // look for the section where the phrase is in (if any) and open it if necessary
             const section = context[level]!.startingSections.find(
                 (_section) =>
-                    phrase.id >= _section.phraseStartId &&
-                    phrase.id <= _section.phraseEndId &&
+                    isVersionPhraseAfterOrEqual(
+                        phrase.id,
+                        _section.phraseStartId,
+                        phraseVersionNumbersById
+                    ) &&
+                    isVersionPhraseAfterOrEqual(
+                        _section.phraseEndId,
+                        phrase.id,
+                        phraseVersionNumbersById
+                    ) &&
                     // in some situations (like verse reference popups) we don't want to show
                     // sections that start at the first phrase of the query and end after the last
                     // phrase
                     !(
                         rangeQuery.skipPartialWrappingSectionsInDocument &&
                         _section.phraseStartId === firstPhraseId &&
-                        _section.phraseEndId > lastPhraseId
+                        isVersionPhraseAfter(
+                            _section.phraseEndId,
+                            lastPhraseId,
+                            phraseVersionNumbersById
+                        )
                     )
             );
             // is the section already active?
@@ -376,11 +440,24 @@ export const generateBibleDocument = (
         // look for the paragraph where the phrase is in (if any) and open it if necessary
         const paragraph = paragraphs.find(
             (_paragraph) =>
-                phrase.id >= _paragraph.phraseStartId && phrase.id <= _paragraph.phraseEndId
+                isVersionPhraseAfterOrEqual(
+                    phrase.id,
+                    _paragraph.phraseStartId,
+                    phraseVersionNumbersById
+                ) &&
+                isVersionPhraseAfterOrEqual(
+                    _paragraph.phraseEndId,
+                    phrase.id,
+                    phraseVersionNumbersById
+                )
         );
         if (paragraph && activeParagraph && activeParagraph.paragraphId !== paragraph.id) {
             // paragraphs can not be children of paragraphs. Else the structure got
             // corrupted somewhere. throw an error so we know about it
+            console.log(activeGroup);
+            console.log(activeParagraph);
+            console.log(paragraph);
+            console.log(phrase);
             throw new Error(
                 `can't create output object: corrupted structure (multilevel paragraphs)`
             );
@@ -996,7 +1073,7 @@ export const normalizeDocumentContents = (
 ) => {
     const inputData: DocumentElement[] = [];
     for (const obj of contents) {
-        if (obj.type === 'phrase') {
+        if (!obj.type || obj.type === 'phrase') {
             const inputPhrase: DocumentPhrase = {
                 content: obj.content,
             };

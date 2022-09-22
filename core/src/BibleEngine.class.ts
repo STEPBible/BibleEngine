@@ -27,6 +27,7 @@ import {
     generateContextRanges,
     generateContextSections,
     normalizeDocumentContents,
+    PhraseVersionNumbersById,
     stripUnnecessaryDataFromBibleBook,
     stripUnnecessaryDataFromBibleContent,
     stripUnnecessaryDataFromBibleContextData,
@@ -497,11 +498,22 @@ export class BibleEngine {
             .select()
             .leftJoinAndSelect('section.crossReferences', 'crossReference')
             .where(generateBookSectionsSql(rangeNormalized, 'section'))
-            // sections are inserted in order, so its safe to sort by generated id
-            .orderBy({ 'section.level': 'ASC', 'section.id': 'ASC' })
+            .orderBy({ 'section.level': 'ASC', 'section.phraseStartId': 'ASC' })
             .getMany();
 
         /* GENERATE STRUCTURED DATA */
+
+        // generate an array of all phrases keyed by phraseId
+        const phraseVersionNumbersById = phrases.reduce((acc, phrase) => {
+            if (phrase.sourceTypeId)
+                acc[phrase.id] = {
+                    chapter: phrase.versionChapterNum,
+                    verse: phrase.versionVerseNum,
+                    subverse: phrase.versionSubverseNum ?? 1,
+                    phraseNum: phrase.normalizedReference.phraseNum,
+                };
+            return acc;
+        }, {} as PhraseVersionNumbersById);
         const context = generateContextSections(phrases, sections);
 
         const contextRanges = generateContextRanges(
@@ -519,7 +531,8 @@ export class BibleEngine {
             context,
             bookAbbreviations,
             versionEntity.chapterVerseSeparator,
-            rangeQuery
+            rangeQuery,
+            phraseVersionNumbersById
         );
 
         if (stripUnnecessaryData) {
@@ -782,8 +795,7 @@ export class BibleEngine {
             usedRefIds: new Set(),
             currentPhraseNum: 0,
             currentVersionChapter: 0,
-            currentVersionVerse: -1,
-            currentVersionSubverse: 0,
+            currentVersionVerse: 0,
         },
         localState = {
             modifierState: { quoteLevel: 0, indentLevel: 0 },
@@ -843,12 +855,17 @@ export class BibleEngine {
             if (content.type !== 'section' && content.numbering) {
                 versionNumberingChange = true;
                 // input uses numbering objects on number change
-                if (content.numbering.versionChapterIsStartingInRange)
+                if (content.numbering.versionChapterIsStartingInRange) {
                     globalState.currentVersionChapter =
                         content.numbering.versionChapterIsStartingInRange;
+                    // in verses where we have subverse zero, `versionVerseIsStarting` is only set
+                    // on subverse 1. for the purpose of saving to db, we need to set the version
+                    // verse number on subverse 0 as well
+                    globalState.currentVersionVerse = 1;
+                }
                 if (content.numbering.versionVerseIsStarting)
                     globalState.currentVersionVerse = content.numbering.versionVerseIsStarting;
-                if (content.numbering.versionSubverseIsStarting)
+                if (typeof content.numbering.versionSubverseIsStarting !== 'undefined')
                     globalState.currentVersionSubverse =
                         content.numbering.versionSubverseIsStarting;
                 globalState.currentJoinToVersionRefId = content.numbering.joinToVersionRefId;
@@ -924,7 +941,10 @@ export class BibleEngine {
                                 content.numbering.normalizedChapterIsStartingInRange;
                         if (content.numbering && content.numbering.normalizedVerseIsStarting)
                             nRef.normalizedVerseNum = content.numbering.normalizedVerseIsStarting;
-                        if (content.numbering && content.numbering.normalizedSubverseIsStarting)
+                        if (
+                            content.numbering &&
+                            typeof content.numbering.normalizedSubverseIsStarting !== 'undefined'
+                        )
                             nRef.normalizedSubverseNum =
                                 content.numbering.normalizedSubverseIsStarting;
                     }
@@ -1416,18 +1436,6 @@ export class BibleEngine {
                 } else await insertQb.execute();
             }
 
-            for (let index = 0; index < globalState.crossRefStack.length; index += chunkSize) {
-                const insertQb = db
-                    .createQueryBuilder()
-                    .insert()
-                    .into(BibleCrossReferenceEntity)
-                    .values(globalState.crossRefStack.slice(index, index + chunkSize));
-                if (this.executeSqlSetOverride) {
-                    const [statement, values] = insertQb.getQueryAndParameters();
-                    sqlSet.push({ statement, values });
-                } else await insertQb.execute();
-            }
-
             for (let index = 0; index < globalState.paragraphStack.length; index += chunkSize) {
                 const insertQb = db
                     .createQueryBuilder()
@@ -1440,11 +1448,64 @@ export class BibleEngine {
                 } else await insertQb.execute();
             }
 
+            // since saving entities with a relation is a costly operation, we do it in a second step
+            const sectionsWithoutCrossRefs = globalState.sectionStack.filter(
+                (section) => !section.crossReferences?.length
+            );
+            for (let index = 0; index < sectionsWithoutCrossRefs.length; index += chunkSize) {
+                const insertQb = db
+                    .createQueryBuilder()
+                    .insert()
+                    .into(BibleSectionEntity)
+                    .values(sectionsWithoutCrossRefs.slice(index, index + chunkSize));
+                if (this.executeSqlSetOverride) {
+                    const [statement, values] = insertQb.getQueryAndParameters();
+                    sqlSet.push({ statement, values });
+                } else await insertQb.execute();
+            }
+
+            // entites with a relation need to be saved one at a time, since the insertId is
+            // needed, therefore we save sections with crossrefs separately, with a custom logic
+            // optimized for minimal JS > native roundtrips
+            const sectionsWithCrossRefs = globalState.sectionStack.filter(
+                (section) => !!section.crossReferences?.length
+            );
+            const insertQb = db
+                .createQueryBuilder()
+                .insert()
+                .into(BibleSectionEntity)
+                .values(sectionsWithCrossRefs);
+            const sectionsInsertId = (await insertQb.execute()).identifiers;
+            if (sectionsInsertId.length !== sectionsWithCrossRefs.length)
+                throw new Error('section insertId mismatch');
+            for (const section of sectionsWithCrossRefs) {
+                const sectionInsertId = sectionsInsertId.shift()!.id;
+                globalState.crossRefStack.push(
+                    ...section.crossReferences!.map((crossRef) => {
+                        crossRef.sectionId = sectionInsertId;
+                        crossRef.prepare();
+                        return crossRef;
+                    })
+                );
+            }
+
+            for (let index = 0; index < globalState.crossRefStack.length; index += chunkSize) {
+                const insertQb = db
+                    .createQueryBuilder()
+                    .insert()
+                    .into(BibleCrossReferenceEntity)
+                    .values(globalState.crossRefStack.slice(index, index + chunkSize));
+                if (this.executeSqlSetOverride) {
+                    const [statement, values] = insertQb.getQueryAndParameters();
+                    sqlSet.push({ statement, values });
+                } else await insertQb.execute();
+            }
+
             if (BibleEngine.DEBUG) console.timeEnd('db_set');
 
             if (BibleEngine.DEBUG) console.time('db_write');
+
             if (this.executeSqlSetOverride) await this.executeSqlSetOverride(sqlSet);
-            await db.save(BibleSectionEntity, globalState.sectionStack, { chunk: chunkSize });
             if (BibleEngine.DEBUG) console.timeEnd('db_write');
         }
 
@@ -1530,15 +1591,23 @@ export class BibleEngine {
             normalizedVerseEndNum: standardRefEnd.normalizedVerseNum,
             normalizedSubverseEndNum: standardRefEnd.normalizedSubverseNum ?? MAX_SUBVERSE_NUMBER,
         };
+        const potentialNormalizedRangeSql =
+            generatePhraseIdSql(potentialNormalizedRange, 'phrase') +
+            ' AND phrase.versionChapterNum = :cNum' +
+            // if the verse num is not set on input, it is auto-set to be 1 and last verse in
+            // chapter. since those numbers can switch around after normalisation (so that e.g. the
+            // last verse in the version is not the last normalised verse), we need to ignore
+            // `versionVerseNum` and only guard for the chapter number so that we make sure to get
+            // all phrases within the requested chapter
+            (inputRange.versionVerseNum ? ' AND phrase.versionVerseNum = :vNum' : '');
 
         const { phraseIdStart } = await db
             .createQueryBuilder(BiblePhraseEntity, 'phrase')
             .select('MIN(phrase.id)', 'phraseIdStart')
-            .where(
-                generatePhraseIdSql(potentialNormalizedRange, 'phrase') +
-                    ' AND phrase.versionChapterNum = :cNum AND phrase.versionVerseNum = :vNum',
-                { cNum: range.versionChapterNum, vNum: range.versionVerseNum }
-            )
+            .where(potentialNormalizedRangeSql, {
+                cNum: range.versionChapterNum,
+                vNum: range.versionVerseNum,
+            })
             .getRawOne();
 
         if (!phraseIdStart)
@@ -1558,28 +1627,15 @@ export class BibleEngine {
         // we only come here when there is a verseNum - in this case an end chapter without an end
         // verse wouldn't make sense, so we can safely ignore this case
         if (range.versionVerseEndNum) {
-            // const phraseEnd = await entityManager.findOne(BiblePhrase, {
-            //     where: {
-            //         id: Raw(col => generatePhraseIdSql(pontentialNormalizedRange, col)),
-            //         versionChapterNum: range.versionChapterEndNum
-            //             ? range.versionChapterEndNum
-            //             : range.versionChapterNum,
-            //         versionVerseNum: range.versionVerseEndNum
-            //     }
-            // });
             const { phraseIdEnd } = await db
                 .createQueryBuilder(BiblePhraseEntity, 'phrase')
                 .select('MAX(phrase.id)', 'phraseIdEnd')
-                .where(
-                    generatePhraseIdSql(potentialNormalizedRange, 'phrase') +
-                        ' AND phrase.versionChapterNum = :cNum AND phrase.versionVerseNum = :vNum',
-                    {
-                        cNum: range.versionChapterEndNum
-                            ? range.versionChapterEndNum
-                            : range.versionChapterNum,
-                        vNum: range.versionVerseEndNum,
-                    }
-                )
+                .where(potentialNormalizedRangeSql, {
+                    cNum: range.versionChapterEndNum
+                        ? range.versionChapterEndNum
+                        : range.versionChapterNum,
+                    vNum: range.versionVerseEndNum,
+                })
                 .getRawOne();
 
             if (!phraseIdEnd)
