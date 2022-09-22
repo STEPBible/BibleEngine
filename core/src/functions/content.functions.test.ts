@@ -1,8 +1,14 @@
 import { BibleParagraphEntity, BiblePhraseEntity, BibleSectionEntity } from '../entities';
 import {
-    IBibleContent, IBibleContentGroup, IBibleContentPhrase, IBibleContentSection, IBibleOutputRich, IBibleOutputRoot, IBibleVersion
+    IBibleContent,
+    IBibleContentGroup,
+    IBibleContentPhrase,
+    IBibleContentSection,
+    IBibleOutputRich,
+    IBibleOutputRoot,
+    IBibleVersion,
 } from '../models';
-import { generateBibleDocument } from './content.functions';
+import { generateBibleDocument, PhraseVersionNumbersById } from './content.functions';
 
 describe('generateBibleDocument', () => {
     let doc: IBibleOutputRoot;
@@ -11,12 +17,12 @@ describe('generateBibleDocument', () => {
         uid: 'ESV',
         title: 'ESV',
         chapterVerseSeparator: ':',
-        language: 'en-US'
+        language: 'en-US',
     };
 
     const bookAbbreviations = {
         Gen: 'Gen',
-        Ps: 'Ps'
+        Ps: 'Ps',
     };
 
     const phrase1 = new BiblePhraseEntity(
@@ -31,10 +37,10 @@ describe('generateBibleDocument', () => {
                         bookOsisId: 'Ps',
                         versionChapterNum: 23,
                         versionVerseNum: 5,
-                        versionVerseEndNum: 7
-                    }
-                }
-            ]
+                        versionVerseEndNum: 7,
+                    },
+                },
+            ],
         },
         {
             isNormalized: true,
@@ -43,7 +49,7 @@ describe('generateBibleDocument', () => {
             normalizedChapterNum: 1,
             normalizedVerseNum: 1,
             normalizedSubverseNum: 0,
-            phraseNum: 1
+            phraseNum: 1,
         }
     );
     phrase1.prepare();
@@ -57,7 +63,7 @@ describe('generateBibleDocument', () => {
             normalizedChapterNum: 1,
             normalizedVerseNum: 2,
             normalizedSubverseNum: 0,
-            phraseNum: 1
+            phraseNum: 1,
         },
         { quoteLevel: 1 }
     );
@@ -72,7 +78,7 @@ describe('generateBibleDocument', () => {
             normalizedChapterNum: 1,
             normalizedVerseNum: 3,
             normalizedSubverseNum: 0,
-            phraseNum: 1
+            phraseNum: 1,
         },
         { quoteLevel: 1 }
     );
@@ -87,7 +93,7 @@ describe('generateBibleDocument', () => {
             normalizedChapterNum: 1,
             normalizedVerseNum: 3,
             normalizedSubverseNum: 0,
-            phraseNum: 2
+            phraseNum: 2,
         },
         { translationChange: 'change' }
     );
@@ -101,7 +107,7 @@ describe('generateBibleDocument', () => {
         level: 1,
         title: 'section1',
         phraseStartId: phrase1.id,
-        phraseEndId: phrase3.id
+        phraseEndId: phrase3.id,
     });
     section1.id = 1;
     const section2 = new BibleSectionEntity({
@@ -109,7 +115,7 @@ describe('generateBibleDocument', () => {
         level: 1,
         title: 'section2',
         phraseStartId: phrase4.id,
-        phraseEndId: phrase4.id
+        phraseEndId: phrase4.id,
     });
     section2.id = 2;
     const section2_1 = new BibleSectionEntity({
@@ -117,7 +123,7 @@ describe('generateBibleDocument', () => {
         level: 2,
         title: 'section2_1',
         phraseStartId: phrase4.id,
-        phraseEndId: phrase4.id
+        phraseEndId: phrase4.id,
     });
     section2_1.id = 3;
 
@@ -145,21 +151,32 @@ describe('generateBibleDocument', () => {
             1: {
                 startingSections: [section1, section2],
                 nextSections: [],
-                previousSections: []
+                previousSections: [],
             },
             2: {
                 startingSections: [section2_1],
                 nextSections: [],
-                previousSections: []
-            }
+                previousSections: [],
+            },
         };
+        const phraseVersionNumbersById = phrases.reduce((acc, phrase) => {
+            if (phrase.sourceTypeId)
+                acc[phrase.id] = {
+                    chapter: phrase.versionChapterNum,
+                    verse: phrase.versionVerseNum,
+                    subverse: phrase.versionSubverseNum ?? 1,
+                    phraseNum: phrase.normalizedReference.phraseNum,
+                };
+            return acc;
+        }, {} as PhraseVersionNumbersById);
         doc = generateBibleDocument(
             phrases,
             paragraphs,
             context,
             bookAbbreviations,
             version.chapterVerseSeparator,
-            { versionUid: version.uid, bookOsisId: 'Gen' }
+            { versionUid: version.uid, bookOsisId: 'Gen' },
+            phraseVersionNumbersById
         );
         item1 = doc!.contents![0]!;
         item1_1 = (item1 as IBibleContentSection).contents![0]!;
