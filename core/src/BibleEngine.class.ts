@@ -5,6 +5,7 @@ import {
     DataSourceOptions,
     EntityManager,
     FindOptionsWhere,
+    In,
     Like,
     Raw,
 } from 'typeorm';
@@ -493,6 +494,31 @@ export class BibleEngine {
             )
             .orderBy('id')
             .getMany();
+        // we fetch the previous and next paragraphs that we need for the context ranges
+        if (paragraphs.length) {
+            // paragraphs are inserted in order so we can just fetch the previous and next
+            // paragraphs by de-/incrementing the first/last id (paragraphs from other books or
+            // versions are filtered out later)
+            const nextPreviousParagraphs = await db.find(BibleParagraphEntity, {
+                where: {
+                    id: In([paragraphs[0]!.id - 1, paragraphs[paragraphs.length - 1]!.id + 1]),
+                },
+            });
+            for (const paragraph of nextPreviousParagraphs) {
+                const paragraphPhraseIdParsed = parsePhraseId(paragraph.phraseStartId);
+                // in case the query range is at the beginning or end of the book or even the
+                // versions we need to filter out the previous / next paragraphs
+                if (
+                    paragraph.versionId !== rangeNormalized.versionId ||
+                    paragraphPhraseIdParsed.bookOsisId !== rangeNormalized.bookOsisId
+                )
+                    continue;
+
+                if (paragraph.id === paragraphs[0]!.id - 1) paragraphs.unshift(paragraph);
+                else if (paragraph.id === paragraphs[paragraphs.length - 1]!.id + 1)
+                    paragraphs.push(paragraph);
+            }
+        }
         const sections = await db
             .createQueryBuilder(BibleSectionEntity, 'section')
             .select()

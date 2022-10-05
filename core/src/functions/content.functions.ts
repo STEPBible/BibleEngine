@@ -39,11 +39,14 @@ import { StringModifiers } from '../models/BiblePhrase';
 import {
     generateRangeFromGenericSection,
     generateReferenceRangeLabel,
-    parseNumbersFromPhraseId,
     slimDownCrossReference,
     slimDownReferenceRange,
 } from './reference.functions';
-import { getNormalizedChapterCountForOsisId, getNormalizedVerseCount } from './v11n.functions';
+import {
+    getNormalizedChapterCountForOsisId,
+    getNormalizedVerseCount,
+    isValidNormalizedChapter,
+} from './v11n.functions';
 
 export type PhraseVersionNumbersById = {
     [index: number]: { chapter: number; verse: number; subverse: number; phraseNum: number };
@@ -56,9 +59,27 @@ function comparePhraseIdsByVersionNumbering(
 ) {
     let phraseVersionNumberA = phraseVersionNumbersById[phraseIdA];
     let phraseVersionNumberB = phraseVersionNumbersById[phraseIdB];
-    if (!phraseVersionNumberA && !phraseVersionNumberB) return phraseIdA - phraseIdB;
-    if (!phraseVersionNumberA) phraseVersionNumberA = parseNumbersFromPhraseId(phraseIdA);
-    if (!phraseVersionNumberB) phraseVersionNumberB = parseNumbersFromPhraseId(phraseIdB);
+
+    // if we don't know the version number of one of the phrases, we need to fall back to comparing
+    // the normalized numbers.This issue occurs because we only have the version numbers for the
+    // phrases within the range of the query, but we need to compare phrases with paragraphs and
+    // section boundaries that are outside of the range of the query.
+    // RADAR: This could in theory lead to wrong results if the order of phrases between normalized
+    //        and versioned numbers is different _and_ the difference affects paragraphs or sections
+    //        that span outside of where `phraseVersionNumbersById` has values. If this leads to
+    //        issues in the future, we need to fetch all missing version numbers from the database
+    //        (this would need to be done outside of this method in an efficient way since this
+    //         method needs to run fast - possible efficient solution:
+    //           - check if any phrase has `sourceTypeId` set (i.e. there is a potential reordering)
+    //           - if yes, compare the order of the phrases with normalized and versioned numbers
+    //           - if the order is different, go through all paragraph and section ranges and
+    //             determine which phrase ids are missing from `phraseVersionNumbersById`
+    //             (possibly not all section and paragraphs are relevant to this problem, but only
+    //             those that intersect with the range of the query, either by versioned or
+    //             normalized numbers)
+    //          - fetch the version numbers for the determined phrase ids from the database
+    //        ).
+    if (!phraseVersionNumberA || !phraseVersionNumberB) return phraseIdA - phraseIdB;
 
     if (phraseVersionNumberA.chapter !== phraseVersionNumberB.chapter)
         return phraseVersionNumberA.chapter - phraseVersionNumberB.chapter;
@@ -86,7 +107,7 @@ function isVersionPhraseAfterOrEqual(
     phraseVersionNumbersById: PhraseVersionNumbersById
 ) {
     if (phraseIdA === phraseIdB) return true;
-    return comparePhraseIdsByVersionNumbering(phraseIdA, phraseIdB, phraseVersionNumbersById) > 0;
+    return comparePhraseIdsByVersionNumbering(phraseIdA, phraseIdB, phraseVersionNumbersById) >= 0;
 }
 
 /**
@@ -221,6 +242,7 @@ export const generateBibleDocument = (
         // group. if not, "go out" of that group by setting the activeGroup to its parent
         let _group = <BibleContentGeneratorContainer>activeGroup;
         let isIndentDowngrade = false;
+        let isLineRestart = false;
         while (_group.parent) {
             let isPhraseInGroup = true;
             if (_group.type === 'section') {
@@ -258,8 +280,22 @@ export const generateBibleDocument = (
                         !!phrase.getModifierValue('quoteLevel') &&
                         phrase.getModifierValue('quoteLevel')! >=
                             (<IBibleContentGeneratorGroup<'quote'>>_group).meta.level;
+                } else if (_group.groupType === 'line') {
+                    const currentLineNumber = (_group as IBibleContentGeneratorGroup<'line'>)
+                        .modifier;
+                    const phraseLineNumber = phrase.getModifierValue('line');
+
+                    isPhraseInGroup = phraseLineNumber === currentLineNumber;
+                    // in case of adjacent linegroups we need to detect when to start a new line group by
+                    // looking for a restart of line numbers
+                    if (
+                        phraseLineNumber !== undefined &&
+                        currentLineNumber !== undefined &&
+                        phraseLineNumber < currentLineNumber
+                    ) {
+                        isLineRestart = true;
+                    }
                 } else if (
-                    _group.groupType === 'line' ||
                     _group.groupType === 'orderedListItem' ||
                     _group.groupType === 'unorderedListItem' ||
                     _group.groupType === 'translationChange' ||
@@ -269,18 +305,20 @@ export const generateBibleDocument = (
                     isPhraseInGroup = phrase.getModifierValue(_group.groupType) === _group.modifier;
                 } else if (_group.groupType === 'person') {
                     isPhraseInGroup = phrase.person === _group.modifier;
+                } else if (_group.groupType === 'lineGroup') {
+                    isPhraseInGroup = !!phrase.getModifierValue('lineGroup') && !isLineRestart;
                 } else {
                     // => this group has a boolean modifier
                     isPhraseInGroup = !!phrase.getModifierValue(_group.groupType);
                 }
             }
 
-            if (!isPhraseInGroup) activeGroup = _group.parent!;
+            if (!isPhraseInGroup) activeGroup = _group.parent;
 
             // go up one level in the group hierarchy for the next loop iteration.
             // the rootGroup has no parent, so the loop will exit there
             // RADAR [optimization]: Identify cases where can quit the loop before root
-            _group = _group.parent!;
+            _group = _group.parent;
         }
 
         // we need to go through the groups oncemore to determine the active modifiers
@@ -973,8 +1011,12 @@ export const generateContextRanges = (
                 rangeNormalized.normalizedVerseNum &&
                 (!rangeNormalized.normalizedVerseEndNum ||
                     rangeNormalized.normalizedVerseNum > 1 ||
-                    rangeNormalized.normalizedVerseEndNum <
-                        getNormalizedVerseCount(book.osisId, rangeNormalized.normalizedChapterNum))
+                    (isValidNormalizedChapter(book.osisId, rangeNormalized.normalizedChapterNum) &&
+                        rangeNormalized.normalizedVerseEndNum <
+                            getNormalizedVerseCount(
+                                book.osisId,
+                                rangeNormalized.normalizedChapterNum
+                            )))
             ) {
                 contextRanges.normalizedChapter.completeRange = {
                     bookOsisId: book.osisId,
@@ -996,6 +1038,7 @@ export const generateContextRanges = (
                 rangeNormalized.normalizedChapterEndNum &&
                 rangeNormalized.normalizedChapterEndNum !== rangeNormalized.normalizedChapterNum &&
                 rangeNormalized.normalizedVerseEndNum &&
+                isValidNormalizedChapter(book.osisId, rangeNormalized.normalizedChapterEndNum) &&
                 rangeNormalized.normalizedVerseEndNum <
                     getNormalizedVerseCount(book.osisId, rangeNormalized.normalizedChapterEndNum)
             ) {

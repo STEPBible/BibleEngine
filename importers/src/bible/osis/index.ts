@@ -21,6 +21,7 @@ import {
     getBibleReferenceFromParsedReference,
     getPhrasesFromParsedReferences,
     getReferencesFromText,
+    isOnlyCrossReferenceWordOrPunctuation,
     startsWithNoSpaceBeforeChar,
     streamToString,
 } from '../../shared/helpers.functions';
@@ -925,7 +926,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeType.BOOK_INTRODUCTION:
             case OsisXmlNodeName.NOTE: {
-                const note = context.contentContainerStack.pop();
+                const note = context.contentContainerStack.pop() as DocumentRoot | undefined;
                 if (!note || note.type !== 'root') {
                     throw new OsisParseError(
                         `
@@ -940,6 +941,46 @@ export class OsisImporter extends BibleEngineImporter {
                         context
                     );
                 }
+                if (
+                    note.contents.length &&
+                    // tests the non-existance of anything other than a bible-reference-phrase or a
+                    // phrase that is just a punctuation character
+                    note.contents.findIndex(
+                        (_content) =>
+                            !(
+                                // any phrase that is a bible reference or just a punctuation character
+                                (
+                                    (_content.type === 'phrase' || !_content.type) &&
+                                    (_content.bibleReference ||
+                                        isOnlyCrossReferenceWordOrPunctuation(_content.content))
+                                )
+                            )
+                    ) === -1
+                ) {
+                    const currentPhrase = this.getCurrentPhrase(context, true);
+                    if (!currentPhrase) {
+                        throw new OsisParseError('note without a phrase', context);
+                    }
+                    const noteIndex = currentPhrase.notes?.findIndex(
+                        (noteContainer) => noteContainer.content === note
+                    );
+                    if (noteIndex === undefined || noteIndex === -1)
+                        throw new OsisParseError('note-phrase mismatch', context);
+
+                    const crossRefs = note.contents
+                        .filter((_content) => !!(_content as DocumentPhrase).bibleReference)
+                        .map((_content) => ({
+                            label: (_content as DocumentPhrase).content,
+                            range: (_content as DocumentPhrase).bibleReference!,
+                        }));
+
+                    if (currentPhrase.crossReferences)
+                        currentPhrase.crossReferences.push(...crossRefs);
+                    else currentPhrase.crossReferences = crossRefs;
+
+                    currentPhrase.notes!.splice(noteIndex, 1);
+                }
+
                 break;
             }
             case OsisXmlNodeType.CROSS_REFERENCE: {

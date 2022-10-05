@@ -55,43 +55,43 @@ export const generateParagraphSql = (
     tableAlias: string
 ) => {
     const refEnd: IBiblePhraseRef = generateEndReferenceFromRange(range);
-    // we want to catch the previous and next paragraph as well
-    // by using the approach we even get rid of the 'OR' query (using a second index)
-    // by just selection 1 more chapter at the beginning and end
-    // Note: in order to not loose our original intention to make a wider range (i.e.
-    //       selecting the previous paragraph), the start of the range has to also
-    //       catch the start of the previous paragraph (i.e. it must be two times the length
-    //       of the longest paragraph before the actual range.start)
-    const rangePhraseIdStart = generatePhraseId(range) - 20000000000;
-    const rangePhraseIdEnd = generatePhraseId(refEnd) + 10000000000;
-    const colVersion = `${tableAlias}.versionId`;
-    const colSectionStart = `${tableAlias}.phraseStartId`;
-    const colSectionEnd = `${tableAlias}.phraseEndId`;
+    const bookPhraseIdStart = generatePhraseId({
+        versionId: range.versionId,
+        bookOsisId: range.bookOsisId,
+        isNormalized: true,
+    });
+    const bookPhraseIdEnd = generatePhraseId({
+        versionId: range.versionId,
+        bookOsisId: range.bookOsisId,
+        normalizedChapterNum: 999,
+        normalizedVerseNum: 999,
+        normalizedSubverseNum: 99,
+        isNormalized: true,
+    });
 
-    // since this is an OR query the query optimizer may/will use different indexes for each
-    // https://www.sqlite.org/optoverview.html#or_optimizations
-    // thats also why we repeat the versionId condition.
+    const rangePhraseIdStart = generatePhraseId(range);
+    const rangePhraseIdEnd = generatePhraseId(refEnd);
+
+    const colVersion = `${tableAlias}.versionId`;
+    const colParagraphStart = `${tableAlias}.phraseStartId`;
+    const colParagraphEnd = `${tableAlias}.phraseEndId`;
+
+    // we first filter for the book since the table is indexed by `versionId, phraseStartId,
+    // phraseEndId`. otherwise the query or `phraseEndId` would not use the index efficiently.
+    // as it is, the query will select all book paragraphs first and then filter for our range.
     //
     // the three conditions select:
-    // - paragraphs that wrap around the range
     // - paragraphs that start within the range
-    // - [DISABLED] paragraphs that end within the range (seperate index)
-    //
-    // (paragraphs that are fully contained in the range or selected by both the 2nd and 3rd
-    //  condition)
-    return `
-        ( ${colVersion} = ${range.versionId} AND (
-                ( ${colSectionStart} < ${rangePhraseIdStart} AND
-                    ${colSectionEnd} > ${rangePhraseIdEnd} ) OR
-                ( ${colSectionStart} >= ${rangePhraseIdStart} AND
-                    ${colSectionStart} <= ${rangePhraseIdEnd} )
-            )
-        )`;
-    // /* [DISABLED] OR (
-    //     ${colVersion} = ${range.versionId} AND
-    //     ${colSectionEnd} >= ${rangePhraseIdStart} AND
-    //     ${colSectionEnd} <= ${rangePhraseIdEnd}
-    // ) */`;
+    // - paragraphs that end within the range
+    // - paragraphs that wrap around the range
+
+    return `( 
+        ${colVersion} = ${range.versionId} AND ${colParagraphStart} >= ${bookPhraseIdStart} AND ${colParagraphEnd} <= ${bookPhraseIdEnd} AND (
+            (${colParagraphStart} >= ${rangePhraseIdStart} AND ${colParagraphStart} <= ${rangePhraseIdEnd}) OR
+            (${colParagraphEnd} >= ${rangePhraseIdStart} AND ${colParagraphEnd} <= ${rangePhraseIdEnd}) OR
+            (${colParagraphStart} < ${rangePhraseIdStart} AND ${colParagraphEnd} > ${rangePhraseIdEnd})
+        )
+    )`;
 };
 
 /**

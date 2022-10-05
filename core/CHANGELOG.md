@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.3]
+
+### Bug Fixes
+
+-   paragraph handling is now more solid in edge cases when querying
+-   line groups are now properly restarted if the line number resets
+-   prevent error when a version has chapters that don't exist in normalized v11n
+-   fixed wrong results when comparing phraseIds by version numbering
+
 ## [1.2.0]
 
 ### Bug Fixes

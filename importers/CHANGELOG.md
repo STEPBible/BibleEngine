@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.3]
+
+### Features
+
+-   added cross reference detection for notes to OSIS importer
+
 ## [1.2.0]
 
 ### Bug Fixes

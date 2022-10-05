@@ -1174,3 +1174,8 @@ export const isTestMatching = (test: string, context: BibleBookPlaintext) => {
 
     return true;
 };
+
+export const isValidNormalizedChapter = (bookOsisId: string, chapter: number) => {
+    const genericBookId = getBookGenericIdFromOsisId(bookOsisId);
+    return NORMALIZED_VERSE_NUMS[genericBookId - 1]?.[chapter - 1] !== undefined;
+};

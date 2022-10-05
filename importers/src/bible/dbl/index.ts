@@ -219,7 +219,8 @@ export class DblImporter extends BibleEngineImporter {
             bookMeta.set(osisId, {
                 number: bookIndex + 1,
                 abbreviation: metaBookName.abbr,
-                title: metaBookName.long,
+                title: metaBookName.short,
+                longTitle: metaBookName.long,
                 sourcePath: `${sourceDir}/${metaStructureBook.src}`,
             });
         }

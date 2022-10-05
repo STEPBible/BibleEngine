@@ -110,10 +110,14 @@ export function isOnlyPunctuationChar(string: string) {
  * "cf." or "see") or just punctuation (i.e. there is no actual content besides the references)
  */
 export function isOnlyCrossReferenceWordOrPunctuation(string: string) {
-    return (
+    const isSimpleMatch =
         CROSS_REFERENCE_WORDS.indexOf(string.trim().toLowerCase()) !== -1 ||
-        isOnlyPunctuationChar(string)
-    );
+        isOnlyPunctuationChar(string);
+    // in lists of references that use `CROSS_REFERENCE_WORDS`, there is often a punctuation char
+    // in front of it.obviously we also want to catch that case
+    if (!isSimpleMatch && !!string && isOnlyPunctuationChar(string[0]!))
+        return CROSS_REFERENCE_WORDS.indexOf(string.slice(1).trim().toLowerCase()) !== -1;
+    else return isSimpleMatch;
 }
 
 export function matchAll(string: string, regexp: RegExp) {
