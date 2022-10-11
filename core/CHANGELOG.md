@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.1]
+
+### Features
+
+-   added `crossRefBeforePhrase` attribute to `BibleVersionEntity`
+
 ## [1.2.3]
 
 ### Bug Fixes

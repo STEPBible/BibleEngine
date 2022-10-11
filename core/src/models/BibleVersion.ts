@@ -13,5 +13,6 @@ export interface IBibleVersion {
     isPlaintext?: boolean;
     lastUpdate?: Date;
     dataLocation?: 'db' | 'file' | 'remote';
-    type?: 'orig' | 'formal' | 'dynamic' | 'free'
+    type?: 'orig' | 'formal' | 'dynamic' | 'free';
+    crossRefBeforePhrase?: boolean;
 }

@@ -16,8 +16,6 @@ export interface IImporterOptions {
      *  of sections, e.g. in Psalms.
      */
     enableChapterLabels?: boolean;
-    crossRefConnectToPhrase?: 'before' | 'after';
-    noteConnectToPhrase?: 'before' | 'after';
     logLevel?: LogLevel;
 }
 export type ImporterBookMetadata = Map<string, ImporterBookMetadataBook>;
@@ -34,11 +32,7 @@ export interface IBibleEngineImporter {
 }
 
 export class BibleEngineImporter {
-    constructor(protected bibleEngine: BibleEngine, public options: IImporterOptions = {}) {
-        // set defaults so that new options are backwards compatible
-        if (!this.options.crossRefConnectToPhrase) this.options.crossRefConnectToPhrase = 'after';
-        if (!this.options.noteConnectToPhrase) this.options.noteConnectToPhrase = 'before';
-    }
+    constructor(protected bibleEngine: BibleEngine, public options: IImporterOptions = {}) {}
 
     import() {}
 

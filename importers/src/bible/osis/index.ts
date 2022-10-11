@@ -204,7 +204,7 @@ export class OsisImporter extends BibleEngineImporter {
                         return Logger.error('section cross reference without section', context);
                     }
                     currentSection.crossReferences.push(crossRef);
-                } else if (this.options.crossRefConnectToPhrase === 'before') {
+                } else if (context.version?.crossRefBeforePhrase) {
                     const currentPhrase = this.getCurrentPhrase(context, true);
                     if (!currentPhrase || !currentPhrase.crossReferences)
                         return Logger.error('cross reference without phrase', context);
@@ -233,6 +233,15 @@ export class OsisImporter extends BibleEngineImporter {
                     chapterVerseSeparator: ':',
                     ...this.options.versionMeta,
                 };
+
+                // we add this special case for the ESV to make the addition of `crossRefBeforePhrase`
+                // backwards compatible. we didn't make it the default because most versions put
+                // both cross references and notes after the phrase
+                if (
+                    context.version.uid === 'ESV' &&
+                    !this.options.versionMeta?.crossRefBeforePhrase
+                )
+                    context.version.crossRefBeforePhrase = true;
 
                 try {
                     const bcv_parser = require(`bible-passage-reference-parser/js/${context.version.language}_bcv_parser`)
@@ -519,7 +528,7 @@ export class OsisImporter extends BibleEngineImporter {
                         throw new OsisParseError('cross reference without section', context);
                     Logger.info('saving cross refs for section', context);
                     currentSection.crossReferences = [];
-                } else if (this.options.crossRefConnectToPhrase === 'before') {
+                } else if (context.version?.crossRefBeforePhrase) {
                     const currentPhrase = this.getCurrentPhrase(context, true);
                     if (!currentPhrase) {
                         throw new OsisParseError('cross reference without phrase', context);
@@ -941,7 +950,11 @@ export class OsisImporter extends BibleEngineImporter {
                         context
                     );
                 }
+                // check if note is just a list of reference and if so, convert it to a crossref
                 if (
+                    // we only convert notes if crossrefs are not shown before the phrase in this
+                    // version (otherwise the crossref would look out of place in a lot of cases)
+                    !context.version?.crossRefBeforePhrase &&
                     note.contents.length &&
                     // tests the non-existance of anything other than a bible-reference-phrase or a
                     // phrase that is just a punctuation character
@@ -985,10 +998,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 // we handle the cross ref in parseTextNode
-                if (
-                    this.options.crossRefConnectToPhrase === 'before' ||
-                    this.isInsideSectionCrossRefs()
-                ) {
+                if (context.version?.crossRefBeforePhrase || this.isInsideSectionCrossRefs()) {
                     delete context.crossRefBuffer;
                 } else if (context.crossRefBuffer?.refs?.length === 0) {
                     Logger.verbose(
@@ -1165,7 +1175,7 @@ export class OsisImporter extends BibleEngineImporter {
                     const currentSection = getCurrentSection(context);
                     if (currentSection?.crossReferences?.length)
                         currentCrossRefContainer = currentSection.crossReferences;
-                } else if (this.options.crossRefConnectToPhrase === 'before') {
+                } else if (context.version?.crossRefBeforePhrase) {
                     const currentPhrase = this.getCurrentPhrase(context);
                     if (currentPhrase && currentPhrase.crossReferences?.length)
                         currentCrossRefContainer = currentPhrase.crossReferences;
@@ -1311,10 +1321,7 @@ export class OsisImporter extends BibleEngineImporter {
         if (endsWithNoSpaceAfterChar(trimmedText))
             phrase.skipSpace = phrase.skipSpace === 'before' ? 'both' : 'after';
         if (context.crossRefBuffer) {
-            if (
-                this.options.crossRefConnectToPhrase === 'after' &&
-                context.crossRefBuffer.refs?.length
-            )
+            if (!context.version?.crossRefBeforePhrase && context.crossRefBuffer.refs?.length)
                 phrase.crossReferences = context.crossRefBuffer.refs;
             delete context.crossRefBuffer;
         }

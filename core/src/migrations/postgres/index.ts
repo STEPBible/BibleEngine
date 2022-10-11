@@ -4,6 +4,7 @@ import { VersionAbbreviation1602683683972 } from './1602683683972-VersionAbbrevi
 import { PhraseJoinToVersionRefId1603383603377 } from './1603383603377-PhraseJoinToVersionRefId';
 import { AddPronunciationField1609105697104 } from './1609105697104-AddPronunciationField';
 import { SectionChapterLabel1660299033547 } from './1660299033547-SectionChapterLabel';
+import { CrossrefPosition1665491751275 } from './1665491751275-CrossrefPosition';
 export default {
     name: 'postgres',
     migrations: [
@@ -13,5 +14,6 @@ export default {
         PhraseJoinToVersionRefId1603383603377,
         AddPronunciationField1609105697104,
         SectionChapterLabel1660299033547,
+        CrossrefPosition1665491751275,
     ],
 };

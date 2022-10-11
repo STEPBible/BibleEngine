@@ -4,6 +4,7 @@ import { VersionAbbreviation1602683683972 } from './1602683683972-VersionAbbrevi
 import { PhraseJoinToVersionRefId1603383603377 } from './1603383603377-PhraseJoinToVersionRefId';
 import { AddPronunciationField1609105701370 } from './1609105701370-AddPronunciationField';
 import { SectionChapterLabel1660299033547 } from './1660299033547-SectionChapterLabel';
+import { CrossrefPosition1601037334269 } from './1665491751275-CrossrefPosition';
 export default {
     name: 'sqlite',
     migrations: [
@@ -13,5 +14,6 @@ export default {
         PhraseJoinToVersionRefId1603383603377,
         AddPronunciationField1609105701370,
         SectionChapterLabel1660299033547,
+        CrossrefPosition1601037334269,
     ],
 };

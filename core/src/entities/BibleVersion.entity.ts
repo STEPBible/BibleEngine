@@ -45,6 +45,9 @@ export class BibleVersionEntity implements IBibleVersion {
     @Column({ nullable: true })
     isPlaintext?: boolean;
 
+    @Column({ nullable: true })
+    crossRefBeforePhrase?: boolean;
+
     @Column({ nullable: true, type: 'varchar' })
     type?: IBibleVersion['type'];
 
