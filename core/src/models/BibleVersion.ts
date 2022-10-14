@@ -12,7 +12,7 @@ export interface IBibleVersion {
     hasStrongs?: boolean;
     isPlaintext?: boolean;
     lastUpdate?: Date;
-    dataLocation?: 'db' | 'file' | 'remote';
+    dataLocation?: 'db' | 'importing' | 'file' | 'remote';
     type?: 'orig' | 'formal' | 'dynamic' | 'free';
     crossRefBeforePhrase?: boolean;
 }

@@ -98,6 +98,13 @@ export class BibleVersionRemoteOnlyError extends Error {
     }
 }
 
+export class BibleVersionNotImportedError extends Error {
+    constructor() {
+        super('accessing content of a bible version that is not imported yet');
+        this.name = 'BibleVersionNotImportedError';
+    }
+}
+
 export class BibleBookContentNotImportedError extends Error {
     constructor() {
         super('accessing content of a bible book that has not been imported yet');
@@ -458,6 +465,7 @@ export class BibleEngine {
 
         if (!versionEntity) throw new BibleVersionInvalidError();
         if (versionEntity.dataLocation === 'remote') throw new BibleVersionRemoteOnlyError();
+        if (versionEntity.dataLocation === 'file') throw new BibleVersionNotImportedError();
 
         const range = { ...rangeQuery, versionId: versionEntity.id };
         const bookEntity = await this.getBookForVersionReference(range);
