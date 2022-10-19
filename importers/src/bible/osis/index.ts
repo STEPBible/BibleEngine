@@ -204,7 +204,7 @@ export class OsisImporter extends BibleEngineImporter {
                         return Logger.error('section cross reference without section', context);
                     }
                     currentSection.crossReferences.push(crossRef);
-                } else if (context.version?.crossRefBeforePhrase) {
+                } else if (!context.version?.crossRefBeforePhrase) {
                     const currentPhrase = this.getCurrentPhrase(context, true);
                     if (!currentPhrase || !currentPhrase.crossReferences)
                         return Logger.error('cross reference without phrase', context);
@@ -528,7 +528,7 @@ export class OsisImporter extends BibleEngineImporter {
                         throw new OsisParseError('cross reference without section', context);
                     Logger.info('saving cross refs for section', context);
                     currentSection.crossReferences = [];
-                } else if (context.version?.crossRefBeforePhrase) {
+                } else if (!context.version?.crossRefBeforePhrase) {
                     const currentPhrase = this.getCurrentPhrase(context, true);
                     if (!currentPhrase) {
                         throw new OsisParseError('cross reference without phrase', context);
@@ -998,7 +998,7 @@ export class OsisImporter extends BibleEngineImporter {
             }
             case OsisXmlNodeType.CROSS_REFERENCE: {
                 // we handle the cross ref in parseTextNode
-                if (context.version?.crossRefBeforePhrase || this.isInsideSectionCrossRefs()) {
+                if (!context.version?.crossRefBeforePhrase || this.isInsideSectionCrossRefs()) {
                     delete context.crossRefBuffer;
                 } else if (context.crossRefBuffer?.refs?.length === 0) {
                     Logger.verbose(
@@ -1175,7 +1175,7 @@ export class OsisImporter extends BibleEngineImporter {
                     const currentSection = getCurrentSection(context);
                     if (currentSection?.crossReferences?.length)
                         currentCrossRefContainer = currentSection.crossReferences;
-                } else if (context.version?.crossRefBeforePhrase) {
+                } else if (!context.version?.crossRefBeforePhrase) {
                     const currentPhrase = this.getCurrentPhrase(context);
                     if (currentPhrase && currentPhrase.crossReferences?.length)
                         currentCrossRefContainer = currentPhrase.crossReferences;
@@ -1321,7 +1321,7 @@ export class OsisImporter extends BibleEngineImporter {
         if (endsWithNoSpaceAfterChar(trimmedText))
             phrase.skipSpace = phrase.skipSpace === 'before' ? 'both' : 'after';
         if (context.crossRefBuffer) {
-            if (!context.version?.crossRefBeforePhrase && context.crossRefBuffer.refs?.length)
+            if (context.version?.crossRefBeforePhrase && context.crossRefBuffer.refs?.length)
                 phrase.crossReferences = context.crossRefBuffer.refs;
             delete context.crossRefBuffer;
         }
