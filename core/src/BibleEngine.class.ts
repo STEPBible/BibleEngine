@@ -1156,9 +1156,9 @@ export class BibleEngine {
                         throw new Error(
                             `missing last phrase when parsing ${book.osisId} ${content.versionChapterNum}:${content.versionVerseNum}`
                         );
-                    if (lastContent.skipSpace === 'both') lastPhrase.skipSpace = 'before';
-                    else if (lastContent.skipSpace === 'after') lastPhrase.skipSpace = undefined;
-                    else if (content.skipSpace === 'before') {
+                    if (lastPhrase.skipSpace === 'both') lastPhrase.skipSpace = 'before';
+                    else if (lastPhrase.skipSpace === 'after') lastPhrase.skipSpace = undefined;
+                    else if (content.skipSpace === 'before' || content.skipSpace === 'both') {
                     } else lastPhrase.content += ' ';
 
                     lastPhrase.content += content.content;
