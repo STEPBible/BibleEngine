@@ -54,6 +54,7 @@ import { isTestMatching } from './functions/v11n.functions';
 import mysqlMigrations from './migrations/mysql';
 import postgresMigrations from './migrations/postgres';
 import sqliteMigrations from './migrations/sqlite';
+import { FTS1666713816863 } from './migrations/sqlite/1666713816863-FTS';
 import {
     BibleBookPlaintext,
     BiblePlaintext,
@@ -137,15 +138,24 @@ export interface BibleEngineOptions {
      * Allows for performance optimization for large INSERTs outside of the possibilites of TypeORM
      */
     executeSqlSetOverride?: (set: { statement: string; values: any[] }[]) => Promise<any>;
+
+    /**
+     * Enables the creation and use of a full text index for the respective database engines
+     */
+    fts?: {
+        sqlite?: boolean;
+    };
 }
 
 export class BibleEngine {
     static DEBUG = false;
     dataSource: DataSource;
     executeSqlSetOverride?: BibleEngineOptions['executeSqlSetOverride'];
+    fts?: BibleEngineOptions['fts'];
     pDB: Promise<EntityManager>;
 
     constructor(dbConfig: DataSourceOptions, options?: BibleEngineOptions) {
+        this.fts = options?.fts;
         if (options?.executeSqlSetOverride)
             this.executeSqlSetOverride = options.executeSqlSetOverride;
         if (options?.checkForExistingConnection) {
@@ -184,7 +194,12 @@ export class BibleEngine {
             'sqljs',
         ];
         if (SQLITE_TYPES.includes(type)) {
-            return sqliteMigrations;
+            if (this.fts?.sqlite)
+                return {
+                    name: 'sqlite',
+                    migrations: [...sqliteMigrations.migrations, FTS1666713816863],
+                };
+            else return sqliteMigrations;
         } else if (type === 'postgres') {
             return postgresMigrations;
         } else if (type === 'mysql') {
@@ -238,7 +253,12 @@ export class BibleEngine {
         // generate the bible plaintext structure
         let textData: BibleBookPlaintext = new Map();
         let chaptersCount = bookInput.book.chaptersCount;
-        if (!inputHasNormalizedNumbering || !chaptersCount || !chaptersCount.length) {
+        if (
+            !inputHasNormalizedNumbering ||
+            !chaptersCount ||
+            !chaptersCount.length ||
+            this.fts?.sqlite
+        ) {
             textData = convertBibleInputToBookPlaintext(bookInput.contents);
             chaptersCount = [];
             for (const verses of textData.values()) {
@@ -1533,6 +1553,19 @@ export class BibleEngine {
                     const [statement, values] = insertQb.getQueryAndParameters();
                     sqlSet.push({ statement, values });
                 } else await insertQb.execute();
+            }
+
+            // set up search index
+            if (this.executeSqlSetOverride && this.fts?.sqlite) {
+                context.forEach((verses, chapter) => {
+                    verses.forEach((subverses, verse) => {
+                        const verseText = subverses.join(' ');
+                        sqlSet.push({
+                            statement: 'INSERT INTO bible_search VALUES (?, ?, ?, ?, ?)',
+                            values: [verseText, version.uid, book.number, chapter, verse],
+                        });
+                    });
+                });
             }
 
             if (BibleEngine.DEBUG) console.timeEnd('db_set');
