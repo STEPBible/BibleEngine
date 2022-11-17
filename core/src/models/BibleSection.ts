@@ -19,3 +19,12 @@ export interface IBibleSectionEntity extends IBibleSection {
     versionId: number;
     level: number;
 }
+
+export interface IBibleSectionHierarchical extends IBibleSectionEntity {
+    versionChapterStart: number;
+    versionVerseStart: number;
+    versionChapterEnd: number;
+    versionVerseEnd: number;
+    rangeLabel: string;
+    subSections: IBibleSectionHierarchical[];
+}

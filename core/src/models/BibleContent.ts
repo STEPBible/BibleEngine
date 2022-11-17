@@ -1,6 +1,6 @@
-import { IBibleSectionBase } from './BibleSection';
 import { IBiblePhraseWithNumbers } from './BiblePhrase';
-import { IContentGroup, ContentGroupType } from './ContentGroup';
+import { IBibleSectionBase } from './BibleSection';
+import { ContentGroupType, IContentGroup } from './ContentGroup';
 
 export type IBibleContent =
     | IBibleContentSection

@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.6]
+
+### Features
+
+-   added method to get book sections in a hierarchical structure
+-   added option to ignore sections with empty titles
+
+### Bug Fixes
+
+-   switched to default sqlite fts tokenizer since `porter` does only work for english
+-   added handling of `skipSpaces` to plaintext generation
+
+## [1.3.5]
+
+### Bug Fixes
+
+-   fixed plaintext generation not properly handling psalm titles
+
 ## [1.3.4]
 
 ### Features

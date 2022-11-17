@@ -16,6 +16,7 @@ export interface IImporterOptions {
      *  of sections, e.g. in Psalms.
      */
     enableChapterLabels?: boolean;
+    ignoreSectionsWithoutTitle?: boolean;
     logLevel?: LogLevel;
 }
 export type ImporterBookMetadata = Map<string, ImporterBookMetadataBook>;

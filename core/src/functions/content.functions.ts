@@ -148,8 +148,13 @@ export const convertBibleInputToBookPlaintext = (
                     if (content.numbering.normalizedSubverseIsStarting)
                         _currentNumbers.subverse = content.numbering.normalizedSubverseIsStarting;
                 } else {
-                    if (content.numbering.versionChapterIsStartingInRange)
+                    if (content.numbering.versionChapterIsStartingInRange) {
                         _currentNumbers.chapter = content.numbering.versionChapterIsStartingInRange;
+                        // in verses where we have subverse zero, `versionVerseIsStarting` is only set
+                        // on subverse 1. for the purpose of saving to db, we need to set the version
+                        // verse number on subverse 0 as well
+                        _currentNumbers.verse = 1;
+                    }
                     if (content.numbering.versionVerseIsStarting) {
                         _currentNumbers.verse = content.numbering.versionVerseIsStarting;
                         delete _currentNumbers.subverse;
@@ -169,7 +174,9 @@ export const convertBibleInputToBookPlaintext = (
             );
         } else {
             if (!_currentNumbers.chapter || !_currentNumbers.verse) {
-                throw new Error(`missing numbering in input`);
+                throw new Error(
+                    `missing numbering in input for "${content.content}" (${content.versionChapterNum}:${content.versionVerseNum}), current numbers: ${_currentNumbers.chapter}:${_currentNumbers.verse}`
+                );
             }
 
             const subverseNum = _currentNumbers.subverse ?? 1;
@@ -178,10 +185,16 @@ export const convertBibleInputToBookPlaintext = (
             const chapter = _accChapters.get(_currentNumbers.chapter)!; // we know it's set
             if (!chapter.has(_currentNumbers.verse)) chapter.set(_currentNumbers.verse, []);
             const verse = chapter.get(_currentNumbers.verse)!; // we know it's set
-            const subverse = verse[subverseNum]
-                ? verse[subverseNum] + ' ' + content.content
-                : content.content;
-            verse[subverseNum] = subverse;
+            let subverseContent = verse[subverseNum] ?? '';
+            if (
+                (content.skipSpace === 'before' || content.skipSpace === 'both') &&
+                subverseContent.slice(-1) === ' '
+            )
+                subverseContent = subverseContent.slice(0, -1);
+            subverseContent += content.content;
+            if (content.skipSpace !== 'after' && content.skipSpace !== 'both')
+                subverseContent += ' ';
+            verse[subverseNum] = subverseContent;
         }
     }
 

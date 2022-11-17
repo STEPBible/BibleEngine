@@ -138,6 +138,7 @@ export class OsisImporter extends BibleEngineImporter {
                 skipCrossRefs: this.options.skip?.crossRefs,
                 skipNotes: this.options.skip?.notes,
                 skipStrongs: this.options.skip?.strongs,
+                ignoreSectionsWithoutTitle: this.options.ignoreSectionsWithoutTitle,
             });
         }
 

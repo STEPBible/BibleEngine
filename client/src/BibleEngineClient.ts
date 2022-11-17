@@ -84,6 +84,16 @@ export class BibleEngineClient {
         throw new Error(`can't get formatted text: invalid version`);
     }
 
+    getSectionsForBook(versionUid: string, osisId: string, forceRemote = false) {
+        if (forceRemote || !this.localBibleEngine) {
+            if (this.remoteApi)
+                return this.remoteApi
+                    .getBookSections({ versionUid, osisId })
+                    .then((resp) => resp.result);
+            throw new Error(`No remote config provided`);
+        } else return this.localBibleEngine.getBookSectionsForVersionUid(versionUid, osisId);
+    }
+
     getVersions(forceRemote = false) {
         if (!this.localBibleEngine || forceRemote) {
             // TODO: persist updates if local database exists

@@ -75,6 +75,7 @@ import {
     IDictionaryEntry,
     PhraseModifiers,
 } from './models';
+import { IBibleSectionHierarchical } from './models/BibleSection';
 
 export class NoDbConnectionError extends Error {
     constructor() {
@@ -238,6 +239,7 @@ export class BibleEngine {
             skipCrossRefs?: boolean;
             skipNotes?: boolean;
             skipStrongs?: boolean;
+            ignoreSectionsWithoutTitle?: boolean;
         } = {}
     ) {
         if (!this.pDB) throw new NoDbConnectionError();
@@ -313,6 +315,7 @@ export class BibleEngine {
                     notes: options.skipNotes,
                     crossRefs: options.skipCrossRefs,
                 },
+                ignoreSectionsWithoutTitle: options.ignoreSectionsWithoutTitle,
             });
 
             bookEntity = await this.updateBook(
@@ -354,6 +357,7 @@ export class BibleEngine {
                         notes: options.skipNotes,
                         crossRefs: options.skipCrossRefs,
                     },
+                    ignoreSectionsWithoutTitle: options.ignoreSectionsWithoutTitle,
                 });
 
                 bookEntity = await this.updateBook(
@@ -466,6 +470,134 @@ export class BibleEngine {
         });
         if (!version) throw new Error(`missing version ${versionUid}`);
         return this.getBooksForVersion(version.id);
+    }
+
+    async getBookSections(
+        version: { id: number; chapterVerseSeparator: string },
+        book: { osisId: string; chaptersCount: number[] }
+    ) {
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return await db
+            .createQueryBuilder(BibleSectionEntity, 'section')
+            .select()
+            .leftJoin(BiblePhraseEntity, 'phraseStart', 'section.phraseStartId = phraseStart.id')
+            .addSelect('phraseStart.versionChapterNum', 'versionChapterStart')
+            .addSelect('phraseStart.versionVerseNum', 'versionVerseStart')
+            .leftJoin(BiblePhraseEntity, 'phraseEnd', 'section.phraseEndId = phraseEnd.id')
+            .addSelect('phraseEnd.versionChapterNum', 'versionChapterEnd')
+            .addSelect('phraseEnd.versionVerseNum', 'versionVerseEnd')
+            .where(
+                generateBookSectionsSql(
+                    { versionId: version.id, bookOsisId: book.osisId, isNormalized: true },
+                    'section'
+                )
+            )
+            .orderBy({ 'section.level': 'ASC', 'section.phraseStartId': 'ASC' })
+            .getRawAndEntities()
+            .then(({ raw, entities }) => {
+                const sectionsWithVersionNumbers: IBibleSectionHierarchical[] = entities.map(
+                    (entity, idx) => {
+                        const numbering = raw[idx];
+                        let rangeLabel: string = numbering.versionChapterStart;
+                        if (
+                            numbering.versionVerseStart > 1 ||
+                            book.chaptersCount?.[numbering.versionChapterEnd - 1] !==
+                                numbering.versionVerseEnd
+                        )
+                            rangeLabel += `${version.chapterVerseSeparator}${numbering.versionVerseStart}`;
+                        if (
+                            numbering.versionChapterStart !== numbering.versionChapterEnd ||
+                            numbering.versionVerseStart > 1 ||
+                            book.chaptersCount?.[numbering.versionChapterEnd - 1] !==
+                                numbering.versionVerseEnd
+                        )
+                            rangeLabel += '-';
+                        if (numbering.versionChapterEnd !== numbering.versionChapterStart)
+                            rangeLabel += numbering.versionChapterEnd;
+                        if (
+                            numbering.versionVerseStart > 1 ||
+                            book.chaptersCount?.[numbering.versionChapterEnd - 1] !==
+                                numbering.versionVerseEnd
+                        ) {
+                            if (numbering.versionChapterEnd !== numbering.versionChapterStart)
+                                rangeLabel += version.chapterVerseSeparator;
+                            rangeLabel += numbering.versionVerseEnd;
+                        }
+                        return {
+                            ...entity,
+                            title: entity.title
+                                ?.replace(`${rangeLabel}: `, '')
+                                .replace(` (${rangeLabel})`, ''),
+                            versionChapterStart: numbering.versionChapterStart,
+                            versionVerseStart: numbering.versionVerseStart,
+                            versionChapterEnd: numbering.versionChapterEnd,
+                            versionVerseEnd: numbering.versionVerseEnd,
+                            rangeLabel,
+                            subSections: [],
+                        };
+                    }
+                );
+                const sectionsHierarchical: IBibleSectionHierarchical[] = [];
+                for (const section of sectionsWithVersionNumbers) {
+                    // we only support three levels of sections for this method
+                    if (section.level > 2) break;
+
+                    if (section.level === 0) {
+                        sectionsHierarchical.push(section);
+                    } else {
+                        const parent = sectionsHierarchical.find(
+                            (parent) =>
+                                (parent.versionChapterStart < section.versionChapterStart ||
+                                    (parent.versionChapterStart === section.versionChapterStart &&
+                                        parent.versionVerseStart <= section.versionVerseStart)) &&
+                                (parent.versionChapterEnd > section.versionChapterEnd ||
+                                    (parent.versionChapterEnd === section.versionChapterEnd &&
+                                        parent.versionVerseEnd >= section.versionVerseEnd))
+                        );
+                        if (!parent)
+                            throw new Error(
+                                `missing parent for section level ${section.level} ${section.phraseStartId}-${section.phraseEndId}`
+                            );
+                        if (section.level === 1) {
+                            parent.subSections.push(section);
+                        } else if (section.level === 2) {
+                            const parent2 = parent.subSections.find(
+                                (_parent2) =>
+                                    (_parent2.versionChapterStart < section.versionChapterStart ||
+                                        (_parent2.versionChapterStart ===
+                                            section.versionChapterStart &&
+                                            _parent2.versionVerseStart <=
+                                                section.versionVerseStart)) &&
+                                    (_parent2.versionChapterEnd > section.versionChapterEnd ||
+                                        (_parent2.versionChapterEnd === section.versionChapterEnd &&
+                                            _parent2.versionVerseEnd >= section.versionVerseEnd))
+                            );
+                            if (!parent2)
+                                throw new Error(
+                                    `missing parent for section level ${section.level} ${section.phraseStartId}-${section.phraseEndId}`
+                                );
+                            parent2.subSections.push(section);
+                        }
+                    }
+                }
+                return sectionsHierarchical;
+            });
+    }
+
+    async getBookSectionsForVersionUid(versionUid: string, bookOsisId: string) {
+        const db = await this.pDB;
+        const version = await db.findOne(BibleVersionEntity, {
+            where: { uid: versionUid },
+            select: ['id', 'chapterVerseSeparator'],
+        });
+        if (!version) throw new Error(`missing version ${versionUid}`);
+        const book = await db.findOne(BibleBookEntity, {
+            where: { osisId: bookOsisId },
+            select: ['osisId', 'chaptersCount'],
+        });
+        if (!book) throw new Error(`missing book ${bookOsisId}`);
+        return this.getBookSections(version, book);
     }
 
     async getDictionaryEntries(strong: string, dictionary?: string) {
@@ -859,6 +991,7 @@ export class BibleEngine {
         },
         inputHasNormalizedNumbering = false,
         skip = {},
+        ignoreSectionsWithoutTitle = false,
     }: {
         entityManger: EntityManager;
         contents: IBibleContent[];
@@ -894,6 +1027,7 @@ export class BibleEngine {
             notes?: boolean;
             strongs?: boolean;
         };
+        ignoreSectionsWithoutTitle?: boolean;
     }): Promise<{ firstPhraseId: number | undefined; lastPhraseId: number | undefined }> {
         if (BibleEngine.DEBUG && localState.recursionLevel === 0) console.time('db_prepare');
         if (!this.pDB) throw new NoDbConnectionError();
@@ -1330,6 +1464,7 @@ export class BibleEngine {
                     localState: childState,
                     inputHasNormalizedNumbering,
                     skip,
+                    ignoreSectionsWithoutTitle,
                 });
                 if (
                     (firstPhraseId && groupFirstPhraseId && groupFirstPhraseId < firstPhraseId) ||
@@ -1365,7 +1500,7 @@ export class BibleEngine {
                     modifierState: { ...localState.modifierState },
                     columnModifierState: { ...localState.columnModifierState },
                     sectionLevel:
-                        content.type === 'section'
+                        content.type === 'section' && (content.title || !ignoreSectionsWithoutTitle)
                             ? localState.sectionLevel + 1
                             : localState.sectionLevel,
                     recursionLevel: localState.recursionLevel + 1,
@@ -1387,6 +1522,7 @@ export class BibleEngine {
                     localState: childState,
                     inputHasNormalizedNumbering,
                     skip,
+                    ignoreSectionsWithoutTitle,
                 });
 
                 if (content.type === 'group' && content.groupType === 'paragraph')
@@ -1401,7 +1537,10 @@ export class BibleEngine {
                                 sectionLastPhraseId
                             )
                         );
-                    } else if (content.type === 'section') {
+                    } else if (
+                        content.type === 'section' &&
+                        (content.title || !ignoreSectionsWithoutTitle)
+                    ) {
                         globalState.sectionStack.push(
                             new BibleSectionEntity({
                                 versionId: book.versionId,
@@ -1559,7 +1698,7 @@ export class BibleEngine {
             if (this.executeSqlSetOverride && this.fts?.sqlite) {
                 context.forEach((verses, chapter) => {
                     verses.forEach((subverses, verse) => {
-                        const verseText = subverses.join(' ');
+                        const verseText = subverses.join(' ').trim();
                         sqlSet.push({
                             statement: 'INSERT INTO bible_search VALUES (?, ?, ?, ?, ?)',
                             values: [verseText, version.uid, book.number, chapter, verse],

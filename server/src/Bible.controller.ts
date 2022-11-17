@@ -1,9 +1,16 @@
-import { JsonController, Post, Body, Get, Param, HttpError } from 'routing-controllers';
+import {
+    BibleEngine,
+    IBibleBook,
+    IBibleReferenceRangeQuery,
+    IBibleVersion,
+    stripUnnecessaryDataFromBibleBook,
+    stripUnnecessaryDataFromBibleVersion,
+} from '@bible-engine/core';
+import { Body, Get, HttpError, JsonController, Param, Post } from 'routing-controllers';
 import { Inject, Service } from 'typedi';
-import { BibleEngine, IBibleBook, IBibleReferenceRangeQuery, IBibleVersion, stripUnnecessaryDataFromBibleBook, stripUnnecessaryDataFromBibleVersion } from '@bible-engine/core';
 
 class BibleEngineHttpError extends HttpError {
-    constructor(bibleEngineError: Error & {httpCode?: number}) {
+    constructor(bibleEngineError: Error & { httpCode?: number }) {
         super(bibleEngineError.httpCode || 400, bibleEngineError.message);
         this.name = bibleEngineError.name;
     }
@@ -16,7 +23,7 @@ export class BibleController {
     private bibleEngine: BibleEngine;
 
     private getReference(ref: IBibleReferenceRangeQuery) {
-        return this.bibleEngine.getFullDataForReferenceRange(ref, true).catch(error => {
+        return this.bibleEngine.getFullDataForReferenceRange(ref, true).catch((error) => {
             throw new BibleEngineHttpError(error);
         });
     }
@@ -36,19 +43,22 @@ export class BibleController {
         return this.bibleEngine.getBooksForVersionUid(versionUid);
     }
 
+    @Get('/sections/:versionUid/:osisId')
+    getBookSections(@Param('versionUid') versionUid: string, @Param('osisId') osisId: string) {
+        return this.bibleEngine.getBookSectionsForVersionUid(versionUid, osisId);
+    }
+
     @Get('/ref/:versionUid/:osisId/:chapterNr')
     getChapter(
         @Param('versionUid') versionUid: string,
         @Param('osisId') osisId: string,
         @Param('chapterNr') chapterNr: number
     ) {
-        return this.getReference(
-            {
-                versionUid,
-                bookOsisId: osisId,
-                versionChapterNum: chapterNr,
-            }
-        );
+        return this.getReference({
+            versionUid,
+            bookOsisId: osisId,
+            versionChapterNum: chapterNr,
+        });
     }
 
     @Get('/ref/:versionUid/:osisId/:chapterNr/:verseNr')
@@ -58,15 +68,13 @@ export class BibleController {
         @Param('chapterNr') chapterNr: number,
         @Param('verseNr') verseNr: number
     ) {
-        return this.getReference(
-            {
-                versionUid,
-                bookOsisId: osisId,
-                versionChapterNum: chapterNr,
-                versionVerseNum: verseNr,
-                skipPartialWrappingSectionsInDocument: true,
-            }
-        );
+        return this.getReference({
+            versionUid,
+            bookOsisId: osisId,
+            versionChapterNum: chapterNr,
+            versionVerseNum: verseNr,
+            skipPartialWrappingSectionsInDocument: true,
+        });
     }
 
     @Get('/ref/:versionUid/:osisId/:chapterNr/:verseNr-:verseEndNr')
@@ -77,16 +85,14 @@ export class BibleController {
         @Param('verseNr') verseNr: number,
         @Param('verseEndNr') verseEndNr: number
     ) {
-        return this.getReference(
-            {
-                versionUid,
-                bookOsisId: osisId,
-                versionChapterNum: chapterNr,
-                versionVerseNum: verseNr,
-                versionVerseEndNum: verseEndNr,
-                skipPartialWrappingSectionsInDocument: true,
-            }
-        );
+        return this.getReference({
+            versionUid,
+            bookOsisId: osisId,
+            versionChapterNum: chapterNr,
+            versionVerseNum: verseNr,
+            versionVerseEndNum: verseEndNr,
+            skipPartialWrappingSectionsInDocument: true,
+        });
     }
 
     @Post('/ref')

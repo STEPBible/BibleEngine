@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.6]
+
+### Features
+
+-   [osis] added option to ignore empty section titles
+
 ## [1.2.3]
 
 ### Features

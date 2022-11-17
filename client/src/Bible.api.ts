@@ -54,6 +54,25 @@
             });
         }
         
+        getBookSections(
+            params: {
+                versionUid: FirstArgument<BibleController['getBookSections']>;
+                osisId: SecondArgument<BibleController['getBookSections']>;
+            },
+        ) {
+            let path = '/bible/sections/:versionUid/:osisId';
+        
+            path = path.replace(':versionUid', params.versionUid+'');
+            path = path.replace(':osisId', params.osisId+'');
+            
+            return apiRequest<
+                ThenArg<ReturnType<BibleController['getBookSections']>>
+            >({
+                url: this.apiBaseUrl + path,
+                method: 'GET',
+            });
+        }
+        
         getChapter(
             params: {
                 versionUid: FirstArgument<BibleController['getChapter']>;
