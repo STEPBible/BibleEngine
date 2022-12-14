@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.1]
+
+### Bug Fixes
+
+-   added db type normalization to `getMigrations` to retain backwards compatibililty with code directly using this method
+
 ## [1.4.0]
 
 ### Features

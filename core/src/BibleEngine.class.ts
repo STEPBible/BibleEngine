@@ -148,8 +148,27 @@ export interface BibleEngineOptions {
     fts?: boolean;
 }
 
+export function getNormalizedDbType(type: DatabaseType) {
+    const SQLITE_TYPES: DatabaseType[] = [
+        'better-sqlite3',
+        'capacitor',
+        'cordova',
+        'expo',
+        'react-native',
+        'sqlite',
+        'sqljs',
+    ];
+    const MYSQL_TYPES: DatabaseType[] = ['mysql', 'mariadb', 'aurora-mysql'];
+    // return directly if type is already normalized
+    if (BibleEngine.supportedDbTypes.includes(type)) return type;
+    else if (SQLITE_TYPES.includes(type)) return 'sqlite';
+    else if (MYSQL_TYPES.includes(type)) return 'mysql';
+    else return type;
+}
+
 export class BibleEngine {
     static DEBUG = false;
+    static supportedDbTypes = ['mysql', 'postgres', 'sqlite'];
     dataSource: DataSource;
     dbType: 'mysql' | 'postgres' | 'sqlite';
     executeSqlSetOverride?: BibleEngineOptions['executeSqlSetOverride'];
@@ -157,21 +176,13 @@ export class BibleEngine {
     pDB: Promise<EntityManager>;
 
     constructor(dbConfig: DataSourceOptions, options?: BibleEngineOptions) {
-        const SQLITE_TYPES: DatabaseType[] = [
-            'better-sqlite3',
-            'capacitor',
-            'cordova',
-            'expo',
-            'react-native',
-            'sqlite',
-            'sqljs',
-        ];
-        const MYSQL_TYPES: DatabaseType[] = ['mysql', 'mariadb', 'aurora-mysql'];
-        if (dbConfig.type === 'postgres') this.dbType = 'postgres';
-        else if (MYSQL_TYPES.includes(dbConfig.type)) this.dbType = 'mysql';
-        else if (SQLITE_TYPES.includes(dbConfig.type)) this.dbType = 'sqlite';
-        else throw new Error(`unsupported database type: ${dbConfig.type}`);
+        const normalizedDbType = getNormalizedDbType(dbConfig.type);
+        if (!BibleEngine.supportedDbTypes.includes(normalizedDbType))
+            throw new Error(
+                `unsupported database type: ${dbConfig.type} (normalized to ${normalizedDbType})`
+            );
 
+        this.dbType = normalizedDbType as BibleEngine['dbType'];
         this.fts = options?.fts;
         if (options?.executeSqlSetOverride)
             this.executeSqlSetOverride = options.executeSqlSetOverride;
@@ -201,11 +212,12 @@ export class BibleEngine {
     }
 
     getMigrations(type: DatabaseType): any {
-        if (type === 'sqlite') {
+        const normalizedType = getNormalizedDbType(type);
+        if (normalizedType === 'sqlite') {
             return sqliteMigrations;
-        } else if (type === 'postgres') {
+        } else if (normalizedType === 'postgres') {
             return postgresMigrations;
-        } else if (type === 'mysql') {
+        } else if (normalizedType === 'mysql') {
             return mysqlMigrations;
         } else {
             throw new Error('Unsupported database type, cannot run migrations');
