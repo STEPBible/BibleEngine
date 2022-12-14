@@ -5,6 +5,7 @@ import { PhraseJoinToVersionRefId1603383603377 } from './1603383603377-PhraseJoi
 import { AddPronunciationField1609105701370 } from './1609105701370-AddPronunciationField';
 import { SectionChapterLabel1660299033547 } from './1660299033547-SectionChapterLabel';
 import { CrossrefPosition1601037334269 } from './1665491751275-CrossrefPosition';
+import { FTS1666713816863 } from './1666713816863-FTS';
 export default {
     name: 'sqlite',
     migrations: [
@@ -15,5 +16,6 @@ export default {
         AddPronunciationField1609105701370,
         SectionChapterLabel1660299033547,
         CrossrefPosition1601037334269,
+        FTS1666713816863,
     ],
 };

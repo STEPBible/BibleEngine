@@ -94,12 +94,14 @@
             });
         }
         
-        getVerse(
+        getVerses(
             params: {
-                versionUid: FirstArgument<BibleController['getVerse']>;
-                osisId: SecondArgument<BibleController['getVerse']>;
-                chapterNr: ThirdArgument<BibleController['getVerse']>;
-                verseNr: FourthArgument<BibleController['getVerse']>;
+                versionUid: FirstArgument<BibleController['getVerses']>;
+                osisId: SecondArgument<BibleController['getVerses']>;
+                chapterNr: ThirdArgument<BibleController['getVerses']>;
+                verseNr: FourthArgument<BibleController['getVerses']>;
+                chapterEnd?: FifthArgument<BibleController['getVerses']>;
+                verseEnd?: any;
             },
         ) {
             let path = '/bible/ref/:versionUid/:osisId/:chapterNr/:verseNr';
@@ -110,35 +112,14 @@
             path = path.replace(':verseNr', params.verseNr+'');
             
             return apiRequest<
-                ThenArg<ReturnType<BibleController['getVerse']>>
-            >({
-                url: this.apiBaseUrl + path,
-                method: 'GET',
-            });
-        }
-        
-        getVerses(
-            params: {
-                versionUid: FirstArgument<BibleController['getVerses']>;
-                osisId: SecondArgument<BibleController['getVerses']>;
-                chapterNr: ThirdArgument<BibleController['getVerses']>;
-                verseNr: FourthArgument<BibleController['getVerses']>;
-                verseEndNr: FifthArgument<BibleController['getVerses']>;
-            },
-        ) {
-            let path = '/bible/ref/:versionUid/:osisId/:chapterNr/:verseNr-:verseEndNr';
-        
-            path = path.replace(':versionUid', params.versionUid+'');
-            path = path.replace(':osisId', params.osisId+'');
-            path = path.replace(':chapterNr', params.chapterNr+'');
-            path = path.replace(':verseNr', params.verseNr+'');
-            path = path.replace(':verseEndNr', params.verseEndNr+'');
-            
-            return apiRequest<
                 ThenArg<ReturnType<BibleController['getVerses']>>
             >({
                 url: this.apiBaseUrl + path,
                 method: 'GET',
+                queryParams: {
+                    chapterEnd: params.chapterEnd,
+                    verseEnd: params.verseEnd,
+                }
             });
         }
         
@@ -190,6 +171,39 @@
             >({
                 url: this.apiBaseUrl + path,
                 method: 'GET',
+            });
+        }
+        
+        search(
+            params: {
+                versionUid: FirstArgument<BibleController['search']>;
+                query: SecondArgument<BibleController['search']>;
+                queryMode?: ThirdArgument<BibleController['search']>;
+                sortMode?: FourthArgument<BibleController['search']>;
+                page?: FifthArgument<BibleController['search']>;
+                count?: any;
+                rangeStart?: any;
+                rangeEnd?: any;
+            },
+        ) {
+            let path = '/bible/search/:versionUid/:query';
+        
+            path = path.replace(':versionUid', params.versionUid+'');
+            path = path.replace(':query', params.query+'');
+            
+            return apiRequest<
+                ThenArg<ReturnType<BibleController['search']>>
+            >({
+                url: this.apiBaseUrl + path,
+                method: 'GET',
+                queryParams: {
+                    queryMode: params.queryMode,
+                    sortMode: params.sortMode,
+                    page: params.page,
+                    count: params.count,
+                    rangeStart: params.rangeStart,
+                    rangeEnd: params.rangeEnd,
+                }
             });
         }
         

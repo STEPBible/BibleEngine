@@ -3,10 +3,12 @@ import {
     IBibleBook,
     IBibleReferenceRangeQuery,
     IBibleVersion,
+    SearchQueryMode,
+    SearchSortMode,
     stripUnnecessaryDataFromBibleBook,
     stripUnnecessaryDataFromBibleVersion,
 } from '@bible-engine/core';
-import { Body, Get, HttpError, JsonController, Param, Post } from 'routing-controllers';
+import { Body, Get, HttpError, JsonController, Param, Post, QueryParam } from 'routing-controllers';
 import { Inject, Service } from 'typedi';
 
 class BibleEngineHttpError extends HttpError {
@@ -62,34 +64,20 @@ export class BibleController {
     }
 
     @Get('/ref/:versionUid/:osisId/:chapterNr/:verseNr')
-    getVerse(
-        @Param('versionUid') versionUid: string,
-        @Param('osisId') osisId: string,
-        @Param('chapterNr') chapterNr: number,
-        @Param('verseNr') verseNr: number
-    ) {
-        return this.getReference({
-            versionUid,
-            bookOsisId: osisId,
-            versionChapterNum: chapterNr,
-            versionVerseNum: verseNr,
-            skipPartialWrappingSectionsInDocument: true,
-        });
-    }
-
-    @Get('/ref/:versionUid/:osisId/:chapterNr/:verseNr-:verseEndNr')
     getVerses(
         @Param('versionUid') versionUid: string,
         @Param('osisId') osisId: string,
         @Param('chapterNr') chapterNr: number,
         @Param('verseNr') verseNr: number,
-        @Param('verseEndNr') verseEndNr: number
+        @QueryParam('chapterEnd') chapterEndNr?: number,
+        @QueryParam('verseEnd') verseEndNr?: number
     ) {
         return this.getReference({
             versionUid,
             bookOsisId: osisId,
             versionChapterNum: chapterNr,
             versionVerseNum: verseNr,
+            versionChapterEndNum: chapterEndNr,
             versionVerseEndNum: verseEndNr,
             skipPartialWrappingSectionsInDocument: true,
         });
@@ -113,6 +101,39 @@ export class BibleController {
         return this.bibleEngine
             .getDictionaryEntries(strongNum, dictionaryId)
             .then((entries) => (entries.length ? entries[0] : undefined));
+    }
+
+    @Get('/search/:versionUid/:query')
+    async search(
+        @Param('versionUid') versionUid: string,
+        @Param('query') query: string,
+        @QueryParam('queryMode') queryMode?: SearchQueryMode,
+        @QueryParam('sortMode') sortMode?: SearchSortMode,
+        @QueryParam('page') page?: number,
+        @QueryParam('count') count?: number,
+        @QueryParam('rangeStart') rangeStart?: number,
+        @QueryParam('rangeEnd') rangeEnd?: number
+    ) {
+        const pagination = page || count ? { page: page || 1, count } : undefined;
+        const bookRange = rangeStart ? { start: rangeStart, end: rangeEnd } : undefined;
+
+        const version = await this.bibleEngine.getVersion(versionUid);
+        if (!version) throw new HttpError(404, 'version not found');
+        const alternativeVersions = await this.bibleEngine.getVersions(
+            version.language.slice(0, 2)
+        );
+
+        return this.bibleEngine.search({
+            versionUid,
+            query,
+            queryMode,
+            sortMode,
+            pagination,
+            bookRange,
+            alternativeVersionUids: alternativeVersions
+                .map((v) => v.uid)
+                .filter((uid) => uid !== versionUid),
+        });
     }
 
     @Post('/versions/:lang')

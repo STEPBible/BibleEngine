@@ -5,6 +5,7 @@ import { PhraseJoinToVersionRefId1603383603377 } from './1603383603377-PhraseJoi
 import { AddPronunciationField1609105692434 } from './1609105692434-AddPronunciationField';
 import { SectionChapterLabel1660299033547 } from './1660299033547-SectionChapterLabel';
 import { CrossrefPosition1665491751275 } from './1665491751275-CrossrefPosition';
+import { FTS1666713816863 } from './1666713816863-FTS';
 export default {
     name: 'mysql',
     migrations: [
@@ -15,5 +16,6 @@ export default {
         AddPronunciationField1609105692434,
         SectionChapterLabel1660299033547,
         CrossrefPosition1665491751275,
+        FTS1666713816863,
     ],
 };

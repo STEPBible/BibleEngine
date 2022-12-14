@@ -1,35 +1,5 @@
-import {
-    BibleContentGenerator,
-    IBibleContentGeneratorGroup,
-    IBibleContentGeneratorPhrase,
-    IBibleOutputRich,
-    IBibleContentGeneratorRoot,
-    IBibleContentGeneratorSection,
-    IBibleVerse,
-    BibleContentGeneratorContainer,
-    IBibleOutputRoot,
-} from './BibleOutput';
-import {
-    IBibleReference,
-    IBibleReferenceRange,
-    IBibleReferenceNormalized,
-    IBibleReferenceRangeNormalized,
-    IBiblePhraseRef,
-    IBibleReferenceRangeQuery,
-    IBibleReferenceVersion,
-    IBibleReferenceRangeVersion,
-    BibleReferenceParser,
-    BibleReferenceParsedEntity,
-} from './BibleReference';
 import { IBibleBook, IBibleBookEntity } from './BibleBook';
-import { IBibleSection, IBibleSectionGeneric, IBibleSectionEntity } from './BibleSection';
-import {
-    IBiblePhrase,
-    PhraseModifiers,
-    ValueModifiers,
-    BooleanModifiers,
-    IBiblePhraseWithNumbers,
-} from './BiblePhrase';
+import { BibleBookPlaintext, BibleChapterPlaintext, BiblePlaintext } from './BibleBookPlaintext';
 import {
     IBibleContent,
     IBibleContentGroup,
@@ -37,20 +7,56 @@ import {
     IBibleContentSection,
     IBibleNumbering,
 } from './BibleContent';
-import { BibleBookPlaintext, BibleChapterPlaintext, BiblePlaintext } from './BibleBookPlaintext';
+import { IBibleCrossReference } from './BibleCrossReference';
+import { BookWithContentForInput } from './BibleInput';
+import { IBibleNote } from './BibleNote';
 import {
-    DocumentRoot,
+    BibleContentGenerator,
+    BibleContentGeneratorContainer,
+    IBibleContentGeneratorGroup,
+    IBibleContentGeneratorPhrase,
+    IBibleContentGeneratorRoot,
+    IBibleContentGeneratorSection,
+    IBibleOutputRich,
+    IBibleOutputRoot,
+    IBibleVerse,
+} from './BibleOutput';
+import {
+    BooleanModifiers,
+    IBiblePhrase,
+    IBiblePhraseWithNumbers,
+    PhraseModifiers,
+    ValueModifiers,
+} from './BiblePhrase';
+import {
+    BibleReferenceParsedEntity,
+    BibleReferenceParser,
+    IBiblePhraseRef,
+    IBibleReference,
+    IBibleReferenceNormalized,
+    IBibleReferenceRange,
+    IBibleReferenceRangeNormalized,
+    IBibleReferenceRangeQuery,
+    IBibleReferenceRangeVersion,
+    IBibleReferenceVersion,
+} from './BibleReference';
+import {
+    IBibleSearchOptions,
+    IBibleSearchResult,
+    SearchQueryMode,
+    SearchSortMode,
+} from './BibleSearch';
+import { IBibleSection, IBibleSectionEntity, IBibleSectionGeneric } from './BibleSection';
+import { IBibleVersion } from './BibleVersion';
+import { ContentGroupType, IContentGroup } from './ContentGroup';
+import { IDictionaryEntry } from './DictionaryEntry';
+import {
     DocumentElement,
     DocumentGroup,
     DocumentPhrase,
+    DocumentRoot,
     DocumentSection,
 } from './Document';
-import { IBibleVersion } from './BibleVersion';
-import { IDictionaryEntry } from './DictionaryEntry';
-import { IContentGroup, ContentGroupType } from './ContentGroup';
-import { IBibleCrossReference } from './BibleCrossReference';
-import { IBibleNote } from './BibleNote';
-import { BookWithContentForInput } from './BibleInput';
 import { IV11nRule } from './V11nRule';
 
 export {
@@ -94,6 +100,8 @@ export {
     IBibleReferenceRangeQuery,
     IBibleReferenceRangeVersion,
     IBibleReferenceVersion,
+    IBibleSearchOptions,
+    IBibleSearchResult,
     IBibleSection,
     IBibleSectionEntity,
     IBibleSectionGeneric,
@@ -103,5 +111,7 @@ export {
     IDictionaryEntry,
     IV11nRule,
     PhraseModifiers,
+    SearchQueryMode,
+    SearchSortMode,
     ValueModifiers,
 };

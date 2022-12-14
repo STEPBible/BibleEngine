@@ -212,21 +212,17 @@ export default class ModuleIndex {
                         chapt.bookStartPos = bookStartPos;
                     }
                     if (booknum === 0 && startPos === 0 && length === 0) {
-                        if (chapt !== {}) {
-                            chapt.verses.push({ startPos: 0, length: 0 });
-                        }
-                    } else if (chapt !== {}) {
+                        chapt.verses.push({ startPos: 0, length: 0 });
+                    } else {
                         chapt.verses.push({ startPos: startPos - chapterStartPos, length });
                     }
                 } // end verse
-                if (chapt !== {}) {
-                    // console.log('LENGTH:', lastNonZeroStartPos, chapterStartPos, length, c, chapt, chapters);
-                    chapterLength = lastNonZeroStartPos - chapterStartPos + length;
-                    chapt.length = chapterLength;
-                    chapters[bookData.abbrev].push(chapt);
-                    if (isNaN(chapterLength) || chapterLength === 0) {
-                        foundEmptyChapter++;
-                    }
+                // console.log('LENGTH:', lastNonZeroStartPos, chapterStartPos, length, c, chapt, chapters);
+                chapterLength = lastNonZeroStartPos - chapterStartPos + length;
+                chapt.length = chapterLength;
+                chapters[bookData.abbrev].push(chapt);
+                if (isNaN(chapterLength) || chapterLength === 0) {
+                    foundEmptyChapter++;
                 }
                 // dump a post for the chapter break
                 this.getShortIntFromStream(inBuf);

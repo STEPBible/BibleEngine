@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0]
+
+### Features
+
+-   added FTS for mysql
+-   added `search` method
+
+## [1.3.7]
+
+### Bug Fixes
+
+-   section reference labels were sometimes based on verse counts of another version
+
 ## [1.3.6]
 
 ### Features

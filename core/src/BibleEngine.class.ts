@@ -54,7 +54,6 @@ import { isTestMatching } from './functions/v11n.functions';
 import mysqlMigrations from './migrations/mysql';
 import postgresMigrations from './migrations/postgres';
 import sqliteMigrations from './migrations/sqlite';
-import { FTS1666713816863 } from './migrations/sqlite/1666713816863-FTS';
 import {
     BibleBookPlaintext,
     BiblePlaintext,
@@ -71,10 +70,12 @@ import {
     IBibleReferenceRangeQuery,
     IBibleReferenceRangeVersion,
     IBibleReferenceVersion,
+    IBibleSearchResult,
     IBibleVersion,
     IDictionaryEntry,
     PhraseModifiers,
 } from './models';
+import { IBibleSearchOptions } from './models/BibleSearch';
 import { IBibleSectionHierarchical } from './models/BibleSection';
 
 export class NoDbConnectionError extends Error {
@@ -141,21 +142,36 @@ export interface BibleEngineOptions {
     executeSqlSetOverride?: (set: { statement: string; values: any[] }[]) => Promise<any>;
 
     /**
-     * Enables the creation and use of a full text index for the respective database engines
+     * Enables the creation and use of a full text index (currently only supported for MySQL and
+     * SQLite with `executeSqlSetOverride` enabled)
      */
-    fts?: {
-        sqlite?: boolean;
-    };
+    fts?: boolean;
 }
 
 export class BibleEngine {
     static DEBUG = false;
     dataSource: DataSource;
+    dbType: 'mysql' | 'postgres' | 'sqlite';
     executeSqlSetOverride?: BibleEngineOptions['executeSqlSetOverride'];
     fts?: BibleEngineOptions['fts'];
     pDB: Promise<EntityManager>;
 
     constructor(dbConfig: DataSourceOptions, options?: BibleEngineOptions) {
+        const SQLITE_TYPES: DatabaseType[] = [
+            'better-sqlite3',
+            'capacitor',
+            'cordova',
+            'expo',
+            'react-native',
+            'sqlite',
+            'sqljs',
+        ];
+        const MYSQL_TYPES: DatabaseType[] = ['mysql', 'mariadb', 'aurora-mysql'];
+        if (dbConfig.type === 'postgres') this.dbType = 'postgres';
+        else if (MYSQL_TYPES.includes(dbConfig.type)) this.dbType = 'mysql';
+        else if (SQLITE_TYPES.includes(dbConfig.type)) this.dbType = 'sqlite';
+        else throw new Error(`unsupported database type: ${dbConfig.type}`);
+
         this.fts = options?.fts;
         if (options?.executeSqlSetOverride)
             this.executeSqlSetOverride = options.executeSqlSetOverride;
@@ -176,7 +192,7 @@ export class BibleEngine {
             entities: ENTITIES,
             synchronize: false,
             logging: ['error'],
-            migrations: this.getMigrations(dbConfig.type).migrations,
+            migrations: this.getMigrations(this.dbType).migrations,
             migrationsRun: true,
             ...dbConfig,
         });
@@ -185,22 +201,8 @@ export class BibleEngine {
     }
 
     getMigrations(type: DatabaseType): any {
-        const SQLITE_TYPES: DatabaseType[] = [
-            'better-sqlite3',
-            'capacitor',
-            'cordova',
-            'expo',
-            'react-native',
-            'sqlite',
-            'sqljs',
-        ];
-        if (SQLITE_TYPES.includes(type)) {
-            if (this.fts?.sqlite)
-                return {
-                    name: 'sqlite',
-                    migrations: [...sqliteMigrations.migrations, FTS1666713816863],
-                };
-            else return sqliteMigrations;
+        if (type === 'sqlite') {
+            return sqliteMigrations;
         } else if (type === 'postgres') {
             return postgresMigrations;
         } else if (type === 'mysql') {
@@ -255,12 +257,7 @@ export class BibleEngine {
         // generate the bible plaintext structure
         let textData: BibleBookPlaintext = new Map();
         let chaptersCount = bookInput.book.chaptersCount;
-        if (
-            !inputHasNormalizedNumbering ||
-            !chaptersCount ||
-            !chaptersCount.length ||
-            this.fts?.sqlite
-        ) {
+        if (!inputHasNormalizedNumbering || !chaptersCount || !chaptersCount.length || this.fts) {
             textData = convertBibleInputToBookPlaintext(bookInput.contents);
             chaptersCount = [];
             for (const verses of textData.values()) {
@@ -593,7 +590,7 @@ export class BibleEngine {
         });
         if (!version) throw new Error(`missing version ${versionUid}`);
         const book = await db.findOne(BibleBookEntity, {
-            where: { osisId: bookOsisId },
+            where: { versionId: version.id, osisId: bookOsisId },
             select: ['osisId', 'chaptersCount'],
         });
         if (!book) throw new Error(`missing book ${bookOsisId}`);
@@ -945,6 +942,181 @@ export class BibleEngine {
         return lang
             ? db.find(BibleVersionEntity, { where: { language: Like(`${lang}%`) } })
             : db.find(BibleVersionEntity);
+    }
+
+    async search({
+        versionUid,
+        alternativeVersionUids,
+        bookRange,
+        query,
+        queryMode,
+        sortMode,
+        pagination,
+    }: IBibleSearchOptions): Promise<IBibleSearchResult[]> {
+        if (!query) return [];
+        if (!queryMode) queryMode = 'fuzzy';
+        if (!sortMode) sortMode = 'reference';
+        if (!pagination) pagination = { page: 1, count: 50 };
+        if (!pagination.count) pagination.count = 50;
+
+        const queryTermsNormalized = query
+            // split words but group terms in quotes together
+            .match(/(?:[^\s"']+|['"][^'"]*["'])+/g)
+            ?.map((term) =>
+                // remove all punctuation chars from query
+                term
+                    .replace(
+                        /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-./:;<=>?@[\]^_`{|}~=]/g,
+                        ' '
+                    )
+                    .trim()
+            );
+        if (!queryTermsNormalized) return [];
+
+        const bibleVersionUids = [versionUid, ...(alternativeVersionUids || [])];
+        const versionFilter = bibleVersionUids.map(() => '?').join(',');
+        const bookRangeFilter = bookRange ? 'AND versionBook BETWEEN ? AND ?' : '';
+        const parameters: (string | number)[] = [];
+
+        let sqlQuery: string;
+        if (this.dbType === 'sqlite') {
+            const queryNormalized =
+                queryMode === 'fuzzy'
+                    ? // enclose terms with multiple words in quotes
+                      queryTermsNormalized
+                          .map((term) => (term.indexOf(' ') !== -1 ? `"${term}" *` : `${term}*`))
+                          // put everything back together
+                          .join(' ')
+                    : `"${queryTermsNormalized.join(' ')}" *`;
+
+            if (!queryNormalized) return [];
+
+            sqlQuery = `
+                SELECT 
+                    verse, versionUid, versionBook, versionChapter, versionVerse, 
+                    /* force the current bible version to always be selected by group by */
+                    MIN(case when versionUid = ? then 1 else 2 end) as isCurrentVersion,
+                    rowid, rank 
+                FROM bible_search(?) 
+                WHERE versionUid IN (${versionFilter}) ${bookRangeFilter}
+                GROUP BY versionBook,versionChapter,versionVerse
+                ORDER BY ${
+                    sortMode === 'reference' ? 'versionBook, versionChapter, versionVerse' : 'rank'
+                }
+                LIMIT ?,?
+            `;
+
+            // construct the parameters array in the order they are used in the query
+            parameters.push(versionUid, queryNormalized, ...bibleVersionUids);
+            if (bookRange) parameters.push(bookRange.start, bookRange.end || bookRange.start);
+            parameters.push((pagination.page - 1) * pagination.count, pagination.count);
+        } else if (this.dbType === 'mysql') {
+            let exactSearchFilter = '';
+            let queryNormalized = '';
+            let queryRegex = '';
+            if (queryMode === 'exact') {
+                // it is (to my knowledge) not possible to an "incomplete phrase search" in mysql
+                // therefore we don't use a quoted phrase in exact search but filter the fuzzy results
+                // with an additional regex in the query
+
+                queryNormalized =
+                    queryTermsNormalized
+                        .map((term) =>
+                            term.indexOf(' ') !== -1
+                                ? term
+                                      .split(' ')
+                                      .map((_term) => `+${term}`)
+                                      .join(' ')
+                                : `+${term}`
+                        )
+                        // put everything back together and add a wildcard to the last word
+                        .join(' ') + '*';
+
+                exactSearchFilter = 'AND verse REGEXP ?';
+                // the regex ensures that the terms follow each other in the verse with only
+                // whitespace or punctuation chars in between. in contrast to the fts phrase search
+                // it also allows partial words at the end of the phrase, which isn't possible with
+                // the fts phrase search. this is important so that we can show the results without
+                // the user having to type out the full phrase.
+                queryRegex = `${queryTermsNormalized
+                    .map((term) =>
+                        term.indexOf(' ') !== -1
+                            ? term.replace(/ /g, '[[:space:][:punct:]]+')
+                            : term
+                    )
+                    // put everything back together
+                    .join('[[:space:][:punct:]]+')}`;
+            } else {
+                // enclose terms with multiple words in quotes
+                queryNormalized = queryTermsNormalized
+                    .map((term) => (term.indexOf(' ') !== -1 ? `"${term}"` : `+${term}*`))
+                    // put everything back together
+                    .join(' ');
+
+                if (!queryNormalized) return [];
+            }
+
+            sqlQuery = `
+                SELECT 
+                    verse, versionUid, versionBook, versionChapter, versionVerse, 
+                    MIN(IF(versionUid = ?,1,2)), 
+                    MATCH(verse) AGAINST(? IN BOOLEAN MODE) AS relevance
+                FROM bible_search
+                WHERE
+                    MATCH(verse) AGAINST(? IN BOOLEAN MODE)
+                    ${exactSearchFilter}
+                    AND versionUid IN (${versionFilter}) 
+                    ${bookRangeFilter}
+                GROUP BY versionBook,versionChapter,versionVerse
+                ORDER BY ${
+                    sortMode === 'reference'
+                        ? 'versionBook, versionChapter, versionVerse'
+                        : 'relevance DESC'
+                }
+                LIMIT ?,?`;
+
+            // construct the parameters array in the order they are used in the query
+            parameters.push(versionUid, queryNormalized, queryNormalized);
+            if (queryMode === 'exact') parameters.push(queryRegex);
+            parameters.push(...bibleVersionUids);
+            if (bookRange) parameters.push(bookRange.start, bookRange.end || bookRange.start);
+            parameters.push((pagination.page - 1) * pagination.count, pagination.count);
+        } else {
+            throw new Error(`unsupported db type ${this.dbType}`);
+        }
+
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+        return db.query(sqlQuery, parameters).then((results) =>
+            results.map((result: any) => ({
+                versionUid: result.versionUid,
+                versionBook: result.versionBook,
+                versionChapter: result.versionChapter,
+                versionVerse: result.versionVerse,
+                // enclose words that start with terms in `queryTermsNormalized` in <b> tags
+                content: result.verse.replace(
+                    new RegExp(
+                        queryMode === 'fuzzy'
+                            ? `(${queryTermsNormalized
+                                  // allow any non-word char between words in a term and any
+                                  // word char after the term
+                                  .map((term) => term.replace(/ /gi, '[^\\w]+') + '\\w*')
+                                  .join('|')})`
+                            : `(${
+                                  queryTermsNormalized
+                                      // allow any non-word char between words in a term (this is
+                                      // necessary here if the user encloses the term in quotes
+                                      // while using exact search)
+                                      .map((term) => term.replace(/ /gi, '[^\\w]+'))
+                                      // allow any non-word char between words in a query
+                                      .join('[^\\w]+') + '\\w*'
+                              })`,
+                        'gi'
+                    ),
+                    '<b>$1</b>'
+                ),
+            }))
+        );
     }
 
     async updateBook(
@@ -1695,16 +1867,27 @@ export class BibleEngine {
             }
 
             // set up search index
-            if (this.executeSqlSetOverride && this.fts?.sqlite) {
+            if (this.fts) {
+                const mysqlValues: (string | number)[] = [];
+                let mysqlQuery = 'INSERT INTO bible_search VALUES ';
                 context.forEach((verses, chapter) => {
                     verses.forEach((subverses, verse) => {
                         const verseText = subverses.join(' ').trim();
-                        sqlSet.push({
-                            statement: 'INSERT INTO bible_search VALUES (?, ?, ?, ?, ?)',
-                            values: [verseText, version.uid, book.number, chapter, verse],
-                        });
+                        if (this.dbType === 'sqlite' && this.executeSqlSetOverride) {
+                            sqlSet.push({
+                                statement: 'INSERT INTO bible_search VALUES (?, ?, ?, ?, ?)',
+                                values: [verseText, version.uid, book.number, chapter, verse],
+                            });
+                        } else if (this.dbType === 'mysql') {
+                            mysqlQuery += '(?, ?, ?, ?, ?),';
+                            mysqlValues.push(verseText, version.uid, book.number, chapter, verse);
+                        }
                     });
                 });
+                if (this.dbType === 'mysql') {
+                    // run the mysql query with the last comma removed
+                    await db.query(mysqlQuery.slice(0, -1), mysqlValues);
+                }
             }
 
             if (BibleEngine.DEBUG) console.timeEnd('db_set');
