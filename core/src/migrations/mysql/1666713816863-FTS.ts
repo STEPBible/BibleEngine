@@ -5,7 +5,7 @@ export class FTS1666713816863 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(
-            'CREATE TABLE `bible_search` (`verse` text NOT NULL, `versionUid` varchar(255) NOT NULL, `versionBook` int NOT NULL, `versionChapter` int NOT NULL, `versionVerse` int NOT NULL, FULLTEXT ftidx (verse)) ENGINE=InnoDB',
+            'CREATE TABLE `bible_search` (`verse` text NOT NULL, `versionUid` varchar(255) NOT NULL, `versionBook` int NOT NULL, `versionChapter` int NOT NULL, `versionVerse` int NOT NULL, PRIMARY KEY (`versionUid`,`versionBook`,`versionChapter`,`versionVerse`), FULLTEXT ftidx (verse)) ENGINE=InnoDB',
             undefined
         );
     }

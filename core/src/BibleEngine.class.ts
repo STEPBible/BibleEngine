@@ -1068,31 +1068,48 @@ export class BibleEngine {
                 if (!queryNormalized) return [];
             }
 
+            // since mysql has non-deterministic column-results for grouped rows when using an
+            // aggregate function, we need to use a subquery to get the correct verse and
+            // versionUid for each result
             sqlQuery = `
-                SELECT 
-                    verse, versionUid, versionBook, versionChapter, versionVerse, 
-                    MIN(IF(versionUid = ?,1,2)), 
-                    MATCH(verse) AGAINST(? IN BOOLEAN MODE) AS relevance
-                FROM bible_search
-                WHERE
-                    MATCH(verse) AGAINST(? IN BOOLEAN MODE)
-                    ${exactSearchFilter}
-                    AND versionUid IN (${versionFilter}) 
-                    ${bookRangeFilter}
-                GROUP BY versionBook,versionChapter,versionVerse
-                ORDER BY ${
-                    sortMode === 'reference'
-                        ? 'versionBook, versionChapter, versionVerse'
-                        : 'relevance DESC'
-                }
-                LIMIT ?,?`;
+                SELECT s.* FROM (
+                    SELECT 
+                        versionBook, versionChapter, versionVerse, 
+                        /* replace search version by "1" in the group and then use mysql MIN to 
+                           prioritize it for output */
+                        MIN(IF(versionUid = ?,1,versionUid)) as versionUidOrOne,
+                        /* this will possibly calculate the relevance for the wrong row-column in 
+                           the grouped rows, however we need the value for ordering and limiting.
+                           This is tolerable since relevance will be similar for the same verse in
+                           different versions */
+                        MATCH(verse) AGAINST(? IN BOOLEAN MODE) AS relevance
+                    FROM bible_search
+                    WHERE
+                        MATCH(verse) AGAINST(? IN BOOLEAN MODE)
+                        ${exactSearchFilter}
+                        AND versionUid IN (${versionFilter}) 
+                        ${bookRangeFilter}
+                    GROUP BY versionBook,versionChapter,versionVerse
+                    ORDER BY ${
+                        sortMode === 'reference'
+                            ? 'versionBook, versionChapter, versionVerse'
+                            : 'relevance DESC'
+                    }
+                    LIMIT ?,?
+                ) res INNER JOIN bible_search s ON 
+                    /* undo serach version > "1" replacement from above */
+                    s.versionUid = IF(versionUidOrOne = 1, ?, res.versionUidOrOne) AND
+                    s.versionBook = res.versionBook AND
+                    s.versionChapter = res.versionChapter AND
+                    s.versionVerse = res.versionVerse
+            `;
 
             // construct the parameters array in the order they are used in the query
             parameters.push(versionUid, queryNormalized, queryNormalized);
             if (queryMode === 'exact') parameters.push(queryRegex);
             parameters.push(...bibleVersionUids);
             if (bookRange) parameters.push(bookRange.start, bookRange.end || bookRange.start);
-            parameters.push((pagination.page - 1) * pagination.count, pagination.count);
+            parameters.push((pagination.page - 1) * pagination.count, pagination.count, versionUid);
         } else {
             throw new Error(`unsupported db type ${this.dbType}`);
         }

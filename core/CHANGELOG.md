@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.2]
+
+### Bug Fixes
+
+-   refactored mysql FTS to always return primary version results if available (mysql has non-deterministic results on grouped rows with an aggregate function)
+
 ## [1.4.1]
 
 ### Bug Fixes
