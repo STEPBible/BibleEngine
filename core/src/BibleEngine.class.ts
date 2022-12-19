@@ -166,6 +166,11 @@ export function getNormalizedDbType(type: DatabaseType) {
     else return type;
 }
 
+export function isCjkLanguage(langCode: string) {
+    // return true if first two characters of langCode are a CJK language code
+    return ['zh', 'ja', 'ko'].includes(langCode.slice(0, 2));
+}
+
 export class BibleEngine {
     static DEBUG = false;
     static supportedDbTypes = ['mysql', 'postgres', 'sqlite'];
@@ -939,6 +944,15 @@ export class BibleEngine {
         return db.findOne(BibleVersionEntity, { where: { uid: versionUid } });
     }
 
+    async getVersionLanguage(versionUid: string) {
+        const db = await this.pDB;
+        const version = await db.findOne(BibleVersionEntity, {
+            where: { uid: versionUid },
+            select: ['language'],
+        });
+        return version?.language;
+    }
+
     async getVersionLocalId(versionUid: string) {
         const db = await this.pDB;
         const version = await db.findOne(BibleVersionEntity, {
@@ -965,24 +979,38 @@ export class BibleEngine {
         sortMode,
         pagination,
     }: IBibleSearchOptions): Promise<IBibleSearchResult[]> {
+        // remove all punctuation chars from query
+        query = query.replace(
+            /[\u2000-\u206F\u2E00-\u2E7F\\!#$%&()*+,\-./:;<=>?@[\]^_`{|}~=]/g,
+            ' '
+        );
         if (!query) return [];
         if (!queryMode) queryMode = 'fuzzy';
         if (!sortMode) sortMode = 'reference';
         if (!pagination) pagination = { page: 1, count: 50 };
         if (!pagination.count) pagination.count = 50;
 
+        const language = await this.getVersionLanguage(versionUid);
+        // since cjk languages don't use spaces between words, a different kind of fts index is
+        // needed. currently we only use a special index when the mysql driver is used. for sqlite
+        // indexing cjk seems to be possible with fts4 (instead of fts5) and when compiled with the
+        // ICU flag. since this is a bit more involved, we leave this for a later time.
+        // consequently, a search in cjk language with sqlite will only return matches that
+        // start at the beginning of a sentence or after a punctuation mark. until this is
+        // implemented it is recommended to fallback on a remote query using BibleEngineClient when
+        // working with cjk languages on the client.
+        const isCjk = language && isCjkLanguage(language);
+        if (isCjk) {
+            // remove all latin chars from query
+            query = query.replace(/[a-zA-Z]/g, ' ');
+        }
+
         const queryTermsNormalized = query
             // split words but group terms in quotes together
             .match(/(?:[^\s"']+|['"][^'"]*["'])+/g)
-            ?.map((term) =>
-                // remove all punctuation chars from query
-                term
-                    .replace(
-                        /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-./:;<=>?@[\]^_`{|}~=]/g,
-                        ' '
-                    )
-                    .trim()
-            );
+            ?.map((term) => term.replace(/['"]/g, ' ').trim())
+            .filter(Boolean);
+
         if (!queryTermsNormalized) return [];
 
         const bibleVersionUids = [versionUid, ...(alternativeVersionUids || [])];
@@ -1083,7 +1111,7 @@ export class BibleEngine {
                            This is tolerable since relevance will be similar for the same verse in
                            different versions */
                         MATCH(verse) AGAINST(? IN BOOLEAN MODE) AS relevance
-                    FROM bible_search
+                    FROM bible_search${isCjk ? '_cjk' : ''}
                     WHERE
                         MATCH(verse) AGAINST(? IN BOOLEAN MODE)
                         ${exactSearchFilter}
@@ -1096,7 +1124,7 @@ export class BibleEngine {
                             : 'relevance DESC'
                     }
                     LIMIT ?,?
-                ) res INNER JOIN bible_search s ON 
+                ) res INNER JOIN bible_search${isCjk ? '_cjk' : ''} s ON 
                     /* undo serach version > "1" replacement from above */
                     s.versionUid = IF(versionUidOrOne = 1, ?, res.versionUidOrOne) AND
                     s.versionBook = res.versionBook AND
@@ -1898,7 +1926,9 @@ export class BibleEngine {
             // set up search index
             if (this.fts) {
                 const mysqlValues: (string | number)[] = [];
-                let mysqlQuery = 'INSERT INTO bible_search VALUES ';
+                let mysqlQuery = `INSERT INTO bible_search${
+                    isCjkLanguage(version.language) ? '_cjk' : ''
+                } VALUES `;
                 context.forEach((verses, chapter) => {
                     verses.forEach((subverses, verse) => {
                         const verseText = subverses.join(' ').trim();
