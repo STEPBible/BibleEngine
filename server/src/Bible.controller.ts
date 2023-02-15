@@ -139,6 +139,7 @@ export class BibleController {
     @Post('/versions/:lang')
     async syncVersions(
         @Param('lang') lang: string,
+        @QueryParam('secondaryLangs') secondaryLangs?: string,
         @Body()
         clientVersions?: {
             [index: string]: {
@@ -147,8 +148,9 @@ export class BibleController {
             };
         }
     ) {
+        const langs = [lang, ...(secondaryLangs ? secondaryLangs.split(',') : [])];
         // fetch all versions for the given language
-        const langVersions = await this.bibleEngine.getVersions(lang);
+        const langVersions = await this.bibleEngine.getVersions(langs);
 
         // filter versions to all versions missing on the client or remote-only
         // versions that have been updated

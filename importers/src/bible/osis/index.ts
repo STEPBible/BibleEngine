@@ -889,7 +889,11 @@ export class OsisImporter extends BibleEngineImporter {
                 break;
             }
             case OsisXmlNodeName.CHAPTER: {
-                if (!this.context.hasParagraphsInSourceText) {
+                if (
+                    !this.context.hasParagraphsInSourceText &&
+                    !this.context.hasSectionsInSourceText &&
+                    this.options.autoGenChapterParagraphs
+                ) {
                     const paragraph = getCurrentContainer(context);
                     if (
                         paragraph &&
@@ -1158,7 +1162,7 @@ export class OsisImporter extends BibleEngineImporter {
                         `can't add version title: version meta missing`,
                         context
                     );
-                context.version.title = text;
+                if (!this.options.versionMeta?.title) context.version.title = text;
             }
             return;
         }

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.6]
+
+### Bug Fixes
+
+-   [osis] force version title if passed via version metadata
+-   [osis] fixed auto-closing condition of paragraphs after chapters to be consistent with auto-opening
+
 ## [1.3.6]
 
 ### Features

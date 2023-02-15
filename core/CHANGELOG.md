@@ -2,11 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [1.4.3]
+## [1.4.6]
 
 ### Features
 
--   create/use a separate FTS index for CJK languages (currently mysql only)
+-   allow to get versions for an array of languages in `getVersions`
+
+## [1.4.5]
+
+### Features
+
+-   create/use a separate FTS index for CJK languages (currently only for MySQL or MariaDb with Mroonga plugin)
 
 ## [1.4.2]
 

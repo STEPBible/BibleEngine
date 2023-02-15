@@ -142,8 +142,10 @@ export interface BibleEngineOptions {
     executeSqlSetOverride?: (set: { statement: string; values: any[] }[]) => Promise<any>;
 
     /**
-     * Enables the creation and use of a full text index (currently only supported for MySQL and
-     * SQLite with `executeSqlSetOverride` enabled)
+     * Enables the creation and use of a full text index. Supported environments:
+     * - SQLite (only when `executeSqlSetOverride` is set as well)
+     * - MySQL with `ngram` support (should be default)
+     * - MariaDB with Mroonga plugin installed
      */
     fts?: boolean;
 }
@@ -962,11 +964,14 @@ export class BibleEngine {
         return version?.id;
     }
 
-    async getVersions(lang?: string) {
+    async getVersions(lang?: string | string[]) {
         if (!this.pDB) throw new NoDbConnectionError();
         const db = await this.pDB;
-        return lang
-            ? db.find(BibleVersionEntity, { where: { language: Like(`${lang}%`) } })
+        const langs = typeof lang === 'string' ? [lang] : lang;
+        return langs
+            ? db.find(BibleVersionEntity, {
+                  where: langs.map((lang) => ({ language: Like(`${lang}%`) })),
+              })
             : db.find(BibleVersionEntity);
     }
 
@@ -1018,6 +1023,9 @@ export class BibleEngine {
         const bookRangeFilter = bookRange ? 'AND versionBook BETWEEN ? AND ?' : '';
         const parameters: (string | number)[] = [];
 
+        if (!this.pDB) throw new NoDbConnectionError();
+        const db = await this.pDB;
+
         let sqlQuery: string;
         if (this.dbType === 'sqlite') {
             const queryNormalized =
@@ -1054,6 +1062,16 @@ export class BibleEngine {
             let exactSearchFilter = '';
             let queryNormalized = '';
             let queryRegex = '';
+            let wildcard = '*';
+            if (isCjk) {
+                const ftsEngine = await db
+                    .query(
+                        "SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'bibleengine' AND TABLE_NAME = 'bible_search_cjk'"
+                    )
+                    .then((res) => res[0]?.ENGINE);
+                // mroonga doesn't support wildcards in cjk, i.e. they are implicitly appended
+                if (ftsEngine === 'Mroonga') wildcard = '';
+            }
             if (queryMode === 'exact') {
                 // it is (to my knowledge) not possible to an "incomplete phrase search" in mysql
                 // therefore we don't use a quoted phrase in exact search but filter the fuzzy results
@@ -1070,7 +1088,7 @@ export class BibleEngine {
                                 : `+${term}`
                         )
                         // put everything back together and add a wildcard to the last word
-                        .join(' ') + '*';
+                        .join(' ') + wildcard;
 
                 exactSearchFilter = 'AND verse REGEXP ?';
                 // the regex ensures that the terms follow each other in the verse with only
@@ -1089,7 +1107,7 @@ export class BibleEngine {
             } else {
                 // enclose terms with multiple words in quotes
                 queryNormalized = queryTermsNormalized
-                    .map((term) => (term.indexOf(' ') !== -1 ? `"${term}"` : `+${term}*`))
+                    .map((term) => (term.indexOf(' ') !== -1 ? `"${term}"` : `+${term}${wildcard}`))
                     // put everything back together
                     .join(' ');
 
@@ -1142,8 +1160,6 @@ export class BibleEngine {
             throw new Error(`unsupported db type ${this.dbType}`);
         }
 
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
         return db.query(sqlQuery, parameters).then((results) =>
             results.map((result: any) => ({
                 versionUid: result.versionUid,

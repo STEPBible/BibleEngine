@@ -210,8 +210,9 @@
         syncVersions(
             params: {
                 lang: FirstArgument<BibleController['syncVersions']>;
+                secondaryLangs?: SecondArgument<BibleController['syncVersions']>;
             },
-            data?: SecondArgument<BibleController['syncVersions']>,
+            data?: ThirdArgument<BibleController['syncVersions']>,
         ) {
             let path = '/bible/versions/:lang';
         
@@ -223,6 +224,9 @@
                 url: this.apiBaseUrl + path,
                 method: 'POST',
                 data: data,
+                queryParams: {
+                    secondaryLangs: params.secondaryLangs,
+                }
             });
         }
         
