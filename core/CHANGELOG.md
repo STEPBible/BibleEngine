@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.7]
+
+### Bug Fixes
+
+-   normalize query range now detects non existing end chapters
+
 ## [1.4.6]
 
 ### Features

@@ -2001,7 +2001,7 @@ export class BibleEngine {
         if (!range.versionId || !range.versionChapterNum)
             return generateNormalizedRangeFromVersionRange(range);
 
-        if (!range.versionVerseNum) {
+        if (!range.versionVerseNum || range.versionChapterEndNum) {
             if (!book) {
                 book = await db.findOne(BibleBookEntity, {
                     where: { versionId: range.versionId, osisId: range.bookOsisId },
@@ -2013,10 +2013,17 @@ export class BibleEngine {
                     `missing book data for ${range.bookOsisId} during reference normalization`
                 );
 
-            range.versionVerseNum = 1;
-            range.versionVerseEndNum = range.versionChapterEndNum
-                ? book.chaptersCount[range.versionChapterEndNum - 1]
-                : book.chaptersCount[range.versionChapterNum - 1];
+            if (range.versionChapterEndNum && !book.chaptersCount[range.versionChapterEndNum - 1]) {
+                range.versionChapterEndNum = book.chaptersCount.length;
+                if (range.versionVerseEndNum)
+                    range.versionVerseEndNum = book.chaptersCount[range.versionChapterEndNum - 1];
+            }
+            if (!range.versionVerseNum) {
+                range.versionVerseNum = 1;
+                range.versionVerseEndNum = range.versionChapterEndNum
+                    ? book.chaptersCount[range.versionChapterEndNum - 1]
+                    : book.chaptersCount[range.versionChapterNum - 1];
+            }
         }
 
         const rules = await this.getNormalisationRulesForRange(range);
