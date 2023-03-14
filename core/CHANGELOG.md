@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.8]
+
+### Bug Fixes
+
+-   fixed wrong column type for `BiblePhraseEntity.joinToVersionRefId` which caused an int overflow on MySQL (and possible PostgreSQL) in certain situations
+
 ## [1.4.7]
 
 ### Bug Fixes
