@@ -2095,31 +2095,37 @@ export class BibleEngine {
             normalizedSubverseNum: phraseStart.normalizedSubverseNum ?? undefined,
         };
 
-        // we only come here when there is a verseNum - in this case an end chapter without an end
-        // verse wouldn't make sense, so we can safely ignore this case
-        if (range.versionVerseEndNum) {
-            const { phraseIdEnd } = await db
-                .createQueryBuilder(BiblePhraseEntity, 'phrase')
-                .select('MAX(phrase.id)', 'phraseIdEnd')
-                .where(potentialNormalizedRangeSql, {
-                    cNum: range.versionChapterEndNum
-                        ? range.versionChapterEndNum
-                        : range.versionChapterNum,
-                    vNum: range.versionVerseEndNum,
-                })
-                .getRawOne();
+        // since verse might span multiple subverses we need to make a second request to get determine phraseIdEnd
+        // (we previously only did this when range.versionVerseEndNum was set)
+        const { phraseIdEnd } = await db
+            .createQueryBuilder(BiblePhraseEntity, 'phrase')
+            .select('MAX(phrase.id)', 'phraseIdEnd')
+            .where(potentialNormalizedRangeSql, {
+                // we made sure that the numbers in `range` make sense above
+                cNum: range.versionChapterEndNum || range.versionChapterNum,
+                vNum: range.versionVerseEndNum || range.versionVerseNum,
+            })
+            .getRawOne();
 
-            if (!phraseIdEnd)
-                throw new Error(
-                    `can't get normalized end reference for ${inputRange.versionUid} ${inputRange.versionId} ${inputRange.bookOsisId} ${inputRange.versionChapterNum}:${inputRange.versionVerseNum}-${inputRange.versionChapterEndNum}:${inputRange.versionVerseEndNum} - version data missing`
-                );
-            const phraseEnd = parsePhraseId(phraseIdEnd);
+        if (!phraseIdEnd)
+            throw new Error(
+                `can't get normalized end reference for ${inputRange.versionUid} ${inputRange.versionId} ${inputRange.bookOsisId} ${inputRange.versionChapterNum}:${inputRange.versionVerseNum}-${inputRange.versionChapterEndNum}:${inputRange.versionVerseEndNum} - version data missing`
+            );
+        const phraseEnd = parsePhraseId(phraseIdEnd);
 
+        if (phraseEnd.normalizedChapterNum !== normRange.normalizedChapterNum)
             normRange.normalizedChapterEndNum = phraseEnd.normalizedChapterNum;
+        if (
+            phraseEnd.normalizedChapterNum !== normRange.normalizedChapterNum ||
+            phraseEnd.normalizedVerseNum !== normRange.normalizedVerseNum
+        )
             normRange.normalizedVerseEndNum = phraseEnd.normalizedVerseNum;
-            if (typeof phraseEnd.normalizedSubverseNum !== 'undefined')
-                normRange.normalizedSubverseEndNum = phraseEnd.normalizedSubverseNum;
-        }
+        if (
+            phraseEnd.normalizedChapterNum !== normRange.normalizedChapterNum ||
+            phraseEnd.normalizedVerseNum !== normRange.normalizedVerseNum ||
+            phraseEnd.normalizedSubverseNum !== normRange.normalizedSubverseNum
+        )
+            normRange.normalizedSubverseEndNum = phraseEnd.normalizedSubverseNum;
 
         return normRange;
     }

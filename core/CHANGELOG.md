@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.9]
+
+### Bug Fixes
+
+-   fixed reference normalization for single-verse ranges only including the first subverse
+
 ## [1.4.8]
 
 ### Bug Fixes
