@@ -51,6 +51,7 @@ import {
     generateReferenceIdSql,
 } from './functions/sql.functions';
 import { isTestMatching } from './functions/v11n.functions';
+import expoMigrations from './migrations/expo';
 import mysqlMigrations from './migrations/mysql';
 import postgresMigrations from './migrations/postgres';
 import sqliteMigrations from './migrations/sqlite';
@@ -155,7 +156,6 @@ export function getNormalizedDbType(type: DatabaseType) {
         'better-sqlite3',
         'capacitor',
         'cordova',
-        'expo',
         'react-native',
         'sqlite',
         'sqljs',
@@ -175,9 +175,9 @@ export function isCjkLanguage(langCode: string) {
 
 export class BibleEngine {
     static DEBUG = false;
-    static supportedDbTypes = ['mysql', 'postgres', 'sqlite'];
+    static supportedDbTypes = ['mysql', 'postgres', 'sqlite', 'expo'];
     dataSource: DataSource;
-    dbType: 'mysql' | 'postgres' | 'sqlite';
+    dbType: 'mysql' | 'postgres' | 'sqlite' | 'expo';
     executeSqlSetOverride?: BibleEngineOptions['executeSqlSetOverride'];
     fts?: BibleEngineOptions['fts'];
     pDB: Promise<EntityManager>;
@@ -220,7 +220,9 @@ export class BibleEngine {
 
     getMigrations(type: DatabaseType): any {
         const normalizedType = getNormalizedDbType(type);
-        if (normalizedType === 'sqlite') {
+        if (normalizedType === 'expo') {
+            return expoMigrations;
+        } else if (normalizedType === 'sqlite') {
             return sqliteMigrations;
         } else if (normalizedType === 'postgres') {
             return postgresMigrations;
@@ -984,6 +986,9 @@ export class BibleEngine {
         sortMode,
         pagination,
     }: IBibleSearchOptions): Promise<IBibleSearchResult[]> {
+        if (this.dbType === 'expo') {
+            throw new Error('search is unavailable on Expo due to lack of FTS5 extension')
+        }
         // remove all punctuation chars from query
         query = query.replace(
             /[\u2000-\u206F\u2E00-\u2E7F\\!#$%&()*+,\-./:;<=>?@[\]^_`{|}~=]/g,
