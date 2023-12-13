@@ -4,9 +4,13 @@ export class FTS1666713816863 implements MigrationInterface {
     name = 'FTS1666713816863';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(
-            `CREATE VIRTUAL TABLE bible_search USING fts5(verse, versionUid UNINDEXED, versionBook UNINDEXED, versionChapter UNINDEXED, versionVerse UNINDEXED);`
-        );
+        try {
+            await queryRunner.query(
+                `CREATE VIRTUAL TABLE bible_search USING fts5(verse, versionUid UNINDEXED, versionBook UNINDEXED, versionChapter UNINDEXED, versionVerse UNINDEXED);`
+            );
+        } catch (error) {
+            console.error('failed to create virtual table bible_search', error)
+        }
     }
 
     public async down(): Promise<void> {
