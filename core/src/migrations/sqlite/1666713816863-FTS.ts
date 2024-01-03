@@ -9,7 +9,7 @@ export class FTS1666713816863 implements MigrationInterface {
                 `CREATE VIRTUAL TABLE bible_search USING fts5(verse, versionUid UNINDEXED, versionBook UNINDEXED, versionChapter UNINDEXED, versionVerse UNINDEXED);`
             );
         } catch (error) {
-            console.error('failed to create virtual table bible_search', error)
+            console.error(`Failed to create virtual table bible_search. This is an expected error if you use SQLite versions without fts support. It can be safely ignored as long as you don't enable/use full text search features in BibleEngine`, error)
         }
     }
 
