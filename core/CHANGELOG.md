@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.4.10](https://github.com/STEPBible/BibleEngine/compare/v1.4.9...v1.4.10) (2024-01-15)
+
 ## [1.4.9]
 
 ### Bug Fixes
