@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.11]
+
+### Features
+
+-   [usx] added support for `tcr3` node style (TABLE_CELL3_RIGHT)
+
+### Chores
+
+-   bumped `better-sqlite3` to `11.7.0`
+
 ## [1.4.6]
 
 ### Bug Fixes

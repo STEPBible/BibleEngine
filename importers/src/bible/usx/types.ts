@@ -147,6 +147,7 @@ export enum UsxXmlNodeStyle {
     TABLE_CELL2 = 'tc2',
     TABLE_CELL3 = 'tc3',
     TABLE_CELL2_RIGHT = 'tcr2',
+    TABLE_CELL3_RIGHT = 'tcr3',
     TITLE_CANONICAL = 'd',
     TRANSLATION_CHANGE_ADDITION = 'add',
     QUOTE = 'qt',

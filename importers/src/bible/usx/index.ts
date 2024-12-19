@@ -589,6 +589,7 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.TABLE_CELL2:
             case UsxXmlNodeStyle.TABLE_CELL2_RIGHT:
             case UsxXmlNodeStyle.TABLE_CELL3:
+            case UsxXmlNodeStyle.TABLE_CELL3_RIGHT:
             case UsxXmlNodeStyle.NOTE_ADDITIONAL_PARAGRAPH:
             case UsxXmlNodeStyle.PROPER_NAME:
             case UsxXmlNodeStyle.WORDLIST_ITEM:
