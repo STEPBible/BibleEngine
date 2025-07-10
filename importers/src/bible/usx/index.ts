@@ -272,6 +272,7 @@ export class UsxImporter extends BibleEngineImporter {
                     };
                 }
                 break;
+            case UsxXmlNodeStyle.NOTE_CROSS_REFERENCE:
             case UsxXmlNodeStyle.NOTE_ENDNOTE:
             case UsxXmlNodeStyle.NOTE_EXTENDED:
             case UsxXmlNodeStyle.NOTE_FOOTNOTE:
@@ -373,6 +374,9 @@ export class UsxImporter extends BibleEngineImporter {
                 break;
             case UsxXmlNodeStyle.SECTION_MAJOR:
                 startSection(context, UsxXmlNodeStyle.SECTION_MAJOR_LEVEL1);
+                break;
+            case UsxXmlNodeStyle.SECTION_LEVEL_DEFAULT:
+                startSection(context, UsxXmlNodeStyle.SECTION_LEVEL1);
                 break;
             case UsxXmlNodeStyle.INTRODUCTION_SECTION_HEADING_LEVEL1:
             case UsxXmlNodeStyle.INTRODUCTION_OUTLINE_TITLE:
@@ -781,6 +785,7 @@ export class UsxImporter extends BibleEngineImporter {
         if (isInsideIgnoredContent(context)) return;
 
         switch (currentTag.type) {
+            case UsxXmlNodeStyle.NOTE_CROSS_REFERENCE:
             case UsxXmlNodeStyle.NOTE_ENDNOTE:
             case UsxXmlNodeStyle.NOTE_EXTENDED:
             case UsxXmlNodeStyle.NOTE_FOOTNOTE:

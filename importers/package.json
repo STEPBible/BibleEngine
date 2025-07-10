@@ -1,6 +1,6 @@
 {
     "name": "@bible-engine/importers",
-    "version": "1.4.11",
+    "version": "1.4.12",
     "license": "MIT",
     "main": "lib/index.js",
     "scripts": {

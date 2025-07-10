@@ -44,7 +44,8 @@ export type UsxXmlNodeName =
     | 'char'
     | 'table'
     | 'ref'
-    | 'optbreak';
+    | 'optbreak'
+    | 'figure';
 export enum UsxXmlNodeStyle {
     BOOK = 'id',
     FILE_ENCODING = 'ide',
@@ -90,6 +91,7 @@ export enum UsxXmlNodeStyle {
     LIST_ITEM_LEVEL2 = 'li2',
     LIST_ITEM_LEVEL3 = 'li3',
     LIST_ITEM_LEVEL4 = 'li4',
+    NOTE_CROSS_REFERENCE = 'x',
     NOTE_FOOTNOTE = 'f',
     NOTE_ENDNOTE = 'fe',
     NOTE_EXTENDED = 'ef',
@@ -127,6 +129,7 @@ export enum UsxXmlNodeStyle {
     POETRY_CENTERED = 'qc',
     POETRY_RIGHT = 'qr',
     POETRY_ACROSTIC_HEADING = 'qa',
+    SECTION_LEVEL_DEFAULT = 's',
     SECTION_LEVEL1 = 's1',
     SECTION_LEVEL2 = 's2',
     SECTION_LEVEL3 = 's3',
@@ -158,6 +161,7 @@ export enum UsxXmlNodeStyle {
     TRANSLITERATED = 'tl',
     ORDINAL_NUMBER_TEXT = 'ord',
     SMALL_CAPITALIZATION = 'sc',
+    CROSS_REFERENCE_ORIGIN = 'xo',
     CROSS_REFERENCE = 'xt',
     CROSS_REFERENCE_QUOTE = 'rq',
     BOOK_NAME = 'bk',
@@ -165,6 +169,7 @@ export enum UsxXmlNodeStyle {
     WORDLIST_ITEM = 'w',
     KEYWORD = 'k',
     ACROSTIC_FIRST_CHARACTER = 'qac',
+    FIGURE = 'fig',
 }
 
 export type TagType = UsxXmlNodeName | UsxXmlNodeStyle;
@@ -173,6 +178,7 @@ export const SECTION_TAGS = [
     UsxXmlNodeStyle.SECTION_MAJOR,
     UsxXmlNodeStyle.SECTION_MAJOR_LEVEL1,
     UsxXmlNodeStyle.SECTION_MAJOR_LEVEL2,
+    UsxXmlNodeStyle.SECTION_LEVEL_DEFAULT,
     UsxXmlNodeStyle.SECTION_LEVEL1,
     UsxXmlNodeStyle.SECTION_LEVEL2,
     UsxXmlNodeStyle.SECTION_LEVEL3,
@@ -194,6 +200,7 @@ export const SECTION_TAGS_NORMALIZED = [
 ] as const;
 
 export const NOTE_CONTAINER_TAGS = [
+    UsxXmlNodeStyle.NOTE_CROSS_REFERENCE,
     UsxXmlNodeStyle.NOTE_ENDNOTE,
     UsxXmlNodeStyle.NOTE_EXTENDED,
     UsxXmlNodeStyle.NOTE_FOOTNOTE,
@@ -211,6 +218,8 @@ export const CROSS_REFERENCE_CONTAINER_TAGS = [
 
 export const IGNORED_TAGS: TagType[] = [
     'book',
+    'figure',
+    UsxXmlNodeStyle.FIGURE,
     UsxXmlNodeStyle.BOOK,
     UsxXmlNodeStyle.FILE_ENCODING,
     UsxXmlNodeStyle.BOOK_HEADING,
@@ -224,6 +233,7 @@ export const IGNORED_TAGS: TagType[] = [
     UsxXmlNodeStyle.TOC1,
     UsxXmlNodeStyle.TOC2,
     UsxXmlNodeStyle.TOC3,
+    UsxXmlNodeStyle.CROSS_REFERENCE_ORIGIN,
     UsxXmlNodeStyle.NOTE_CHAR_ORIGIN,
     UsxXmlNodeStyle.NOTE_CHAR_LABEL,
     UsxXmlNodeStyle.NOTE_CHAR_PREVIOUS_REFERENCE,

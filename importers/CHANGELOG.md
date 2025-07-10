@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.12]
+
+### Features
+
+-   [usx] added support for `s`, `x`, `xo`, `fig` node style 
+
 ## [1.4.11]
 
 ### Features
