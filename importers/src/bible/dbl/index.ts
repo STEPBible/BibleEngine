@@ -5,8 +5,8 @@ import { parseStringPromise } from 'xml2js';
 import { BibleEngineImporter, ImporterBookMetadataBook } from '../../shared/Importer.interface';
 
 import {
-    BookWithContentForInput,
     BOOK_DATA,
+    BookWithContentForInput,
     ContentGroupType,
     DocumentGroup,
     DocumentPhrase,
@@ -111,10 +111,12 @@ function getChapterVerseSeparatorFromLanguage(language: string, direction: 'LTR'
     switch (langNormalized) {
         case 'de':
         case 'hr':
+        case 'sk':
             separator = ',';
             break;
         case 'fr':
         case 'ru':
+        case 'ha':
             separator = '.';
             break;
     }
@@ -133,6 +135,17 @@ export class DblImporter extends BibleEngineImporter {
 
         // we parse the metadata file two times so that we can make use of a more sane parser
         // config for the key-value data
+        type VersionPublication = {
+            structure: {
+                content: [
+                    {
+                        name: string;
+                        src: string;
+                        role: string;
+                    }
+                ];
+            };
+        };
         const parsedMetadata: {
             identification: {
                 name: string;
@@ -162,17 +175,7 @@ export class DblImporter extends BibleEngineImporter {
                 ];
             };
             publications: {
-                publication: {
-                    structure: {
-                        content: [
-                            {
-                                name: string;
-                                src: string;
-                                role: string;
-                            }
-                        ];
-                    };
-                };
+                publication: VersionPublication | VersionPublication[];
             };
         } = await parseStringPromise(xml, {
             explicitRoot: false,
@@ -183,14 +186,16 @@ export class DblImporter extends BibleEngineImporter {
         const parsedCopyright: {
             copyright: {
                 fullStatement?: {
-                    statementContent: { $$: IXHTMLNode<XHTMLNodeType>[] };
+                    statementContent:
+                        | { $$: IXHTMLNode<XHTMLNodeType>[] }
+                        | [{ $$: IXHTMLNode<XHTMLNodeType>[] } | { _: string }];
                 };
                 statement?: {
                     $$: IXHTMLNode<XHTMLNodeType>[];
                 };
             };
             promotion: {
-                promoVersionInfo: { $$: IXHTMLNode<XHTMLNodeType>[] };
+                promoVersionInfo?: { $$: IXHTMLNode<XHTMLNodeType>[] };
             };
         } = await parseStringPromise(xml, {
             explicitRoot: false,
@@ -204,20 +209,24 @@ export class DblImporter extends BibleEngineImporter {
         const bookMeta: Map<string, ImporterBookMetadataBook & { sourcePath: string }> = new Map();
         for (const osisId of OT_BOOKS.concat(NT_BOOKS)) {
             const paratextId = BOOK_DATA[osisId]!.paratextId;
-            const bookIndex = parsedMetadata.publications.publication.structure.content.findIndex(
+            const publication = Array.isArray(parsedMetadata.publications.publication)
+                ? parsedMetadata.publications.publication[0]!
+                : parsedMetadata.publications.publication;
+            const bookIndex = publication.structure.content.findIndex(
                 (metaStructureBook) => metaStructureBook.role === paratextId
             );
-            if (bookIndex === -1) throw new Error(`missing book for paratextId ${paratextId}`);
-            const metaStructureBook = parsedMetadata.publications.publication.structure.content[
-                bookIndex
-            ]!;
+            if (bookIndex === -1) {
+                this.log(`missing book for paratextId ${paratextId}`);
+                continue;
+            }
+            const metaStructureBook = publication.structure.content[bookIndex]!;
             const metaBookName = parsedMetadata.names.name.find(
                 (metaName) => metaName.id === metaStructureBook.name
             );
             if (!metaBookName)
                 throw new Error(`missing book name metadata for ${metaStructureBook.name}`);
             bookMeta.set(osisId, {
-                number: bookIndex + 1,
+                number: BOOK_DATA[osisId]!.genericId,
                 abbreviation: metaBookName.abbr,
                 title: metaBookName.short,
                 longTitle: metaBookName.long,
@@ -226,20 +235,16 @@ export class DblImporter extends BibleEngineImporter {
         }
 
         const versionMeta: IBibleVersion = {
-            uid: parsedMetadata.identification.abbreviation,
-            abbreviation: parsedMetadata.identification.abbreviationLocal,
+            uid: parsedMetadata.identification.abbreviation.toUpperCase(),
+            abbreviation: parsedMetadata.identification.abbreviationLocal
+                ? parsedMetadata.identification.abbreviationLocal.toUpperCase()
+                : undefined,
             title: parsedMetadata.identification.nameLocal,
             language: parsedMetadata.language.ldml,
             chapterVerseSeparator: getChapterVerseSeparatorFromLanguage(
                 parsedMetadata.language.ldml,
                 parsedMetadata.language.scriptDirection
             ),
-            description: {
-                type: 'root',
-                contents: genDocumentElementsFromXHTMLNodes(
-                    parsedCopyright.promotion.promoVersionInfo.$$
-                ),
-            },
             type:
                 parsedMetadata.type.audience === 'Literary' ||
                 parsedMetadata.type.audience === 'Liturgical'
@@ -248,27 +253,64 @@ export class DblImporter extends BibleEngineImporter {
             ...this.options.versionMeta,
         };
 
-        if (parsedCopyright.copyright.fullStatement?.statementContent) {
-            versionMeta.copyrightLong = {
+        if (parsedCopyright.promotion.promoVersionInfo) {
+            versionMeta.description = {
                 type: 'root',
                 contents: genDocumentElementsFromXHTMLNodes(
-                    parsedCopyright.copyright.fullStatement.statementContent.$$
+                    parsedCopyright.promotion.promoVersionInfo.$$
                 ),
             };
         }
+
+        if (parsedCopyright.copyright.fullStatement?.statementContent) {
+            if (Array.isArray(parsedCopyright.copyright.fullStatement.statementContent)) {
+                const nodeWithChildren = parsedCopyright.copyright.fullStatement.statementContent.find(
+                    (item: any): item is { $$: IXHTMLNode<XHTMLNodeType>[] } =>
+                        item.$$ && Array.isArray(item.$$)
+                );
+                if (nodeWithChildren) {
+                    versionMeta.copyrightLong = {
+                        type: 'root',
+                        contents: genDocumentElementsFromXHTMLNodes(nodeWithChildren.$$),
+                    };
+                }
+                const nodePlaintext = parsedCopyright.copyright.fullStatement.statementContent.find(
+                    (item: any): item is { _: string } => typeof item._ === 'string'
+                );
+                if (nodePlaintext) {
+                    versionMeta.copyrightShort = nodePlaintext._;
+                }
+            } else {
+                versionMeta.copyrightLong = {
+                    type: 'root',
+                    contents: genDocumentElementsFromXHTMLNodes(
+                        parsedCopyright.copyright.fullStatement.statementContent.$$
+                    ),
+                };
+            }
+        }
+
         if (parsedCopyright.copyright.statement) {
             versionMeta.copyrightShort = genPlaintextFromXHTMLNodes(
                 parsedCopyright.copyright.statement.$$
             );
-        } else if (parsedCopyright.copyright.fullStatement?.statementContent) {
+        }
+
+        if (!versionMeta.copyrightShort && versionMeta.copyrightLong) {
             // RADAR: this is a hack, since our data from Biblica is missing a dedicated
             //        attribute for short copyright, however in the data we received up until
             //        now it is always the second line in the long copyright text.
-            const shortCopyrightLine = parsedCopyright.copyright.fullStatement.statementContent.$$.find(
-                ({ _ }) => _?.indexOf('©') !== -1
+            const shortCopyrightParagraph = versionMeta.copyrightLong.contents.find(
+                (item): item is DocumentGroup<ContentGroupType> =>
+                    item?.type === 'group' &&
+                    !!item.contents[0] &&
+                    item.contents[0].type === undefined &&
+                    item.contents[0].content.indexOf('©') !== -1
             );
-            if (shortCopyrightLine)
-                versionMeta.copyrightShort = genPlaintextFromXHTMLNodes([shortCopyrightLine]);
+
+            if (shortCopyrightParagraph)
+                versionMeta.copyrightShort = (shortCopyrightParagraph
+                    .contents[0] as DocumentPhrase).content;
         }
 
         const usxImporter = new UsxImporter(this.bibleEngine, {

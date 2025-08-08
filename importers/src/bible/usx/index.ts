@@ -313,7 +313,12 @@ export class UsxImporter extends BibleEngineImporter {
                 break;
             }
             case UsxXmlNodeStyle.PARAGRAPH:
-            case UsxXmlNodeStyle.PARAGRAPH_NOFIRSTLINEINDENT: {
+            case UsxXmlNodeStyle.PARAGRAPH_NOFIRSTLINEINDENT:
+            case UsxXmlNodeStyle.PARAGRAPH_OPENING:
+            case UsxXmlNodeStyle.PARAGRAPH_RIGHT:
+            case UsxXmlNodeStyle.CLOSURE:
+            case UsxXmlNodeStyle.LIST_HEADER:
+            case UsxXmlNodeStyle.LIST_FOOTER: {
                 closeAllGroups(context);
                 startGroupContainer('paragraph', context);
                 break;
@@ -398,7 +403,8 @@ export class UsxImporter extends BibleEngineImporter {
                 // we treat acrostic or speaker headings as the lowest level sections to make those headings work
                 startSection(context, UsxXmlNodeStyle.SECTION_LEVEL4);
                 break;
-            case UsxXmlNodeStyle.TITLE_CANONICAL: {
+            case UsxXmlNodeStyle.TITLE_CANONICAL: 
+            case UsxXmlNodeStyle.POETRY_END_NOTE: {
                 // if the canonical title is outside of verse 1 (i.e. we set the verse number implicitly on chapter start), we number it as `1.0`
                 if (context.isCurrentVerseImplicit) context.currentSubverse = 0;
 
@@ -590,6 +596,7 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.SMALL_CAPITALIZATION:
             case UsxXmlNodeStyle.BOOK_NAME:
             case UsxXmlNodeStyle.TABLE_CELL1:
+            case UsxXmlNodeStyle.TABLE_CELL1_RIGHT:
             case UsxXmlNodeStyle.TABLE_CELL2:
             case UsxXmlNodeStyle.TABLE_CELL2_RIGHT:
             case UsxXmlNodeStyle.TABLE_CELL3:
@@ -597,6 +604,7 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.NOTE_ADDITIONAL_PARAGRAPH:
             case UsxXmlNodeStyle.PROPER_NAME:
             case UsxXmlNodeStyle.WORDLIST_ITEM:
+            case UsxXmlNodeStyle.LIST_ENTRY_TOTAL:
                 break;
             default:
                 this.log('warn', `unhandled tag ${tag.type}`);
@@ -881,6 +889,8 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.PARAGRAPH:
             case UsxXmlNodeStyle.PARAGRAPH_NOBREAK:
             case UsxXmlNodeStyle.PARAGRAPH_NOFIRSTLINEINDENT:
+            case UsxXmlNodeStyle.PARAGRAPH_OPENING:
+            case UsxXmlNodeStyle.PARAGRAPH_RIGHT:
             case UsxXmlNodeStyle.PARAGRAPH_EMBEDDED:
             case UsxXmlNodeStyle.PARAGRAPH_EMBEDDED_OPENING:
             case UsxXmlNodeStyle.PARAGRAPH_EMBEDDED_CLOSING:
@@ -894,11 +904,15 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.INTRODUCTION_PARAGRAPH_MARGIN:
             case UsxXmlNodeStyle.INTRODUCTION_PARAGRAPH_MARGIN_INDENTED:
             case UsxXmlNodeStyle.INTRODUCTION_PARAGRAPH_NOFIRSTLINEINDENT:
+            case UsxXmlNodeStyle.CLOSURE:
+            case UsxXmlNodeStyle.LIST_HEADER:
+            case UsxXmlNodeStyle.LIST_FOOTER:
             // the following types open multiple groups and we need to close them down to the paragraph level
             case UsxXmlNodeStyle.INSCRIPTION:
                 closeGroupContainer('paragraph', context);
                 break;
             case UsxXmlNodeStyle.TITLE_CANONICAL:
+            case UsxXmlNodeStyle.POETRY_END_NOTE:
                 closeGroupContainer('paragraph', context);
                 if (context.isCurrentVerseImplicit) context.currentSubverse = 1;
                 break;

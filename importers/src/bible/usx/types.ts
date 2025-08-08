@@ -91,6 +91,9 @@ export enum UsxXmlNodeStyle {
     LIST_ITEM_LEVEL2 = 'li2',
     LIST_ITEM_LEVEL3 = 'li3',
     LIST_ITEM_LEVEL4 = 'li4',
+    LIST_HEADER = 'lh',
+    LIST_FOOTER = 'lf',
+    LIST_ENTRY_TOTAL = 'litl',
     NOTE_CROSS_REFERENCE = 'x',
     NOTE_FOOTNOTE = 'f',
     NOTE_ENDNOTE = 'fe',
@@ -118,6 +121,8 @@ export enum UsxXmlNodeStyle {
     PARAGRAPH_INDENTED_NOFIRSTLINEINDENT = 'mi',
     PARAGRAPH_NOBREAK = 'nb',
     PARAGRAPH_NOFIRSTLINEINDENT = 'm',
+    PARAGRAPH_OPENING = 'po',
+    PARAGRAPH_RIGHT = 'pr',
     POETRY = 'q',
     POETRY_LEVEL1 = 'q1',
     POETRY_LEVEL2 = 'q2',
@@ -129,6 +134,7 @@ export enum UsxXmlNodeStyle {
     POETRY_CENTERED = 'qc',
     POETRY_RIGHT = 'qr',
     POETRY_ACROSTIC_HEADING = 'qa',
+    POETRY_END_NOTE = 'qd',
     SECTION_LEVEL_DEFAULT = 's',
     SECTION_LEVEL1 = 's1',
     SECTION_LEVEL2 = 's2',
@@ -149,6 +155,7 @@ export enum UsxXmlNodeStyle {
     TABLE_CELL1 = 'tc1',
     TABLE_CELL2 = 'tc2',
     TABLE_CELL3 = 'tc3',
+    TABLE_CELL1_RIGHT = 'tcr1',
     TABLE_CELL2_RIGHT = 'tcr2',
     TABLE_CELL3_RIGHT = 'tcr3',
     TITLE_CANONICAL = 'd',
@@ -170,6 +177,7 @@ export enum UsxXmlNodeStyle {
     KEYWORD = 'k',
     ACROSTIC_FIRST_CHARACTER = 'qac',
     FIGURE = 'fig',
+    CLOSURE = 'cls',
 }
 
 export type TagType = UsxXmlNodeName | UsxXmlNodeStyle;
