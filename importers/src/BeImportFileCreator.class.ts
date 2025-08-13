@@ -46,6 +46,10 @@ export class BeImportFileCreator {
                     hasStrongs: versionEntity.hasStrongs,
                     type: versionEntity.type,
                     lastUpdate: versionEntity.lastUpdate,
+                    copyrightLong: versionEntity.copyrightLong,
+                    description: versionEntity.description,
+                    crossRefBeforePhrase: versionEntity.crossRefBeforePhrase,
+                    isPlaintext: versionEntity.isPlaintext,
                 },
                 file: await this.createVersionFile(versionEntity.uid, options),
             });

@@ -1,6 +1,10 @@
 # Changelog
 
-## [1.4.16]
+## [1.4.17]
+
+### Bug Fixes
+
+-   added missing version properties to BeImportFileCreator.createAllVersions
 
 ### Features
 
