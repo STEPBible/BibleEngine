@@ -6,6 +6,46 @@
 
 -   migrated from typeorm to kysely, constructor parameters have changed
 
+## [1.4.17]
+
+### Bug Fixes
+
+-   added missing version properties to BeImportFileCreator.createAllVersions
+
+### Features
+
+-   [usx] use `qd` (POETRY_END_NOTE) equivalent to `d` (TITLE_CANONICAL) which have basically the same meaning and formatting
+
+### Bug Fixes
+
+-   [dbl] ensure consistent uppercase for version abbreviations
+
+## [1.4.15]
+
+### Bug Fixes
+
+-   [dbl] adjustments for slovak language
+-   [usx] added `pr`, `po`, `qd`, `litl`, `lh`, and `lf` node styles
+
+## [1.4.14]
+
+### Bug Fixes
+
+-   [dbl] fixed handling of different metadata structures in DBL packages
+-   [usx] added `tcr1` and `cls` node style
+
+## [1.4.13]
+
+### Bug Fixes
+
+-   [dbl] added chapter verse separator setting for Hausa language
+
+## [1.4.12]
+
+### Features
+
+-   [usx] added support for `s`, `x`, `xo`, `fig` node style 
+
 ## [1.4.11]
 
 ### Features
