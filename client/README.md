@@ -10,15 +10,7 @@ The package can be installed via yarn or npm as usual.
 import { BibleEngineClient } from '@bible-engine/client';
 
 const beClient = new BibleEngineClient({
-    bibleEngineConnectionOptions: {
-        type: 'capacitor',
-        driver: this.sqlite, // specific for the capacitor-typeorm-driver, you have to pass the sqlite driver
-        journalMode: 'WAL',
-        name: 'bibleEngine',
-        database: `bibles_${environment.dbBiblesVersion}`,
-        synchronize: false,
-        logging: ['error'],
-    },
+    bibleEngineKyselyDb: kyselyDb, // the Kysely database instance for local access
     apiBaseUrl: 'https://bible-engine.example.test/api', // the URL to the BibleEngine server
 });
 

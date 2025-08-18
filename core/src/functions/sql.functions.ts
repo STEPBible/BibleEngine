@@ -1,3 +1,4 @@
+import { sql } from 'kysely';
 import { IBiblePhraseRef, IBibleReferenceRangeNormalized } from '../models';
 import {
     generateEndReferenceFromRange,
@@ -25,14 +26,13 @@ export const generateBookSectionsSql = (
         isNormalized: true,
     });
 
-    const colVersion = `${tableAlias}.versionId`;
-    const colSectionStart = `${tableAlias}.phraseStartId`;
-    const colSectionEnd = `${tableAlias}.phraseEndId`;
-    let sql = '';
+    const colVersion = sql.ref(`${tableAlias}.versionId`);
+    const colSectionStart = sql.ref(`${tableAlias}.phraseStartId`);
+    const colSectionEnd = sql.ref(`${tableAlias}.phraseEndId`);
 
-    if (range.versionId) sql += `${colVersion} = ${range.versionId} AND `;
-
-    sql += `${colSectionStart} >= ${bookPhraseIdStart} AND ${colSectionEnd} <= ${bookPhraseIdEnd}`;
+    return sql`${colVersion} = ${
+        range.versionId ?? colVersion
+    } AND ${colSectionStart} >= ${bookPhraseIdStart} AND ${colSectionEnd} <= ${bookPhraseIdEnd}`;
 
     // [REFERENCE] we added the versionId column to the sections table, so we don't need to query
     //             the version via the phraseIds. Since this is not stable, we leave the code for
@@ -72,9 +72,9 @@ export const generateParagraphSql = (
     const rangePhraseIdStart = generatePhraseId(range);
     const rangePhraseIdEnd = generatePhraseId(refEnd);
 
-    const colVersion = `${tableAlias}.versionId`;
-    const colParagraphStart = `${tableAlias}.phraseStartId`;
-    const colParagraphEnd = `${tableAlias}.phraseEndId`;
+    const colVersion = sql.ref(`${tableAlias}.versionId`);
+    const colParagraphStart = sql.ref(`${tableAlias}.phraseStartId`);
+    const colParagraphEnd = sql.ref(`${tableAlias}.phraseEndId`);
 
     // we first filter for the book since the table is indexed by `versionId, phraseStartId,
     // phraseEndId`. otherwise the query or `phraseEndId` would not use the index efficiently.
@@ -85,7 +85,7 @@ export const generateParagraphSql = (
     // - paragraphs that end within the range
     // - paragraphs that wrap around the range
 
-    return `( 
+    return sql`( 
         ${colVersion} = ${range.versionId} AND ${colParagraphStart} >= ${bookPhraseIdStart} AND ${colParagraphEnd} <= ${bookPhraseIdEnd} AND (
             (${colParagraphStart} >= ${rangePhraseIdStart} AND ${colParagraphStart} <= ${rangePhraseIdEnd}) OR
             (${colParagraphEnd} >= ${rangePhraseIdStart} AND ${colParagraphEnd} <= ${rangePhraseIdEnd}) OR
@@ -99,15 +99,17 @@ export const generateParagraphSql = (
  */
 export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, tableAlias: string) => {
     const refEnd = generateEndReferenceFromRange(range);
-    let sql = `${tableAlias}.id BETWEEN '${generatePhraseId(range)}' AND '${generatePhraseId(
-        refEnd
-    )}'`;
+    const colId = sql.ref(`${tableAlias}.id`);
+    const startId = generatePhraseId(range);
+    const endId = generatePhraseId(refEnd);
 
-    // if we query for a specific version we need to filter out the
-    // version with a little math (due to the nature of our encoded reference integers)
-    if (range.versionId) sql += 'AND ' + generatePhraseIdVersionSql(range.versionId, tableAlias); //, col);
+    let query = sql`${colId} BETWEEN ${startId} AND ${endId}`;
 
-    return sql;
+    if (range.versionId) {
+        query = sql`${query} AND ${generatePhraseIdVersionSql(range.versionId, tableAlias)}`;
+    }
+
+    return query;
 };
 
 /**
@@ -115,7 +117,7 @@ export const generatePhraseIdSql = (range: IBibleReferenceRangeNormalized, table
  */
 export const generatePhraseIdVersionSql = (versionId: number, tableAlias: string) =>
     // `cast(${col} % 100000 / 100 as UNSIGNED) = ${versionId}`;
-    `${tableAlias}.versionId = ${versionId}`;
+    sql`${sql.ref(`${tableAlias}.versionId`)} = ${versionId}`;
 
 /**
  * generates SQL for a range-query for reference ids
@@ -149,9 +151,7 @@ export const generateReferenceIdSql = (range: IBibleReferenceRangeNormalized, co
                 ? range.normalizedSubverseNum
                 : MAX_SUBVERSE_NUMBER,
     };
-    let sql = `${col} BETWEEN '${generateReferenceId(refStart)}' AND '${generateReferenceId(
+    return sql`${sql.ref(col)} BETWEEN ${generateReferenceId(refStart)} AND ${generateReferenceId(
         refEnd
-    )}'`;
-
-    return sql;
+    )}`;
 };

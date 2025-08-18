@@ -1,16 +1,16 @@
-import { BiblePhraseEntity } from '../entities';
 import {
-    IBibleReferenceRange,
-    IBibleReference,
-    IBibleContentSection,
+    IBibleBook,
     IBibleContent,
     IBibleContentGroup,
     IBibleContentPhrase,
-    IBibleSection,
+    IBibleContentSection,
+    IBibleReference,
+    IBibleReferenceRange,
     IBibleVersion,
-    IBibleBook
 } from '../models';
 import { IBibleNumbering } from './BibleContent';
+import { IBiblePhraseEntity } from './BiblePhrase';
+import { IBibleSectionReduced } from './BibleSection';
 import { ContentGroupType } from './ContentGroup';
 
 // export interface IBibleEngineOutput {
@@ -47,25 +47,25 @@ export interface IBibleOutputRich extends IBibleOutputBase {
             /**
              * the sections that start within the current range
              */
-            startingSections: IBibleSection[];
+            startingSections: IBibleSectionReduced[];
             /**
              * the section that ends within the current range (but not starts within)
              */
-            endingPartialSection?: IBibleSection;
+            endingPartialSection?: IBibleSectionReduced;
             /**
              * the section that wraps the current range (without being contained in it)
              */
-            wrappingSection?: IBibleSection;
+            wrappingSection?: IBibleSectionReduced;
             /**
              * the sections of this level before the current range that have no intersection
              * with the current range
              */
-            previousSections: IBibleSection[];
+            previousSections: IBibleSectionReduced[];
             /**
              * this sections of this level after the current range that have no intersection
              * with the current range
              */
-            nextSections: IBibleSection[];
+            nextSections: IBibleSectionReduced[];
         };
     };
 
@@ -83,7 +83,7 @@ export interface IBibleOutputRich extends IBibleOutputBase {
 
 export interface IBibleVerse {
     reference: Required<IBibleReference>;
-    phrases: BiblePhraseEntity[];
+    phrases: IBiblePhraseEntity[];
 }
 
 export interface IBibleOutputRoot extends IBibleNumbering {

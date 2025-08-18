@@ -1,17 +1,18 @@
 {
     "name": "@bible-engine/source",
-    "version": "1.4.11",
+    "version": "2.0.0",
     "license": "MIT",
     "description": "BibleEngine mono-repo root package.json, used mainly to execute build scripts. This package is not published to npm.",
     "private": true,
     "scripts": {
-        "postinstall": "yarn run buildAll",
+        "_postinstall": "yarn run buildAll",
         "heroku": "node server/lib/heroku.js",
-        "buildAll": "yarn workspace @bible-engine/core run build && yarn workspace @bible-engine/importers run build && yarn workspace @bible-engine/server run generateApiClient && yarn workspace @bible-engine/server run build && yarn workspace @bible-engine/client run build",
-        "typeorm": "yarn ts-node ./node_modules/typeorm/cli.js"
+        "buildAll": "yarn workspace @bible-engine/core run build && yarn workspace @bible-engine/importers run build && yarn workspace @bible-engine/server run generateApiClient && yarn workspace @bible-engine/server run build && yarn workspace @bible-engine/client run build && yarn workspace @bible-engine/db-schema run build",
+        "genDbTypes": "yarn workspace @bible-engine/db-schema run genDbTypes"
     },
     "dependencies": {
-        "typeorm": "~0.3.11"
+        "kysely": "^0.27.5",
+        "kysely-codegen": "^0.17.0"
     },
     "devDependencies": {
         "@types/jest": "24.0.11",
@@ -29,7 +30,8 @@
             "core",
             "importers",
             "server",
-            "client"
+            "client",
+            "db-schema"
         ]
     }
 }

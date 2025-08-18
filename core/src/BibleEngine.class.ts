@@ -1,27 +1,14 @@
 import {
-    Between,
-    DatabaseType,
-    DataSource,
-    DataSourceOptions,
-    EntityManager,
-    FindOptionsWhere,
-    In,
-    Like,
-    Raw,
-} from 'typeorm';
-
-import {
-    BibleBookEntity,
-    BibleCrossReferenceEntity,
-    BibleNoteEntity,
-    BibleParagraphEntity,
-    BiblePhraseEntity,
-    BibleSectionEntity,
-    BibleVersionEntity,
-    DictionaryEntryEntity,
-    ENTITIES,
-    V11nRuleEntity,
-} from './entities';
+    BibleCrossReference,
+    BibleNote,
+    BibleParagraph,
+    BiblePhrase,
+    BibleSection,
+    DB,
+} from '@bible-engine/db-schema/generated/db';
+import { Insertable, Kysely, sql, Transaction } from 'kysely';
+import { jsonArrayFrom as mysqlJsonArrayFrom } from 'kysely/helpers/mysql';
+import { jsonArrayFrom as sqliteJsonArrayFrom } from 'kysely/helpers/sqlite';
 import {
     convertBibleInputToBookPlaintext,
     generateBibleDocument,
@@ -35,6 +22,7 @@ import {
     stripUnnecessaryDataFromBibleReferenceRange,
     stripUnnecessaryDataFromBibleVersion,
 } from './functions/content.functions';
+import { isSqlite } from './functions/kysely.functions';
 import {
     generateEndReferenceFromRange,
     generateNormalizedRangeFromVersionRange,
@@ -51,9 +39,6 @@ import {
     generateReferenceIdSql,
 } from './functions/sql.functions';
 import { isTestMatching } from './functions/v11n.functions';
-import mysqlMigrations from './migrations/mysql';
-import postgresMigrations from './migrations/postgres';
-import sqliteMigrations from './migrations/sqlite';
 import {
     BibleBookPlaintext,
     BiblePlaintext,
@@ -75,8 +60,40 @@ import {
     IDictionaryEntry,
     PhraseModifiers,
 } from './models';
+import {
+    getBookChapterVerseCount,
+    parseBookFromDatabase,
+    prepareBookForDatabase,
+} from './models/BibleBook';
+import {
+    IBibleCrossReference,
+    parseCrossReferenceFromDatabase,
+    prepareCrossReferenceForDatabase,
+} from './models/BibleCrossReference';
+import { parseNoteFromDatabase, prepareNoteForDatabase } from './models/BibleNote';
+import {
+    IBiblePhraseEntity,
+    parsePhraseFromDatabase,
+    preparePhraseForDatabase,
+} from './models/BiblePhrase';
+import { IBibleReferenceVersionNormalized } from './models/BibleReference';
 import { IBibleSearchOptions } from './models/BibleSearch';
-import { IBibleSectionHierarchical } from './models/BibleSection';
+import {
+    IBibleSectionEntity,
+    IBibleSectionHierarchical,
+    parseSectionFromDatabase,
+    prepareSectionForDatabase,
+} from './models/BibleSection';
+import {
+    IBibleVersionEntity,
+    parseVersionFromDatabase,
+    prepareVersionForDatabase,
+} from './models/BibleVersion';
+import {
+    IV11nRule,
+    parseV11nRuleFromDatabase,
+    prepareV11nRuleForDatabase,
+} from './models/V11nRule';
 
 export class NoDbConnectionError extends Error {
     constructor() {
@@ -139,7 +156,9 @@ export interface BibleEngineOptions {
     /**
      * Allows for performance optimization for large INSERTs outside of the possibilites of TypeORM
      */
-    executeSqlSetOverride?: (set: { statement: string; values: any[] }[]) => Promise<any>;
+    executeSqlSetOverride?: (
+        set: { statement: string; values: readonly unknown[] }[]
+    ) => Promise<any>;
 
     /**
      * Enables the creation and use of a full text index. Supported environments:
@@ -148,24 +167,11 @@ export interface BibleEngineOptions {
      * - MariaDB with Mroonga plugin installed
      */
     fts?: boolean;
-}
 
-export function getNormalizedDbType(type: DatabaseType) {
-    const SQLITE_TYPES: DatabaseType[] = [
-        'better-sqlite3',
-        'capacitor',
-        'cordova',
-        'expo',
-        'react-native',
-        'sqlite',
-        'sqljs',
-    ];
-    const MYSQL_TYPES: DatabaseType[] = ['mysql', 'mariadb', 'aurora-mysql'];
-    // return directly if type is already normalized
-    if (BibleEngine.supportedDbTypes.includes(type)) return type;
-    else if (SQLITE_TYPES.includes(type)) return 'sqlite';
-    else if (MYSQL_TYPES.includes(type)) return 'mysql';
-    else return type;
+    /**
+     * The type of database to use. If not set, the type will be inferred from the database connection.
+     */
+    dbType?: 'mysql' | 'sqlite';
 }
 
 export function isCjkLanguage(langCode: string) {
@@ -175,100 +181,63 @@ export function isCjkLanguage(langCode: string) {
 
 export class BibleEngine {
     static DEBUG = false;
-    static supportedDbTypes = ['mysql', 'postgres', 'sqlite'];
-    dataSource: DataSource;
-    dbType: 'mysql' | 'postgres' | 'sqlite';
+    dbType?: 'mysql' | 'sqlite';
     executeSqlSetOverride?: BibleEngineOptions['executeSqlSetOverride'];
     fts?: BibleEngineOptions['fts'];
-    pDB: Promise<EntityManager>;
+    db: Kysely<DB>;
 
-    constructor(dbConfig: DataSourceOptions, options?: BibleEngineOptions) {
-        const normalizedDbType = getNormalizedDbType(dbConfig.type);
-        if (!BibleEngine.supportedDbTypes.includes(normalizedDbType))
-            throw new Error(
-                `unsupported database type: ${dbConfig.type} (normalized to ${normalizedDbType})`
-            );
-
-        this.dbType = normalizedDbType as BibleEngine['dbType'];
+    constructor(db: Kysely<DB>, options?: BibleEngineOptions) {
+        this.db = db;
+        this.dbType = options?.dbType;
         this.fts = options?.fts;
         if (options?.executeSqlSetOverride)
             this.executeSqlSetOverride = options.executeSqlSetOverride;
-        if (options?.checkForExistingConnection) {
-            this.pDB = this.findConnection(dbConfig);
-            return;
-        }
-        this.pDB = this.createConnection(dbConfig);
     }
 
-    async findConnection(dbConfig: DataSourceOptions) {
-        if (this.dataSource) return this.dataSource.manager;
-        else return this.createConnection(dbConfig);
+    async getDbType() {
+        if (this.dbType) return this.dbType;
+        const isSqliteCheck = await isSqlite(this.db);
+        this.dbType = isSqliteCheck ? 'sqlite' : 'mysql';
+        return this.dbType;
     }
 
-    async createConnection(dbConfig: DataSourceOptions) {
-        this.dataSource = new DataSource({
-            entities: ENTITIES,
-            synchronize: false,
-            logging: ['error'],
-            migrations: this.getMigrations(this.dbType).migrations,
-            migrationsRun: true,
-            ...dbConfig,
-        });
-        await this.dataSource.initialize();
-        return this.dataSource.manager;
+    async getDbJsonArrayFrom() {
+        const dbType = await this.getDbType();
+        return dbType === 'sqlite' ? sqliteJsonArrayFrom : mysqlJsonArrayFrom;
     }
 
-    getMigrations(type: DatabaseType): any {
-        const normalizedType = getNormalizedDbType(type);
-        if (normalizedType === 'sqlite') {
-            return sqliteMigrations;
-        } else if (normalizedType === 'postgres') {
-            return postgresMigrations;
-        } else if (normalizedType === 'mysql') {
-            return mysqlMigrations;
-        } else {
-            throw new Error('Unsupported database type, cannot run migrations');
-        }
+    getBook(versionId: number, osisId: string) {
+        return this.db
+            .selectFrom('bible_book')
+            .where('versionId', '=', versionId)
+            .where('osisId', '=', osisId)
+            .selectAll()
+            .executeTakeFirst()
+            .then((book) => parseBookFromDatabase(book));
     }
 
-    async runMigrations() {
-        const entityManager = await this.pDB;
-        await entityManager.connection.runMigrations();
-    }
+    async addBook(book: IBibleBookEntity, tx?: Transaction<DB>) {
+        const db = tx || this.db;
 
-    async addBook(book: IBibleBookEntity, entityManager?: EntityManager) {
-        if (!entityManager) {
-            if (!this.pDB) throw new NoDbConnectionError();
-            entityManager = await this.pDB;
-        }
-
-        await entityManager
-            .createQueryBuilder()
-            .insert()
-            .into(BibleBookEntity)
-            .values(book)
-            .execute();
+        await db.insertInto('bible_book').values(prepareBookForDatabase(book)).execute();
 
         return book;
     }
 
     async addBookWithContent(
-        version: BibleVersionEntity,
+        version: IBibleVersionEntity,
         bookInput: BookWithContentForInput,
         options: {
-            entityManager?: EntityManager;
+            tx?: Transaction<DB>;
             skipCrossRefs?: boolean;
             skipNotes?: boolean;
             skipStrongs?: boolean;
             ignoreSectionsWithoutTitle?: boolean;
         } = {}
     ) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
+        const db = options.tx || this.db;
 
-        let bookEntity: IBibleBookEntity | null = await db.findOne(BibleBookEntity, {
-            where: { versionId: version.id, osisId: bookInput.book.osisId },
-        });
+        let bookEntity = await this.getBook(version.id, bookInput.book.osisId);
 
         const inputHasNormalizedNumbering = bookInput.contentHasNormalizedNumbers || false;
 
@@ -298,7 +267,7 @@ export class BibleEngine {
                 contents: normalizeDocumentContents(bookInput.book.introduction.contents),
             };
 
-        if (options.entityManager) {
+        if (options.tx) {
             // mark the book as importing (and save missing book meta-data)
 
             if (!bookEntity) {
@@ -309,18 +278,18 @@ export class BibleEngine {
                         versionId: version.id,
                         dataLocation: 'importing',
                     },
-                    options.entityManager
+                    options.tx
                 );
             } else {
                 bookEntity = await this.updateBook(
                     bookEntity,
                     { ...bookInput.book, dataLocation: 'importing' },
-                    options.entityManager
+                    options.tx
                 );
             }
 
             bookImportPhraseRange = await this.addBibleBookContent({
-                entityManger: options.entityManager,
+                db: options.tx,
                 contents: bookInput.contents,
                 version,
                 book: bookEntity,
@@ -334,13 +303,9 @@ export class BibleEngine {
                 ignoreSectionsWithoutTitle: options.ignoreSectionsWithoutTitle,
             });
 
-            bookEntity = await this.updateBook(
-                bookEntity,
-                { dataLocation: 'db' },
-                options.entityManager
-            );
+            bookEntity = await this.updateBook(bookEntity, { dataLocation: 'db' }, options.tx);
         } else {
-            await db.transaction(async (transactionEntityManger) => {
+            await db.transaction().execute(async (tx) => {
                 // mark the book as importing (and save missing book meta-data)
 
                 if (!bookEntity) {
@@ -351,18 +316,18 @@ export class BibleEngine {
                             versionId: version.id,
                             dataLocation: 'importing',
                         },
-                        transactionEntityManger
+                        tx
                     );
                 } else {
                     bookEntity = await this.updateBook(
                         bookEntity,
                         { ...bookInput.book, dataLocation: 'importing' },
-                        transactionEntityManger
+                        tx
                     );
                 }
 
                 bookImportPhraseRange = await this.addBibleBookContent({
-                    entityManger: transactionEntityManger,
+                    db: tx,
                     contents: bookInput.contents,
                     version,
                     book: bookEntity,
@@ -376,11 +341,7 @@ export class BibleEngine {
                     ignoreSectionsWithoutTitle: options.ignoreSectionsWithoutTitle,
                 });
 
-                bookEntity = await this.updateBook(
-                    bookEntity,
-                    { dataLocation: 'db' },
-                    transactionEntityManger
-                );
+                bookEntity = await this.updateBook(bookEntity, { dataLocation: 'db' }, tx);
             });
         }
 
@@ -388,102 +349,126 @@ export class BibleEngine {
     }
 
     async addDictionaryEntries(dictionaryEntries: IDictionaryEntry[]) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        await db.save(DictionaryEntryEntity, dictionaryEntries, { chunk: 100 });
-        if (
-            this.dataSource.options.type === 'mysql' ||
-            this.dataSource.options.type === 'mariadb'
-        ) {
+        const chunkSize = 100;
+        // Split the array into chunks and insert in batches
+        for (let i = 0; i < dictionaryEntries.length; i += chunkSize) {
+            const chunk = dictionaryEntries.slice(i, i + chunkSize);
+            await this.db.insertInto('dictionary_entry').values(chunk).execute();
+        }
+        const dbType = await this.getDbType();
+        if (dbType === 'mysql') {
             // https://stackoverflow.com/questions/60059084/what-does-using-join-buffer-block-nested-loop-mean-with-explain-mysql-command
             // https://bugs.mysql.com/bug.php?id=69721
-            await db.query('OPTIMIZE TABLE `dictionary_entry`');
+            await sql`OPTIMIZE TABLE dictionary_entry`.execute(this.db);
         }
     }
 
-    async addV11nRules(rules: V11nRuleEntity[]) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        await db.save(rules, { chunk: 100 });
-        if (
-            this.dataSource.options.type === 'mysql' ||
-            this.dataSource.options.type === 'mariadb'
-        ) {
+    async addV11nRules(rules: IV11nRule[]) {
+        const chunkSize = 100;
+        // Split the array into chunks and insert in batches
+        for (let i = 0; i < rules.length; i += chunkSize) {
+            const chunk = rules.slice(i, i + chunkSize);
+            await this.db
+                .insertInto('v11n_rule')
+                .values(chunk.map((rule) => prepareV11nRuleForDatabase(rule)))
+                .execute();
+        }
+        const dbType = await this.getDbType();
+        if (dbType === 'mysql') {
             // https://stackoverflow.com/questions/60059084/what-does-using-join-buffer-block-nested-loop-mean-with-explain-mysql-command
             // https://bugs.mysql.com/bug.php?id=69721
-            await db.query('OPTIMIZE TABLE `v11n_rule`');
+            await sql`OPTIMIZE TABLE v11n_rule`.execute(this.db);
         }
         return;
     }
 
-    async addVersion(version: IBibleVersion) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return db.save(new BibleVersionEntity(version));
+    async addVersion(version: IBibleVersion): Promise<IBibleVersionEntity> {
+        return this.db
+            .insertInto('bible_version')
+            .values(prepareVersionForDatabase(version))
+            .executeTakeFirstOrThrow()
+            .then((insertResult) => ({
+                ...version,
+                id: Number(insertResult.insertId),
+                lastUpdate: new Date(),
+            }));
     }
 
     async finalizeVersion(versionId: number) {
         await this.normalizeCrossReferencesForVersion(versionId);
-        if (
-            this.dataSource.options.type === 'mysql' ||
-            this.dataSource.options.type === 'mariadb'
-        ) {
+        const dbType = await this.getDbType();
+        if (dbType === 'mysql') {
             // https://stackoverflow.com/questions/60059084/what-does-using-join-buffer-block-nested-loop-mean-with-explain-mysql-command
             // https://bugs.mysql.com/bug.php?id=69721
-            const db = await this.pDB;
-            await db.query('OPTIMIZE TABLE `bible_book`');
-            await db.query('OPTIMIZE TABLE `bible_cross_reference`');
-            await db.query('OPTIMIZE TABLE `bible_note`');
-            await db.query('OPTIMIZE TABLE `bible_paragraph`');
-            await db.query('OPTIMIZE TABLE `bible_phrase`');
-            await db.query('OPTIMIZE TABLE `bible_phrase_original_word`');
-            await db.query('OPTIMIZE TABLE `bible_section`');
-            await db.query('OPTIMIZE TABLE `bible_version`');
+            await sql`OPTIMIZE TABLE bible_book`.execute(this.db);
+            await sql`OPTIMIZE TABLE bible_cross_reference`.execute(this.db);
+            await sql`OPTIMIZE TABLE bible_note`.execute(this.db);
+            await sql`OPTIMIZE TABLE bible_paragraph`.execute(this.db);
+            await sql`OPTIMIZE TABLE bible_phrase`.execute(this.db);
+            await sql`OPTIMIZE TABLE bible_phrase_original_word`.execute(this.db);
+            await sql`OPTIMIZE TABLE bible_section`.execute(this.db);
+            await sql`OPTIMIZE TABLE bible_version`.execute(this.db);
         }
         return;
     }
 
-    async generateBookMetadata(book: BibleBookEntity) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        const metaData = await db
-            .createQueryBuilder(BiblePhraseEntity, 'phrase')
-            .addSelect('COUNT(DISTINCT phrase.versionVerseNum)', 'numVerses')
-            .where({
-                id: Raw(() =>
-                    generatePhraseIdSql({ isNormalized: true, bookOsisId: book.osisId }, 'phrase')
-                ),
-            })
-            .orderBy('phrase.versionChapterNum')
+    // RADAR: while migrating this method to kysely, I noticed that this method doesn't seem to be
+    // used anywhere. also, it seems to be wrong because it doesn't query for the versionId of the
+    // book. So this should be either deleted or if still needed properly implemented and tested.
+    async generateBookMetadata(book: IBibleBookEntity) {
+        const metaData = await this.db
+            .selectFrom('bible_phrase as phrase')
+            .select([sql<number>`COUNT(DISTINCT phrase.versionVerseNum)`.as('numVerses')])
+            .where(
+                sql<boolean>`${generatePhraseIdSql(
+                    { isNormalized: true, bookOsisId: book.osisId },
+                    'phrase'
+                )}`
+            )
             .groupBy('phrase.versionChapterNum')
-            .getRawMany();
-        book.chaptersCount = metaData.map((chapterMetaDb) => chapterMetaDb.numVerses);
-        return db.save(book);
+            .orderBy('phrase.versionChapterNum')
+            .execute();
+
+        const bookUpdates = {
+            chaptersCount: metaData.map((chapter) => chapter.numVerses).join(','),
+        };
+
+        await this.db
+            .updateTable('bible_book')
+            .set(bookUpdates)
+            .where('versionId', '=', book.versionId)
+            .where('osisId', '=', book.osisId)
+            .execute();
+
+        return bookUpdates;
     }
 
     async getBookForVersionReference({ versionId, bookOsisId }: IBibleReferenceVersion) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return db.findOne(BibleBookEntity, {
-            where: { osisId: bookOsisId, versionId },
-        });
+        return this.db
+            .selectFrom('bible_book')
+            .where('osisId', '=', bookOsisId)
+            .where('versionId', '=', versionId)
+            .selectAll()
+            .executeTakeFirst()
+            .then((book) => parseBookFromDatabase(book));
     }
 
     async getBooksForVersion(versionId: number) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return db.find(BibleBookEntity, {
-            where: { versionId },
-            order: { number: 'ASC' },
-        });
+        return this.db
+            .selectFrom('bible_book')
+            .selectAll()
+            .where('versionId', '=', versionId)
+            .orderBy('number')
+            .execute()
+            .then((books) => books.map((book) => parseBookFromDatabase(book)));
     }
 
     async getBooksForVersionUid(versionUid: string) {
-        const db = await this.pDB;
-        const version = await db.findOne(BibleVersionEntity, {
-            where: { uid: versionUid },
-            select: ['id'],
-        });
+        const version = await this.db
+            .selectFrom('bible_version')
+            .where('uid', '=', versionUid)
+            .select(['id'])
+            .executeTakeFirst();
         if (!version) throw new Error(`missing version ${versionUid}`);
         return this.getBooksForVersion(version.id);
     }
@@ -492,144 +477,152 @@ export class BibleEngine {
         version: { id: number; chapterVerseSeparator: string },
         book: { osisId: string; chaptersCount: number[] }
     ) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return await db
-            .createQueryBuilder(BibleSectionEntity, 'section')
-            .select()
-            .leftJoin(BiblePhraseEntity, 'phraseStart', 'section.phraseStartId = phraseStart.id')
-            .addSelect('phraseStart.versionChapterNum', 'versionChapterStart')
-            .addSelect('phraseStart.versionVerseNum', 'versionVerseStart')
-            .leftJoin(BiblePhraseEntity, 'phraseEnd', 'section.phraseEndId = phraseEnd.id')
-            .addSelect('phraseEnd.versionChapterNum', 'versionChapterEnd')
-            .addSelect('phraseEnd.versionVerseNum', 'versionVerseEnd')
+        const query = this.db
+            .selectFrom('bible_section as section')
+            .selectAll()
+            .innerJoin('bible_phrase as phraseStart', 'phraseStart.id', 'section.phraseStartId')
+            .select('phraseStart.versionChapterNum as versionChapterStart')
+            .select('phraseStart.versionVerseNum as versionVerseStart')
+            .innerJoin('bible_phrase as phraseEnd', 'phraseEnd.id', 'section.phraseEndId')
+            .select('phraseEnd.versionChapterNum as versionChapterEnd')
+            .select('phraseEnd.versionVerseNum as versionVerseEnd')
             .where(
-                generateBookSectionsSql(
+                sql<boolean>`${generateBookSectionsSql(
                     { versionId: version.id, bookOsisId: book.osisId, isNormalized: true },
                     'section'
-                )
+                )}`
             )
-            .orderBy({ 'section.level': 'ASC', 'section.phraseStartId': 'ASC' })
-            .getRawAndEntities()
-            .then(({ raw, entities }) => {
-                const sectionsWithVersionNumbers: IBibleSectionHierarchical[] = entities.map(
-                    (entity, idx) => {
-                        const numbering = raw[idx];
-                        let rangeLabel: string = numbering.versionChapterStart;
-                        if (
-                            numbering.versionVerseStart > 1 ||
-                            book.chaptersCount?.[numbering.versionChapterEnd - 1] !==
-                                numbering.versionVerseEnd
-                        )
-                            rangeLabel += `${version.chapterVerseSeparator}${numbering.versionVerseStart}`;
-                        if (
-                            numbering.versionChapterStart !== numbering.versionChapterEnd ||
-                            numbering.versionVerseStart > 1 ||
-                            book.chaptersCount?.[numbering.versionChapterEnd - 1] !==
-                                numbering.versionVerseEnd
-                        )
-                            rangeLabel += '-';
-                        if (numbering.versionChapterEnd !== numbering.versionChapterStart)
-                            rangeLabel += numbering.versionChapterEnd;
-                        if (
-                            numbering.versionVerseStart > 1 ||
-                            book.chaptersCount?.[numbering.versionChapterEnd - 1] !==
-                                numbering.versionVerseEnd
-                        ) {
-                            if (numbering.versionChapterEnd !== numbering.versionChapterStart)
-                                rangeLabel += version.chapterVerseSeparator;
-                            rangeLabel += numbering.versionVerseEnd;
-                        }
-                        return {
-                            ...entity,
-                            title: entity.title
-                                ?.replace(`${rangeLabel}: `, '')
-                                .replace(` (${rangeLabel})`, ''),
-                            versionChapterStart: numbering.versionChapterStart,
-                            versionVerseStart: numbering.versionVerseStart,
-                            versionChapterEnd: numbering.versionChapterEnd,
-                            versionVerseEnd: numbering.versionVerseEnd,
-                            rangeLabel,
-                            subSections: [],
-                        };
+            .orderBy(['section.level asc', 'section.phraseStartId asc']);
+        return query.execute().then((sections) => {
+            const sectionsWithVersionNumbers: IBibleSectionHierarchical[] = sections.map(
+                (section) => {
+                    let rangeLabel: string = `${section.versionChapterStart}`;
+                    if (
+                        section.versionVerseStart > 1 ||
+                        book.chaptersCount?.[section.versionChapterEnd - 1] !==
+                            section.versionVerseEnd
+                    )
+                        rangeLabel += `${version.chapterVerseSeparator}${section.versionVerseStart}`;
+                    if (
+                        section.versionChapterStart !== section.versionChapterEnd ||
+                        section.versionVerseStart > 1 ||
+                        book.chaptersCount?.[section.versionChapterEnd - 1] !==
+                            section.versionVerseEnd
+                    )
+                        rangeLabel += '-';
+                    if (section.versionChapterEnd !== section.versionChapterStart)
+                        rangeLabel += section.versionChapterEnd;
+                    if (
+                        section.versionVerseStart > 1 ||
+                        book.chaptersCount?.[section.versionChapterEnd - 1] !==
+                            section.versionVerseEnd
+                    ) {
+                        if (section.versionChapterEnd !== section.versionChapterStart)
+                            rangeLabel += version.chapterVerseSeparator;
+                        rangeLabel += section.versionVerseEnd;
                     }
-                );
-                const sectionsHierarchical: IBibleSectionHierarchical[] = [];
-                for (const section of sectionsWithVersionNumbers) {
-                    // we only support three levels of sections for this method
-                    if (section.level > 2) break;
+                    return {
+                        ...parseSectionFromDatabase(section),
+                        title: section.title
+                            ?.replace(`${rangeLabel}: `, '')
+                            .replace(` (${rangeLabel})`, ''),
+                        versionChapterStart: section.versionChapterStart,
+                        versionVerseStart: section.versionVerseStart,
+                        versionChapterEnd: section.versionChapterEnd,
+                        versionVerseEnd: section.versionVerseEnd,
+                        rangeLabel,
+                        subSections: [],
+                    };
+                }
+            );
+            const sectionsHierarchical: IBibleSectionHierarchical[] = [];
+            for (const section of sectionsWithVersionNumbers) {
+                // we only support three levels of sections for this method
+                if (section.level > 2) break;
 
-                    if (section.level === 0) {
-                        sectionsHierarchical.push(section);
-                    } else {
-                        const parent = sectionsHierarchical.find(
-                            (parent) =>
-                                (parent.versionChapterStart < section.versionChapterStart ||
-                                    (parent.versionChapterStart === section.versionChapterStart &&
-                                        parent.versionVerseStart <= section.versionVerseStart)) &&
-                                (parent.versionChapterEnd > section.versionChapterEnd ||
-                                    (parent.versionChapterEnd === section.versionChapterEnd &&
-                                        parent.versionVerseEnd >= section.versionVerseEnd))
+                if (section.level === 0) {
+                    sectionsHierarchical.push(section);
+                } else {
+                    const parent = sectionsHierarchical.find(
+                        (parent) =>
+                            (parent.versionChapterStart < section.versionChapterStart ||
+                                (parent.versionChapterStart === section.versionChapterStart &&
+                                    parent.versionVerseStart <= section.versionVerseStart)) &&
+                            (parent.versionChapterEnd > section.versionChapterEnd ||
+                                (parent.versionChapterEnd === section.versionChapterEnd &&
+                                    parent.versionVerseEnd >= section.versionVerseEnd))
+                    );
+                    if (!parent)
+                        throw new Error(
+                            `missing parent for section level ${section.level} ${section.phraseStartId}-${section.phraseEndId}`
                         );
-                        if (!parent)
+                    if (section.level === 1) {
+                        parent.subSections.push(section);
+                    } else if (section.level === 2) {
+                        const parent2 = parent.subSections.find(
+                            (_parent2) =>
+                                (_parent2.versionChapterStart < section.versionChapterStart ||
+                                    (_parent2.versionChapterStart === section.versionChapterStart &&
+                                        _parent2.versionVerseStart <= section.versionVerseStart)) &&
+                                (_parent2.versionChapterEnd > section.versionChapterEnd ||
+                                    (_parent2.versionChapterEnd === section.versionChapterEnd &&
+                                        _parent2.versionVerseEnd >= section.versionVerseEnd))
+                        );
+                        if (!parent2)
                             throw new Error(
                                 `missing parent for section level ${section.level} ${section.phraseStartId}-${section.phraseEndId}`
                             );
-                        if (section.level === 1) {
-                            parent.subSections.push(section);
-                        } else if (section.level === 2) {
-                            const parent2 = parent.subSections.find(
-                                (_parent2) =>
-                                    (_parent2.versionChapterStart < section.versionChapterStart ||
-                                        (_parent2.versionChapterStart ===
-                                            section.versionChapterStart &&
-                                            _parent2.versionVerseStart <=
-                                                section.versionVerseStart)) &&
-                                    (_parent2.versionChapterEnd > section.versionChapterEnd ||
-                                        (_parent2.versionChapterEnd === section.versionChapterEnd &&
-                                            _parent2.versionVerseEnd >= section.versionVerseEnd))
-                            );
-                            if (!parent2)
-                                throw new Error(
-                                    `missing parent for section level ${section.level} ${section.phraseStartId}-${section.phraseEndId}`
-                                );
-                            parent2.subSections.push(section);
-                        }
+                        parent2.subSections.push(section);
                     }
                 }
-                return sectionsHierarchical;
-            });
+            }
+            return sectionsHierarchical;
+        });
     }
 
     async getBookSectionsForVersionUid(versionUid: string, bookOsisId: string) {
-        const db = await this.pDB;
-        const version = await db.findOne(BibleVersionEntity, {
-            where: { uid: versionUid },
-            select: ['id', 'chapterVerseSeparator'],
-        });
+        const version = await this.db
+            .selectFrom('bible_version')
+            .where('uid', '=', versionUid)
+            .select(['id', 'chapterVerseSeparator'])
+            .executeTakeFirst();
+
         if (!version) throw new Error(`missing version ${versionUid}`);
-        const book = await db.findOne(BibleBookEntity, {
-            where: { versionId: version.id, osisId: bookOsisId },
-            select: ['osisId', 'chaptersCount'],
-        });
+
+        const book = await this.db
+            .selectFrom('bible_book')
+            .where('versionId', '=', version.id)
+            .where('osisId', '=', bookOsisId)
+            .select(['osisId', 'chaptersCount'])
+            .executeTakeFirst();
+
         if (!book) throw new Error(`missing book ${bookOsisId}`);
-        return this.getBookSections(version, book);
+
+        return this.getBookSections(version, {
+            osisId: book.osisId,
+            chaptersCount: book.chaptersCount.split(',').map((c) => +c),
+        });
     }
 
-    async getDictionaryEntries(strong: string, dictionary?: string) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return db.find(DictionaryEntryEntity, { where: { strong, dictionary } });
+    async getDictionaryEntries(strong: string, dictionary?: string): Promise<IDictionaryEntry[]> {
+        return this.db
+            .selectFrom('dictionary_entry')
+            .selectAll()
+            .where('strong', '=', strong)
+            .$if(!!dictionary, (qb) => qb.where('dictionary', '=', dictionary!))
+            .execute();
     }
 
     async getFullDataForReferenceRange(
         rangeQuery: IBibleReferenceRangeQuery,
         stripUnnecessaryData = false
     ): Promise<IBibleOutputRich> {
-        const db = await this.pDB;
-        const versionEntity = await db.findOne(BibleVersionEntity, {
-            where: { uid: rangeQuery.versionUid },
-        });
+        const versionEntity = await this.db
+            .selectFrom('bible_version')
+            .where('uid', '=', rangeQuery.versionUid)
+            .selectAll()
+            .executeTakeFirst()
+            .then((version) => parseVersionFromDatabase(version));
 
         if (!versionEntity) throw new BibleVersionInvalidError();
         if (versionEntity.dataLocation === 'remote') throw new BibleVersionRemoteOnlyError();
@@ -642,11 +635,11 @@ export class BibleEngine {
         if (bookEntity.dataLocation === 'file') throw new BibleBookContentNotImportedError();
         if (bookEntity.dataLocation === 'importing') throw new BibleBookContentImportingError();
 
-        const bookAbbreviations = await db
-            .find(BibleBookEntity, {
-                select: ['osisId', 'abbreviation'],
-                where: { versionId: versionEntity.id },
-            })
+        const bookAbbreviations = await this.db
+            .selectFrom('bible_book')
+            .select(['osisId', 'abbreviation'])
+            .where('versionId', '=', versionEntity.id)
+            .execute()
             .then((books) => {
                 const dict: { [index: string]: string } = {};
                 for (const _book of books) {
@@ -660,26 +653,30 @@ export class BibleEngine {
             : await this.getNormalizedReferenceRange(range, bookEntity);
 
         const phrases = await this.getPhrases(rangeNormalized, bookEntity);
-        const paragraphs = await db
-            .createQueryBuilder(BibleParagraphEntity, 'paragraph')
+        const paragraphs = await this.db
+            .selectFrom('bible_paragraph as paragraph')
             .where(
-                generateParagraphSql(
+                sql<boolean>`${generateParagraphSql(
                     { ...rangeNormalized, versionId: rangeNormalized.versionId! },
                     'paragraph'
-                )
+                )}`
             )
-            .orderBy('id')
-            .getMany();
+            .selectAll()
+            .orderBy('paragraph.id')
+            .execute();
         // we fetch the previous and next paragraphs that we need for the context ranges
         if (paragraphs.length) {
             // paragraphs are inserted in order so we can just fetch the previous and next
             // paragraphs by de-/incrementing the first/last id (paragraphs from other books or
             // versions are filtered out later)
-            const nextPreviousParagraphs = await db.find(BibleParagraphEntity, {
-                where: {
-                    id: In([paragraphs[0]!.id - 1, paragraphs[paragraphs.length - 1]!.id + 1]),
-                },
-            });
+            const nextPreviousParagraphs = await this.db
+                .selectFrom('bible_paragraph')
+                .selectAll()
+                .where('id', 'in', [
+                    paragraphs[0]!.id - 1,
+                    paragraphs[paragraphs.length - 1]!.id + 1,
+                ])
+                .execute();
             for (const paragraph of nextPreviousParagraphs) {
                 const paragraphPhraseIdParsed = parsePhraseId(paragraph.phraseStartId);
                 // in case the query range is at the beginning or end of the book or even the
@@ -695,13 +692,43 @@ export class BibleEngine {
                     paragraphs.push(paragraph);
             }
         }
-        const sections = await db
-            .createQueryBuilder(BibleSectionEntity, 'section')
-            .select()
-            .leftJoinAndSelect('section.crossReferences', 'crossReference')
-            .where(generateBookSectionsSql(rangeNormalized, 'section'))
-            .orderBy({ 'section.level': 'ASC', 'section.phraseStartId': 'ASC' })
-            .getMany();
+        const jsonArrayFrom = await this.getDbJsonArrayFrom();
+        const sections: IBibleSectionEntity[] = await this.db
+            .selectFrom('bible_section as section')
+            .selectAll()
+            .select((eb) => [
+                jsonArrayFrom(
+                    eb
+                        .selectFrom('bible_cross_reference as crossRef')
+                        .select([
+                            'id',
+                            'key',
+                            'normalizedRefId',
+                            'normalizedRefIdEnd',
+                            'partIndicator',
+                            'partIndicatorEnd',
+                            'phraseId',
+                            'sectionId',
+                            'versionChapterEndNum',
+                            'versionChapterNum',
+                            'versionId',
+                            'versionVerseEndNum',
+                            'versionVerseNum',
+                        ])
+                        .whereRef('crossRef.sectionId', '=', 'section.id')
+                ).as('crossReferences'),
+            ])
+            .where(sql<boolean>`${generateBookSectionsSql(rangeNormalized, 'section')}`)
+            .orderBy(['section.level asc', 'section.phraseStartId asc'])
+            .execute()
+            .then((sections) =>
+                sections.map((section) => ({
+                    ...parseSectionFromDatabase(section),
+                    crossReferences: section.crossReferences.map((crossRef) =>
+                        parseCrossReferenceFromDatabase(crossRef)
+                    ),
+                }))
+            );
 
         /* GENERATE STRUCTURED DATA */
 
@@ -770,97 +797,129 @@ export class BibleEngine {
     }
 
     async getNextPhraseNumForNormalizedVerseNum(
-        reference: IBibleReferenceNormalized
+        reference: IBibleReferenceVersionNormalized
     ): Promise<number> {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        const lastPhrase = await db.find(BiblePhraseEntity, {
-            where: {
-                id: Between(
-                    generatePhraseId(reference),
-                    generatePhraseId(generateEndReferenceFromRange(reference))
-                ),
-                versionId: reference.versionId,
-            },
-            order: { id: 'DESC' },
-            take: 1,
-            select: ['id'],
-        });
+        const lastPhrase = await this.db
+            .selectFrom('bible_phrase')
+            .select(['id'])
+            .where('id', '>=', generatePhraseId(reference))
+            .where('id', '<=', generatePhraseId(generateEndReferenceFromRange(reference)))
+            .where('versionId', '=', reference.versionId)
+            .orderBy('id', 'desc')
+            .limit(1)
+            .execute();
+
         return lastPhrase.length ? parsePhraseId(lastPhrase[0]!.id).phraseNum! + 1 : 1;
     }
 
     async getPhrases(
         range: IBibleReferenceRangeNormalized | IBibleReferenceRangeVersion,
-        book?: BibleBookEntity
-    ) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
+        book?: IBibleBookEntity
+    ): Promise<IBiblePhraseEntity[]> {
         const normalizedRange =
             range.isNormalized === true
                 ? <IBibleReferenceRangeNormalized>range
                 : await this.getNormalizedReferenceRange(range, book);
-        const where: FindOptionsWhere<BiblePhraseEntity> = {
-            id: Between(
-                generatePhraseId(normalizedRange),
-                generatePhraseId(generateEndReferenceFromRange(normalizedRange))
-            ),
-        };
-        let order: any = { id: 'ASC' };
-        if (normalizedRange.versionId) {
-            where.versionId = normalizedRange.versionId;
-            if (normalizedRange.versionChapterNum && normalizedRange.versionChapterEndNum)
-                where.versionChapterNum = Between(
-                    normalizedRange.versionChapterNum,
-                    normalizedRange.versionChapterEndNum
-                );
-            else if (normalizedRange.versionChapterNum)
-                where.versionChapterNum = normalizedRange.versionChapterNum;
+        const jsonArrayFrom = await this.getDbJsonArrayFrom();
+        return this.db
+            .selectFrom('bible_phrase')
+            .selectAll()
+            .select((eb) => [
+                jsonArrayFrom(
+                    eb
+                        .selectFrom('bible_note')
+                        .whereRef('bible_note.phraseId', '=', 'bible_phrase.id')
+                        .select(['content', 'id', 'key', 'phraseId', 'type'])
+                ).as('notes'),
+                jsonArrayFrom(
+                    eb
+                        .selectFrom('bible_cross_reference')
+                        .whereRef('bible_cross_reference.phraseId', '=', 'bible_phrase.id')
+                        .select([
+                            'id',
+                            'key',
+                            'normalizedRefId',
+                            'normalizedRefIdEnd',
+                            'partIndicator',
+                            'partIndicatorEnd',
+                            'phraseId',
+                            'sectionId',
+                            'versionChapterEndNum',
+                            'versionChapterNum',
+                            'versionId',
+                            'versionVerseEndNum',
+                            'versionVerseNum',
+                        ])
+                ).as('crossReferences'),
+            ])
+            .where(
+                sql<boolean>`${sql.ref('id')} BETWEEN ${generatePhraseId(
+                    normalizedRange
+                )} AND ${generatePhraseId(generateEndReferenceFromRange(normalizedRange))}`
+            )
+            .$if(!!normalizedRange.versionId, (qb) => {
+                let _qb = qb.where('versionId', '=', normalizedRange.versionId!);
+                if (normalizedRange.versionChapterNum && normalizedRange.versionChapterEndNum)
+                    _qb = _qb
+                        .where('versionChapterNum', '>=', normalizedRange.versionChapterNum!)
+                        .where('versionChapterNum', '<=', normalizedRange.versionChapterEndNum!);
+                else if (normalizedRange.versionChapterNum)
+                    _qb = _qb.where('versionChapterNum', '=', normalizedRange.versionChapterNum);
 
-            const singleChapter =
-                normalizedRange.versionChapterNum &&
-                (!normalizedRange.versionChapterEndNum ||
-                    normalizedRange.versionChapterNum === normalizedRange.versionChapterEndNum);
-            if (singleChapter && normalizedRange.versionVerseNum) {
-                if (normalizedRange.versionVerseNum && normalizedRange.versionVerseEndNum)
-                    where.versionVerseNum = Between(
-                        normalizedRange.versionVerseNum,
-                        normalizedRange.versionVerseEndNum
-                    );
-                else if (normalizedRange.versionVerseNum)
-                    where.versionVerseNum = normalizedRange.versionVerseNum;
-            }
-
-            order = {
-                versionChapterNum: 'ASC',
-                versionVerseNum: 'ASC',
-                versionSubverseNum: 'ASC',
-                id: 'ASC',
-            };
-        }
-
-        return db.find(BiblePhraseEntity, {
-            where,
-            order,
-            relations: ['notes', 'crossReferences'],
-        });
+                const singleChapter =
+                    normalizedRange.versionChapterNum &&
+                    (!normalizedRange.versionChapterEndNum ||
+                        normalizedRange.versionChapterNum === normalizedRange.versionChapterEndNum);
+                if (singleChapter && normalizedRange.versionVerseNum) {
+                    if (normalizedRange.versionVerseNum && normalizedRange.versionVerseEndNum)
+                        _qb = _qb
+                            .where('versionVerseNum', '>=', normalizedRange.versionVerseNum)
+                            .where('versionVerseNum', '<=', normalizedRange.versionVerseEndNum);
+                    else if (normalizedRange.versionVerseNum)
+                        _qb = _qb.where('versionVerseNum', '=', normalizedRange.versionVerseNum);
+                }
+                return _qb;
+            })
+            .orderBy(
+                normalizedRange.versionId
+                    ? [
+                          'versionChapterNum asc',
+                          'versionVerseNum asc',
+                          'versionSubverseNum asc',
+                          'id asc',
+                      ]
+                    : ['id asc']
+            )
+            .execute()
+            .then((phrases) =>
+                phrases.map((phrase) => ({
+                    ...parsePhraseFromDatabase(phrase),
+                    notes: phrase.notes.map((note) => parseNoteFromDatabase(note)),
+                    crossReferences: phrase.crossReferences.map((crossRef) =>
+                        parseCrossReferenceFromDatabase(crossRef)
+                    ),
+                }))
+            );
     }
 
     async getVersionFullData(versionUid: string) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        const versionEntity = await db.findOne(BibleVersionEntity, {
-            where: {
-                uid: versionUid,
-            },
-        });
+        const versionEntity = await this.db
+            .selectFrom('bible_version')
+            .where('uid', '=', versionUid)
+            .selectAll()
+            .executeTakeFirst()
+            .then((version) => parseVersionFromDatabase(version));
         if (!versionEntity) throw new Error(`version ${versionUid} is not available`);
 
         const version: IBibleVersion = stripUnnecessaryDataFromBibleVersion(versionEntity);
 
-        const books: BibleBookEntity[] = await db.find(BibleBookEntity, {
-            where: { versionId: versionEntity.id },
-            order: { number: 'ASC' },
-        });
+        const books: IBibleBookEntity[] = await this.db
+            .selectFrom('bible_book')
+            .selectAll()
+            .where('versionId', '=', versionEntity.id)
+            .orderBy('number asc')
+            .execute()
+            .then((books) => books.map((book) => parseBookFromDatabase(book)));
         const bookData: BookWithContentForInput[] = [];
         for (const book of books) {
             const bookStrippedData = await this.getFullDataForReferenceRange(
@@ -881,13 +940,12 @@ export class BibleEngine {
     }
 
     async getVersionPlaintextNormalized(versionUid: string): Promise<BiblePlaintext> {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        const versionEntity = await db.findOne(BibleVersionEntity, {
-            where: {
-                uid: versionUid,
-            },
-        });
+        const versionEntity = await this.db
+            .selectFrom('bible_version')
+            .selectAll()
+            .where('uid', '=', versionUid)
+            .executeTakeFirst()
+            .then((version) => parseVersionFromDatabase(version));
         if (!versionEntity) throw new Error(`version ${versionUid} is not available`);
 
         const plaintextMap = new Map();
@@ -903,14 +961,16 @@ export class BibleEngine {
 
     async getReferenceRangeWithAllVersionProperties(
         range: IBibleReferenceRange,
-        versionBook?: BibleBookEntity | null
+        versionBook?: IBibleBookEntity | null
     ): Promise<IBibleReferenceRange> {
-        if (!versionBook) {
-            if (!this.pDB) throw new NoDbConnectionError();
-            const db = await this.pDB;
-            versionBook = await db.findOne(BibleBookEntity, {
-                where: { versionId: range.versionId, osisId: range.bookOsisId },
-            });
+        if (!versionBook && range.versionId) {
+            versionBook = await this.db
+                .selectFrom('bible_book')
+                .selectAll()
+                .where('versionId', '=', range.versionId)
+                .where('osisId', '=', range.bookOsisId)
+                .executeTakeFirst()
+                .then((book) => parseBookFromDatabase(book));
         }
         if (!versionBook) {
             throw new Error(
@@ -929,7 +989,7 @@ export class BibleEngine {
               (!range.versionChapterEndNum ||
                   range.versionChapterEndNum === range.versionChapterNum)
             ? range.versionVerseNum
-            : versionBook.getChapterVerseCount(versionChapterEndNum);
+            : getBookChapterVerseCount(versionBook, versionChapterEndNum);
         return {
             versionId: range.versionId,
             bookOsisId: range.bookOsisId,
@@ -941,38 +1001,45 @@ export class BibleEngine {
     }
 
     async getVersion(versionUid: string) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return db.findOne(BibleVersionEntity, { where: { uid: versionUid } });
+        return this.db
+            .selectFrom('bible_version')
+            .selectAll()
+            .where('uid', '=', versionUid)
+            .executeTakeFirst()
+            .then((version) => parseVersionFromDatabase(version));
     }
 
     async getVersionLanguage(versionUid: string) {
-        const db = await this.pDB;
-        const version = await db.findOne(BibleVersionEntity, {
-            where: { uid: versionUid },
-            select: ['language'],
-        });
-        return version?.language;
+        return this.db
+            .selectFrom('bible_version')
+            .where('uid', '=', versionUid)
+            .select(['language'])
+            .executeTakeFirst()
+            .then((version) => version?.language);
     }
 
     async getVersionLocalId(versionUid: string) {
-        const db = await this.pDB;
-        const version = await db.findOne(BibleVersionEntity, {
-            where: { uid: versionUid },
-            select: ['id'],
-        });
-        return version?.id;
+        return this.db
+            .selectFrom('bible_version')
+            .where('uid', '=', versionUid)
+            .select(['id'])
+            .executeTakeFirst()
+            .then((version) => version?.id);
     }
 
     async getVersions(lang?: string | string[]) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        const langs = typeof lang === 'string' ? [lang] : lang;
-        return langs
-            ? db.find(BibleVersionEntity, {
-                  where: langs.map((lang) => ({ language: Like(`${lang}%`) })),
-              })
-            : db.find(BibleVersionEntity);
+        let query = this.db.selectFrom('bible_version').selectAll();
+
+        if (lang) {
+            const langs = typeof lang === 'string' ? [lang] : lang;
+            query = query.where((eb) =>
+                eb.or(langs.map((lang) => eb('language', 'like', `${lang}%`)))
+            );
+        }
+
+        return query
+            .execute()
+            .then((versions) => versions.map((version) => parseVersionFromDatabase(version)));
     }
 
     async search({
@@ -980,9 +1047,9 @@ export class BibleEngine {
         alternativeVersionUids,
         bookRange,
         query,
-        queryMode,
-        sortMode,
-        pagination,
+        queryMode = 'fuzzy',
+        sortMode = 'reference',
+        pagination = { page: 1, count: 50 },
     }: IBibleSearchOptions): Promise<IBibleSearchResult[]> {
         // remove all punctuation chars from query
         query = query.replace(
@@ -990,11 +1057,12 @@ export class BibleEngine {
             ' '
         );
         if (!query) return [];
-        if (!queryMode) queryMode = 'fuzzy';
-        if (!sortMode) sortMode = 'reference';
-        if (!pagination) pagination = { page: 1, count: 50 };
-        if (!pagination.count) pagination.count = 50;
+        const paginationNormalized = {
+            page: pagination.page,
+            count: pagination.count || 50,
+        };
 
+        // Handle CJK languages
         const language = await this.getVersionLanguage(versionUid);
         // since cjk languages don't use spaces between words, a different kind of fts index is
         // needed. currently we only use a special index when the mysql driver is used. for sqlite
@@ -1004,12 +1072,13 @@ export class BibleEngine {
         // start at the beginning of a sentence or after a punctuation mark. until this is
         // implemented it is recommended to fallback on a remote query using BibleEngineClient when
         // working with cjk languages on the client.
-        const isCjk = language && isCjkLanguage(language);
+        const isCjk = !!language && isCjkLanguage(language);
         if (isCjk) {
             // remove all latin chars from query
             query = query.replace(/[a-zA-Z]/g, ' ');
         }
 
+        // Process query terms
         const queryTermsNormalized = query
             // split words but group terms in quotes together
             .match(/(?:[^\s"']+|['"][^'"]*["'])+/g)
@@ -1019,200 +1088,273 @@ export class BibleEngine {
         if (!queryTermsNormalized) return [];
 
         const bibleVersionUids = [versionUid, ...(alternativeVersionUids || [])];
-        const versionFilter = bibleVersionUids.map(() => '?').join(',');
-        const bookRangeFilter = bookRange ? 'AND versionBook BETWEEN ? AND ?' : '';
-        const parameters: (string | number)[] = [];
 
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-
-        let sqlQuery: string;
         if (this.dbType === 'sqlite') {
-            const queryNormalized =
-                queryMode === 'fuzzy'
-                    ? // enclose terms with multiple words in quotes
-                      queryTermsNormalized
-                          .map((term) => (term.indexOf(' ') !== -1 ? `"${term}" *` : `${term}*`))
-                          // put everything back together
-                          .join(' ')
-                    : `"${queryTermsNormalized.join(' ')}" *`;
-
-            if (!queryNormalized) return [];
-
-            sqlQuery = `
-                SELECT 
-                    verse, versionUid, versionBook, versionChapter, versionVerse, 
-                    /* force the current bible version to always be selected by group by */
-                    MIN(case when versionUid = ? then 1 else 2 end) as isCurrentVersion,
-                    rowid, rank 
-                FROM bible_search(?) 
-                WHERE versionUid IN (${versionFilter}) ${bookRangeFilter}
-                GROUP BY versionBook,versionChapter,versionVerse
-                ORDER BY ${
-                    sortMode === 'reference' ? 'versionBook, versionChapter, versionVerse' : 'rank'
-                }
-                LIMIT ?,?
-            `;
-
-            // construct the parameters array in the order they are used in the query
-            parameters.push(versionUid, queryNormalized, ...bibleVersionUids);
-            if (bookRange) parameters.push(bookRange.start, bookRange.end || bookRange.start);
-            parameters.push((pagination.page - 1) * pagination.count, pagination.count);
+            return this.searchSqlite({
+                versionUid,
+                bibleVersionUids,
+                bookRange,
+                queryTermsNormalized,
+                queryMode,
+                sortMode,
+                pagination: paginationNormalized,
+            });
         } else if (this.dbType === 'mysql') {
-            let exactSearchFilter = '';
-            let queryNormalized = '';
-            let queryRegex = '';
-            let wildcard = '*';
-            if (isCjk) {
-                const ftsEngine = await db
-                    .query(
-                        "SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = 'bibleengine' AND TABLE_NAME = 'bible_search_cjk'"
-                    )
-                    .then((res) => res[0]?.ENGINE);
-                // mroonga doesn't support wildcards in cjk, i.e. they are implicitly appended
-                if (ftsEngine === 'Mroonga') wildcard = '';
-            }
-            if (queryMode === 'exact') {
-                // it is (to my knowledge) not possible to an "incomplete phrase search" in mysql
-                // therefore we don't use a quoted phrase in exact search but filter the fuzzy results
-                // with an additional regex in the query
-
-                queryNormalized =
-                    queryTermsNormalized
-                        .map((term) =>
-                            term.indexOf(' ') !== -1
-                                ? term
-                                      .split(' ')
-                                      .map((_term) => `+${term}`)
-                                      .join(' ')
-                                : `+${term}`
-                        )
-                        // put everything back together and add a wildcard to the last word
-                        .join(' ') + wildcard;
-
-                exactSearchFilter = 'AND verse REGEXP ?';
-                // the regex ensures that the terms follow each other in the verse with only
-                // whitespace or punctuation chars in between. in contrast to the fts phrase search
-                // it also allows partial words at the end of the phrase, which isn't possible with
-                // the fts phrase search. this is important so that we can show the results without
-                // the user having to type out the full phrase.
-                queryRegex = `${queryTermsNormalized
-                    .map((term) =>
-                        term.indexOf(' ') !== -1
-                            ? term.replace(/ /g, '[[:space:][:punct:]]+')
-                            : term
-                    )
-                    // put everything back together
-                    .join('[[:space:][:punct:]]+')}`;
-            } else {
-                // enclose terms with multiple words in quotes
-                queryNormalized = queryTermsNormalized
-                    .map((term) => (term.indexOf(' ') !== -1 ? `"${term}"` : `+${term}${wildcard}`))
-                    // put everything back together
-                    .join(' ');
-
-                if (!queryNormalized) return [];
-            }
-
-            // since mysql has non-deterministic column-results for grouped rows when using an
-            // aggregate function, we need to use a subquery to get the correct verse and
-            // versionUid for each result
-            sqlQuery = `
-                SELECT s.* FROM (
-                    SELECT 
-                        versionBook, versionChapter, versionVerse, 
-                        /* replace search version by "1" in the group and then use mysql MIN to 
-                           prioritize it for output */
-                        MIN(IF(versionUid = ?,1,versionUid)) as versionUidOrOne,
-                        /* this will possibly calculate the relevance for the wrong row-column in 
-                           the grouped rows, however we need the value for ordering and limiting.
-                           This is tolerable since relevance will be similar for the same verse in
-                           different versions */
-                        MATCH(verse) AGAINST(? IN BOOLEAN MODE) AS relevance
-                    FROM bible_search${isCjk ? '_cjk' : ''}
-                    WHERE
-                        MATCH(verse) AGAINST(? IN BOOLEAN MODE)
-                        ${exactSearchFilter}
-                        AND versionUid IN (${versionFilter}) 
-                        ${bookRangeFilter}
-                    GROUP BY versionBook,versionChapter,versionVerse
-                    ORDER BY ${
-                        sortMode === 'reference'
-                            ? 'versionBook, versionChapter, versionVerse'
-                            : 'relevance DESC'
-                    }
-                    LIMIT ?,?
-                ) res INNER JOIN bible_search${isCjk ? '_cjk' : ''} s ON 
-                    /* undo serach version > "1" replacement from above */
-                    s.versionUid = IF(versionUidOrOne = 1, ?, res.versionUidOrOne) AND
-                    s.versionBook = res.versionBook AND
-                    s.versionChapter = res.versionChapter AND
-                    s.versionVerse = res.versionVerse
-            `;
-
-            // construct the parameters array in the order they are used in the query
-            parameters.push(versionUid, queryNormalized, queryNormalized);
-            if (queryMode === 'exact') parameters.push(queryRegex);
-            parameters.push(...bibleVersionUids);
-            if (bookRange) parameters.push(bookRange.start, bookRange.end || bookRange.start);
-            parameters.push((pagination.page - 1) * pagination.count, pagination.count, versionUid);
-        } else {
-            throw new Error(`unsupported db type ${this.dbType}`);
+            return this.searchMysql({
+                versionUid,
+                bibleVersionUids,
+                bookRange,
+                queryTermsNormalized,
+                queryMode,
+                sortMode,
+                pagination: paginationNormalized,
+                isCjk,
+            });
         }
 
-        return db.query(sqlQuery, parameters).then((results) =>
-            results.map((result: any) => ({
-                versionUid: result.versionUid,
-                versionBook: result.versionBook,
-                versionChapter: result.versionChapter,
-                versionVerse: result.versionVerse,
-                // enclose words that start with terms in `queryTermsNormalized` in <b> tags
-                content: result.verse.replace(
-                    new RegExp(
-                        queryMode === 'fuzzy'
-                            ? `(${queryTermsNormalized
-                                  // allow any non-word char between words in a term and any
-                                  // word char after the term
-                                  .map((term) => term.replace(/ /gi, '[^\\w]+') + '\\w*')
-                                  .join('|')})`
-                            : `(${
-                                  queryTermsNormalized
-                                      // allow any non-word char between words in a term (this is
-                                      // necessary here if the user encloses the term in quotes
-                                      // while using exact search)
-                                      .map((term) => term.replace(/ /gi, '[^\\w]+'))
-                                      // allow any non-word char between words in a query
-                                      .join('[^\\w]+') + '\\w*'
-                              })`,
-                        'gi'
-                    ),
-                    '<b>$1</b>'
+        throw new Error(`unsupported db type ${this.dbType}`);
+    }
+
+    private async searchSqlite({
+        versionUid,
+        bibleVersionUids,
+        bookRange,
+        queryTermsNormalized,
+        queryMode,
+        sortMode,
+        pagination,
+    }: {
+        versionUid: string;
+        bibleVersionUids: string[];
+        bookRange?: { start: number; end?: number };
+        queryTermsNormalized: string[];
+        queryMode: string;
+        sortMode: string;
+        pagination: { page: number; count: number };
+    }): Promise<IBibleSearchResult[]> {
+        const queryNormalized =
+            queryMode === 'fuzzy'
+                ? // enclose terms with multiple words in quotes
+                  queryTermsNormalized
+                      .map((term) => (term.indexOf(' ') !== -1 ? `"${term}" *` : `${term}*`))
+                      // put everything back together
+                      .join(' ')
+                : `"${queryTermsNormalized.join(' ')}" *`;
+
+        if (!queryNormalized) return [];
+
+        const offset = (pagination.page - 1) * pagination.count;
+
+        return sql<{
+            verse: string;
+            versionUid: string;
+            versionBook: number;
+            versionChapter: number;
+            versionVerse: number;
+        }>`
+            SELECT 
+                verse, versionUid, versionBook, versionChapter, versionVerse, 
+                 /* force the current bible version to always be selected by group by */
+                MIN(case when versionUid = ${versionUid} then 1 else 2 end) as isCurrentVersion,
+                rowid, rank 
+            FROM bible_search(${queryNormalized}) 
+            WHERE versionUid IN (${sql.join(bibleVersionUids)})
+            ${
+                bookRange
+                    ? sql`AND versionBook BETWEEN ${bookRange.start} AND ${
+                          bookRange.end || bookRange.start
+                      }`
+                    : sql``
+            }
+            GROUP BY versionBook, versionChapter, versionVerse
+            ORDER BY ${
+                sortMode === 'reference'
+                    ? sql`versionBook, versionChapter, versionVerse`
+                    : sql`rank`
+            }
+            LIMIT ${pagination.count}
+            OFFSET ${offset}
+        `
+            .execute(this.db)
+            .then(({ rows }) => this.processSearchResults(rows, queryMode, queryTermsNormalized));
+    }
+
+    private async searchMysql({
+        versionUid,
+        bibleVersionUids,
+        bookRange,
+        queryTermsNormalized,
+        queryMode,
+        sortMode,
+        pagination,
+        isCjk,
+    }: {
+        versionUid: string;
+        bibleVersionUids: string[];
+        bookRange?: { start: number; end?: number };
+        queryTermsNormalized: string[];
+        queryMode: string;
+        sortMode: string;
+        pagination: { page: number; count: number };
+        isCjk: boolean;
+    }): Promise<IBibleSearchResult[]> {
+        const wildcard = '*';
+        let queryNormalized: string;
+        let exactSearchRegex: string | undefined;
+
+        if (queryMode === 'exact') {
+            // it is (to my knowledge) not possible to an "incomplete phrase search" in mysql
+            // therefore we don't use a quoted phrase in exact search but filter the fuzzy results
+            // with an additional regex in the query
+
+            queryNormalized =
+                queryTermsNormalized
+                    .map((term) =>
+                        term.indexOf(' ') !== -1
+                            ? term
+                                  .split(' ')
+                                  .map((_term) => `+${term}`)
+                                  .join(' ')
+                            : `+${term}`
+                    )
+                    // put everything back together and add a wildcard to the last word
+                    .join(' ') + wildcard;
+
+            // the regex ensures that the terms follow each other in the verse with only
+            // whitespace or punctuation chars in between. in contrast to the fts phrase search
+            // it also allows partial words at the end of the phrase, which isn't possible with
+            // the fts phrase search. this is important so that we can show the results without
+            // the user having to type out the full phrase.
+            exactSearchRegex = queryTermsNormalized
+                .map((term) =>
+                    term.indexOf(' ') !== -1 ? term.replace(/ /g, '[[:space:][:punct:]]+') : term
+                )
+                // put everything back together
+                .join('[[:space:][:punct:]]+');
+        } else {
+            // enclose terms with multiple words in quotes
+            queryNormalized = queryTermsNormalized
+                .map((term) => (term.indexOf(' ') !== -1 ? `"${term}"` : `+${term}${wildcard}`))
+                // put everything back together
+                .join(' ');
+        }
+
+        if (!queryNormalized) return [];
+
+        const offset = (pagination.page - 1) * pagination.count;
+        const searchTable = isCjk ? 'bible_search_cjk' : 'bible_search';
+
+        // since mysql has non-deterministic column-results for grouped rows when using an
+        // aggregate function, we need to use a subquery to get the correct verse and
+        // versionUid for each result
+        return sql<{
+            verse: string;
+            versionUid: string;
+            versionBook: number;
+            versionChapter: number;
+            versionVerse: number;
+        }>`
+            SELECT s.* FROM (
+                SELECT 
+                    versionBook, versionChapter, versionVerse,
+                    /* replace search version by "1" in the group and then use mysql MIN to 
+                       prioritize it for output */
+                    MIN(IF(versionUid = ${versionUid}, 1, versionUid)) as versionUidOrOne,
+                    /* this will possibly calculate the relevance for the wrong row-column in 
+                        the grouped rows, however we need the value for ordering and limiting.
+                        This is tolerable since relevance will be similar for the same verse in
+                        different versions */
+                    MATCH(verse) AGAINST(${queryNormalized} IN BOOLEAN MODE) AS relevance
+                FROM ${sql.raw(searchTable)}
+                WHERE MATCH(verse) AGAINST(${queryNormalized} IN BOOLEAN MODE)
+                    ${exactSearchRegex ? sql`AND verse REGEXP ${exactSearchRegex}` : sql``}
+                    AND versionUid IN (${sql.join(bibleVersionUids)})
+                    ${
+                        bookRange
+                            ? sql`AND versionBook BETWEEN ${bookRange.start} AND ${
+                                  bookRange.end || bookRange.start
+                              }`
+                            : sql``
+                    }
+                GROUP BY versionBook, versionChapter, versionVerse
+                ORDER BY ${
+                    sortMode === 'reference'
+                        ? sql`versionBook, versionChapter, versionVerse`
+                        : sql`relevance DESC`
+                }
+                LIMIT ${pagination.count}
+                OFFSET ${offset}
+            ) res 
+            INNER JOIN ${sql.raw(searchTable)} s ON
+                /* undo search version > "1" replacement from above */
+                s.versionUid = IF(versionUidOrOne = 1, ${versionUid}, res.versionUidOrOne)
+                AND s.versionBook = res.versionBook
+                AND s.versionChapter = res.versionChapter
+                AND s.versionVerse = res.versionVerse
+        `
+            .execute(this.db)
+            .then(({ rows }) => this.processSearchResults(rows, queryMode, queryTermsNormalized));
+    }
+
+    private processSearchResults(
+        rows: Array<{
+            verse: string;
+            versionUid: string;
+            versionBook: number;
+            versionChapter: number;
+            versionVerse: number;
+        }>,
+        queryMode: string,
+        queryTermsNormalized: string[]
+    ): IBibleSearchResult[] {
+        return rows.map((result) => ({
+            versionUid: result.versionUid,
+            versionBook: result.versionBook,
+            versionChapter: result.versionChapter,
+            versionVerse: result.versionVerse,
+            // enclose words that start with terms in `queryTermsNormalized` in <b> tags
+            content: result.verse.replace(
+                new RegExp(
+                    queryMode === 'fuzzy'
+                        ? `(${queryTermsNormalized
+                              // allow any non-word char between words in a term and any
+                              // word char after the term
+                              .map((term) => term.replace(/ /gi, '[^\\w]+') + '\\w*')
+                              .join('|')})`
+                        : `(${
+                              queryTermsNormalized
+                                  // allow any non-word char between words in a term (this is
+                                  // necessary here if the user encloses the term in quotes
+                                  // while using exact search)
+                                  .map((term) => term.replace(/ /gi, '[^\\w]+'))
+                                  // allow any non-word char between words in a query
+                                  .join('[^\\w]+') + '\\w*'
+                          })`,
+                    'gi'
                 ),
-            }))
-        );
+                '<b>$1</b>'
+            ),
+        }));
     }
 
     async updateBook(
         book: IBibleBookEntity,
         updates: Partial<IBibleBookEntity>,
-        entityManager?: EntityManager
+        tx?: Transaction<DB>
     ) {
-        if (!entityManager) {
-            if (!this.pDB) throw new NoDbConnectionError();
-            entityManager = await this.pDB;
-        }
+        const db = tx || this.db;
 
-        await entityManager
-            .createQueryBuilder()
-            .update(BibleBookEntity)
-            .set(updates)
-            .where({ versionId: book.versionId, osisId: book.osisId })
+        await db
+            .updateTable('bible_book')
+            .set(prepareBookForDatabase(updates))
+            .where('versionId', '=', book.versionId)
+            .where('osisId', '=', book.osisId)
             .execute();
         return { ...book, ...updates };
     }
 
     private async addBibleBookContent({
-        entityManger,
+        db,
         contents,
         version,
         book,
@@ -1238,17 +1380,20 @@ export class BibleEngine {
         skip = {},
         ignoreSectionsWithoutTitle = false,
     }: {
-        entityManger: EntityManager;
+        db: Kysely<DB> | Transaction<DB>;
         contents: IBibleContent[];
-        version: BibleVersionEntity;
+        version: IBibleVersionEntity;
         book: IBibleBookEntity;
         context: BibleBookPlaintext;
         globalState?: {
-            phraseStack: BiblePhraseEntity[];
-            paragraphStack: BibleParagraphEntity[];
-            sectionStack: BibleSectionEntity[];
-            noteStack: BibleNoteEntity[];
-            crossRefStack: BibleCrossReferenceEntity[];
+            phraseStack: Insertable<BiblePhrase>[];
+            paragraphStack: Insertable<BibleParagraph>[];
+            sectionStack: {
+                section: Insertable<BibleSection>;
+                crossReferences?: IBibleCrossReference[];
+            }[];
+            noteStack: Insertable<BibleNote>[];
+            crossRefStack: Insertable<BibleCrossReference>[];
             usedRefIds: Set<number>;
             currentVersionChapter: number;
             currentVersionVerse: number;
@@ -1275,8 +1420,6 @@ export class BibleEngine {
         ignoreSectionsWithoutTitle?: boolean;
     }): Promise<{ firstPhraseId: number | undefined; lastPhraseId: number | undefined }> {
         if (BibleEngine.DEBUG && localState.recursionLevel === 0) console.time('db_prepare');
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = entityManger;
         const skipStrongs = skip.strongs || version.hasStrongs === false;
         let firstPhraseId: number | undefined, lastPhraseId: number | undefined;
         let lastContent: IBibleContent | undefined;
@@ -1393,7 +1536,7 @@ export class BibleEngine {
                     const normalisationRules = await this.getNormalisationRulesForRange(reference);
 
                     for (const rule of normalisationRules) {
-                        if (!isTestMatching(rule.tests, context)) continue;
+                        if (!rule.tests || !isTestMatching(rule.tests, context)) continue;
 
                         // if the rule is matching we know the sourceType of the phrase. we save
                         // this with the phrase so that later we can just query for the
@@ -1427,7 +1570,7 @@ export class BibleEngine {
                             };
 
                             globalState.phraseStack.push(
-                                new BiblePhraseEntity(emptyPhrase, emptyPhraseReference, {
+                                preparePhraseForDatabase(emptyPhrase, emptyPhraseReference, {
                                     ...localState.modifierState,
                                 })
                             );
@@ -1470,7 +1613,7 @@ export class BibleEngine {
                             };
 
                             globalState.phraseStack.push(
-                                new BiblePhraseEntity(
+                                preparePhraseForDatabase(
                                     emptyPhrase,
                                     // this is set to the standardRef of the current rule
                                     // above
@@ -1627,7 +1770,7 @@ export class BibleEngine {
                 if (content.notes && !skip.notes) {
                     for (const note of content.notes) {
                         globalState.noteStack.push(
-                            new BibleNoteEntity(
+                            prepareNoteForDatabase(
                                 {
                                     ...note,
                                     content: {
@@ -1644,14 +1787,14 @@ export class BibleEngine {
                     for (const crossRef of content.crossReferences) {
                         if (!crossRef.range.versionId) crossRef.range.versionId = book.versionId;
                         globalState.crossRefStack.push(
-                            new BibleCrossReferenceEntity(crossRef, true, phraseId)
+                            prepareCrossReferenceForDatabase(crossRef, { phraseId })
                         );
                     }
                 }
                 if (content.strongs && skipStrongs) delete content.strongs;
 
                 globalState.phraseStack.push(
-                    new BiblePhraseEntity(content, phraseRef, {
+                    preparePhraseForDatabase(content, phraseRef, {
                         ...localState.modifierState,
                     })
                 );
@@ -1700,7 +1843,7 @@ export class BibleEngine {
                     firstPhraseId: groupFirstPhraseId,
                     lastPhraseId: groupLastPhraseId,
                 } = await this.addBibleBookContent({
-                    entityManger: db,
+                    db,
                     contents: content.contents,
                     version,
                     book,
@@ -1735,7 +1878,7 @@ export class BibleEngine {
                 ) {
                     const lastGroupPhrase =
                         globalState.phraseStack[globalState.phraseStack.length - 1];
-                    lastGroupPhrase!.linebreak = true;
+                    lastGroupPhrase!.linebreak = 1;
                 }
             } else if (
                 (content.type === 'group' && content.groupType === 'paragraph') ||
@@ -1758,7 +1901,7 @@ export class BibleEngine {
                     firstPhraseId: sectionFirstPhraseId,
                     lastPhraseId: sectionLastPhraseId,
                 } = await this.addBibleBookContent({
-                    entityManger: db,
+                    db,
                     contents: content.contents,
                     version,
                     book,
@@ -1775,35 +1918,23 @@ export class BibleEngine {
 
                 if (sectionFirstPhraseId && sectionLastPhraseId) {
                     if (content.type === 'group' && content.groupType === 'paragraph') {
-                        globalState.paragraphStack.push(
-                            new BibleParagraphEntity(
-                                book.versionId,
-                                sectionFirstPhraseId,
-                                sectionLastPhraseId
-                            )
-                        );
+                        globalState.paragraphStack.push({
+                            versionId: book.versionId,
+                            phraseStartId: sectionFirstPhraseId,
+                            phraseEndId: sectionLastPhraseId,
+                        });
                     } else if (
                         content.type === 'section' &&
                         (content.title || !ignoreSectionsWithoutTitle)
                     ) {
-                        globalState.sectionStack.push(
-                            new BibleSectionEntity({
+                        globalState.sectionStack.push({
+                            section: prepareSectionForDatabase({
                                 versionId: book.versionId,
                                 phraseStartId: sectionFirstPhraseId,
                                 phraseEndId: sectionLastPhraseId,
                                 level: localState.sectionLevel,
                                 title: content.title,
                                 subTitle: content.subTitle,
-                                crossReferences:
-                                    content.crossReferences && !skip.crossRefs
-                                        ? content.crossReferences.map((crossRef) => ({
-                                              ...crossRef,
-                                              range: {
-                                                  ...crossRef.range,
-                                                  versionId: book.versionId,
-                                              },
-                                          }))
-                                        : undefined,
                                 description: content.description
                                     ? {
                                           type: 'root',
@@ -1813,8 +1944,18 @@ export class BibleEngine {
                                       }
                                     : undefined,
                                 isChapterLabel: content.isChapterLabel,
-                            })
-                        );
+                            }),
+                            crossReferences:
+                                content.crossReferences && !skip.crossRefs
+                                    ? content.crossReferences.map((crossRef) => ({
+                                          ...crossRef,
+                                          range: {
+                                              ...crossRef.range,
+                                              versionId: book.versionId,
+                                          },
+                                      }))
+                                    : undefined,
+                        });
                     }
 
                     if (
@@ -1838,52 +1979,45 @@ export class BibleEngine {
             if (BibleEngine.DEBUG) console.time('db_set');
             // we are at the end of the root method => persist everything
 
-            // RADAR: check performance of higher chunkSize
+            const sqlSet: { statement: string; values: readonly unknown[] }[] = [];
             const chunkSize = 100;
-
-            const sqlSet: { statement: string; values: any[] }[] = [];
-            if (this.executeSqlSetOverride) {
-                for (const phrase of globalState.phraseStack) {
-                    phrase.prepare();
-                }
-                for (const crossRef of globalState.crossRefStack) {
-                    crossRef.prepare();
-                }
-            }
             for (let index = 0; index < globalState.phraseStack.length; index += chunkSize) {
-                const insertQb = db
-                    .createQueryBuilder()
-                    .insert()
-                    .into(BiblePhraseEntity)
+                const insert = db
+                    .insertInto('bible_phrase')
                     .values(globalState.phraseStack.slice(index, index + chunkSize));
+
                 if (this.executeSqlSetOverride) {
-                    const [statement, values] = insertQb.getQueryAndParameters();
-                    sqlSet.push({ statement, values });
-                } else await insertQb.execute();
+                    const compiled = insert.compile();
+                    sqlSet.push({ statement: compiled.sql, values: compiled.parameters });
+                } else {
+                    await insert.execute();
+                }
             }
 
             for (let index = 0; index < globalState.noteStack.length; index += chunkSize) {
-                const insertQb = db
-                    .createQueryBuilder()
-                    .insert()
-                    .into(BibleNoteEntity)
+                const insert = db
+                    .insertInto('bible_note')
                     .values(globalState.noteStack.slice(index, index + chunkSize));
+
                 if (this.executeSqlSetOverride) {
-                    const [statement, values] = insertQb.getQueryAndParameters();
-                    sqlSet.push({ statement, values });
-                } else await insertQb.execute();
+                    const compiled = insert.compile();
+                    sqlSet.push({ statement: compiled.sql, values: compiled.parameters });
+                } else {
+                    await insert.execute();
+                }
             }
 
             for (let index = 0; index < globalState.paragraphStack.length; index += chunkSize) {
-                const insertQb = db
-                    .createQueryBuilder()
-                    .insert()
-                    .into(BibleParagraphEntity)
+                const insert = db
+                    .insertInto('bible_paragraph')
                     .values(globalState.paragraphStack.slice(index, index + chunkSize));
+
                 if (this.executeSqlSetOverride) {
-                    const [statement, values] = insertQb.getQueryAndParameters();
-                    sqlSet.push({ statement, values });
-                } else await insertQb.execute();
+                    const compiled = insert.compile();
+                    sqlSet.push({ statement: compiled.sql, values: compiled.parameters });
+                } else {
+                    await insert.execute();
+                }
             }
 
             // since saving entities with a relation is a costly operation, we do it in a second step
@@ -1891,60 +2025,60 @@ export class BibleEngine {
                 (section) => !section.crossReferences?.length
             );
             for (let index = 0; index < sectionsWithoutCrossRefs.length; index += chunkSize) {
-                const insertQb = db
-                    .createQueryBuilder()
-                    .insert()
-                    .into(BibleSectionEntity)
-                    .values(sectionsWithoutCrossRefs.slice(index, index + chunkSize));
+                const insert = db
+                    .insertInto('bible_section')
+                    .values(
+                        sectionsWithoutCrossRefs
+                            .slice(index, index + chunkSize)
+                            .map(({ section }) => section)
+                    );
+
                 if (this.executeSqlSetOverride) {
-                    const [statement, values] = insertQb.getQueryAndParameters();
-                    sqlSet.push({ statement, values });
-                } else await insertQb.execute();
+                    const compiled = insert.compile();
+                    sqlSet.push({ statement: compiled.sql, values: compiled.parameters });
+                } else {
+                    await insert.execute();
+                }
             }
 
-            // entites with a relation need to be saved one at a time, since the insertId is
-            // needed, therefore we save sections with crossrefs separately, with a custom logic
-            // optimized for minimal JS > native roundtrips
+            // Handle sections with cross references one by one to get proper insert IDs
             const sectionsWithCrossRefs = globalState.sectionStack.filter(
                 (section) => !!section.crossReferences?.length
             );
-            const insertQb = db
-                .createQueryBuilder()
-                .insert()
-                .into(BibleSectionEntity)
-                .values(sectionsWithCrossRefs);
-            const sectionsInsertId = (await insertQb.execute()).identifiers;
-            if (sectionsInsertId.length !== sectionsWithCrossRefs.length)
-                throw new Error('section insertId mismatch');
+
             for (const section of sectionsWithCrossRefs) {
-                const sectionInsertId = sectionsInsertId.shift()!.id;
-                globalState.crossRefStack.push(
-                    ...section.crossReferences!.map((crossRef) => {
-                        crossRef.sectionId = sectionInsertId;
-                        crossRef.prepare();
-                        return crossRef;
-                    })
-                );
+                const result = await db
+                    .insertInto('bible_section')
+                    .values(section.section)
+                    .executeTakeFirstOrThrow();
+
+                if (section.crossReferences) {
+                    const crossRefs = section.crossReferences.map((crossRef) =>
+                        prepareCrossReferenceForDatabase(crossRef, {
+                            sectionId: Number(result.insertId),
+                        })
+                    );
+                    globalState.crossRefStack.push(...crossRefs);
+                }
             }
 
+            // Insert cross references in batches
             for (let index = 0; index < globalState.crossRefStack.length; index += chunkSize) {
-                const insertQb = db
-                    .createQueryBuilder()
-                    .insert()
-                    .into(BibleCrossReferenceEntity)
+                const insert = db
+                    .insertInto('bible_cross_reference')
                     .values(globalState.crossRefStack.slice(index, index + chunkSize));
+
                 if (this.executeSqlSetOverride) {
-                    const [statement, values] = insertQb.getQueryAndParameters();
-                    sqlSet.push({ statement, values });
-                } else await insertQb.execute();
+                    const compiled = insert.compile();
+                    sqlSet.push({ statement: compiled.sql, values: compiled.parameters });
+                } else {
+                    await insert.execute();
+                }
             }
 
             // set up search index
             if (this.fts) {
-                const mysqlValues: (string | number)[] = [];
-                let mysqlQuery = `INSERT INTO bible_search${
-                    isCjkLanguage(version.language) ? '_cjk' : ''
-                } VALUES `;
+                const values: Array<[string, string, number, number, number]> = [];
                 context.forEach((verses, chapter) => {
                     verses.forEach((subverses, verse) => {
                         const verseText = subverses.join(' ').trim();
@@ -1954,14 +2088,17 @@ export class BibleEngine {
                                 values: [verseText, version.uid, book.number, chapter, verse],
                             });
                         } else if (this.dbType === 'mysql') {
-                            mysqlQuery += '(?, ?, ?, ?, ?),';
-                            mysqlValues.push(verseText, version.uid, book.number, chapter, verse);
+                            values.push([verseText, version.uid, book.number, chapter, verse]);
                         }
                     });
                 });
                 if (this.dbType === 'mysql') {
-                    // run the mysql query with the last comma removed
-                    await db.query(mysqlQuery.slice(0, -1), mysqlValues);
+                    await sql<void>`
+                        INSERT INTO bible_search${sql.raw(
+                            isCjkLanguage(version.language) ? '_cjk' : ''
+                        )}
+                        VALUES ${sql.join(values.map((row) => sql`(${sql.join(row)})`))}
+                    `.execute(db);
                 }
             }
 
@@ -1978,21 +2115,19 @@ export class BibleEngine {
 
     private async getNormalizedReferenceRange(
         inputRange: IBibleReferenceRangeVersion,
-        book?: BibleBookEntity | null
+        book?: { chaptersCount: IBibleBookEntity['chaptersCount'] } | null
     ): Promise<IBibleReferenceRangeNormalized> {
         if (isReferenceNormalized(inputRange)) return { ...inputRange, isNormalized: true };
 
         // no mutation
         const range = { ...inputRange };
 
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-
         if (!range.versionId && range.versionUid) {
-            const version = await db.findOne(BibleVersionEntity, {
-                where: { uid: range.versionUid },
-                select: ['id'],
-            });
+            const version = await this.db
+                .selectFrom('bible_version')
+                .select(['id'])
+                .where('uid', '=', range.versionUid)
+                .executeTakeFirst();
             if (version) range.versionId = version.id;
         }
 
@@ -2003,10 +2138,19 @@ export class BibleEngine {
 
         if (!range.versionVerseNum || range.versionChapterEndNum) {
             if (!book) {
-                book = await db.findOne(BibleBookEntity, {
-                    where: { versionId: range.versionId, osisId: range.bookOsisId },
-                    select: ['chaptersCount'],
-                });
+                book = await this.db
+                    .selectFrom('bible_book')
+                    .where('versionId', '=', range.versionId)
+                    .where('osisId', '=', range.bookOsisId)
+                    .select(['chaptersCount'])
+                    .executeTakeFirst()
+                    .then((book) =>
+                        book
+                            ? {
+                                  chaptersCount: book.chaptersCount.split(',').map((n) => +n),
+                              }
+                            : null
+                    );
             }
             if (!book)
                 throw new Error(
@@ -2062,24 +2206,23 @@ export class BibleEngine {
             normalizedVerseEndNum: standardRefEnd.normalizedVerseNum,
             normalizedSubverseEndNum: standardRefEnd.normalizedSubverseNum ?? MAX_SUBVERSE_NUMBER,
         };
-        const potentialNormalizedRangeSql =
-            generatePhraseIdSql(potentialNormalizedRange, 'phrase') +
-            ' AND phrase.versionChapterNum = :cNum' +
-            // if the verse num is not set on input, it is auto-set to be 1 and last verse in
-            // chapter. since those numbers can switch around after normalisation (so that e.g. the
-            // last verse in the version is not the last normalised verse), we need to ignore
-            // `versionVerseNum` and only guard for the chapter number so that we make sure to get
-            // all phrases within the requested chapter
-            (inputRange.versionVerseNum ? ' AND phrase.versionVerseNum = :vNum' : '');
 
-        const { phraseIdStart } = await db
-            .createQueryBuilder(BiblePhraseEntity, 'phrase')
-            .select('MIN(phrase.id)', 'phraseIdStart')
-            .where(potentialNormalizedRangeSql, {
-                cNum: range.versionChapterNum,
-                vNum: range.versionVerseNum,
-            })
-            .getRawOne();
+        const phraseIdStart = await this.db
+            .selectFrom('bible_phrase as phrase')
+            .select(sql<number>`MIN(phrase.id)`.as('phraseIdStart'))
+            .where(
+                sql<boolean>`
+                ${generatePhraseIdSql(potentialNormalizedRange, 'phrase')}
+                AND phrase.versionChapterNum = ${range.versionChapterNum}
+                ${
+                    range.versionVerseNum
+                        ? sql`AND phrase.versionVerseNum = ${range.versionVerseNum}`
+                        : sql``
+                }
+            `
+            )
+            .executeTakeFirst()
+            .then((result) => result?.phraseIdStart);
 
         if (!phraseIdStart)
             throw new Error(
@@ -2097,15 +2240,26 @@ export class BibleEngine {
 
         // since verse might span multiple subverses we need to make a second request to get determine phraseIdEnd
         // (we previously only did this when range.versionVerseEndNum was set)
-        const { phraseIdEnd } = await db
-            .createQueryBuilder(BiblePhraseEntity, 'phrase')
-            .select('MAX(phrase.id)', 'phraseIdEnd')
-            .where(potentialNormalizedRangeSql, {
-                // we made sure that the numbers in `range` make sense above
-                cNum: range.versionChapterEndNum || range.versionChapterNum,
-                vNum: range.versionVerseEndNum || range.versionVerseNum,
-            })
-            .getRawOne();
+        const phraseIdEnd = await this.db
+            .selectFrom('bible_phrase as phrase')
+            .select(sql<number>`MAX(phrase.id)`.as('phraseIdEnd'))
+            .where(
+                sql<boolean>`
+                ${generatePhraseIdSql(potentialNormalizedRange, 'phrase')}
+                AND phrase.versionChapterNum = ${
+                    range.versionChapterEndNum || range.versionChapterNum
+                }
+                ${
+                    range.versionVerseEndNum || range.versionVerseNum
+                        ? sql`AND phrase.versionVerseNum = ${
+                              range.versionVerseEndNum || range.versionVerseNum
+                          }`
+                        : sql``
+                }
+            `
+            )
+            .executeTakeFirst()
+            .then((result) => result?.phraseIdEnd);
 
         if (!phraseIdEnd)
             throw new Error(
@@ -2131,71 +2285,95 @@ export class BibleEngine {
     }
 
     private async getNormalisationRulesForRange(range: IBibleReferenceRangeVersion) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        return db.find(V11nRuleEntity, {
-            where: {
-                sourceRefId: Raw((col) =>
-                    generateReferenceIdSql(generateNormalizedRangeFromVersionRange(range), col)
-                ),
-                actionId: 2,
-            },
-            order: { id: 'ASC' },
-        });
+        return this.db
+            .selectFrom('v11n_rule')
+            .selectAll()
+            .where(
+                sql<boolean>`${generateReferenceIdSql(
+                    generateNormalizedRangeFromVersionRange(range),
+                    'sourceRefId'
+                )}`
+            )
+            .where('actionId', '=', 2)
+            .orderBy('id')
+            .execute()
+            .then((rules) => rules.map((rule) => parseV11nRuleFromDatabase(rule)));
     }
 
     private async normalizeCrossReferencesForVersion(versionId: number) {
-        if (!this.pDB) throw new NoDbConnectionError();
-        const db = await this.pDB;
-        // go through each bible book seperately
-        for (const book of await db.find(BibleBookEntity, { where: { versionId } })) {
-            // fetch all cross reference for that version and book
-            for (const cRef of await db.find(BibleCrossReferenceEntity, {
-                where: {
-                    versionId,
-                    normalizedRefId: Raw((col) =>
-                        generateReferenceIdSql({ isNormalized: true, bookOsisId: book.osisId }, col)
-                    ),
-                },
-            })) {
+        // go through each bible book separately
+        const books = await this.db
+            .selectFrom('bible_book')
+            .selectAll()
+            .where('versionId', '=', versionId)
+            .execute()
+            .then((books) => books.map((book) => parseBookFromDatabase(book)));
+
+        for (const book of books) {
+            // fetch all cross references for that version and book
+            const crossRefs = await this.db
+                .selectFrom('bible_cross_reference')
+                .selectAll()
+                .where('versionId', '=', versionId)
+                .where(
+                    sql<boolean>`${generateReferenceIdSql(
+                        { isNormalized: true, bookOsisId: book.osisId },
+                        'normalizedRefId'
+                    )}`
+                )
+                .execute()
+                .then((crossRefs) =>
+                    crossRefs.map((crossRef) => parseCrossReferenceFromDatabase(crossRef))
+                );
+
+            for (const cRef of crossRefs) {
                 try {
                     // get normalized reference range
                     const normalizedRange = await this.getNormalizedReferenceRange(
                         {
                             versionId,
                             bookOsisId: book.osisId,
-                            versionChapterNum: cRef.versionChapterNum,
-                            versionVerseNum: cRef.versionVerseNum,
-                            versionChapterEndNum: cRef.versionChapterEndNum,
-                            versionVerseEndNum: cRef.versionVerseEndNum,
+                            versionChapterNum: cRef.range.versionChapterNum,
+                            versionVerseNum: cRef.range.versionVerseNum,
+                            versionChapterEndNum: cRef.range.versionChapterEndNum,
+                            versionVerseEndNum: cRef.range.versionVerseEndNum,
                         },
                         book
                     );
-                    if (cRef.versionChapterNum)
+
+                    if (cRef.range.versionChapterNum)
                         cRef.range.normalizedChapterNum = normalizedRange.normalizedChapterNum;
-                    if (cRef.versionVerseNum)
+                    if (cRef.range.versionVerseNum)
                         cRef.range.normalizedVerseNum = normalizedRange.normalizedVerseNum;
-                    if (cRef.versionChapterEndNum)
+                    if (cRef.range.versionChapterEndNum)
                         cRef.range.normalizedChapterEndNum =
                             normalizedRange.normalizedChapterEndNum;
-                    if (cRef.versionVerseEndNum)
+                    if (cRef.range.versionVerseEndNum)
                         cRef.range.normalizedVerseEndNum = normalizedRange.normalizedVerseEndNum;
 
-                    // we need to call `prepare` manually since typeOrm can't detect that the entity
-                    // has changed (in other words: it does not run the method before change
-                    // detection) and therefore does not execute an update
-                    cRef.prepare();
-                    // and save cross reference back to db
-                    await db.save(cRef);
+                    // Update the cross reference with normalized values
+                    await this.db
+                        .updateTable('bible_cross_reference')
+                        .set(
+                            prepareCrossReferenceForDatabase(cRef, {
+                                sectionId: cRef.sectionId,
+                                phraseId: cRef.phraseId,
+                            })
+                        )
+                        .where('id', '=', cRef.id)
+                        .execute();
                 } catch (e) {
-                    // we can't avoid that there are invalid cross references, either due to errors
-                    // in the source file or due to ambiguities when parsing references from text.
-                    // Since a reference that can't be normalized can not be displayed, its best to
+                    // we can't avoid invalid cross references, either due to errors in the source file
+                    // or due to ambiguities when parsing references from text.
+                    // Since a reference that can't be normalized cannot be displayed, it's best to
                     // just delete it and log the error
                     console.error(
                         `removed cross reference ${cRef.normalizedRefId} for phrase|section ${cRef.phraseId}|${cRef.sectionId} since normalization failed`
                     );
-                    await db.remove(cRef);
+                    await this.db
+                        .deleteFrom('bible_cross_reference')
+                        .where('id', '=', cRef.id)
+                        .execute();
                 }
             }
         }

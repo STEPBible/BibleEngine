@@ -1,5 +1,3 @@
-import { DataSourceOptions } from 'typeorm';
-
 import {
     BibleEngine,
     BibleEngineOptions,
@@ -7,6 +5,8 @@ import {
     IBibleReferenceRangeQuery,
     IBibleSearchOptions,
 } from '@bible-engine/core';
+import { DB } from '@bible-engine/db-schema/generated/db';
+import { Kysely } from 'kysely';
 import { BibleApi } from './Bible.api';
 
 export class BibleEngineClient {
@@ -14,20 +14,17 @@ export class BibleEngineClient {
     localBibleEngine?: BibleEngine;
 
     constructor({
-        bibleEngineConnectionOptions,
+        bibleEngineKyselyDb,
         bibleEngineOptions,
         apiBaseUrl,
     }: {
-        bibleEngineConnectionOptions?: DataSourceOptions;
+        bibleEngineKyselyDb?: Kysely<DB>;
         bibleEngineOptions?: BibleEngineOptions;
         apiBaseUrl?: string;
     }) {
         if (apiBaseUrl) this.remoteApi = new BibleApi(apiBaseUrl);
-        if (bibleEngineConnectionOptions)
-            this.localBibleEngine = new BibleEngine(
-                bibleEngineConnectionOptions,
-                bibleEngineOptions
-            );
+        if (bibleEngineKyselyDb)
+            this.localBibleEngine = new BibleEngine(bibleEngineKyselyDb, bibleEngineOptions);
     }
 
     getBooksForVersion(versionUid: string, forceRemote = false) {

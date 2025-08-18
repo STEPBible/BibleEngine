@@ -1,12 +1,15 @@
 import { BibleEngine, IBibleContentSection } from '@bible-engine/core';
-import { DataSourceOptions } from 'typeorm';
+import { DB } from '@bible-engine/db-schema/generated/db';
+import Database from 'better-sqlite3';
+import { Kysely, SqliteDialect } from 'kysely';
 import { OsisImporter } from '..';
 import { enBookMetadata } from '../../../metadata';
 
-const CONNECTION_OPTIONS: DataSourceOptions = {
-    type: 'sqlite',
-    database: ':memory:',
-};
+const db: Kysely<DB> = new Kysely<DB>({
+    dialect: new SqliteDialect({
+        database: new Database(':memory:'),
+    }),
+});
 
 export const TEST_BIBLE_VERSION = {
     uid: 'NASB',
@@ -16,7 +19,7 @@ export const TEST_BIBLE_VERSION = {
 };
 
 export const getBibleEngineTestInstance = () => {
-    return new BibleEngine(CONNECTION_OPTIONS);
+    return new BibleEngine(db);
 };
 
 export const getEmptySection = (): IBibleContentSection => {

@@ -1,6 +1,10 @@
 # Changelog for BibleEngine Client
 
-## [1.4.6]
+## [2.0.0]
+
+### Breaking Changes
+
+-   migrated from typeorm to kysely, constructor parameters have changed
 
 ### Features
 

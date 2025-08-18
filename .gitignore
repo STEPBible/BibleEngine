@@ -38,3 +38,4 @@ temp.sqlite
 tmp.ts
 v11n-rules-old.tsv
 yarn-error.log
+core/legacy

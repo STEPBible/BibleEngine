@@ -1,32 +1,32 @@
-import {
-    BeDatabaseCreator,
-    V11nImporter,
-    NeueImporter,
-    SwordImporter
-} from '@bible-engine/importers';
-import { join } from 'path';
+// import {
+//     BeDatabaseCreator,
+//     V11nImporter,
+//     NeueImporter,
+//     SwordImporter
+// } from '@bible-engine/importers';
+// import { join } from 'path';
 
-const run = async () => {
-    const creator = new BeDatabaseCreator({
-        type: 'mysql',
-        host: 'localhost',
-        port: 3306,
-        username: 'bibleengine',
-        password: 'bibleengine',
-        database: 'bibleengine',
-        dropSchema: true
-    });
+// const run = async () => {
+//     const creator = new BeDatabaseCreator({
+//         type: 'mysql',
+//         host: 'localhost',
+//         port: 3306,
+//         username: 'bibleengine',
+//         password: 'bibleengine',
+//         database: 'bibleengine',
+//         dropSchema: true
+//     });
 
-    creator.addImporter(V11nImporter);
+//     creator.addImporter(V11nImporter);
 
-    const filename = join(__dirname, '../data/ESV2016_th.zip');
-    creator.addImporter(SwordImporter, { sourcePath: filename });
+//     const filename = join(__dirname, '../data/ESV2016_th.zip');
+//     creator.addImporter(SwordImporter, { sourcePath: filename });
 
-    creator.addImporter(NeueImporter);
+//     creator.addImporter(NeueImporter);
 
-    return creator.createDatabase();
-};
+//     return creator.createDatabase();
+// };
 
-run()
-    .then(() => process.exit())
-    .catch(e => console.error(e));
+// run()
+//     .then(() => process.exit())
+//     .catch(e => console.error(e));

@@ -1,6 +1,6 @@
 {
     "name": "@bible-engine/core",
-    "version": "1.4.10",
+    "version": "2.0.0-pre1",
     "main": "lib/index.js",
     "license": "MIT",
     "scripts": {
@@ -16,7 +16,7 @@
         "whatwg-fetch": "^3.6.2"
     },
     "peerDependencies": {
-        "typeorm": "~0.3.11"
+        "@bible-engine/db-schema": "2.0.x"
     },
     "sideEffects": false
 }

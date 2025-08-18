@@ -1,5 +1,41 @@
 {
+    "files.exclude": {
+        "**/.DS_Store": true,
+        "**/.git": true,
+        "**/.hg": true,
+        "**/.svn": true,
+        "**/CVS": true,
+        "**/.vscode": true,
+        "**/node_modules": false,
+        "**/lib": true,
+        "**/lib-es6": true
+    },
+    "editor.formatOnType": true,
+    "editor.formatOnSave": false,
     "editor.codeActionsOnSave": {
         "source.organizeImports": "explicit"
-    }
+    },
+    "editor.renderWhitespace": "boundary",
+    "editor.renderControlCharacters": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.wrappingIndent": "indent",
+    "editor.wordWrap": "off",
+    "editor.maxTokenizationLineLength": 100000,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeLens": false,
+        "editor.formatOnPaste": false,
+        "editor.formatOnSave": true,
+        "editor.rulers": [100],
+        "editor.wordWrap": "off",
+        "editor.wordWrapColumn": 100
+    },
+    "typescript.referencesCodeLens.enabled": true,
+    "typescript.disableAutomaticTypeAcquisition": true,
+    "typescript.validate.enable": true,
+    "typescript.suggest.completeFunctionCalls": true
 }

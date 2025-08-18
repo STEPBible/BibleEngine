@@ -1,9 +1,9 @@
 export interface IDictionaryEntry {
     strong: string;
     dictionary: string;
-    lemma?: string;
-    transliteration?: string;
-    pronunciation?: string;
+    lemma?: string | null;
+    transliteration?: string | null;
+    pronunciation?: string | null;
     gloss: string;
-    content?: string;
+    content?: string | null;
 }

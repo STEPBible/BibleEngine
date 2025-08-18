@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.0]
+
+### Breaking Changes
+
+-   migrated from typeorm to kysely, constructor parameters have changed
+
 ## [1.4.11]
 
 ### Features

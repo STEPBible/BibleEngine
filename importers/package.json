@@ -1,6 +1,6 @@
 {
     "name": "@bible-engine/importers",
-    "version": "1.4.11",
+    "version": "2.0.0-pre1",
     "license": "MIT",
     "main": "lib/index.js",
     "scripts": {
@@ -31,6 +31,7 @@
     },
     "devDependencies": {
         "@types/archiver": "^2.1.2",
+        "@types/better-sqlite3": "^7.6.12",
         "@types/fs-extra": "^5.0.4",
         "@types/pako": "^1.0.0",
         "@types/parse5": "4",
@@ -41,6 +42,6 @@
         "xml-formatter": "^2.4.0"
     },
     "peerDependencies": {
-        "@bible-engine/core": "1.4.x"
+        "@bible-engine/core": "2.0.x"
     }
 }

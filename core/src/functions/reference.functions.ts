@@ -280,8 +280,8 @@ export const slimDownCrossReference = ({
     label,
 }: IBibleCrossReference): IBibleCrossReference => ({
     key,
+    range: slimDownReferenceRange(range) as IBibleReferenceRangeNormalized,
     label,
-    range: slimDownReferenceRange(range),
 });
 
 /**

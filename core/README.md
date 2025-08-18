@@ -9,10 +9,9 @@ However you can also use core methods directly for writing if you prefer that:
 ```typescript
 import { BibleEngine } from '@bible-engine/core';
 
-const bibleEngine = new BibleEngine({
-    type: 'sqlite',
-    database: `${dirProjectRoot}/output/bible.db`,
-});
+const bibleEngine = new BibleEngine(
+    kyselyDb // the Kysely database instance for local access
+);
 
 const version = await bibleEngine.addVersion(
     new BibleVersion({

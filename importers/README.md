@@ -14,15 +14,9 @@ import {
     SwordImporter,
 } from '@bible-engine/importers';
 
-const creator = new BeDatabaseCreator({
-    type: 'mysql',
-    host: 'localhost',
-    port: 3306,
-    username: 'bibleengine',
-    password: 'bibleengine',
-    database: 'bibleengine',
-    dropSchema: true,
-});
+const creator = new BeDatabaseCreator(
+    kyselyDb // the Kysely database instance for local access
+);
 
 // BibleEngine works without the versification rules form STEPData, however references won't be
 // internally normalized then, i.e. BibleEngine can't ensure that it returns the correct text when
@@ -48,14 +42,7 @@ creator.createDatabase();
 import { BeImportFileCreator } from '@bible-engine/importers';
 
 const creator = new BeImportFileCreator(
-    {
-        type: 'mysql',
-        host: 'localhost',
-        port: 3306,
-        username: 'bibleengine',
-        password: 'bibleengine',
-        database: 'bibleengine',
-    },
+    kyselyDb, // the Kysely database instance for local access
     './preload/bibles'
 );
 

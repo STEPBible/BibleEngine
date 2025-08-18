@@ -1,11 +1,4 @@
 import {
-    BibleBookEntity,
-    BibleParagraphEntity,
-    BiblePhraseEntity,
-    BibleSectionEntity,
-    BibleVersionEntity,
-} from '../entities';
-import {
     BibleBookPlaintext,
     BibleContentGeneratorContainer,
     BooleanModifiers,
@@ -15,6 +8,7 @@ import {
     DocumentPhrase,
     DocumentSection,
     IBibleBook,
+    IBibleBookEntity,
     IBibleContent,
     IBibleContentGeneratorGroup,
     IBibleContentGeneratorPhrase,
@@ -30,12 +24,16 @@ import {
     IBibleReferenceRange,
     IBibleReferenceRangeNormalized,
     IBibleReferenceRangeQuery,
-    IBibleSection,
+    IBibleSectionEntity,
     IBibleVersion,
     PhraseModifiers,
     ValueModifiers,
 } from '../models';
-import { StringModifiers } from '../models/BiblePhrase';
+import { getBookChapterVerseCount } from '../models/BibleBook';
+import { IBibleParagraphEntity } from '../models/BibleParagraph';
+import { getPhraseModifierValue, IBiblePhraseEntity, StringModifiers } from '../models/BiblePhrase';
+import { IBibleSectionReduced } from '../models/BibleSection';
+import { IBibleVersionEntity } from '../models/BibleVersion';
 import {
     generateRangeFromGenericSection,
     generateReferenceRangeLabel,
@@ -205,8 +203,8 @@ export const convertBibleInputToBookPlaintext = (
  * turns list of phrases, paragraphs and sections into a structured bible document
  */
 export const generateBibleDocument = (
-    phrases: BiblePhraseEntity[],
-    paragraphs: BibleParagraphEntity[],
+    phrases: IBiblePhraseEntity[],
+    paragraphs: IBibleParagraphEntity[],
     context: IBibleOutputRich['context'],
     bookAbbreviations: { [index: string]: string },
     chapterVerseSeparator: string,
@@ -277,26 +275,29 @@ export const generateBibleDocument = (
                     // check if the current phrase has the same or higher level
                     isPhraseInGroup =
                         !isIndentDowngrade &&
-                        !!phrase.getModifierValue('indentLevel') &&
-                        phrase.getModifierValue('indentLevel')! >=
+                        !!getPhraseModifierValue(phrase, 'indentLevel') &&
+                        getPhraseModifierValue(phrase, 'indentLevel')! >=
                             (<IBibleContentGeneratorGroup<'indent'>>_group).meta.level;
 
                     // if an indent group ends we want to set up new indent groups from root level
                     // (we need this for UI-rendering, especially related to showing verse numbers
                     //  on a consistent line and not indented)
-                    if (!isPhraseInGroup && phrase.getModifierValue('indentLevel') !== undefined) {
+                    if (
+                        !isPhraseInGroup &&
+                        getPhraseModifierValue(phrase, 'indentLevel') !== undefined
+                    ) {
                         isIndentDowngrade = true;
                     }
                 } else if (_group.groupType === 'quote') {
                     isPhraseInGroup =
                         phrase.quoteWho === _group.modifier &&
-                        !!phrase.getModifierValue('quoteLevel') &&
-                        phrase.getModifierValue('quoteLevel')! >=
+                        !!getPhraseModifierValue(phrase, 'quoteLevel') &&
+                        getPhraseModifierValue(phrase, 'quoteLevel')! >=
                             (<IBibleContentGeneratorGroup<'quote'>>_group).meta.level;
                 } else if (_group.groupType === 'line') {
                     const currentLineNumber = (_group as IBibleContentGeneratorGroup<'line'>)
                         .modifier;
-                    const phraseLineNumber = phrase.getModifierValue('line');
+                    const phraseLineNumber = getPhraseModifierValue(phrase, 'line');
 
                     isPhraseInGroup = phraseLineNumber === currentLineNumber;
                     // in case of adjacent linegroups we need to detect when to start a new line group by
@@ -315,14 +316,16 @@ export const generateBibleDocument = (
                     _group.groupType === 'title' ||
                     _group.groupType === 'link'
                 ) {
-                    isPhraseInGroup = phrase.getModifierValue(_group.groupType) === _group.modifier;
+                    isPhraseInGroup =
+                        getPhraseModifierValue(phrase, _group.groupType) === _group.modifier;
                 } else if (_group.groupType === 'person') {
                     isPhraseInGroup = phrase.person === _group.modifier;
                 } else if (_group.groupType === 'lineGroup') {
-                    isPhraseInGroup = !!phrase.getModifierValue('lineGroup') && !isLineRestart;
+                    isPhraseInGroup =
+                        !!getPhraseModifierValue(phrase, 'lineGroup') && !isLineRestart;
                 } else {
                     // => this group has a boolean modifier
-                    isPhraseInGroup = !!phrase.getModifierValue(_group.groupType);
+                    isPhraseInGroup = !!getPhraseModifierValue(phrase, _group.groupType);
                 }
             }
 
@@ -561,26 +564,28 @@ export const generateBibleDocument = (
             let newGroup = null;
             if (modifier === 'indentLevel') {
                 if (
-                    phrase.getModifierValue('indentLevel') !== undefined &&
+                    getPhraseModifierValue(phrase, 'indentLevel') !== undefined &&
                     (activeModifiers['indentLevel'] === undefined ||
-                        phrase.getModifierValue('indentLevel')! > activeModifiers['indentLevel']!)
+                        getPhraseModifierValue(phrase, 'indentLevel')! >
+                            activeModifiers['indentLevel']!)
                 ) {
                     // => this phrase starts a new indent group
                     newGroup = <IBibleContentGeneratorGroup<'indent'>>{
                         type: 'group',
                         groupType: 'indent',
                         parent: activeGroup,
-                        meta: { level: phrase.getModifierValue('indentLevel')! },
+                        meta: { level: getPhraseModifierValue(phrase, 'indentLevel')! },
                         contents: [],
                     };
 
-                    activeModifiers['indentLevel'] = phrase.getModifierValue('indentLevel')!;
+                    activeModifiers['indentLevel'] = getPhraseModifierValue(phrase, 'indentLevel')!;
                 }
             } else if (modifier === 'quoteLevel') {
                 if (
-                    phrase.getModifierValue('quoteLevel') &&
+                    getPhraseModifierValue(phrase, 'quoteLevel') &&
                     (!activeModifiers['quoteLevel'] ||
-                        phrase.getModifierValue('quoteLevel')! > activeModifiers['quoteLevel']!)
+                        getPhraseModifierValue(phrase, 'quoteLevel')! >
+                            activeModifiers['quoteLevel']!)
                 ) {
                     // => this phrase starts a new quote group
 
@@ -589,11 +594,11 @@ export const generateBibleDocument = (
                         groupType: 'quote',
                         modifier: phrase.quoteWho,
                         parent: activeGroup,
-                        meta: { level: phrase.getModifierValue('quoteLevel')! },
+                        meta: { level: getPhraseModifierValue(phrase, 'quoteLevel')! },
                         contents: [],
                     };
 
-                    activeModifiers['quoteLevel'] = phrase.getModifierValue('quoteLevel')!;
+                    activeModifiers['quoteLevel'] = getPhraseModifierValue(phrase, 'quoteLevel')!;
                 }
             } else if (
                 modifier === 'orderedListItem' ||
@@ -604,14 +609,14 @@ export const generateBibleDocument = (
                 modifier === 'line'
             ) {
                 if (
-                    phrase.getModifierValue(modifier) &&
-                    phrase.getModifierValue(modifier) !== activeModifiers[modifier]
+                    getPhraseModifierValue(phrase, modifier) &&
+                    getPhraseModifierValue(phrase, modifier) !== activeModifiers[modifier]
                 ) {
                     newGroup = <IBibleContentGeneratorGroup<ValueModifiers>>{
                         type: 'group',
                         meta: undefined, // TypeScript wants that (bug?)
                         groupType: modifier,
-                        modifier: phrase.getModifierValue(modifier),
+                        modifier: getPhraseModifierValue(phrase, modifier),
                         parent: activeGroup,
                         contents: [],
                     };
@@ -623,10 +628,10 @@ export const generateBibleDocument = (
                     // (https://github.com/microsoft/TypeScript/issues/32698). Open issue for
                     // tracking this: https://github.com/microsoft/TypeScript/issues/33014
                     if (modifier === 'line')
-                        activeModifiers[modifier] = phrase.getModifierValue(modifier);
+                        activeModifiers[modifier] = getPhraseModifierValue(phrase, modifier);
                     else if (modifier === 'title')
-                        activeModifiers[modifier] = phrase.getModifierValue(modifier);
-                    else activeModifiers[modifier] = phrase.getModifierValue(modifier);
+                        activeModifiers[modifier] = getPhraseModifierValue(phrase, modifier);
+                    else activeModifiers[modifier] = getPhraseModifierValue(phrase, modifier);
                 }
             } else if (modifier === 'person') {
                 if (phrase.person && phrase.person !== activeModifiers['person']) {
@@ -641,7 +646,7 @@ export const generateBibleDocument = (
                     activeModifiers[modifier] = phrase.person;
                 }
             } else {
-                if (phrase.getModifierValue(modifier) && !activeModifiers[modifier]) {
+                if (getPhraseModifierValue(phrase, modifier) && !activeModifiers[modifier]) {
                     // => this phrase starts a boolean modifier
 
                     newGroup = <IBibleContentGeneratorGroup<BooleanModifiers>>{
@@ -806,8 +811,8 @@ export const generateBibleDocument = (
 };
 
 export const generateContextSections = (
-    phrases: BiblePhraseEntity[],
-    sections: BibleSectionEntity[]
+    phrases: IBiblePhraseEntity[],
+    sections: IBibleSectionEntity[]
 ) => {
     const context: IBibleOutputRich['context'] = {};
 
@@ -880,10 +885,10 @@ export const generateContextSections = (
 export const generateContextRanges = (
     range: IBibleReferenceRange,
     rangeNormalized: IBibleReferenceRangeNormalized,
-    phrases: BiblePhraseEntity[],
-    paragraphs: BibleParagraphEntity[],
+    phrases: IBiblePhraseEntity[],
+    paragraphs: IBibleParagraphEntity[],
     context: IBibleOutputRich['context'],
-    book: BibleBookEntity
+    book: IBibleBookEntity
 ) => {
     const contextRanges: IBibleOutputRich['contextRanges'] = {
         paragraph: {},
@@ -965,7 +970,8 @@ export const generateContextRanges = (
                 range.versionVerseNum &&
                 (!range.versionVerseEndNum ||
                     range.versionVerseNum > 1 ||
-                    range.versionVerseEndNum < book.getChapterVerseCount(range.versionChapterNum))
+                    range.versionVerseEndNum <
+                        getBookChapterVerseCount(book, range.versionChapterNum))
             ) {
                 contextRanges.versionChapter.completeRange = {
                     bookOsisId: book.osisId,
@@ -987,7 +993,8 @@ export const generateContextRanges = (
                 range.versionChapterEndNum &&
                 range.versionChapterEndNum !== range.versionChapterNum &&
                 range.versionVerseEndNum &&
-                range.versionVerseEndNum < book.getChapterVerseCount(range.versionChapterEndNum)
+                range.versionVerseEndNum <
+                    getBookChapterVerseCount(book, range.versionChapterEndNum)
             ) {
                 contextRanges.versionChapter.completeEndingRange = {
                     bookOsisId: book.osisId,
@@ -1170,7 +1177,7 @@ export const normalizeDocumentContents = (
 };
 
 export const stripUnnecessaryDataFromBibleBook = (
-    bookEntity: BibleBookEntity,
+    bookEntity: IBibleBookEntity,
     stripDocuments = false
 ): IBibleBook => {
     const book: IBibleBook = {
@@ -1282,8 +1289,8 @@ export const stripUnnecessaryDataFromBibleContextData = (
         }
 
         // local helper
-        const slimDownBibleSection = (section: IBibleSection): IBibleSection => {
-            const slimSection: IBibleSection = {
+        const slimDownBibleSection = (section: IBibleSectionReduced): IBibleSectionReduced => {
+            const slimSection: IBibleSectionReduced = {
                 phraseStartId: section.phraseStartId,
                 phraseEndId: section.phraseEndId,
             };
@@ -1316,7 +1323,7 @@ export const stripUnnecessaryDataFromBibleReferenceRange = (
 };
 
 export const stripUnnecessaryDataFromBibleVersion = (
-    versionEntity: BibleVersionEntity,
+    versionEntity: IBibleVersionEntity,
     stripDocuments = false
 ): IBibleVersion => {
     const version: IBibleVersion = {

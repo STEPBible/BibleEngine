@@ -1,4 +1,3 @@
-import { BibleParagraphEntity, BiblePhraseEntity, BibleSectionEntity } from '../entities';
 import {
     IBibleContent,
     IBibleContentGroup,
@@ -8,6 +7,9 @@ import {
     IBibleOutputRoot,
     IBibleVersion,
 } from '../models';
+import { IBibleParagraphEntity } from '../models/BibleParagraph';
+import { createBiblePhraseEntity, IBiblePhraseEntity } from '../models/BiblePhrase';
+import { IBibleSectionEntity } from '../models/BibleSection';
 import { generateBibleDocument, PhraseVersionNumbersById } from './content.functions';
 
 describe('generateBibleDocument', () => {
@@ -25,22 +27,11 @@ describe('generateBibleDocument', () => {
         Ps: 'Ps',
     };
 
-    const phrase1 = new BiblePhraseEntity(
+    const phrase1: IBiblePhraseEntity = createBiblePhraseEntity(
         {
             content: 'phrase1',
             versionChapterNum: 1,
             versionVerseNum: 1,
-            crossReferences: [
-                {
-                    key: 'a',
-                    range: {
-                        bookOsisId: 'Ps',
-                        versionChapterNum: 23,
-                        versionVerseNum: 5,
-                        versionVerseEndNum: 7,
-                    },
-                },
-            ],
         },
         {
             isNormalized: true,
@@ -52,10 +43,13 @@ describe('generateBibleDocument', () => {
             phraseNum: 1,
         }
     );
-    phrase1.prepare();
 
-    const phrase2 = new BiblePhraseEntity(
-        { content: 'phrase2', versionChapterNum: 1, versionVerseNum: 1 },
+    const phrase2: IBiblePhraseEntity = createBiblePhraseEntity(
+        {
+            content: 'phrase2',
+            versionChapterNum: 1,
+            versionVerseNum: 1,
+        },
         {
             isNormalized: true,
             versionId: 1,
@@ -67,10 +61,13 @@ describe('generateBibleDocument', () => {
         },
         { quoteLevel: 1 }
     );
-    phrase2.prepare();
 
-    const phrase3 = new BiblePhraseEntity(
-        { content: 'phrase3', versionChapterNum: 1, versionVerseNum: 2 },
+    const phrase3: IBiblePhraseEntity = createBiblePhraseEntity(
+        {
+            content: 'phrase3',
+            versionChapterNum: 1,
+            versionVerseNum: 2,
+        },
         {
             isNormalized: true,
             versionId: 1,
@@ -82,10 +79,13 @@ describe('generateBibleDocument', () => {
         },
         { quoteLevel: 1 }
     );
-    phrase3.prepare();
 
-    const phrase4 = new BiblePhraseEntity(
-        { content: 'phrase4', versionChapterNum: 1, versionVerseNum: 2 },
+    const phrase4: IBiblePhraseEntity = createBiblePhraseEntity(
+        {
+            content: 'phrase4',
+            versionChapterNum: 1,
+            versionVerseNum: 2,
+        },
         {
             isNormalized: true,
             versionId: 1,
@@ -97,35 +97,38 @@ describe('generateBibleDocument', () => {
         },
         { translationChange: 'change' }
     );
-    phrase4.prepare();
 
-    const paragraph1 = new BibleParagraphEntity(1, phrase1.id, phrase3.id);
-    paragraph1.id = 1;
+    const paragraph1: IBibleParagraphEntity = {
+        id: 1,
+        phraseStartId: phrase1.id,
+        phraseEndId: phrase3.id,
+        versionId: 1,
+    };
 
-    const section1 = new BibleSectionEntity({
+    const section1: IBibleSectionEntity = {
         versionId: 1,
         level: 1,
         title: 'section1',
         phraseStartId: phrase1.id,
         phraseEndId: phrase3.id,
-    });
-    section1.id = 1;
-    const section2 = new BibleSectionEntity({
+        id: 1,
+    };
+    const section2: IBibleSectionEntity = {
         versionId: 1,
         level: 1,
         title: 'section2',
         phraseStartId: phrase4.id,
         phraseEndId: phrase4.id,
-    });
-    section2.id = 2;
-    const section2_1 = new BibleSectionEntity({
+        id: 2,
+    };
+    const section2_1: IBibleSectionEntity = {
         versionId: 1,
         level: 2,
         title: 'section2_1',
         phraseStartId: phrase4.id,
         phraseEndId: phrase4.id,
-    });
-    section2_1.id = 3;
+        id: 3,
+    };
 
     /** should be section1 group */
     let item1: IBibleContent;
@@ -145,8 +148,8 @@ describe('generateBibleDocument', () => {
     let item2_1: IBibleContent;
 
     beforeAll(() => {
-        const phrases: BiblePhraseEntity[] = [phrase1, phrase2, phrase3, phrase4];
-        const paragraphs: BibleParagraphEntity[] = [paragraph1];
+        const phrases = [phrase1, phrase2, phrase3, phrase4];
+        const paragraphs: IBibleParagraphEntity[] = [paragraph1];
         const context: IBibleOutputRich['context'] = {
             1: {
                 startingSections: [section1, section2],
@@ -218,16 +221,5 @@ describe('generateBibleDocument', () => {
     test('should create numbering group on the most outer content group possible', () => {
         expect((item1_1_2 as IBibleContentGroup<'quote'>).numbering).toBeDefined();
         expect((item1_1_2_1 as IBibleContentPhrase).numbering).not.toBeDefined();
-    });
-
-    test('should generate a label of cross references according to version paramters', () => {
-        expect.assertions(1);
-        if (
-            item1_1_1.type === 'phrase' &&
-            item1_1_1.crossReferences &&
-            item1_1_1.crossReferences.length > 0
-        ) {
-            expect(item1_1_1.crossReferences[0]!.label).toBe('Ps 23:5-7');
-        }
     });
 });

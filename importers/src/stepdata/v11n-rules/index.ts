@@ -2,8 +2,9 @@ import {
     getBookGenericIdFromOsisId,
     getOsisIdFromBookString,
     getSourceTypeId,
-    V11nRuleEntity,
+    IV11nRule,
 } from '@bible-engine/core';
+import { notePhrases } from '@bible-engine/core/lib/models/V11nRule';
 import { createReadStream } from 'fs';
 import { resolve } from 'path';
 import { createInterface } from 'readline';
@@ -14,7 +15,7 @@ const DEBUG = false;
 const replaceNoteVars = (note?: string) => {
     if (!note) return undefined;
     return note.replace(/%(.*)%(.*)/, (_, text: string, ref: string) => {
-        for (const phraseEntry of V11nRuleEntity.notePhrases.entries()) {
+        for (const phraseEntry of notePhrases.entries()) {
             if (phraseEntry[1].indexOf(text) === 0) {
                 if (!ref || ref === '.') return `%${phraseEntry[0]}%`;
                 else {
@@ -36,7 +37,7 @@ export class V11nImporter extends BibleEngineImporter {
             });
 
             let lineNr = 0;
-            const rules: V11nRuleEntity[] = [];
+            const rules: IV11nRule[] = [];
             let ignoredRules = 0;
             const ignoredRulesSourceTypes: string[] = [];
             let ignoredRulesNonAp = 0;
@@ -144,30 +145,29 @@ export class V11nImporter extends BibleEngineImporter {
                     return;
                 }
 
-                rules.push(
-                    new V11nRuleEntity({
-                        sourceRef: {
-                            bookOsisId: sourceBookOsisId as string,
-                            versionChapterNum: +sourceRefNumbers[0]!,
-                            versionVerseNum: +sourceRefVerseInfo[0]!,
-                            versionSubverseNum: sourceRef[2] ? +sourceRef[2] : undefined,
-                        },
-                        standardRef: {
-                            bookOsisId: standardBookOsisId as string,
-                            normalizedChapterNum: +standardRefNumbers[0]!,
-                            normalizedVerseNum: +standardRefVerse,
-                            normalizedSubverseNum: standardRef[2] ? +standardRef[2] : undefined,
-                            partIndicator: standardRefVersePartIndicator,
-                        },
-                        action,
-                        noteMarker: row[4] || '[+]',
-                        note,
-                        noteSecondary: replaceNoteVars(row[6]),
-                        noteAncientVersions: row[7],
-                        sourceTypeId,
-                        tests: row[8]?.replace(/Title/g, '1.0'),
-                    })
-                );
+                rules.push({
+                    sourceRef: {
+                        bookOsisId: sourceBookOsisId as string,
+                        versionChapterNum: +sourceRefNumbers[0]!,
+                        versionVerseNum: +sourceRefVerseInfo[0]!,
+                        versionSubverseNum: sourceRef[2] ? +sourceRef[2] : undefined,
+                    },
+                    standardRef: {
+                        isNormalized: true,
+                        bookOsisId: standardBookOsisId as string,
+                        normalizedChapterNum: +standardRefNumbers[0]!,
+                        normalizedVerseNum: +standardRefVerse,
+                        normalizedSubverseNum: standardRef[2] ? +standardRef[2] : undefined,
+                        partIndicator: standardRefVersePartIndicator,
+                    },
+                    action,
+                    noteMarker: row[4] || '[+]',
+                    note,
+                    noteSecondary: replaceNoteVars(row[6]),
+                    noteAncientVersions: row[7],
+                    sourceTypeId,
+                    tests: row[8]?.replace(/Title/g, '1.0'),
+                });
             });
 
             rd.on('close', async () => {

@@ -4,14 +4,14 @@ import {
     IBibleBook,
     IBibleVersion,
     IV11nRule,
-    NoDbConnectionError,
-    V11nRuleEntity,
 } from '@bible-engine/core';
+import { parseV11nRuleFromDatabase } from '@bible-engine/core/lib/models/V11nRule';
+import { DB } from '@bible-engine/db-schema/generated/db';
 import * as archiver from 'archiver';
 import { createWriteStream, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { ensureDirSync } from 'fs-extra';
+import { Kysely } from 'kysely';
 import { sync as rmDirRecSync } from 'rimraf';
-import { DataSourceOptions } from 'typeorm';
 const crypto = require('crypto').webcrypto;
 
 export interface BeFileCreatorOptions {
@@ -24,8 +24,8 @@ export interface BeFileCreatorOptions {
 export class BeImportFileCreator {
     private bibleEngine: BibleEngine;
 
-    constructor(dbConfig: DataSourceOptions, private destinationPath: string) {
-        this.bibleEngine = new BibleEngine(dbConfig);
+    constructor(db: Kysely<DB>, private destinationPath: string) {
+        this.bibleEngine = new BibleEngine(db);
     }
 
     async createAllVersions(options?: BeFileCreatorOptions) {
@@ -58,15 +58,13 @@ export class BeImportFileCreator {
     }
 
     async createV11nFile() {
-        if (!this.bibleEngine.pDB) throw new NoDbConnectionError();
-        const db = await this.bibleEngine.pDB;
-
-        const v11nRules = await db
-            .createQueryBuilder(V11nRuleEntity, 'v11n')
-            .select('v11n.*')
-            .getRawMany()
-            .then((_v11nRules: IV11nRule[]) =>
-                _v11nRules.map((v11nRule) => {
+        const v11nRules = await this.bibleEngine.db
+            .selectFrom('v11n_rule')
+            .selectAll()
+            .execute()
+            .then((_v11nRules) =>
+                _v11nRules.map((_v11nRule) => {
+                    const v11nRule = parseV11nRuleFromDatabase(_v11nRule);
                     const v11nRuleStripped: IV11nRule = {
                         sourceRefId: v11nRule.sourceRefId,
                         standardRefId: v11nRule.standardRefId,

@@ -38,7 +38,6 @@ export class BibleEngineImporter {
     import() {}
 
     async run() {
-        await this.bibleEngine.pDB;
         console.log(`running importer: ${this}`);
         if (this.options?.versionMeta?.uid) {
             console.log('version: ', this.options?.versionMeta?.uid);
