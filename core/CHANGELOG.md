@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.20]
+
+### Features
+
+-   always return full group range for joined verses in `getFullDataForReferenceRange`
+-   moved getChapterVerseSeparatorFromLanguage to core
+
 ## [1.4.10](https://github.com/STEPBible/BibleEngine/compare/v1.4.9...v1.4.10) (2024-01-15)
 
 ## [1.4.9]

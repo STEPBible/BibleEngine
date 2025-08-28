@@ -1,10 +1,30 @@
 # Changelog
 
+## [1.4.20]
+
+### Bug Fixes
+
+-   moved getChapterVerseSeparatorFromLanguage to core
+
+## [1.4.19]
+
+### Features
+
+-   exposed getChapterVerseSeparatorFromLanguage export in index.ts
+
+## [1.4.18]
+
+### Features
+
+-   moved chapter-verse separator to shared helpers (exported)
+
 ## [1.4.17]
 
 ### Bug Fixes
 
 -   added missing version properties to BeImportFileCreator.createAllVersions
+
+## [1.4.16]
 
 ### Features
 

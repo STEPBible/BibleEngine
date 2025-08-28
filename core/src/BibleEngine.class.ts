@@ -40,9 +40,11 @@ import {
     generateNormalizedRangeFromVersionRange,
     generatePhraseId,
     generateReferenceId,
+    generateVersionReferenceId,
     isReferenceNormalized,
     MAX_SUBVERSE_NUMBER,
     parsePhraseId,
+    parseReferenceId,
 } from './functions/reference.functions';
 import {
     generateBookSectionsSql,
@@ -655,11 +657,58 @@ export class BibleEngine {
                 return dict;
             });
 
-        const rangeNormalized = isReferenceNormalized(range)
+        let rangeNormalized = isReferenceNormalized(range)
             ? <IBibleReferenceRangeNormalized>range
             : await this.getNormalizedReferenceRange(range, bookEntity);
 
-        const phrases = await this.getPhrases(rangeNormalized, bookEntity);
+        let phrases = await this.getPhrases(rangeNormalized, bookEntity);
+
+        // check if our range starts with an incomplete verse range. in that
+        // case re-fetch the phrases starting from the starting phrase of the
+        // range
+        if (
+            phrases[0] &&
+            phrases[0].joinToVersionRefId &&
+            phrases[0].joinToVersionRefId <
+                generateVersionReferenceId({
+                    bookOsisId: bookEntity.osisId,
+                    versionChapterNum: phrases[0].versionChapterNum,
+                    versionVerseNum: phrases[0].versionVerseNum,
+                })
+        ) {
+            const parsedRefId = parseReferenceId(phrases[0].joinToVersionRefId);
+            let hasEndRange =
+                range.versionChapterEndNum && range.versionChapterEndNum > range.versionChapterNum!;
+            if (
+                !hasEndRange &&
+                range.versionVerseEndNum &&
+                range.versionVerseEndNum > range.versionVerseNum!
+            )
+                hasEndRange = true;
+            if (
+                !hasEndRange &&
+                range.versionSubverseEndNum &&
+                range.versionSubverseEndNum > range.versionSubverseNum!
+            )
+                hasEndRange = true;
+            rangeNormalized = await this.getNormalizedReferenceRange(
+                {
+                    isNormalized: false,
+                    versionId: versionEntity.id,
+                    versionUid: versionEntity.uid,
+                    bookOsisId: bookEntity.osisId,
+                    versionChapterNum: parsedRefId.normalizedChapterNum, // this is actually a version number, it's just named normalized by the parse method
+                    versionVerseNum: parsedRefId.normalizedVerseNum, // this is actually a version number, it's just named normalized by the parse method
+                    versionSubverseNum: parsedRefId.normalizedSubverseNum, // this is actually a version number, it's just named normalized by the parse method
+                    versionChapterEndNum: hasEndRange ? range.versionChapterEndNum : range.versionChapterNum,
+                    versionVerseEndNum: hasEndRange ? range.versionVerseEndNum : range.versionVerseNum,
+                    versionSubverseEndNum: hasEndRange ? range.versionSubverseEndNum : range.versionSubverseNum,
+                },
+                bookEntity
+            );
+            phrases = await this.getPhrases(rangeNormalized, bookEntity);
+        }
+
         const paragraphs = await db
             .createQueryBuilder(BibleParagraphEntity, 'paragraph')
             .where(
