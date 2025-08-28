@@ -196,6 +196,36 @@ export const generateReferenceRangeLabel = (
 };
 
 /**
+ * returns the character that separates chapter and verses in the given language. Currently this
+ * returns ':' for most languages.
+ */
+export function getChapterVerseSeparatorFromLanguage(language: string) {
+    const langNormalized = language.slice(0, 2);
+    let separator: string | undefined;
+    // RADAR: this needs research
+    switch (langNormalized) {
+        case 'de':
+        case 'hr':
+        case 'sk':
+        case 'hu':
+        // AI want to add those, but we currently use ":" here, needs further research
+        // case 'cs': // Czech (e.g. Jan 3,16)
+        // case 'pl': // Polish (e.g. J 3,16)
+            separator = ',';
+            break;
+        case 'fr':
+        case 'ru':
+        case 'ha':
+            separator = '.';
+            break;
+        default:
+            separator = ':';
+            break;
+    }
+    return separator;
+}
+
+/**
  * checks if there is any normalized property set (thus it has been normalized) or else if there is
  * no version number set (thus it does not need normalization)
  */

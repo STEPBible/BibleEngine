@@ -16,6 +16,7 @@ import {
     IBibleVersion,
     NT_BOOKS,
     OT_BOOKS,
+    getChapterVerseSeparatorFromLanguage
 } from '@bible-engine/core';
 import { UsxImporter } from '../usx';
 import { ITagWithType, ParserStackItem, TagType } from './types';
@@ -104,22 +105,8 @@ function genPlaintextFromXHTMLNodes(nodes: IXHTMLNode<XHTMLNodeType>[]): string 
  * returns ':' for most languages. For RTL languages, a special unicode character is appended
  * that prevents the text direction to flip within the reference.
  */
-function getChapterVerseSeparatorFromLanguage(language: string, direction: 'LTR' | 'RTL' = 'LTR') {
-    const langNormalized = language.slice(0, 2);
-    let separator: string | undefined;
-    // RADAR: this needs research
-    switch (langNormalized) {
-        case 'de':
-        case 'hr':
-        case 'sk':
-            separator = ',';
-            break;
-        case 'fr':
-        case 'ru':
-        case 'ha':
-            separator = '.';
-            break;
-    }
+function getChapterVerseSeparatorFromLanguageWithTextDirChar(language: string, direction: 'LTR' | 'RTL' = 'LTR') {
+    const separator = getChapterVerseSeparatorFromLanguage(language);
     return `${separator || ':'}${direction === 'RTL' ? '\u200f' : ''}`;
 }
 
@@ -241,7 +228,7 @@ export class DblImporter extends BibleEngineImporter {
                 : undefined,
             title: parsedMetadata.identification.nameLocal,
             language: parsedMetadata.language.ldml,
-            chapterVerseSeparator: getChapterVerseSeparatorFromLanguage(
+            chapterVerseSeparator: getChapterVerseSeparatorFromLanguageWithTextDirChar(
                 parsedMetadata.language.ldml,
                 parsedMetadata.language.scriptDirection
             ),
