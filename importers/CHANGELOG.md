@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.21]
+
+### Features
+
+-   [osis] added support for chapter labels/titles in OSIS importer (title.type=chapter, subType=chapterLabel)
+
 ## [1.4.20]
 
 ### Bug Fixes

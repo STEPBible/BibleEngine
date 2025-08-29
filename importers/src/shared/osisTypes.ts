@@ -27,6 +27,7 @@ export enum OsisXmlNodeType {
     BOLD = 'bold',
     BOOK = 'book',
     BOOK_INTRODUCTION = 'introduction',
+    CHAPTER = 'chapter',
     CROSS_REFERENCE = 'crossReference',
     EXPLANATION = 'explanation',
     ITALIC = 'italic',
@@ -50,6 +51,7 @@ export enum OsisXmlNodeType {
 }
 
 export enum OsisXmlNodeSubType {
+    CHAPTER_LABEL = 'chapterLabel',
     PRE_VERSE = 'x-preverse',
 }
 
