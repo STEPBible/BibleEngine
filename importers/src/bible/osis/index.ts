@@ -27,7 +27,7 @@ import {
 } from '../../shared/helpers.functions';
 import { BibleEngineImporter, IImporterOptions } from '../../shared/Importer.interface';
 import Logger from '../../shared/Logger';
-import { OsisXmlNode, OsisXmlNodeName, OsisXmlNodeType } from '../../shared/osisTypes';
+import { OsisXmlNode, OsisXmlNodeName, OsisXmlNodeSubType, OsisXmlNodeType } from '../../shared/osisTypes';
 import { ParserContext } from './entities/ParserContext';
 import { OsisParseError } from './errors/OsisParseError';
 import {
@@ -585,6 +585,12 @@ export class OsisImporter extends BibleEngineImporter {
                         currentContainer.contents.push(paragraph);
                     } else currentContainer.contents.push(titleGroup);
                     context.contentContainerStack.push(titleGroup);
+                } else if(tag.attributes.type === OsisXmlNodeType.CHAPTER && tag.attributes.subType === OsisXmlNodeSubType.CHAPTER_LABEL) {
+                    const sectionType =
+                        tag.attributes.level === 'sub'
+                            ? OsisXmlNodeType.SECTION_SUB
+                            : OsisXmlNodeType.SECTION;
+                    startNewSection(context, sectionType, true);
                 } else if (
                     !context.hasSectionsInSourceText &&
                     tag.attributes.type !== OsisXmlNodeType.SCOPE

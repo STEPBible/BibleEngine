@@ -6,7 +6,7 @@ import { ParserContext } from './../entities/ParserContext';
 import { getCurrentContainer } from './helpers.functions';
 import { startNewParagraph } from './paragraphs.functions';
 
-export const startNewSection = (context: ParserContext, elementType: OsisSection) => {
+export const startNewSection = (context: ParserContext, elementType: OsisSection, isChapterLabel?: boolean) => {
     // since we have some osis files where subSections are ended too early, we only
     // close sections when the next one is started - this leads to this rather
     // complicated code where we look which kind of section is currently open in order
@@ -52,6 +52,7 @@ export const startNewSection = (context: ParserContext, elementType: OsisSection
         level: context.sectionStack.length,
         contents: [],
     };
+    if(isChapterLabel) section.isChapterLabel = true;
 
     context.sectionStack.push(elementType);
     currentContainer.contents.push(section);
