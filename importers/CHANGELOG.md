@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.22]
+
+### Features
+
+-   [usx] added support for bdit (BOLD_ITALIC) and is (INTRODUCTION_SECTION_HEADING) node style
+
 ## [1.4.21]
 
 ### Features

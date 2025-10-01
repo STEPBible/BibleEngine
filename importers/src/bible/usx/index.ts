@@ -383,6 +383,7 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.SECTION_LEVEL_DEFAULT:
                 startSection(context, UsxXmlNodeStyle.SECTION_LEVEL1);
                 break;
+            case UsxXmlNodeStyle.INTRODUCTION_SECTION_HEADING:
             case UsxXmlNodeStyle.INTRODUCTION_SECTION_HEADING_LEVEL1:
             case UsxXmlNodeStyle.INTRODUCTION_OUTLINE_TITLE:
                 // there are files that don't have the `BOOK_INTRODUCTION_START` tag
@@ -505,6 +506,10 @@ export class UsxImporter extends BibleEngineImporter {
                 startGroupContainer('emphasis', context);
                 break;
             case UsxXmlNodeStyle.ITALIC:
+                startGroupContainer('italic', context);
+                break;
+            case UsxXmlNodeStyle.BOLD_ITALIC:
+                startGroupContainer('bold', context);
                 startGroupContainer('italic', context);
                 break;
             case UsxXmlNodeStyle.WORDS_OF_JESUS:
@@ -949,6 +954,7 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.ACROSTIC_FIRST_CHARACTER:
             case UsxXmlNodeStyle.EMPHASIS:
             case UsxXmlNodeStyle.ITALIC:
+            case UsxXmlNodeStyle.BOLD_ITALIC:
             case UsxXmlNodeStyle.WORDS_OF_JESUS:
             case UsxXmlNodeStyle.KEYWORD:
             case UsxXmlNodeStyle.NOTE_CHAR_KEYWORD:
@@ -956,6 +962,10 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.NOTE_CHAR_ALTTRANSLATION:
             case UsxXmlNodeStyle.TRANSLATION_CHANGE_ADDITION:
                 // TODO: do error checks
+
+                // bold-italic is a special case since it opens two containers
+                if(currentTag.type === UsxXmlNodeStyle.BOLD_ITALIC) context.contentContainerStack.pop();
+
                 const closedContainer = context.contentContainerStack.pop();
                 if (closedContainer?.type === 'book')
                     throw new UsxParseError(`closing book root container`, context);
