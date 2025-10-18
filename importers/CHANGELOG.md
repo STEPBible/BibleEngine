@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.23]
+
+### Features
+
+-   [shared] improved cross reference detection in notes
+
+### Bug Fixes
+
+-   [dbl] better support for NT-only bibles
+
+### Chores
+
+-   [NEUE] updated NEUE importer to latest content version
+
 ## [1.4.22]
 
 ### Features

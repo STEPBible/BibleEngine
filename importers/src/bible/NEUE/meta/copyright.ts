@@ -16,7 +16,7 @@ export default <DocumentRoot>{
                 {
                     type: 'group',
                     groupType: 'paragraph',
-                    contents: [{ type: 'phrase', content: 'Textstand: September 2018' }],
+                    contents: [{ type: 'phrase', content: 'Textstand: Oktober 2025' }],
                 },
                 {
                     type: 'group',

@@ -1,21 +1,21 @@
-import { resolve } from 'path';
-import { createReadStream } from 'fs';
+import { bcv_parser } from "bible-passage-reference-parser/esm/bcv_parser.js";
+import * as lang from "bible-passage-reference-parser/esm/lang/de.js";
+import { readFileSync } from 'fs';
 import { parseFragment } from 'parse5';
-import { decodeStream, encodeStream } from 'iconv-lite';
+import { resolve } from 'path';
 import { TreeDocumentFragment } from './models/parse5';
 
-import { BookWithContentForInput, BibleReferenceParser, DocumentRoot } from '@bible-engine/core';
+import { BibleReferenceParser, BookWithContentForInput, DocumentRoot } from '@bible-engine/core';
 
+import { getBibleReferenceParserCustomBooks } from "../../shared/helpers.functions";
+import { BibleEngineImporter } from '../../shared/Importer.interface';
 import { visitNode } from './helpers';
 import { bookList } from './meta/books';
 import copyrightLong from './meta/copyright';
-import { BibleEngineImporter } from '../../shared/Importer.interface';
-import { streamToString } from '../../shared/helpers.functions';
 
 export class NeueImporter extends BibleEngineImporter {
     async import() {
-        const bcv_parser = require('bible-passage-reference-parser/js/de_bcv_parser').bcv_parser;
-        const bcv: BibleReferenceParser = new bcv_parser({});
+        const bcv: BibleReferenceParser = new bcv_parser(lang);
         bcv.set_options({
             punctuation_strategy: 'eu',
             invalid_passage_strategy: 'include',
@@ -23,6 +23,10 @@ export class NeueImporter extends BibleEngineImporter {
             passage_existence_strategy: 'bc',
             consecutive_combination_strategy: 'separate',
         });
+
+        if (this.options.bookMeta) {
+            bcv.add_books({books: getBibleReferenceParserCustomBooks(this.options.bookMeta)});
+        }
 
         const versionUid = 'NEUE';
 
@@ -33,16 +37,12 @@ export class NeueImporter extends BibleEngineImporter {
 
         const sourceDir = this.options.sourcePath || resolve(__dirname) + '/data';
 
-        const descriptionHtml = await streamToString(
-            createReadStream(sourceDir + '/index.htm')
-                .pipe(decodeStream('windows1252'))
-                .pipe(encodeStream('utf8'))
-        );
+        const descriptionHtml = readFileSync(sourceDir + '/index.html', { encoding: 'utf8' });
 
         const descriptionNodes = <TreeDocumentFragment>(
             parseFragment(
                 descriptionHtml.substring(
-                    descriptionHtml.indexOf('<h2'),
+                    descriptionHtml.indexOf('<h3'),
                     descriptionHtml.lastIndexOf('</td>')
                 )
             )
@@ -71,17 +71,19 @@ export class NeueImporter extends BibleEngineImporter {
             // if (bookMeta.bookNum !== 2) continue;
 
             // Convert encoding streaming example
-            let bookHtml = await streamToString(
-                createReadStream(sourceDir + '/' + bookFile)
-                    .pipe(decodeStream('windows1252'))
-                    .pipe(encodeStream('utf8'))
-            );
+            let bookHtml = readFileSync(sourceDir + '/' + bookFile, { encoding: 'utf8'});
 
             // strip beginning and end of the html doc (we only need the content itself)
             bookHtml = bookHtml.substring(bookHtml.indexOf('<h1'), bookHtml.indexOf('<hr'));
 
             // replace poetry line breaks by actual html ones
             bookHtml = bookHtml.replace(/ \/ /g, '<br />');
+
+            // remove anchor tags to bible reference that link to either 1mo.html or 2mo.html
+            bookHtml = bookHtml.replace(
+                /<a href="(?:(?:1mo|2mo|3mo|4mo|5mo|jos|ri|rut|1sam|2sam|1koe|2koe|1chr|2chr|esra|neh|est|hiob|ps|spr|pred|hl|jes|jer|kla|hes|dan|hos|joel|amos|obadja|jona|mi|nah|hab|zef|hag|sach|mal|mt|mk|lk|jo|apg|roe|1kor|2kor|gal|eph|phil|kol|1thes|2thes|1tim|2tim|tit|phm|hebr|jak|1pt|2pt|1jo|2jo|3jo|jud|off)\.html)?#(?:[a-z0-9_-]+)">(.+?)<\/a>/g,
+                (_match, label) => label
+            );
 
             // const bookHtmlLatin1 = readFileSync(resolve(__dirname) + '/html/' + bookFile, 'latin1');
             const bibleNodes = <TreeDocumentFragment>parseFragment(bookHtml);
@@ -92,7 +94,7 @@ export class NeueImporter extends BibleEngineImporter {
                 book: {
                     type: bookMeta.bookNum < 40 ? 'ot' : 'nt',
                     number: bookMeta.bookNum,
-                    abbreviation: bookMeta.abbvreviation,
+                    abbreviation: bookMeta.abbreviation,
                     title: bookMeta.title,
                     osisId: bookMeta.osisId,
                 },

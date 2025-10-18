@@ -194,11 +194,12 @@ export class DblImporter extends BibleEngineImporter {
         });
 
         const bookMeta: Map<string, ImporterBookMetadataBook & { sourcePath: string }> = new Map();
-        for (const osisId of OT_BOOKS.concat(NT_BOOKS)) {
+        const publication = Array.isArray(parsedMetadata.publications.publication)
+            ? parsedMetadata.publications.publication[0]!
+            : parsedMetadata.publications.publication;
+        const allBooks = publication.structure.content.length <= 27 ? NT_BOOKS : OT_BOOKS.concat(NT_BOOKS); 
+        for (const osisId of allBooks) {
             const paratextId = BOOK_DATA[osisId]!.paratextId;
-            const publication = Array.isArray(parsedMetadata.publications.publication)
-                ? parsedMetadata.publications.publication[0]!
-                : parsedMetadata.publications.publication;
             const bookIndex = publication.structure.content.findIndex(
                 (metaStructureBook) => metaStructureBook.role === paratextId
             );

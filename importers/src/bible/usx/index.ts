@@ -26,10 +26,11 @@ import {
 
 import {
     endsWithNoSpaceAfterChar,
+    getBibleReferenceParserCustomBooks,
     getPhrasesFromParsedReferences,
     getReferencesFromText,
     isOnlyCrossReferenceWordOrPunctuation,
-    startsWithNoSpaceBeforeChar,
+    startsWithNoSpaceBeforeChar
 } from '../../shared/helpers.functions';
 import {
     closeAllGroups,
@@ -93,23 +94,34 @@ export class UsxImporter extends BibleEngineImporter {
                 sectionStack: [],
                 isCurrentVerseImplicit: false,
             };
+            let bcv_parser;
             try {
-                const bcv_parser = require(`bible-passage-reference-parser/js/${context.version.language
+                bcv_parser = require(`bible-passage-reference-parser/cjs/${context.version.language
                     .substring(0, 2)
                     .toLowerCase()}_bcv_parser`).bcv_parser;
-                const bcv: BibleReferenceParser = new bcv_parser({});
-                bcv.set_options({
-                    punctuation_strategy:
-                        this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
-                    invalid_passage_strategy: 'include',
-                    invalid_sequence_strategy: 'include',
-                    passage_existence_strategy: 'bc',
-                    consecutive_combination_strategy: 'separate',
-                });
-                context.bcv = bcv;
             } catch (e) {
-                this.log('warn', 'missing language file for bible-reference-parser', context);
+                bcv_parser = require('bible-passage-reference-parser/cjs/en_bcv_parser').bcv_parser;
             }
+            const bcv: BibleReferenceParser = new bcv_parser();
+            bcv.set_options({
+                punctuation_strategy:
+                    this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
+                invalid_passage_strategy: 'include',
+                invalid_sequence_strategy: 'include',
+                passage_existence_strategy: 'bc',
+                consecutive_combination_strategy: 'separate',
+                non_latin_digits_strategy: 'replace',
+                grammar: {
+                    // there seems to be a bug when matching the next-verse pattern
+                    // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
+                    next: /^(?:\x1f\x1f\x1f)/i,
+                }
+            });
+            if (this.options.bookMeta) {
+                bcv.add_books({books: getBibleReferenceParserCustomBooks(this.options.bookMeta)});
+            }
+            context.bcv = bcv;
+            
             const xmlStream = parser(true);
             xmlStream.ontext = (text: string) => {
                 if (encounteredError) {
@@ -255,6 +267,10 @@ export class UsxImporter extends BibleEngineImporter {
                 break;
             case 'verse':
             case UsxXmlNodeStyle.VERSE:
+                if(!context.currentChapter) {
+                    // setting the first chapter seems to be optional in USX (at least some source files we are seeing don't have it)
+                    context.currentChapter = 1;
+                }
                 context.isCurrentVerseImplicit = false;
                 const refs = tag.attributes.number!.split('-');
                 const subverses = ['a', 'b', 'c', 'd', 'e', 'f'];

@@ -103,7 +103,7 @@ export interface IBibleReferenceRangeQuery extends IBibleReferenceRange {
 
 /* types / interfaces needed for bible-passage-reference-parser */
 export type BibleReferenceBCV = {
-    b: 'string';
+    b: string;
     c: number;
     v: number;
     type: 'integer' | 'bc' | 'c' | 'bcv' | 'cv' | 'v' | 'bv';
@@ -111,7 +111,7 @@ export type BibleReferenceBCV = {
 
 export type BibleReferenceParsedEntity = {
     osis: string;
-    type: 'range' | 'integer' | 'bc' | 'c' | 'bcv' | 'cv' | 'v' | 'bv';
+    type: 'range' | 'next_v' | 'integer' | 'bc' | 'c' | 'bcv' | 'cv' | 'v' | 'bv';
     indices: [number, number];
     start: BibleReferenceBCV;
     end: BibleReferenceBCV;
@@ -128,6 +128,15 @@ export interface BibleReferenceParser {
         invalid_sequence_strategy?: 'include' | 'ignore';
         passage_existence_strategy?: 'b' | 'bc' | 'bcv' | 'bv' | 'c' | 'cv' | 'v' | 'none';
         consecutive_combination_strategy: 'separate' | 'combine';
+        non_latin_digits_strategy?: 'replace' | 'ignore';
+        grammar?: { next: RegExp };
+    }) => void;
+    add_books: (options: {
+        books: {
+            osis: string[];
+            regexp: RegExp;
+        }[];
+        insert_at?: 'start' | 'end';
     }) => void;
 }
 

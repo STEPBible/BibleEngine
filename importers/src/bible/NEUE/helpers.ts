@@ -188,7 +188,9 @@ export const visitNode = (
         node.nodeName === 'span' &&
         hasAttribute(node, 'class', 'kap')
     ) {
-        globalState.currentChapterNumber = +getTextFromNode(node);
+        const matchedChapterNumber = getTextFromNode(node).match(/\/([0-9]{1,3})\\/);
+        if(!matchedChapterNumber?.[1]) throw new Error(`can't determine chapter number in ${getTextFromNode(node)}`);
+        globalState.currentChapterNumber = parseInt(matchedChapterNumber[1]);
         // if a new chapter is set, it overwrites the backup number
         if (globalState.currentBackupChapterNumber)
             globalState.currentBackupChapterNumber = undefined;
@@ -198,17 +200,28 @@ export const visitNode = (
         node.nodeName === 'span' &&
         hasAttribute(node, 'class', 'vers')
     ) {
-        const verseRef = getTextFromNode(node);
-        const verseParts = verseRef.split(',');
-        if (verseParts.length > 1) {
+        const verseRef = getAttribute(node,'id');
+        if(verseRef) {
+
+            const verseParts = verseRef.split('_');
             globalState.currentBackupChapterNumber = globalState.currentChapterNumber;
             globalState.currentChapterNumber = +verseParts[0]!;
             globalState.currentVerseNumber = +verseParts[1]!;
-        } else {
-            globalState.currentVerseNumber = +verseRef;
-            if (globalState.currentBackupChapterNumber) {
-                globalState.currentChapterNumber = globalState.currentBackupChapterNumber;
-                globalState.currentBackupChapterNumber = undefined;
+        }
+        else {
+            const verseRefText = getTextFromNode(node);
+            const verseParts = verseRefText.split(',');
+            if (verseParts.length > 1) {
+                globalState.currentBackupChapterNumber = globalState.currentChapterNumber;
+                globalState.currentChapterNumber = +verseParts[0]!;
+                globalState.currentVerseNumber = +verseParts[1]!;
+
+            } else {
+                globalState.currentVerseNumber = +verseRefText;
+                if (globalState.currentBackupChapterNumber) {
+                    globalState.currentChapterNumber = globalState.currentBackupChapterNumber;
+                    globalState.currentBackupChapterNumber = undefined;
+                }
             }
         }
     } else if (globalState.bookData && node.nodeName === 'p' && hasAttribute(node, 'class', 'u0')) {
@@ -240,7 +253,7 @@ export const visitNode = (
         // else if (node.nodeName === 'span' && hasAttribute(node, 'class', 'u2'))
     } else if (globalState.bookData && node.nodeName === 'p' && hasAttribute(node, 'class', 'u3')) {
         if (!localState.currentDocument)
-            throw new Error(`we expect class=u3 to only occur in a book introduction`);
+            throw new Error(`we expect class=u3 to only occur in a book introduction: ${globalState.bookData.book.osisId} ${globalState.currentChapterNumber}:${globalState.currentVerseNumber}`);
         // skip the outline
         return;
     } else if (!globalState.bookData && localState.currentDocument && node.nodeName === 'ul') {
@@ -273,13 +286,30 @@ export const visitNode = (
 
             const expectedNoteReference =
                 `${firstContentWithPendingNote.versionChapterNum},` +
-                `${firstContentWithPendingNote.versionVerseNum}:`;
+                `${firstContentWithPendingNote.versionVerseNum}`;
 
-            if (noteText.indexOf(expectedNoteReference) !== 0)
-                throw new Error(
-                    `error matching note (${noteText}) to next pending phrase: ` +
+            if (noteText.indexOf(expectedNoteReference) !== 0) {
+                const noteRefParts = noteText.split(',');
+                let isPendingPhraseWithinNoteRefRange = false;
+                if (noteRefParts.length === 2) {
+                    const noteRefVerseRange = noteRefParts[1]!.split('-');
+                    if(noteRefVerseRange.length === 2) {
+                        const noteRefChapter = parseInt(noteRefParts[0]!);
+                        const noteRefVerseStart = parseInt(noteRefVerseRange[0]!);
+                        const noteRefVerseEnd = parseInt(noteRefVerseRange[1]!);
+                        if(
+                            firstContentWithPendingNote.versionChapterNum === noteRefChapter &&
+                            firstContentWithPendingNote.versionVerseNum && firstContentWithPendingNote.versionVerseNum >= noteRefVerseStart &&
+                            firstContentWithPendingNote.versionVerseNum <= noteRefVerseEnd
+                        ) isPendingPhraseWithinNoteRefRange = true;
+                    }
+                }
+
+                if (!isPendingPhraseWithinNoteRefRange) throw new Error(
+                    `error matching note (${noteText}) to next pending phrase: ${globalState.bookData?.book.osisId} ` +
                         `${expectedNoteReference}`
                 );
+            }
 
             // check if document only consist of references and convert to cross reference
             if (
@@ -380,7 +410,7 @@ export const visitNode = (
         } else if (globalState.bookData && localState.currentContentGroup) {
             if (!globalState.currentChapterNumber || !globalState.currentVerseNumber)
                 throw new Error(
-                    `verse numbers are missing in node: <${node.nodeName}>${text}</${node.nodeName}> / state: ${globalState.currentChapterNumber}:${globalState.currentVerseNumber}`
+                    `verse numbers are missing in node: <${node.nodeName}>${text}</${node.nodeName}> / state: ${globalState.bookData?.book.osisId} ${globalState.currentChapterNumber}:${globalState.currentVerseNumber}`
                 );
             const numbers = {
                 versionChapterNum: globalState.currentChapterNumber,
