@@ -202,7 +202,6 @@ export const visitNode = (
     ) {
         const verseRef = getAttribute(node,'id');
         if(verseRef) {
-
             const verseParts = verseRef.split('_');
             globalState.currentBackupChapterNumber = globalState.currentChapterNumber;
             globalState.currentChapterNumber = +verseParts[0]!;
@@ -215,13 +214,23 @@ export const visitNode = (
                 globalState.currentBackupChapterNumber = globalState.currentChapterNumber;
                 globalState.currentChapterNumber = +verseParts[0]!;
                 globalState.currentVerseNumber = +verseParts[1]!;
-
             } else {
                 globalState.currentVerseNumber = +verseRefText;
                 if (globalState.currentBackupChapterNumber) {
                     globalState.currentChapterNumber = globalState.currentBackupChapterNumber;
                     globalState.currentBackupChapterNumber = undefined;
                 }
+            }
+        }
+
+        // in a linegroup the verse number indicates the start of a new line
+        if(globalState.currentLinegroup && globalState.currentLinegroup.contents.length) {
+            const lastElement =
+                globalState.currentLinegroup.contents[globalState.currentLinegroup.contents.length - 1] ||
+                null;
+
+            if (lastElement && lastElement.type === 'phrase') {
+                lastElement.linebreak = true;
             }
         }
     } else if (globalState.bookData && node.nodeName === 'p' && hasAttribute(node, 'class', 'u0')) {

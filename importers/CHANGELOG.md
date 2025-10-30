@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.25]
+
+### Bug Fixes
+
+-   [NEUE] fixed line breaks in poetry sections
+
+## [1.4.24]
+
+### Features
+
+-   [shared] improved cross reference detection in notes
+
 ## [1.4.23]
 
 ### Features
