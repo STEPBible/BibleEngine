@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.26]
+
+### Bug Fixes
+
+-   updated types for bible reference parser
+
 ## [1.4.23]
 
 ### Features

@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.26]
+
+### Bug Fixes
+
+-   [shared] fixed issue where references with verse 0 (e.g. time like "12:00") were incorrectly detected as bible references in notes
+-   [shared] ignore local references that are just a digit (too ambiguous)
+-   [shared] detect more local reference patterns with special characters ("—", "·")
+-   [osis|usx] only match bible book case sensitively
+-   [osis] better parsing of section cross references 
+
 ## [1.4.25]
 
 ### Bug Fixes

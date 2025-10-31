@@ -262,6 +262,7 @@ export class OsisImporter extends BibleEngineImporter {
                     passage_existence_strategy: 'bc',
                     consecutive_combination_strategy: 'separate',
                     non_latin_digits_strategy: 'replace',
+                    case_sensitive: 'books',
                     grammar: {
                         // there seems to be a bug when matching the next-verse pattern
                         // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
@@ -1194,12 +1195,14 @@ export class OsisImporter extends BibleEngineImporter {
                 currentTag.name === OsisXmlNodeName.REFERENCE)
         ) {
             // Fix missing osisRefs of the last added reference
-            if (currentTag.name === OsisXmlNodeName.REFERENCE) {
+            if (currentTag.name === OsisXmlNodeName.REFERENCE || (currentTag.name === OsisXmlNodeName.TITLE && currentTag.attributes.type === OsisXmlNodeType.PARALLEL)) {
                 let currentCrossRefContainer: IBibleCrossReference[] | undefined;
                 if (this.isInsideSectionCrossRefs()) {
                     const currentSection = getCurrentSection(context);
-                    if (currentSection?.crossReferences?.length)
+                    if (currentSection) {
+                        if(!currentSection.crossReferences) currentSection.crossReferences = [];
                         currentCrossRefContainer = currentSection.crossReferences;
+                    }
                 } else if (!context.version?.crossRefBeforePhrase) {
                     const currentPhrase = this.getCurrentPhrase(context);
                     if (currentPhrase && currentPhrase.crossReferences?.length)
@@ -1208,16 +1211,16 @@ export class OsisImporter extends BibleEngineImporter {
                     if (context.crossRefBuffer?.refs?.length)
                         currentCrossRefContainer = context.crossRefBuffer.refs;
                 }
-                if (currentCrossRefContainer?.length) {
+                if (currentCrossRefContainer && (this.isInsideSectionCrossRefs() || currentCrossRefContainer?.length)) {
                     const currentCrossRef = currentCrossRefContainer[
                         currentCrossRefContainer.length - 1
                     ]!;
                     // we check if the label was already set. this can happen if we ignored a reference tag earlier
                     // however the parser will still come to this text node which would
                     // overwrite the label of the previous reference in this cross ref group
-                    if (!currentCrossRef.label) {
-                        currentCrossRef.label = trimmedText;
-                        if (!currentCrossRef.range.bookOsisId) {
+                    if (!currentCrossRef?.label) {
+                        if(currentCrossRef) currentCrossRef.label = trimmedText;
+                        if (!currentCrossRef?.range.bookOsisId) {
                             // we remove the ref with the missing range and create new ones (since there can be multiple)
                             currentCrossRefContainer.pop();
                             if (context.bcv && versionUid && context.currentBook?.osisId) {

@@ -327,7 +327,7 @@ export const getReferencesFromText = (
     
     const localRefMatcher: RegExp | undefined = context?.localRefMatcher
         ? context.localRefMatcher
-        : /((?:[\p{L}\p{M}]{1,25}\.?\s?[0-9]{1,3}[:,\.]?[0-9]{0,3})|(?:[\p{L}\p{M}]{0,25}\.?\s?[0-9]{1,3}[:,\.][0-9]{1,3}))(?:(?:(?:\s?[\s,\.\-–;:]\s?)|(?:\s[\p{L}\p{M}]{1,7}\s))[0-9]{1,7})*/giu;
+        : /((?:[\p{L}\p{M}]{1,25}\.?\s?[0-9]{1,3}[:·,\.]?[0-9]{0,3})|(?:[\p{L}\p{M}]{0,25}\.?\s?[0-9]{1,3}[:·,\.][0-9]{1,3}))(?:(?:(?:\s?[\s,\.\-–—;:·]\s?)|(?:\s[\p{L}\p{M}]{1,7}\s))[0-9]{1,7})*/giu;
         // : /((?:[\p{L}\p{M}]{1,25}\.?\s?[0-9]{1,3}[:,\.]?[0-9]{0,3})|(?:[\p{L}\p{M}]{0,25}\.?\s?[0-9]{1,3}[:,\.][0-9]{1,3}))\s?(?:[,\.\-–;:\p{L}\p{M}]{1,7}\s?[0-9:,\.]{1,7})?/giu;
     // : /[\p{L}\p{M}]{0,25}\.?\s?[0-9]{1,3}[:,\.]?[0-9]{0,3}\s?(?:[,\.\-–;:\p{L}\p{M}]{1,7}\s?[0-9:,\.]{1,7})/giu;
     // : /([\p{L}\p{M}]{0,12}\.?\s?[0-9:,\.]{1,7}\s?(?:[,\.\-–;:\p{L}\p{M}]{1,7}\s?[0-9:,\.]{1,7})?)/giu;
@@ -358,6 +358,14 @@ export const getReferencesFromText = (
                     for (const entity of <BibleReferenceParsedEntity[]>(
                         parsedLocalEntities[0].entities
                     )) {
+                        // remove localreferences where the verse is zero (e.g. time like "12:00")
+                        if(entity.entities?.length && entity.entities[0]!.valid?.messages?.start_verse_is_zero) continue;
+
+                        // if the reference text only consists of a number, it
+                        // is just a single number parsed as a chapter. we
+                        // ignore those since that would be too ambiguous
+                        if(!isNaN(Number(localRef.slice(entity.indices[0], entity.indices[1])))) continue;
+
                         // we set `lastRefIndex` to the last index of the last entity in `localRef`
                         lastRefIndex = entity.indices[1] + localRefIndex;
                         const newEntity = {

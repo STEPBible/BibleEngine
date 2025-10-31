@@ -111,6 +111,7 @@ export class UsxImporter extends BibleEngineImporter {
                 passage_existence_strategy: 'bc',
                 consecutive_combination_strategy: 'separate',
                 non_latin_digits_strategy: 'replace',
+                case_sensitive: 'books',
                 grammar: {
                     // there seems to be a bug when matching the next-verse pattern
                     // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33

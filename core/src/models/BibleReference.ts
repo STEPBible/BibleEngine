@@ -115,7 +115,12 @@ export type BibleReferenceParsedEntity = {
     indices: [number, number];
     start: BibleReferenceBCV;
     end: BibleReferenceBCV;
-    valid?: { valid: boolean };
+    valid?: {
+        valid: boolean;
+        messages?: {
+            start_verse_is_zero?: number;
+        };
+    };
     entities?: BibleReferenceParsedEntity[];
 };
 
@@ -129,6 +134,7 @@ export interface BibleReferenceParser {
         passage_existence_strategy?: 'b' | 'bc' | 'bcv' | 'bv' | 'c' | 'cv' | 'v' | 'none';
         consecutive_combination_strategy: 'separate' | 'combine';
         non_latin_digits_strategy?: 'replace' | 'ignore';
+        case_sensitive?: 'books' | 'translations' | 'books,translations' | 'none';
         grammar?: { next: RegExp };
     }) => void;
     add_books: (options: {
