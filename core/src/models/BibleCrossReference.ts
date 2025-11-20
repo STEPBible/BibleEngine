@@ -1,7 +1,7 @@
 import { BibleCrossReference } from '@bible-engine/db-schema/generated/db';
 import { Insertable, Selectable, Updateable } from 'kysely';
-import { generateReferenceId, parseReferenceId } from '../functions/reference.functions';
-import { IBibleReferenceRange, IBibleReferenceRangeNormalized } from './BibleReference';
+import { generateReferenceId, parseReferenceId } from '../functions/reference.functions.js';
+import { IBibleReferenceRange, IBibleReferenceRangeNormalized } from './BibleReference.js';
 
 export interface IBibleCrossReference {
     key?: string;

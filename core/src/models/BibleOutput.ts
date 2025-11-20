@@ -7,11 +7,11 @@ import {
     IBibleReference,
     IBibleReferenceRange,
     IBibleVersion,
-} from '../models';
-import { IBibleNumbering } from './BibleContent';
-import { IBiblePhraseEntity } from './BiblePhrase';
-import { IBibleSectionReduced } from './BibleSection';
-import { ContentGroupType } from './ContentGroup';
+} from '../models/index.js';
+import { IBibleNumbering } from './BibleContent.js';
+import { IBiblePhraseEntity } from './BiblePhrase.js';
+import { IBibleSectionReduced } from './BibleSection.js';
+import { ContentGroupType } from './ContentGroup.js';
 
 // export interface IBibleEngineOutput {
 //     source?: 'local' | 'remote';

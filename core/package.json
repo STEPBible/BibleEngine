@@ -1,22 +1,23 @@
 {
     "name": "@bible-engine/core",
-    "version": "2.0.0-pre1",
-    "main": "lib/index.js",
+    "version": "2.0.0-pre3",
+    "type": "module",
+    "exports": {
+        ".": "./lib/index.js"
+    },
     "license": "MIT",
     "scripts": {
         "test": "yarn jest",
-        "build": "rimraf ./lib && tsc && npm run buildES6",
-        "buildES6": "rimraf ./lib-es6 && tsc --target ES6 --module ES6 --outDir ./lib-es6",
+        "build": "rimraf ./lib && tsc",
         "prepublish": "yarn build",
         "release": "standard-version --path ."
     },
     "dependencies": {
+        "@bible-engine/db-schema": "2.0.0-pre3",
         "bible-passage-reference-parser": "^2.0.1",
+        "kysely": "^0.28.5",
         "reflect-metadata": "^0.1.13",
         "whatwg-fetch": "^3.6.2"
-    },
-    "peerDependencies": {
-        "@bible-engine/db-schema": "2.0.x"
     },
     "sideEffects": false
 }

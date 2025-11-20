@@ -7,11 +7,11 @@
     "scripts": {
         "_postinstall": "yarn run buildAll",
         "heroku": "node server/lib/heroku.js",
-        "buildAll": "yarn workspace @bible-engine/core run build && yarn workspace @bible-engine/importers run build && yarn workspace @bible-engine/server run generateApiClient && yarn workspace @bible-engine/server run build && yarn workspace @bible-engine/client run build && yarn workspace @bible-engine/db-schema run build",
+        "buildAll": "yarn workspace @bible-engine/db-schema run build && yarn workspace @bible-engine/core run build && yarn workspace @bible-engine/importers run build && yarn workspace @bible-engine/server run generateApiClient && yarn workspace @bible-engine/server run build && yarn workspace @bible-engine/client run build",
         "genDbTypes": "yarn workspace @bible-engine/db-schema run genDbTypes"
     },
     "dependencies": {
-        "kysely": "^0.27.5",
+        "kysely": "^0.28.5",
         "kysely-codegen": "^0.17.0"
     },
     "devDependencies": {
@@ -21,17 +21,17 @@
         "rimraf": "^2.6.3",
         "sqlite3": "5.1.2",
         "ts-jest": "24.1.0",
-        "ts-node": "~10.9.1",
         "tslint": "6.1.3",
-        "typescript": "~4.9"
+        "tsx": "^4.20.5",
+        "typescript": "~5.9"
     },
     "workspaces": {
         "packages": [
+            "db-schema",
             "core",
             "importers",
             "server",
-            "client",
-            "db-schema"
+            "client"
         ]
     }
 }

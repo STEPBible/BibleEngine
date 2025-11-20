@@ -15,6 +15,7 @@ bibles_default.db
 ChiUns.zip
 client/lib-es6
 core/lib-es6
+db-schema/lib-es6
 core/output
 esvSearchIndex.db
 greek_lexicon.txt

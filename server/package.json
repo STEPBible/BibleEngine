@@ -6,8 +6,8 @@
         "start": "pm2 startOrRestart process.prod.json",
         "startDev": "pm2 startOrRestart process.json",
         "build": "rm -rf ./lib && npx tsc",
-        "ts": "TS_NODE_PROJECT=./tsconfig.json ts-node -r tsconfig-paths/register",
-        "tsScript": "TS_NODE_PROJECT=./tsconfig.script.json ts-node -r tsconfig-paths/register",
+        "ts": "TS_NODE_PROJECT=./tsconfig.json tsx",
+        "tsScript": "TS_NODE_PROJECT=./tsconfig.script.json tsx",
         "generateApiClient": "npm run tsScript src/genApiClients.ts"
     },
     "dependencies": {

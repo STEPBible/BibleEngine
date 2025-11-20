@@ -5,10 +5,10 @@ import {
     DocumentPhrase,
     getNormalizedVerseCount,
     IBibleReferenceRangeQuery,
+    IContentPhrase,
     NT_BOOKS,
     OT_BOOKS,
 } from '@bible-engine/core';
-import { IContentPhrase } from '@bible-engine/core/lib/models/ContentPhrase';
 import { ImporterBookMetadata } from './Importer.interface';
 
 // we need to be careful with interpreting quotation marks, since german uses a 99-66 pattern, while

@@ -1,8 +1,8 @@
 import { BibleSection } from '@bible-engine/db-schema/generated/db';
 import { Insertable, Selectable, Updateable } from 'kysely';
-import { IBibleCrossReference } from './BibleCrossReference';
-import { IContentSection } from './ContentSection';
-import { DocumentRoot } from './Document';
+import { IBibleCrossReference } from './BibleCrossReference.js';
+import { IContentSection } from './ContentSection.js';
+import { DocumentRoot } from './Document.js';
 
 export interface IBibleSectionGeneric {
     phraseStartId: number;

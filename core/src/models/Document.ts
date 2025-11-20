@@ -1,7 +1,7 @@
-import { IContentSection } from './ContentSection';
-import { IContentGroup, ContentGroupType } from './ContentGroup';
-import { IContentPhrase } from './ContentPhrase';
-import { IBibleReferenceRangeQuery } from './BibleReference';
+import { IBibleReferenceRangeQuery } from './BibleReference.js';
+import { ContentGroupType, IContentGroup } from './ContentGroup.js';
+import { IContentPhrase } from './ContentPhrase.js';
+import { IContentSection } from './ContentSection.js';
 
 export interface DocumentPhrase extends IContentPhrase {
     readonly type?: 'phrase';

@@ -1,8 +1,8 @@
-import 'reflect-metadata';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import Koa from 'koa';
 import { join } from 'path';
-import { writeFileSync, existsSync, mkdirSync } from 'fs';
-import * as Koa from 'koa';
-import { useKoaServer, getMetadataArgsStorage, MetadataArgsStorage } from 'routing-controllers';
+import 'reflect-metadata';
+import { getMetadataArgsStorage, MetadataArgsStorage, useKoaServer } from 'routing-controllers';
 import { ControllerMetadataArgs } from 'routing-controllers/types/metadata/args/ControllerMetadataArgs';
 
 import { BibleController } from './Bible.controller';
@@ -65,7 +65,7 @@ function genApiClient(
             ts += `
             params: {${paramsTs}
             },`;
-        
+
         if (bodyTs)
             ts += `
             ${bodyTs}`;
@@ -118,7 +118,7 @@ async function genApiClients() {
     const app = new Koa();
     // register created koa server in routing-controllers
     useKoaServer(app, {
-        controllers: [BibleController]
+        controllers: [BibleController],
     });
     const controllerMetadata = getMetadataArgsStorage();
 

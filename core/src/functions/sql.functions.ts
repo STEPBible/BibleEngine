@@ -1,5 +1,5 @@
 import { sql } from 'kysely';
-import { IBiblePhraseRef, IBibleReferenceRangeNormalized } from '../models';
+import { IBiblePhraseRef, IBibleReferenceRangeNormalized } from '../models/index.js';
 import {
     generateEndReferenceFromRange,
     generatePhraseId,
@@ -7,7 +7,7 @@ import {
     MAX_CHAPTER_NUMBER,
     MAX_SUBVERSE_NUMBER,
     MAX_VERSE_NUMBER,
-} from './reference.functions';
+} from './reference.functions.js';
 
 /**
  * generates SQL for a range-query on the section table

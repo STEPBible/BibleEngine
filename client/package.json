@@ -1,17 +1,18 @@
 {
     "name": "@bible-engine/client",
     "version": "2.0.0",
-    "main": "lib/index.js",
+    "type": "module",
+    "exports": {
+        ".": "./lib/index.js"
+    },
     "scripts": {
-        "build": "rimraf ./lib && tsc && npm run buildES6",
-        "buildES6": "rimraf ./lib-es6 && tsc --target ES6 --module ES6 --outDir ./lib-es6",
+        "build": "rimraf ./lib && tsc",
         "test": "yarn jest",
         "prepublish": "yarn build"
     },
     "dependencies": {
-        "whatwg-fetch": "^3.6.2"
-    },
-    "peerDependencies": {
-        "@bible-engine/core": "2.0.x"
+        "@bible-engine/core": "2.0.0-pre3",
+        "whatwg-fetch": "^3.6.2",
+        "kysely": "^0.28.5"
     }
 }

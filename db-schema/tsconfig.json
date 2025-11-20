@@ -1,13 +1,16 @@
 {
     "extends": "../tsconfig.json",
     "compilerOptions": {
-        "module":"CommonJS",
-        "moduleResolution": "node",
-        "baseUrl": "./",
-        "outDir": "./lib",
+        "declaration": true,
+        "baseUrl": ".",
+        "outDir": "./lib"
     },
     "include": [
         "./*.ts",
         "./**/*.ts",
     ],
+    "exclude": [
+        "node_modules",
+        "lib",
+    ]
 }

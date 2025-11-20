@@ -1,4 +1,4 @@
-import { BibleBookPlaintext } from '../models';
+import { BibleBookPlaintext } from '../models/index.js';
 
 /**
  * @description OSIS book ID with chapter/verse statistics and English names

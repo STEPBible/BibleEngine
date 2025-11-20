@@ -164,8 +164,9 @@ export class BibleController {
         for (const version of langVersions) {
             if (
                 !clientVersions?.[version.uid] ||
-                (clientVersions[version.uid].dataLocation === 'remote' &&
-                    new Date(clientVersions[version.uid].lastUpdate) < version.lastUpdate)
+                (clientVersions[version.uid]?.dataLocation === 'remote' &&
+                    (!clientVersions[version.uid]?.lastUpdate ||
+                        new Date(clientVersions[version.uid]!.lastUpdate) < version.lastUpdate))
             ) {
                 const versionBooks = await this.bibleEngine.getBooksForVersion(version.id);
                 remoteUpdates.push({
@@ -180,7 +181,7 @@ export class BibleController {
         // check if a version has been deleted on the server
         for (const clientVersionUid of Object.keys(clientVersions || {})) {
             if (
-                clientVersions?.[clientVersionUid].dataLocation === 'remote' &&
+                clientVersions?.[clientVersionUid]?.dataLocation === 'remote' &&
                 !langVersions.find((version) => version.uid === clientVersionUid)
             )
                 remoteUpdates.push({ uid: clientVersionUid, change: 'deleted' });

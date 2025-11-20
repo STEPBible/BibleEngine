@@ -6,9 +6,9 @@ import {
     IBibleReferenceRange,
     IBibleReferenceRangeNormalized,
     IBibleSectionGeneric,
-} from '../models';
-import { pad } from './utils.functions';
-import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from './v11n.functions';
+} from '../models/index.js';
+import { pad } from './utils.functions.js';
+import { getBookGenericIdFromOsisId, getOsisIdFromBookGenericId } from './v11n.functions.js';
 
 // due to the way we save phrase ids as a big integers, there are maximum values for each part
 // the following constants are ordered as they appear in the phrase id (total 15 digits)
@@ -208,9 +208,9 @@ export function getChapterVerseSeparatorFromLanguage(language: string) {
         case 'hr':
         case 'sk':
         case 'hu':
-        // AI want to add those, but we currently use ":" here, needs further research
-        // case 'cs': // Czech (e.g. Jan 3,16)
-        // case 'pl': // Polish (e.g. J 3,16)
+            // AI want to add those, but we currently use ":" here, needs further research
+            // case 'cs': // Czech (e.g. Jan 3,16)
+            // case 'pl': // Polish (e.g. J 3,16)
             separator = ',';
             break;
         case 'fr':

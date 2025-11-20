@@ -3,8 +3,8 @@ import {
     getOsisIdFromBookString,
     getSourceTypeId,
     IV11nRule,
+    notePhrases,
 } from '@bible-engine/core';
-import { notePhrases } from '@bible-engine/core/lib/models/V11nRule';
 import { createReadStream } from 'fs';
 import { resolve } from 'path';
 import { createInterface } from 'readline';

@@ -5,7 +5,7 @@ import {
     generateNormalizedRangeFromVersionRange,
     generateReferenceId,
     parseReferenceId,
-} from '../functions/reference.functions';
+} from '../functions/reference.functions.js';
 
 export interface IV11nRule {
     // one of `sourceRef` or `sourceRefId` is required

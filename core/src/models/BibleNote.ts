@@ -1,6 +1,6 @@
 import { BibleNote } from '@bible-engine/db-schema/generated/db';
 import { Insertable, Selectable, Updateable } from 'kysely';
-import { DocumentRoot } from './Document';
+import { DocumentRoot } from './Document.js';
 
 export interface IBibleNote {
     type?: string;

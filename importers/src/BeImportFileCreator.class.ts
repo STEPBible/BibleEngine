@@ -4,15 +4,15 @@ import {
     IBibleBook,
     IBibleVersion,
     IV11nRule,
+    parseV11nRuleFromDatabase,
 } from '@bible-engine/core';
-import { parseV11nRuleFromDatabase } from '@bible-engine/core/lib/models/V11nRule';
 import { DB } from '@bible-engine/db-schema/generated/db';
-import * as archiver from 'archiver';
+import archiver from 'archiver';
+import { webcrypto as crypto } from 'crypto';
 import { createWriteStream, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { ensureDirSync } from 'fs-extra';
 import { Kysely } from 'kysely';
 import { sync as rmDirRecSync } from 'rimraf';
-const crypto = require('crypto').webcrypto;
 
 export interface BeFileCreatorOptions {
     skipCompression?: boolean;
@@ -88,12 +88,7 @@ export class BeImportFileCreator {
             );
         const filename = `${this.destinationPath}/v11n-rules.json`;
 
-        writeFileSync(
-            filename,
-            // deflate(
-            JSON.stringify(v11nRules)
-            // , { to: 'string' })
-        );
+        writeFileSync(filename, JSON.stringify(v11nRules));
 
         return filename;
     }
@@ -104,7 +99,7 @@ export class BeImportFileCreator {
         const targetFile = `${versionData.version.uid}.bef`;
         const targetPath = `${this.destinationPath}/${targetFile}`;
 
-        const p = new Promise<string>(async (pResolve, pReject) => {
+        const p = new Promise<string>((pResolve, pReject) => {
             // create version directory
             ensureDirSync(targetDir);
 
@@ -133,37 +128,48 @@ export class BeImportFileCreator {
             writeFileSync(`${targetDir}/index.json`, JSON.stringify(versionIndex));
 
             if (options && options.skipCompression) {
-                pResolve('./');
+                pResolve(targetDir);
                 return;
             }
 
             // pack everything
             const zipArchive = archiver('zip');
-            zipArchive.on('warning', function (err) {
+            zipArchive.on('warning', function (err: any) {
                 if (err.code === 'ENOENT') {
                     console.error(err);
                 } else {
-                    // throw error
                     pReject(err);
                 }
             });
+
+            zipArchive.on('error', (err) => pReject(err));
 
             const output = createWriteStream(targetPath);
             output.on('close', async function () {
                 const bytes = zipArchive.pointer();
                 rmDirRecSync(targetDir);
                 if (options?.encryptVersions?.includes(versionUid) && options?.encryptionKey) {
-                    const encData = await aesGcmEncrypt(
-                        crypto,
-                        readFileSync(targetPath),
-                        options.encryptionKey
-                    );
-                    writeFileSync(`${targetPath}.enc`, Buffer.from(encData));
-                    unlinkSync(targetPath);
-                    console.log(
-                        `${targetPath}.enc was successfully created with ${encData.byteLength} total bytes`
-                    );
-                    pResolve(`${targetFile}.enc`);
+                    try {
+                        const fileBuf = readFileSync(targetPath);
+                        const arrayBuf = new ArrayBuffer(fileBuf.byteLength);
+                        new Uint8Array(arrayBuf).set(fileBuf);
+                        const encData = await aesGcmEncrypt(
+                            (crypto as unknown) as Crypto,
+                            arrayBuf,
+                            options.encryptionKey
+                        );
+                        writeFileSync(
+                            `${targetPath}.enc`,
+                            encData instanceof Uint8Array ? encData : new Uint8Array(encData)
+                        );
+                        unlinkSync(targetPath);
+                        console.log(
+                            `${targetPath}.enc was successfully created with ${encData.byteLength} total bytes`
+                        );
+                        pResolve(`${targetFile}.enc`);
+                    } catch (e) {
+                        pReject(e);
+                    }
                 } else {
                     console.log(`${targetPath} was successfully created with ${bytes} total bytes`);
                     pResolve(targetFile);

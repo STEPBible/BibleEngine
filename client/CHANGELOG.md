@@ -2,6 +2,10 @@
 
 ## [2.0.0]
 
+### Bug Fixes
+
+-   properly configured project to use ESM
+
 ### Breaking Changes
 
 -   migrated from typeorm to kysely, constructor parameters have changed

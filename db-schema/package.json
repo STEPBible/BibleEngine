@@ -1,17 +1,26 @@
 {
     "name": "@bible-engine/db-schema",
-    "version": "2.0.0-pre1",
-    "type": "commonjs",
-    "main": "./lib/index.js",
-    "types": "./lib/index.d.ts",
+    "version": "2.0.0-pre3",
+    "type": "module",
+    "exports": {
+        ".": "./lib/index.js",
+        "./generated/db": "./generated/db.d.ts"
+    },
+    "files": [
+        "lib",
+        "generated"
+    ],
     "scripts": {
         "genDbTypes": ". ../.env && kysely-codegen --url mysql://$DB_USER:$DB_PASS@$DB_SERVER:$DB_PORT/$DB_NAME --out-file=./generated/db.d.ts",
         "migrate": "tsx ./migrate.ts",
-        "build": "rimraf ./lib && tsc --declaration"
+        "build": "rimraf ./lib && tsc",
+        "prepublish": "yarn build"
+
     },
     "dependencies": {
         "commander": "^13.1.0",
-        "mysql2": "^3.12.0",
-        "dotenv": "^16.4.7"
+        "dotenv": "^16.4.7",
+        "kysely": "^0.28.5",
+        "mysql2": "^3.12.0"
     }
 }

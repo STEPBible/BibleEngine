@@ -1,14 +1,14 @@
 import { BiblePhrase } from '@bible-engine/db-schema/generated/db';
 import { Insertable, Selectable, Updateable } from 'kysely';
-import { generatePhraseId, parsePhraseId } from '../functions/reference.functions';
-import { IBibleCrossReference } from './BibleCrossReference';
-import { IBibleNote } from './BibleNote';
+import { generatePhraseId, parsePhraseId } from '../functions/reference.functions.js';
+import { IBibleCrossReference } from './BibleCrossReference.js';
+import { IBibleNote } from './BibleNote.js';
 import {
     IBiblePhraseRef,
     IBibleReferenceNormalizedNumbers,
     IBibleReferenceVersionNumbers,
-} from './BibleReference';
-import { IContentPhrase } from './ContentPhrase';
+} from './BibleReference.js';
+import { IContentPhrase } from './ContentPhrase.js';
 
 export interface IBiblePhrase extends IContentPhrase {
     quoteWho?: string;

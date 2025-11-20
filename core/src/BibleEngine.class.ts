@@ -21,8 +21,8 @@ import {
     stripUnnecessaryDataFromBibleContextData,
     stripUnnecessaryDataFromBibleReferenceRange,
     stripUnnecessaryDataFromBibleVersion,
-} from './functions/content.functions';
-import { isSqlite } from './functions/kysely.functions';
+} from './functions/content.functions.js';
+import { isSqlite } from './functions/kysely.functions.js';
 import {
     generateEndReferenceFromRange,
     generateNormalizedRangeFromVersionRange,
@@ -33,14 +33,43 @@ import {
     MAX_SUBVERSE_NUMBER,
     parsePhraseId,
     parseReferenceId,
-} from './functions/reference.functions';
+} from './functions/reference.functions.js';
 import {
     generateBookSectionsSql,
     generateParagraphSql,
     generatePhraseIdSql,
     generateReferenceIdSql,
-} from './functions/sql.functions';
-import { isTestMatching } from './functions/v11n.functions';
+} from './functions/sql.functions.js';
+import { isTestMatching } from './functions/v11n.functions.js';
+import {
+    getBookChapterVerseCount,
+    parseBookFromDatabase,
+    prepareBookForDatabase,
+} from './models/BibleBook.js';
+import {
+    IBibleCrossReference,
+    parseCrossReferenceFromDatabase,
+    prepareCrossReferenceForDatabase,
+} from './models/BibleCrossReference.js';
+import { parseNoteFromDatabase, prepareNoteForDatabase } from './models/BibleNote.js';
+import {
+    IBiblePhraseEntity,
+    parsePhraseFromDatabase,
+    preparePhraseForDatabase,
+} from './models/BiblePhrase.js';
+import { IBibleReferenceVersionNormalized } from './models/BibleReference.js';
+import { IBibleSearchOptions } from './models/BibleSearch.js';
+import {
+    IBibleSectionEntity,
+    IBibleSectionHierarchical,
+    parseSectionFromDatabase,
+    prepareSectionForDatabase,
+} from './models/BibleSection.js';
+import {
+    IBibleVersionEntity,
+    parseVersionFromDatabase,
+    prepareVersionForDatabase,
+} from './models/BibleVersion.js';
 import {
     BibleBookPlaintext,
     BiblePlaintext,
@@ -61,41 +90,12 @@ import {
     IBibleVersion,
     IDictionaryEntry,
     PhraseModifiers,
-} from './models';
-import {
-    getBookChapterVerseCount,
-    parseBookFromDatabase,
-    prepareBookForDatabase,
-} from './models/BibleBook';
-import {
-    IBibleCrossReference,
-    parseCrossReferenceFromDatabase,
-    prepareCrossReferenceForDatabase,
-} from './models/BibleCrossReference';
-import { parseNoteFromDatabase, prepareNoteForDatabase } from './models/BibleNote';
-import {
-    IBiblePhraseEntity,
-    parsePhraseFromDatabase,
-    preparePhraseForDatabase,
-} from './models/BiblePhrase';
-import { IBibleReferenceVersionNormalized } from './models/BibleReference';
-import { IBibleSearchOptions } from './models/BibleSearch';
-import {
-    IBibleSectionEntity,
-    IBibleSectionHierarchical,
-    parseSectionFromDatabase,
-    prepareSectionForDatabase,
-} from './models/BibleSection';
-import {
-    IBibleVersionEntity,
-    parseVersionFromDatabase,
-    prepareVersionForDatabase,
-} from './models/BibleVersion';
+} from './models/index.js';
 import {
     IV11nRule,
     parseV11nRuleFromDatabase,
     prepareV11nRuleForDatabase,
-} from './models/V11nRule';
+} from './models/V11nRule.js';
 
 export class NoDbConnectionError extends Error {
     constructor() {

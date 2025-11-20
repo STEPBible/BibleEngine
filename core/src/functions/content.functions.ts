@@ -1,3 +1,12 @@
+import { getBookChapterVerseCount } from '../models/BibleBook.js';
+import { IBibleParagraphEntity } from '../models/BibleParagraph.js';
+import {
+    getPhraseModifierValue,
+    IBiblePhraseEntity,
+    StringModifiers,
+} from '../models/BiblePhrase.js';
+import { IBibleSectionReduced } from '../models/BibleSection.js';
+import { IBibleVersionEntity } from '../models/BibleVersion.js';
 import {
     BibleBookPlaintext,
     BibleContentGeneratorContainer,
@@ -28,23 +37,18 @@ import {
     IBibleVersion,
     PhraseModifiers,
     ValueModifiers,
-} from '../models';
-import { getBookChapterVerseCount } from '../models/BibleBook';
-import { IBibleParagraphEntity } from '../models/BibleParagraph';
-import { getPhraseModifierValue, IBiblePhraseEntity, StringModifiers } from '../models/BiblePhrase';
-import { IBibleSectionReduced } from '../models/BibleSection';
-import { IBibleVersionEntity } from '../models/BibleVersion';
+} from '../models/index.js';
 import {
     generateRangeFromGenericSection,
     generateReferenceRangeLabel,
     slimDownCrossReference,
     slimDownReferenceRange,
-} from './reference.functions';
+} from './reference.functions.js';
 import {
     getNormalizedChapterCountForOsisId,
     getNormalizedVerseCount,
     isValidNormalizedChapter,
-} from './v11n.functions';
+} from './v11n.functions.js';
 
 export type PhraseVersionNumbersById = {
     [index: number]: { chapter: number; verse: number; subverse: number; phraseNum: number };

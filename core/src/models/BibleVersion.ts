@@ -1,6 +1,6 @@
 import { BibleVersion } from '@bible-engine/db-schema/generated/db';
 import { Insertable, Selectable, Updateable } from 'kysely';
-import { DocumentRoot } from './Document';
+import { DocumentRoot } from './Document.js';
 
 export interface IBibleVersion {
     id?: number;

@@ -1,9 +1,6 @@
 {
+    "extends": "../tsconfig.json",
     "compilerOptions": {
-        "target": "es2017",
-        "module": "commonjs",
-        "lib": ["dom", "es2018"],
-        "moduleResolution": "node",
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,

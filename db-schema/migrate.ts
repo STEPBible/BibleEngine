@@ -4,10 +4,12 @@ import { DB } from 'generated/db';
 import { FileMigrationProvider, Kysely, Migrator, MysqlDialect } from 'kysely';
 import { createPool } from 'mysql2';
 import * as path from 'path';
-import { run } from './run';
+import { run } from './run.js';
 
-
-function connect(envPath: string | undefined, password: string | undefined): [Kysely<any>, Migrator] {
+function connect(
+    envPath: string | undefined,
+    password: string | undefined
+): [Kysely<any>, Migrator] {
     const { parsed: DOTENV } = dotenv.config({
         path: envPath || path.resolve(__dirname, '../.env'),
     });
