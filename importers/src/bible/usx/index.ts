@@ -26,10 +26,11 @@ import {
 
 import {
     endsWithNoSpaceAfterChar,
+    getBibleReferenceParserCustomBooks,
     getPhrasesFromParsedReferences,
     getReferencesFromText,
     isOnlyCrossReferenceWordOrPunctuation,
-    startsWithNoSpaceBeforeChar,
+    startsWithNoSpaceBeforeChar
 } from '../../shared/helpers.functions';
 import {
     closeAllGroups,
@@ -93,23 +94,35 @@ export class UsxImporter extends BibleEngineImporter {
                 sectionStack: [],
                 isCurrentVerseImplicit: false,
             };
+            let bcv_parser;
             try {
-                const bcv_parser = require(`bible-passage-reference-parser/js/${context.version.language
+                bcv_parser = require(`bible-passage-reference-parser/cjs/${context.version.language
                     .substring(0, 2)
                     .toLowerCase()}_bcv_parser`).bcv_parser;
-                const bcv: BibleReferenceParser = new bcv_parser({});
-                bcv.set_options({
-                    punctuation_strategy:
-                        this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
-                    invalid_passage_strategy: 'include',
-                    invalid_sequence_strategy: 'include',
-                    passage_existence_strategy: 'bc',
-                    consecutive_combination_strategy: 'separate',
-                });
-                context.bcv = bcv;
             } catch (e) {
-                this.log('warn', 'missing language file for bible-reference-parser', context);
+                bcv_parser = require('bible-passage-reference-parser/cjs/en_bcv_parser').bcv_parser;
             }
+            const bcv: BibleReferenceParser = new bcv_parser();
+            bcv.set_options({
+                punctuation_strategy:
+                    this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
+                invalid_passage_strategy: 'include',
+                invalid_sequence_strategy: 'include',
+                passage_existence_strategy: 'bc',
+                consecutive_combination_strategy: 'separate',
+                non_latin_digits_strategy: 'replace',
+                case_sensitive: 'books',
+                grammar: {
+                    // there seems to be a bug when matching the next-verse pattern
+                    // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
+                    next: /^(?:\x1f\x1f\x1f)/i,
+                }
+            });
+            if (this.options.bookMeta) {
+                bcv.add_books({books: getBibleReferenceParserCustomBooks(this.options.bookMeta)});
+            }
+            context.bcv = bcv;
+            
             const xmlStream = parser(true);
             xmlStream.ontext = (text: string) => {
                 if (encounteredError) {
@@ -255,6 +268,10 @@ export class UsxImporter extends BibleEngineImporter {
                 break;
             case 'verse':
             case UsxXmlNodeStyle.VERSE:
+                if(!context.currentChapter) {
+                    // setting the first chapter seems to be optional in USX (at least some source files we are seeing don't have it)
+                    context.currentChapter = 1;
+                }
                 context.isCurrentVerseImplicit = false;
                 const refs = tag.attributes.number!.split('-');
                 const subverses = ['a', 'b', 'c', 'd', 'e', 'f'];
@@ -383,6 +400,7 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.SECTION_LEVEL_DEFAULT:
                 startSection(context, UsxXmlNodeStyle.SECTION_LEVEL1);
                 break;
+            case UsxXmlNodeStyle.INTRODUCTION_SECTION_HEADING:
             case UsxXmlNodeStyle.INTRODUCTION_SECTION_HEADING_LEVEL1:
             case UsxXmlNodeStyle.INTRODUCTION_OUTLINE_TITLE:
                 // there are files that don't have the `BOOK_INTRODUCTION_START` tag
@@ -505,6 +523,10 @@ export class UsxImporter extends BibleEngineImporter {
                 startGroupContainer('emphasis', context);
                 break;
             case UsxXmlNodeStyle.ITALIC:
+                startGroupContainer('italic', context);
+                break;
+            case UsxXmlNodeStyle.BOLD_ITALIC:
+                startGroupContainer('bold', context);
                 startGroupContainer('italic', context);
                 break;
             case UsxXmlNodeStyle.WORDS_OF_JESUS:
@@ -949,6 +971,7 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.ACROSTIC_FIRST_CHARACTER:
             case UsxXmlNodeStyle.EMPHASIS:
             case UsxXmlNodeStyle.ITALIC:
+            case UsxXmlNodeStyle.BOLD_ITALIC:
             case UsxXmlNodeStyle.WORDS_OF_JESUS:
             case UsxXmlNodeStyle.KEYWORD:
             case UsxXmlNodeStyle.NOTE_CHAR_KEYWORD:
@@ -956,6 +979,10 @@ export class UsxImporter extends BibleEngineImporter {
             case UsxXmlNodeStyle.NOTE_CHAR_ALTTRANSLATION:
             case UsxXmlNodeStyle.TRANSLATION_CHANGE_ADDITION:
                 // TODO: do error checks
+
+                // bold-italic is a special case since it opens two containers
+                if(currentTag.type === UsxXmlNodeStyle.BOLD_ITALIC) context.contentContainerStack.pop();
+
                 const closedContainer = context.contentContainerStack.pop();
                 if (closedContainer?.type === 'book')
                     throw new UsxParseError(`closing book root container`, context);

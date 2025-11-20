@@ -44,6 +44,7 @@ export enum OsisXmlNodeType {
     SECTION_MAJOR = 'majorSection',
     SECTION_SUB = 'subSection',
     SELAH = 'x-selah',
+    SOURCE = 'source',
     SWORD_MILESTONE = 'x-milestone',
     SWORD_PILCROW = 'x-p',
     TEXTUAL_NOTE = 'x-textual-note',

@@ -43,8 +43,9 @@ export function isInsideIgnoredContent(context: ParserContext) {
         (tag) =>
             IGNORED_METADATA_TAGS.includes(tag.name) ||
             // since we display notes/crossRefs links directly at the text, we don't need to display the reference at the beginning of the note
-            (tag.name === OsisXmlNodeName.REFERENCE &&
-                tag.attributes.type === OsisXmlNodeType.ANNOTATE_REF &&
-                !tag.attributes.osisRef)
+            (tag.name === OsisXmlNodeName.REFERENCE && (
+                (tag.attributes.type === OsisXmlNodeType.ANNOTATE_REF && !tag.attributes.osisRef) ||
+                tag.attributes.type === OsisXmlNodeType.SOURCE
+            ))
     );
 }

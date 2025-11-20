@@ -18,6 +18,8 @@ import { ImporterBookMetadata } from './Importer.interface';
 // Additionally the characters "«" and "»" are used oppositely in different languages, wo we also
 // put them in the "other" category.
 
+const DEBUG = false;
+
 const PUNCTUATION_NO_SPACE_BEFORE = [
     // latin
     '.',
@@ -173,6 +175,7 @@ export const getBibleReferenceFromParsedReference = (
         ref.type === 'cv' ||
         ref.type === 'bcv' ||
         ref.type === 'integer' ||
+        ref.type === 'next_v' ||
         (ref.type === 'range' && ref.start.type !== 'c' && ref.start.type !== 'bc')
     ) {
         bibleReference.versionVerseNum = ref.start.v;
@@ -203,12 +206,13 @@ export const getPhrasesFromParsedReferences = (
     for (const ref of parsedRefs) {
         const refText = text.slice(ref.indices[0], ref.indices[1]).trim();
 
-        if (currentIndex > ref.indices[0])
+        if (currentIndex > ref.indices[0]) {
             throw new Error(
                 `reference entities overlap in text ${text} with refText ${refText} ` +
                     `between currentIndex ${currentIndex} and indices[0] ` +
                     `${ref.indices[0]}`
             );
+        }
 
         if (currentIndex < ref.indices[0]) {
             // create phrase from text at range currentIndex to start of reference
@@ -295,16 +299,46 @@ export const getReferencesFromText = (
     //  regex can be provided to help the parser find all of them
     //  example (german): `/(Kapitel|V\.|Vers) ([0-9,.\-; ]|(und|bis|Kapitel|V\.|Vers))+/g`
     // normalize language to consist of only two letters and lowercase if it is defined, otherwise leave it undefined
-    const languageNormalized = context?.language?.toLowerCase().substring(0, 2);
+    // const languageNormalized = context?.language?.toLowerCase().substring(0, 2);
+    
+    // In order to make this work better for any language we changed the
+    // approach to a generic matching of anything that could be a bible
+    // reference. We don't need to be correct at this point, since the actual
+    // parsing is done as a second step by bible-reference-parser - we just need
+    // to feed it the separate bits since it can't identify local references
+    // within a text on it's own. 
+    //
+    // That does mean that only those references are actually recognized that
+    // are otherwise matched by the language-specific regexes of
+    // bible-reference-parser. This includes bible book abbreviations as well as
+    // words, phrases or letters that go along with bible references in that
+    // language.
+
+    // RADAR: with our generic approach we also match normal bible references
+    //        with bible books for our local matching. In our second pass we
+    //        will match those again and replace them. This isn't very efficient
+    //        but parsing is generally fast and with this approach we manage to
+    //        catch the most references overall (and this code works
+    //        independently from languages and future updates to
+    //        bible-reference-parser matching). In case we need to change back
+    //        to language specific regexes (in order to only match local
+    //        referenes in our first pass) we leave the old code commented out
+    //        below.
+    
     const localRefMatcher: RegExp | undefined = context?.localRefMatcher
         ? context.localRefMatcher
-        : languageNormalized === 'en'
-        ? /(^|\s)(chapter|ch\.|v\.|verse|verses)\s([0-9,:\-–;\s]|(and|to|chapter|ch\.|v\.|verse|verses))+/gi
-        : languageNormalized === 'de'
-        ? /(Kapitel|V\.|Vers)\s([0-9,\.\-–;\s]|(und|bis|Kapitel|V\.|Vers))+/g
-        : languageNormalized === 'fr'
-        ? /(chapitre|ch\.|v\.|verset|versets)\s([0-9,\.\-–;\s]|(et|chapitre|ch\.|v\.|verset|versets))+/gi
-        : /(c\.|ch\.|v\.|vs)\s([0-9,\.:\-–;\s]|(c\.|ch\.|v\.|vs))+/gi;
+        : /((?:[\p{L}\p{M}]{1,25}\.?\s?[0-9]{1,3}[:·,\.]?[0-9]{0,3})|(?:[\p{L}\p{M}]{0,25}\.?\s?[0-9]{1,3}[:·,\.][0-9]{1,3}))(?:(?:(?:\s?[\s,\.\-–—;:·]\s?)|(?:\s[\p{L}\p{M}]{1,7}\s))[0-9]{1,7})*/giu;
+        // : /((?:[\p{L}\p{M}]{1,25}\.?\s?[0-9]{1,3}[:,\.]?[0-9]{0,3})|(?:[\p{L}\p{M}]{0,25}\.?\s?[0-9]{1,3}[:,\.][0-9]{1,3}))\s?(?:[,\.\-–;:\p{L}\p{M}]{1,7}\s?[0-9:,\.]{1,7})?/giu;
+    // : /[\p{L}\p{M}]{0,25}\.?\s?[0-9]{1,3}[:,\.]?[0-9]{0,3}\s?(?:[,\.\-–;:\p{L}\p{M}]{1,7}\s?[0-9:,\.]{1,7})/giu;
+    // : /([\p{L}\p{M}]{0,12}\.?\s?[0-9:,\.]{1,7}\s?(?:[,\.\-–;:\p{L}\p{M}]{1,7}\s?[0-9:,\.]{1,7})?)/giu;
+    // languageNormalized === 'en'
+    // ? /(^|\s)(chapter|ch\.?|v\.?|verse|verses|cf\.?)\s([0-9,:\-–;\s]|(and|to|chapter|ch\.|v\.|verse|verses))+/gi
+    // : languageNormalized === 'de'
+    // ? /(Kapitel|Kap\.?|K\.?|V\.?|Vers|vgl\.)\s([0-9,\.\-–;\s]|(und|bis|Kapitel|Kap\.?|K\.?|V\.?|Vers))+/g
+    // : languageNormalized === 'fr'
+    // ? /(chapitre|ch\.|v\.|verset|versets)\s([0-9,\.\-–;\s]|(et|chapitre|ch\.|v\.|verset|versets))+/gi
+    // // : /(c\.|ch\.|v\.|vs)\s([0-9,\.:\-–;\s]|(c\.|ch\.|v\.|vs))+/gi;
+    // : /(^|\s)(?:[\p{L}\p{M}]{1,12}\.?){0,2}\s*(?:[\p{N}]+|[ivxlcdm]+)(?:\s*(?:[,;:.\-–—]|(?:and|et|und|y|bis|to|à|al|hasta|até|e|ou|dan|hingga)|(?:[\p{L}\p{M}]{1,12}\.?){0,2})\s*(?:[\p{N}]+|[ivxlcdm]+))*/giu
 
     if (context && localRefMatcher) {
         // since for some reason the BCV parser does only match local/context-refs at the beginning
@@ -324,15 +358,31 @@ export const getReferencesFromText = (
                     for (const entity of <BibleReferenceParsedEntity[]>(
                         parsedLocalEntities[0].entities
                     )) {
+                        // remove localreferences where the verse is zero (e.g. time like "12:00")
+                        if(entity.entities?.length && entity.entities[0]!.valid?.messages?.start_verse_is_zero) continue;
+
+                        // if the reference text only consists of a number, it
+                        // is just a single number parsed as a chapter. we
+                        // ignore those since that would be too ambiguous
+                        if(!isNaN(Number(localRef.slice(entity.indices[0], entity.indices[1])))) continue;
+
                         // we set `lastRefIndex` to the last index of the last entity in `localRef`
                         lastRefIndex = entity.indices[1] + localRefIndex;
-                        entities.push({
+                        const newEntity = {
                             ...entity,
                             indices: [
                                 entity.indices[0] + localRefIndex,
                                 entity.indices[1] + localRefIndex,
-                            ],
-                        });
+                            ] as [number, number],
+                        };
+
+                        if (!newEntity.start.b) {
+                            if (DEBUG)
+                                console.log('Missing OSIS ID in local parser', {
+                                    localRef,
+                                    newEntity,
+                                });
+                        } else entities.push(newEntity);
                     }
                 }
             }
@@ -347,18 +397,26 @@ export const getReferencesFromText = (
     for (const parsedEntity of parsedEntities) {
         outer_loop: for (const entity of <BibleReferenceParsedEntity[]>parsedEntity.entities) {
             if (context && localRefMatcher) {
-                let isEntityAlreadyMatched = false;
+                let localEntities = [];
                 // make sure we don't match a reference that we already did within localRefs
                 for (const existingEntity of entities) {
-                    if (
-                        existingEntity.indices[0] === entity.indices[0] ||
-                        existingEntity.indices[1] === entity.indices[1]
-                    ) {
-                        isEntityAlreadyMatched = true;
-                        break;
+                    const [aStart, aEnd] = existingEntity.indices;
+                    const [bStart, bEnd] = entity.indices;
+                    if (aStart <= bEnd && bStart <= aEnd) {
+                        localEntities.push(existingEntity);
                     }
                 }
-                if (isEntityAlreadyMatched) continue;
+                if (localEntities.length) {
+                    if (entity.start.b) {
+                        // remove all local entities in favor of the "proper" one (e.g. local would match a "2" from "2 Tim 3:16", while the proper one matches "2 Tim 3:16");
+                        for (const localEntity of localEntities) {
+                            entities.splice(entities.indexOf(localEntity), 1);
+                        }
+                    } else {
+                        // we don't have a book in the entity (e.g. it is just a "v. 16"), so we can skip it since it is already covered by the local entity
+                        continue;
+                    }
+                }
             }
 
             if (
@@ -376,9 +434,41 @@ export const getReferencesFromText = (
                     );
                 continue;
             }
-            entities.push(entity);
+            if (!entity.start.b) {
+                if (DEBUG) console.log('Missing OSIS ID', { text, entity });
+            } else entities.push(entity);
         }
     }
 
     return entities.filter((entity) => entity.type !== 'bv');
 };
+
+
+export function escapeRegExp(string: string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+export function getAbbreviationWithoutDot(abbreviation: string) {
+    return abbreviation.endsWith('.') ? abbreviation.slice(0, -1) : abbreviation;
+}
+
+export function getBibleReferenceParserCustomBooks(bookMeta: ImporterBookMetadata) {
+    return Array.from(bookMeta.entries()).map(([osisId, book]) => {
+        const abbreviation = getAbbreviationWithoutDot(book.abbreviation);
+        // if the abbreviation is only one character, we don't include it in the
+        // regex since this causes matches that confuse (in fact crash) the
+        // bible-reference-parser library 
+        //
+        // RADAR: this might be related to the way we add our custom books
+        // regexps to the parser, which might be either a bug in the library or
+        // something we do wrong:
+        // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/70
+        const regexp = abbreviation.length > 1
+            ? new RegExp(`(${escapeRegExp(abbreviation)}\.?|${escapeRegExp(book.title)})`)
+            : new RegExp(`(${escapeRegExp(book.title)})`);
+        return {
+            osis: [osisId],
+            regexp
+        };
+    });
+}

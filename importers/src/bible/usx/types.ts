@@ -79,6 +79,7 @@ export enum UsxXmlNodeStyle {
     INTRODUCTION_LIST_ITEM = 'ili',
     INTRODUCTION_LIST_ITEM_LEVEL1 = 'ili1',
     INTRODUCTION_LIST_ITEM_LEVEL2 = 'ili2',
+    INTRODUCTION_SECTION_HEADING = 'is',
     INTRODUCTION_SECTION_HEADING_LEVEL1 = 'is1',
     INTRODUCTION_OUTLINE_TITLE = 'iot',
     INTRODUCTION_OUTLINE_REFERENCES = 'ior',
@@ -165,6 +166,7 @@ export enum UsxXmlNodeStyle {
     BOLD = 'bd',
     EMPHASIS = 'em',
     ITALIC = 'it',
+    BOLD_ITALIC = 'bdit',
     TRANSLITERATED = 'tl',
     ORDINAL_NUMBER_TEXT = 'ord',
     SMALL_CAPITALIZATION = 'sc',
@@ -194,6 +196,7 @@ export const SECTION_TAGS = [
     UsxXmlNodeStyle.SECTION_SPEAKER,
     UsxXmlNodeStyle.POETRY_ACROSTIC_HEADING,
     UsxXmlNodeStyle.CHAPTER_LABEL,
+    UsxXmlNodeStyle.INTRODUCTION_SECTION_HEADING,
     UsxXmlNodeStyle.INTRODUCTION_SECTION_HEADING_LEVEL1,
     UsxXmlNodeStyle.INTRODUCTION_OUTLINE_TITLE,
 ] as const;

@@ -13,17 +13,18 @@ import {
     IBibleContentGroup,
     IBibleContentPhrase,
     IBibleCrossReference,
-    IBibleNote,
+    IBibleNote
 } from '@bible-engine/core';
 
 import {
     endsWithNoSpaceAfterChar,
     getBibleReferenceFromParsedReference,
+    getBibleReferenceParserCustomBooks,
     getPhrasesFromParsedReferences,
     getReferencesFromText,
     isOnlyCrossReferenceWordOrPunctuation,
     startsWithNoSpaceBeforeChar,
-    streamToString,
+    streamToString
 } from '../../shared/helpers.functions';
 import { BibleEngineImporter, IImporterOptions } from '../../shared/Importer.interface';
 import Logger from '../../shared/Logger';
@@ -244,23 +245,37 @@ export class OsisImporter extends BibleEngineImporter {
                 )
                     context.version.crossRefBeforePhrase = true;
 
+                let bcv_parser;
                 try {
-                    const bcv_parser = require(`bible-passage-reference-parser/js/${context.version.language}_bcv_parser`)
+                    bcv_parser = require(`bible-passage-reference-parser/cjs/${context.version.language}_bcv_parser`)
                         .bcv_parser;
-                    const bcv: BibleReferenceParser = new bcv_parser({});
-                    bcv.set_options({
-                        punctuation_strategy:
-                            this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
-                        invalid_passage_strategy: 'include',
-                        invalid_sequence_strategy: 'include',
-                        passage_existence_strategy: 'bc',
-                        consecutive_combination_strategy: 'separate',
-                    });
-                    context.bcv = bcv;
                 } catch (e) {
-                    Logger.warning('missing language file for bible-reference-parser', context);
+                    bcv_parser = require('bible-passage-reference-parser/cjs/en_bcv_parser').bcv_parser;
                 }
 
+                const bcv: BibleReferenceParser = new bcv_parser();
+                bcv.set_options({
+                    punctuation_strategy:
+                        this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
+                    invalid_passage_strategy: 'include',
+                    invalid_sequence_strategy: 'include',
+                    passage_existence_strategy: 'bc',
+                    consecutive_combination_strategy: 'separate',
+                    non_latin_digits_strategy: 'replace',
+                    case_sensitive: 'books',
+                    grammar: {
+                        // there seems to be a bug when matching the next-verse pattern
+                        // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
+                        next: /^(?:\x1f\x1f\x1f)/i,
+                    }
+                });
+
+                if (this.options.bookMeta) {
+                    bcv.add_books({books: getBibleReferenceParserCustomBooks(this.options.bookMeta)});
+                }
+
+                context.bcv = bcv;
+                
                 break;
             }
             case OsisXmlNodeType.BOOK: {
@@ -1180,12 +1195,14 @@ export class OsisImporter extends BibleEngineImporter {
                 currentTag.name === OsisXmlNodeName.REFERENCE)
         ) {
             // Fix missing osisRefs of the last added reference
-            if (currentTag.name === OsisXmlNodeName.REFERENCE) {
+            if (currentTag.name === OsisXmlNodeName.REFERENCE || (currentTag.name === OsisXmlNodeName.TITLE && currentTag.attributes.type === OsisXmlNodeType.PARALLEL)) {
                 let currentCrossRefContainer: IBibleCrossReference[] | undefined;
                 if (this.isInsideSectionCrossRefs()) {
                     const currentSection = getCurrentSection(context);
-                    if (currentSection?.crossReferences?.length)
+                    if (currentSection) {
+                        if(!currentSection.crossReferences) currentSection.crossReferences = [];
                         currentCrossRefContainer = currentSection.crossReferences;
+                    }
                 } else if (!context.version?.crossRefBeforePhrase) {
                     const currentPhrase = this.getCurrentPhrase(context);
                     if (currentPhrase && currentPhrase.crossReferences?.length)
@@ -1194,16 +1211,16 @@ export class OsisImporter extends BibleEngineImporter {
                     if (context.crossRefBuffer?.refs?.length)
                         currentCrossRefContainer = context.crossRefBuffer.refs;
                 }
-                if (currentCrossRefContainer?.length) {
+                if (currentCrossRefContainer && (this.isInsideSectionCrossRefs() || currentCrossRefContainer?.length)) {
                     const currentCrossRef = currentCrossRefContainer[
                         currentCrossRefContainer.length - 1
                     ]!;
                     // we check if the label was already set. this can happen if we ignored a reference tag earlier
                     // however the parser will still come to this text node which would
                     // overwrite the label of the previous reference in this cross ref group
-                    if (!currentCrossRef.label) {
-                        currentCrossRef.label = trimmedText;
-                        if (!currentCrossRef.range.bookOsisId) {
+                    if (!currentCrossRef?.label) {
+                        if(currentCrossRef) currentCrossRef.label = trimmedText;
+                        if (!currentCrossRef?.range.bookOsisId) {
                             // we remove the ref with the missing range and create new ones (since there can be multiple)
                             currentCrossRefContainer.pop();
                             if (context.bcv && versionUid && context.currentBook?.osisId) {

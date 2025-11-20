@@ -1,13 +1,14 @@
 // This file is just a playground script for testing out the ref-parser
 
 import { BibleReferenceParser } from '@bible-engine/core';
+import { bcv_parser } from "bible-passage-reference-parser/esm/bcv_parser.js";
+import * as lang from "bible-passage-reference-parser/esm/lang/de.js";
 import {
     getPhrasesFromParsedReferences,
     getReferencesFromText,
 } from '../../shared/helpers.functions';
 
-const bcv_parser = require('bible-passage-reference-parser/js/en_bcv_parser').bcv_parser;
-const bcv: BibleReferenceParser = new bcv_parser({});
+const bcv: BibleReferenceParser = new bcv_parser(lang);
 bcv.set_options({
     punctuation_strategy: 'us',
     invalid_passage_strategy: 'include',

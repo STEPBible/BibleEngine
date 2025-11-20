@@ -6,6 +6,48 @@
 
 -   migrated from typeorm to kysely, constructor parameters have changed
 
+## [1.4.26]
+
+### Bug Fixes
+
+-   [shared] fixed issue where references with verse 0 (e.g. time like "12:00") were incorrectly detected as bible references in notes
+-   [shared] ignore local references that are just a digit (too ambiguous)
+-   [shared] detect more local reference patterns with special characters ("—", "·")
+-   [osis|usx] only match bible book case sensitively
+-   [osis] better parsing of section cross references 
+
+## [1.4.25]
+
+### Bug Fixes
+
+-   [NEUE] fixed line breaks in poetry sections
+
+## [1.4.24]
+
+### Features
+
+-   [shared] improved cross reference detection in notes
+
+## [1.4.23]
+
+### Features
+
+-   [shared] improved cross reference detection in notes
+
+### Bug Fixes
+
+-   [dbl] better support for NT-only bibles
+
+### Chores
+
+-   [NEUE] updated NEUE importer to latest content version
+
+## [1.4.22]
+
+### Features
+
+-   [usx] added support for bdit (BOLD_ITALIC) and is (INTRODUCTION_SECTION_HEADING) node style
+
 ## [1.4.21]
 
 ### Features

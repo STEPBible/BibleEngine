@@ -14,6 +14,18 @@ All notable changes to this project will be documented in this file. See [standa
 
 -   migrated from typeorm to kysely, constructor parameters have changed
 
+## [1.4.26]
+
+### Bug Fixes
+
+-   updated types for bible reference parser
+
+## [1.4.23]
+
+### Features
+
+-   improved cross reference detection in notes
+
 ## [1.4.20]
 
 ### Features
