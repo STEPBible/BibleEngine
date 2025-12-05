@@ -494,7 +494,8 @@ export class BibleEngine {
                     'section'
                 )}`
             )
-            .orderBy(['section.level asc', 'section.phraseStartId asc']);
+            .orderBy('section.level', 'asc')
+            .orderBy('section.phraseStartId', 'asc');
         return query.execute().then((sections) => {
             const sectionsWithVersionNumbers: IBibleSectionHierarchical[] = sections.map(
                 (section) => {
@@ -774,7 +775,8 @@ export class BibleEngine {
                 ).as('crossReferences'),
             ])
             .where(sql<boolean>`${generateBookSectionsSql(rangeNormalized, 'section')}`)
-            .orderBy(['section.level asc', 'section.phraseStartId asc'])
+            .orderBy('section.level', 'asc')
+            .orderBy('section.phraseStartId', 'asc')
             .execute()
             .then((sections) =>
                 sections.map((section) => ({
@@ -935,16 +937,13 @@ export class BibleEngine {
                 }
                 return _qb;
             })
-            .orderBy(
-                normalizedRange.versionId
-                    ? [
-                          'versionChapterNum asc',
-                          'versionVerseNum asc',
-                          'versionSubverseNum asc',
-                          'id asc',
-                      ]
-                    : ['id asc']
+            .$if(!!normalizedRange.versionId, (qb) =>
+                qb
+                    .orderBy('versionChapterNum', 'asc')
+                    .orderBy('versionVerseNum', 'asc')
+                    .orderBy('versionSubverseNum', 'asc')
             )
+            .orderBy('id', 'asc')
             .execute()
             .then((phrases) =>
                 phrases.map((phrase) => ({
@@ -972,7 +971,7 @@ export class BibleEngine {
             .selectFrom('bible_book')
             .selectAll()
             .where('versionId', '=', versionEntity.id)
-            .orderBy('number asc')
+            .orderBy('number', 'asc')
             .execute()
             .then((books) => books.map((book) => parseBookFromDatabase(book)));
         const bookData: BookWithContentForInput[] = [];

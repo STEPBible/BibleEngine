@@ -6,3 +6,4 @@ lib/bible/NEUE/data/*
 lib/bible/dbl/data/*
 bible.db
 *.log
+!lib/

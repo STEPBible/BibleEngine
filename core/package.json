@@ -1,6 +1,6 @@
 {
     "name": "@bible-engine/core",
-    "version": "2.0.0-pre3",
+    "version": "2.0.0-pre6",
     "type": "module",
     "exports": {
         ".": "./lib/index.js"
@@ -13,9 +13,9 @@
         "release": "standard-version --path ."
     },
     "dependencies": {
-        "@bible-engine/db-schema": "2.0.0-pre3",
+        "@bible-engine/db-schema": "2.0.0-pre6",
         "bible-passage-reference-parser": "^3.1.0",
-        "kysely": "^0.28.5",
+        "kysely": "^0.28.8",
         "reflect-metadata": "^0.1.13",
         "whatwg-fetch": "^3.6.2"
     },

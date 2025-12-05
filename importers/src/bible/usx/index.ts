@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { parser } from 'sax';
+import { SAXParser } from 'sax-ts';
 import * as winston from 'winston';
 
 import {
@@ -30,7 +30,7 @@ import {
     getPhrasesFromParsedReferences,
     getReferencesFromText,
     isOnlyCrossReferenceWordOrPunctuation,
-    startsWithNoSpaceBeforeChar
+    startsWithNoSpaceBeforeChar,
 } from '../../shared/helpers.functions';
 import {
     closeAllGroups,
@@ -116,14 +116,16 @@ export class UsxImporter extends BibleEngineImporter {
                     // there seems to be a bug when matching the next-verse pattern
                     // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
                     next: /^(?:\x1f\x1f\x1f)/i,
-                }
+                },
             });
             if (this.options.bookMeta) {
-                bcv.add_books({books: getBibleReferenceParserCustomBooks(this.options.bookMeta)});
+                bcv.add_books({ books: getBibleReferenceParserCustomBooks(this.options.bookMeta) });
             }
             context.bcv = bcv;
-            
-            const xmlStream = parser(true);
+
+            const strict: boolean = true; // change to false for HTML parsing
+            const options: {} = {}; // refer to "Arguments" section
+            const xmlStream = new SAXParser(strict, options);
             xmlStream.ontext = (text: string) => {
                 if (encounteredError) {
                     return;
@@ -142,7 +144,7 @@ export class UsxImporter extends BibleEngineImporter {
                 }
                 this.parseClosingTag(tagName, context);
             };
-            xmlStream.onerror = (error) => {
+            xmlStream.onerror = (error: any) => {
                 encounteredError = true;
                 reject(error);
             };
@@ -268,7 +270,7 @@ export class UsxImporter extends BibleEngineImporter {
                 break;
             case 'verse':
             case UsxXmlNodeStyle.VERSE:
-                if(!context.currentChapter) {
+                if (!context.currentChapter) {
                     // setting the first chapter seems to be optional in USX (at least some source files we are seeing don't have it)
                     context.currentChapter = 1;
                 }
@@ -421,7 +423,7 @@ export class UsxImporter extends BibleEngineImporter {
                 // we treat acrostic or speaker headings as the lowest level sections to make those headings work
                 startSection(context, UsxXmlNodeStyle.SECTION_LEVEL4);
                 break;
-            case UsxXmlNodeStyle.TITLE_CANONICAL: 
+            case UsxXmlNodeStyle.TITLE_CANONICAL:
             case UsxXmlNodeStyle.POETRY_END_NOTE: {
                 // if the canonical title is outside of verse 1 (i.e. we set the verse number implicitly on chapter start), we number it as `1.0`
                 if (context.isCurrentVerseImplicit) context.currentSubverse = 0;
@@ -981,7 +983,8 @@ export class UsxImporter extends BibleEngineImporter {
                 // TODO: do error checks
 
                 // bold-italic is a special case since it opens two containers
-                if(currentTag.type === UsxXmlNodeStyle.BOLD_ITALIC) context.contentContainerStack.pop();
+                if (currentTag.type === UsxXmlNodeStyle.BOLD_ITALIC)
+                    context.contentContainerStack.pop();
 
                 const closedContainer = context.contentContainerStack.pop();
                 if (closedContainer?.type === 'book')

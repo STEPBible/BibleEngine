@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0-pre6]
+
+### Chores
+
+- migrate to new kysely version
+- force include build directory into package
+- compatibility with esm-only contexts
+
+## [2.0.0-pre4]
+
+Imported changes from V1
+
 ## [2.0.0]
 
 ### Breaking Changes

@@ -3,8 +3,8 @@ import BlobReader from './BlobReader';
 import ModuleConfig from './ModuleConfig';
 import ModuleIndex from './ModuleIndex';
 import { BookXML, ChapterPosition, ChapterXML, VerseXML } from './types';
+import verseKey from './VerseMetadata';
 import VerseScheme from './VerseScheme';
-const verseKey = require('./VerseMetadata');
 
 /**
  * Set of files which encapsulates a Bible version.

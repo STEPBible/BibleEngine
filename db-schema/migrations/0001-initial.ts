@@ -31,7 +31,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 
     await db.schema
         .createTable('bible_version')
-        .addColumn('id', 'integer', (col) => col.notNull().autoIncrement())
+        .addColumn('id', 'integer', (col) => col.autoIncrement().primaryKey())
         .addColumn('uid', 'varchar(255)', (col) => col.notNull())
         .addColumn('title', 'varchar(255)', (col) => col.notNull())
         .addColumn('description', 'text')
@@ -45,8 +45,8 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('type', isSqlite ? 'varchar' : sql`enum('orig','formal','dynamic','free')`)
         .addColumn('abbreviation', 'varchar(10)')
         .addColumn('crossRefBeforePhrase', 'integer')
-        .addColumn('lastUpdate', 'datetime(6)', (col) =>
-            col.notNull().defaultTo(sql`CURRENT_TIMESTAMP(6)`)
+        .addColumn('lastUpdate', 'datetime', (col) =>
+            col.notNull().defaultTo(sql`CURRENT_TIMESTAMP`)
         )
         // For SQLite use plain "varchar", for MySQL use native enum type for dataLocation.
         .addColumn(
@@ -54,7 +54,6 @@ export async function up(db: Kysely<any>): Promise<void> {
             isSqlite ? 'varchar' : sql`enum('db','file','importing','remote')`,
             (col) => col.notNull()
         )
-        .addPrimaryKeyConstraint('bible_version_pk', ['id'])
         .execute();
 
     await db.schema
@@ -79,7 +78,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 
     await db.schema
         .createTable('bible_section')
-        .addColumn('id', 'integer', (col) => col.notNull().autoIncrement())
+        .addColumn('id', 'integer', (col) => col.autoIncrement().primaryKey())
         .addColumn('versionId', 'integer', (col) => col.notNull())
         .addColumn('level', 'integer', (col) => col.notNull())
         .addColumn('phraseStartId', 'bigint', (col) => col.notNull())
@@ -88,26 +87,23 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('subTitle', 'varchar(255)')
         .addColumn('description', 'text')
         .addColumn('isChapterLabel', 'integer')
-        .addPrimaryKeyConstraint('bible_section_pk', ['id'])
         .execute();
 
     await db.schema
         .createTable('bible_paragraph')
-        .addColumn('id', 'integer', (col) => col.notNull().autoIncrement())
+        .addColumn('id', 'integer', (col) => col.autoIncrement().primaryKey())
         .addColumn('versionId', 'integer', (col) => col.notNull())
         .addColumn('phraseStartId', 'bigint', (col) => col.notNull())
         .addColumn('phraseEndId', 'bigint', (col) => col.notNull())
-        .addPrimaryKeyConstraint('bible_paragraph_pk', ['id'])
         .execute();
 
     await db.schema
         .createTable('bible_note')
-        .addColumn('id', 'integer', (col) => col.notNull().autoIncrement())
+        .addColumn('id', 'integer', (col) => col.autoIncrement().primaryKey())
         .addColumn('key', 'varchar(255)')
         .addColumn('type', 'varchar(255)')
         .addColumn('content', 'text', (col) => col.notNull())
         .addColumn('phraseId', 'bigint')
-        .addPrimaryKeyConstraint('bible_note_pk', ['id'])
         .addForeignKeyConstraint('FK_66a40d0dd1d4dec456e1241d382', ['phraseId'], 'bible_phrase', [
             'id',
         ])
@@ -115,7 +111,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 
     await db.schema
         .createTable('bible_phrase_original_word')
-        .addColumn('id', 'integer', (col) => col.notNull().autoIncrement())
+        .addColumn('id', 'integer', (col) => col.autoIncrement().primaryKey())
         .addColumn('strong', 'varchar(255)')
         .addColumn('type', 'varchar(255)')
         .addColumn('tense', 'varchar(255)')
@@ -129,7 +125,6 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('stem', 'varchar(255)')
         .addColumn('action', 'varchar(255)')
         .addColumn('aspect', 'varchar(255)')
-        .addPrimaryKeyConstraint('bible_phrase_original_word_pk', ['id'])
         .execute();
 
     await db.schema
@@ -146,7 +141,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 
     await db.schema
         .createTable('v11n_rule')
-        .addColumn('id', 'integer', (col) => col.notNull().autoIncrement())
+        .addColumn('id', 'integer', (col) => col.autoIncrement().primaryKey())
         .addColumn('sourceRefId', 'bigint', (col) => col.notNull())
         .addColumn('standardRefId', 'bigint', (col) => col.notNull())
         .addColumn('actionId', 'integer', (col) => col.notNull())
@@ -156,12 +151,11 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('noteSecondary', 'varchar(255)')
         .addColumn('noteAncientVersions', 'varchar(255)')
         .addColumn('tests', 'varchar(255)')
-        .addPrimaryKeyConstraint('v11n_rule_pk', ['id'])
         .execute();
 
     await db.schema
         .createTable('bible_cross_reference')
-        .addColumn('id', 'integer', (col) => col.notNull().autoIncrement())
+        .addColumn('id', 'integer', (col) => col.autoIncrement().primaryKey())
         .addColumn('normalizedRefId', 'bigint', (col) => col.notNull())
         .addColumn('partIndicator', 'varchar(255)')
         .addColumn('normalizedRefIdEnd', 'bigint')
@@ -174,7 +168,6 @@ export async function up(db: Kysely<any>): Promise<void> {
         .addColumn('key', 'varchar(255)')
         .addColumn('phraseId', 'bigint')
         .addColumn('sectionId', 'integer')
-        .addPrimaryKeyConstraint('bible_cross_reference_pk', ['id'])
         .addForeignKeyConstraint('FK_7ff9093c7d0193dc69753ff6346', ['phraseId'], 'bible_phrase', [
             'id',
         ])

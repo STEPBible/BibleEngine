@@ -3,6 +3,7 @@
     "compilerOptions": {
         "declaration": true,
         "outDir": "./lib",
+        "allowJs": true
     },
     "include": [
         "src/**/*",

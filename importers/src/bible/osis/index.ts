@@ -1,7 +1,6 @@
-import { createReadStream, readFileSync } from 'fs';
-import { decodeStream, encodeStream } from 'iconv-lite';
+import { readFileSync } from 'fs';
 import path from 'path';
-import { parser } from 'sax';
+import { SAXParser } from 'sax-ts';
 import { getCurrentSection, startNewSection } from './functions/sections.functions';
 
 import {
@@ -13,7 +12,7 @@ import {
     IBibleContentGroup,
     IBibleContentPhrase,
     IBibleCrossReference,
-    IBibleNote
+    IBibleNote,
 } from '@bible-engine/core';
 
 import {
@@ -24,11 +23,15 @@ import {
     getReferencesFromText,
     isOnlyCrossReferenceWordOrPunctuation,
     startsWithNoSpaceBeforeChar,
-    streamToString
 } from '../../shared/helpers.functions';
 import { BibleEngineImporter, IImporterOptions } from '../../shared/Importer.interface';
 import Logger from '../../shared/Logger';
-import { OsisXmlNode, OsisXmlNodeName, OsisXmlNodeSubType, OsisXmlNodeType } from '../../shared/osisTypes';
+import {
+    OsisXmlNode,
+    OsisXmlNodeName,
+    OsisXmlNodeSubType,
+    OsisXmlNodeType,
+} from '../../shared/osisTypes';
 import { ParserContext } from './entities/ParserContext';
 import { OsisParseError } from './errors/OsisParseError';
 import {
@@ -67,11 +70,7 @@ export class OsisImporter extends BibleEngineImporter {
         else {
             const sourcePath = options.sourcePath || path.resolve(__dirname) + '/data/osis.xml';
             xml = options.sourceEncoding
-                ? await streamToString(
-                      createReadStream(sourcePath)
-                          .pipe(decodeStream(options.sourceEncoding))
-                          .pipe(encodeStream('utf8'))
-                  )
+                ? new TextDecoder(options.sourceEncoding).decode(readFileSync(sourcePath))
                 : readFileSync(sourcePath, 'utf8');
         }
         return xml;
@@ -85,7 +84,7 @@ export class OsisImporter extends BibleEngineImporter {
             this.context.hasSectionsInSourceText = xml.includes(`type="section"`);
             this.context.hasParagraphsInSourceText = sourceTextHasParagraphs(xml);
             this.context.autoGenMissingParagraphs = this.options.autoGenMissingParagraphs;
-            const xmlStream = parser(STRICT_MODE_ENABLED);
+            const xmlStream = new SAXParser(STRICT_MODE_ENABLED, {});
             xmlStream.ontext = (text: string) => {
                 if (encounteredError) {
                     return;
@@ -104,7 +103,7 @@ export class OsisImporter extends BibleEngineImporter {
                 }
                 this.parseClosingTag(tagName, this.context);
             };
-            xmlStream.onerror = (error) => {
+            xmlStream.onerror = (error: any) => {
                 encounteredError = true;
                 reject(error);
             };
@@ -250,7 +249,8 @@ export class OsisImporter extends BibleEngineImporter {
                     bcv_parser = require(`bible-passage-reference-parser/cjs/${context.version.language}_bcv_parser`)
                         .bcv_parser;
                 } catch (e) {
-                    bcv_parser = require('bible-passage-reference-parser/cjs/en_bcv_parser').bcv_parser;
+                    bcv_parser = require('bible-passage-reference-parser/cjs/en_bcv_parser')
+                        .bcv_parser;
                 }
 
                 const bcv: BibleReferenceParser = new bcv_parser();
@@ -267,15 +267,17 @@ export class OsisImporter extends BibleEngineImporter {
                         // there seems to be a bug when matching the next-verse pattern
                         // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
                         next: /^(?:\x1f\x1f\x1f)/i,
-                    }
+                    },
                 });
 
                 if (this.options.bookMeta) {
-                    bcv.add_books({books: getBibleReferenceParserCustomBooks(this.options.bookMeta)});
+                    bcv.add_books({
+                        books: getBibleReferenceParserCustomBooks(this.options.bookMeta),
+                    });
                 }
 
                 context.bcv = bcv;
-                
+
                 break;
             }
             case OsisXmlNodeType.BOOK: {
@@ -600,7 +602,10 @@ export class OsisImporter extends BibleEngineImporter {
                         currentContainer.contents.push(paragraph);
                     } else currentContainer.contents.push(titleGroup);
                     context.contentContainerStack.push(titleGroup);
-                } else if(tag.attributes.type === OsisXmlNodeType.CHAPTER && tag.attributes.subType === OsisXmlNodeSubType.CHAPTER_LABEL) {
+                } else if (
+                    tag.attributes.type === OsisXmlNodeType.CHAPTER &&
+                    tag.attributes.subType === OsisXmlNodeSubType.CHAPTER_LABEL
+                ) {
                     const sectionType =
                         tag.attributes.level === 'sub'
                             ? OsisXmlNodeType.SECTION_SUB
@@ -1195,12 +1200,16 @@ export class OsisImporter extends BibleEngineImporter {
                 currentTag.name === OsisXmlNodeName.REFERENCE)
         ) {
             // Fix missing osisRefs of the last added reference
-            if (currentTag.name === OsisXmlNodeName.REFERENCE || (currentTag.name === OsisXmlNodeName.TITLE && currentTag.attributes.type === OsisXmlNodeType.PARALLEL)) {
+            if (
+                currentTag.name === OsisXmlNodeName.REFERENCE ||
+                (currentTag.name === OsisXmlNodeName.TITLE &&
+                    currentTag.attributes.type === OsisXmlNodeType.PARALLEL)
+            ) {
                 let currentCrossRefContainer: IBibleCrossReference[] | undefined;
                 if (this.isInsideSectionCrossRefs()) {
                     const currentSection = getCurrentSection(context);
                     if (currentSection) {
-                        if(!currentSection.crossReferences) currentSection.crossReferences = [];
+                        if (!currentSection.crossReferences) currentSection.crossReferences = [];
                         currentCrossRefContainer = currentSection.crossReferences;
                     }
                 } else if (!context.version?.crossRefBeforePhrase) {
@@ -1211,7 +1220,10 @@ export class OsisImporter extends BibleEngineImporter {
                     if (context.crossRefBuffer?.refs?.length)
                         currentCrossRefContainer = context.crossRefBuffer.refs;
                 }
-                if (currentCrossRefContainer && (this.isInsideSectionCrossRefs() || currentCrossRefContainer?.length)) {
+                if (
+                    currentCrossRefContainer &&
+                    (this.isInsideSectionCrossRefs() || currentCrossRefContainer?.length)
+                ) {
                     const currentCrossRef = currentCrossRefContainer[
                         currentCrossRefContainer.length - 1
                     ]!;
@@ -1219,7 +1231,7 @@ export class OsisImporter extends BibleEngineImporter {
                     // however the parser will still come to this text node which would
                     // overwrite the label of the previous reference in this cross ref group
                     if (!currentCrossRef?.label) {
-                        if(currentCrossRef) currentCrossRef.label = trimmedText;
+                        if (currentCrossRef) currentCrossRef.label = trimmedText;
                         if (!currentCrossRef?.range.bookOsisId) {
                             // we remove the ref with the missing range and create new ones (since there can be multiple)
                             currentCrossRefContainer.pop();

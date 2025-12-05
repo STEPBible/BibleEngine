@@ -1,18 +1,18 @@
-const kjvJson = require('../data/kjv.json');
-const germanJson = require('../data/german.json');
-const catholicJson = require('../data/catholic.json');
-const catholic2Json = require('../data/catholic2.json');
-const kjvaJson = require('../data/kjva.json');
-const leningradJson = require('../data/leningrad.json');
-const lutherJson = require('../data/luther.json');
-const lxxJson = require('../data/lxx.json');
-const mtJson = require('../data/mt.json');
-const nrsvJson = require('../data/nrsv.json');
-const nrsvaJson = require('../data/nrsva.json');
-const orthodoxJson = require('../data/orthodox.json');
-const synodalJson = require('../data/synodal.json');
-const synodalprotJson = require('../data/synodalprot.json');
-const vulgJson = require('../data/vulg.json');
+import catholicJson from '../data/catholic.json';
+import catholic2Json from '../data/catholic2.json';
+import germanJson from '../data/german.json';
+import kjvJson from '../data/kjv.json';
+import kjvaJson from '../data/kjva.json';
+import leningradJson from '../data/leningrad.json';
+import lutherJson from '../data/luther.json';
+import lxxJson from '../data/lxx.json';
+import mtJson from '../data/mt.json';
+import nrsvJson from '../data/nrsv.json';
+import nrsvaJson from '../data/nrsva.json';
+import orthodoxJson from '../data/orthodox.json';
+import synodalJson from '../data/synodal.json';
+import synodalprotJson from '../data/synodalprot.json';
+import vulgJson from '../data/vulg.json';
 
 const versificationMgr: any = {};
 

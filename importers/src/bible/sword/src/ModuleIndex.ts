@@ -1,6 +1,6 @@
+import * as base64 from 'base64-js';
 import ModuleConfig from './ModuleConfig';
 import VerseScheme from './VerseScheme';
-const base64 = require('base64-js');
 
 let start: any = 0;
 let buf: any = null;

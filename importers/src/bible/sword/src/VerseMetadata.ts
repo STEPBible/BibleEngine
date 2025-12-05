@@ -1,7 +1,7 @@
+import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser.js';
+import * as lang from 'bible-passage-reference-parser/esm/lang/en.js';
 import VerseScheme from './VerseScheme';
-const bcvParser = require('bible-passage-reference-parser/cjs/en_bcv_parser').bcv_parser;
-
-const bcv = new bcvParser();
+const bcv = new bcv_parser(lang);
 
 function parseVkey(inVKey: string, inV11n: string) {
     const key: any = {};
@@ -104,10 +104,4 @@ function previous(inVKey: string, inV11n: string) {
     return key;
 }
 
-module.exports = {
-    parseVkey,
-    parseVerseList,
-    getVerseListForChapter,
-    next,
-    previous,
-};
+export default { getVerseListForChapter, next, parseVerseList, parseVkey, previous };

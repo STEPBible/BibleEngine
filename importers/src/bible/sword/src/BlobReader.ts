@@ -1,4 +1,4 @@
-const pako = require('pako');
+import { Inflate } from 'pako';
 
 import * as types from './types';
 
@@ -43,7 +43,9 @@ export default class BlobReader {
                 verse,
                 startPos,
                 positions,
-                finalBlob,
+                typeof finalBlob === 'string'
+                    ? Uint8Array.from(finalBlob, (c) => c.charCodeAt(0))
+                    : finalBlob,
                 encoding
             );
             renderedVerses.push({ text: verseXML, verse: verse.verse });
@@ -100,7 +102,7 @@ export default class BlobReader {
     }
 
     static decompressBlob(blob: Uint8Array) {
-        const inflator = new pako.Inflate();
+        const inflator = new Inflate();
         const array = new Uint8Array(blob);
         inflator.push(array, true);
         if (inflator.err) {

@@ -11,8 +11,8 @@
         "prepublish": "yarn build"
     },
     "dependencies": {
-        "@bible-engine/core": "2.0.0-pre3",
+        "@bible-engine/core": "2.0.0-pre6",
         "whatwg-fetch": "^3.6.2",
-        "kysely": "^0.28.5"
+        "kysely": "^0.28.8"
     }
 }
