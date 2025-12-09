@@ -1,5 +1,5 @@
-import { bcv_parser } from "bible-passage-reference-parser/esm/bcv_parser.js";
-import * as lang from "bible-passage-reference-parser/esm/lang/de.js";
+import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser.js';
+import * as lang from 'bible-passage-reference-parser/esm/lang/de.js';
 import { readFileSync } from 'fs';
 import { parseFragment } from 'parse5';
 import { resolve } from 'path';
@@ -7,11 +7,13 @@ import { TreeDocumentFragment } from './models/parse5';
 
 import { BibleReferenceParser, BookWithContentForInput, DocumentRoot } from '@bible-engine/core';
 
-import { getBibleReferenceParserCustomBooks } from "../../shared/helpers.functions";
+import { getBibleReferenceParserCustomBooks } from '../../shared/helpers.functions';
 import { BibleEngineImporter } from '../../shared/Importer.interface';
 import { visitNode } from './helpers';
 import { bookList } from './meta/books';
 import copyrightLong from './meta/copyright';
+
+const __dirname = new URL('.', import.meta.url).pathname;
 
 export class NeueImporter extends BibleEngineImporter {
     async import() {
@@ -25,7 +27,7 @@ export class NeueImporter extends BibleEngineImporter {
         });
 
         if (this.options.bookMeta) {
-            bcv.add_books({books: getBibleReferenceParserCustomBooks(this.options.bookMeta)});
+            bcv.add_books({ books: getBibleReferenceParserCustomBooks(this.options.bookMeta) });
         }
 
         const versionUid = 'NEUE';
@@ -71,7 +73,7 @@ export class NeueImporter extends BibleEngineImporter {
             // if (bookMeta.bookNum !== 2) continue;
 
             // Convert encoding streaming example
-            let bookHtml = readFileSync(sourceDir + '/' + bookFile, { encoding: 'utf8'});
+            let bookHtml = readFileSync(sourceDir + '/' + bookFile, { encoding: 'utf8' });
 
             // strip beginning and end of the html doc (we only need the content itself)
             bookHtml = bookHtml.substring(bookHtml.indexOf('<h1'), bookHtml.indexOf('<hr'));

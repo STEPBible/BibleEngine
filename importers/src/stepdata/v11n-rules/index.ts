@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import { createInterface } from 'readline';
 import { BibleEngineImporter } from '../../shared/Importer.interface';
 
+const __dirname = new URL('.', import.meta.url).pathname;
 const DEBUG = false;
 
 const replaceNoteVars = (note?: string) => {

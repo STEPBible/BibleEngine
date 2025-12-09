@@ -1,10 +1,10 @@
+import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { SAXParser } from 'sax-ts';
 import { getCurrentSection, startNewSection } from './functions/sections.functions';
 
 import {
-    BibleReferenceParser,
     DocumentGroup,
     DocumentPhrase,
     DocumentRoot,
@@ -53,6 +53,7 @@ import { updateContextWithTitleText } from './functions/titles.functions';
 import { stackHasParagraph, validateGroup } from './functions/validators.functions';
 import { ITagWithType, TagType } from './types';
 
+const __dirname = new URL('.', import.meta.url).pathname;
 const STRICT_MODE_ENABLED = true;
 
 export class OsisImporter extends BibleEngineImporter {
@@ -77,10 +78,46 @@ export class OsisImporter extends BibleEngineImporter {
     }
 
     async getContextFromXml(xml: string): Promise<ParserContext> {
+        let language = this.options.versionMeta?.language;
+        if (!language) {
+            const match = xml.match(/xml:lang=['"]([^'"]+)['"]/);
+            language = match ? match[1] : 'en';
+        }
+        let langMod;
+        try {
+            langMod = await import(`bible-passage-reference-parser/esm/lang/${language}.js`);
+        } catch (e) {
+            langMod = await import('bible-passage-reference-parser/esm/lang/en.js');
+        }
+        const bcv = new bcv_parser(langMod);
+
+        bcv.set_options({
+            punctuation_strategy:
+                this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
+            invalid_passage_strategy: 'include',
+            invalid_sequence_strategy: 'include',
+            passage_existence_strategy: 'bc',
+            consecutive_combination_strategy: 'separate',
+            non_latin_digits_strategy: 'replace',
+            case_sensitive: 'books',
+            grammar: {
+                // there seems to be a bug when matching the next-verse pattern
+                // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
+                next: /^(?:\x1f\x1f\x1f)/i,
+            },
+        });
+
+        if (this.options.bookMeta) {
+            bcv.add_books({
+                books: getBibleReferenceParserCustomBooks(this.options.bookMeta),
+            });
+        }
+
         // Since the stream can't be canceled, we need to wrap events in a guard
         let encounteredError = false;
         const pParsing = new Promise<ParserContext>((resolve, reject) => {
             this.context = new ParserContext();
+            this.context.bcv = bcv;
             this.context.hasSectionsInSourceText = xml.includes(`type="section"`);
             this.context.hasParagraphsInSourceText = sourceTextHasParagraphs(xml);
             this.context.autoGenMissingParagraphs = this.options.autoGenMissingParagraphs;
@@ -243,40 +280,6 @@ export class OsisImporter extends BibleEngineImporter {
                     !this.options.versionMeta?.crossRefBeforePhrase
                 )
                     context.version.crossRefBeforePhrase = true;
-
-                let bcv_parser;
-                try {
-                    bcv_parser = require(`bible-passage-reference-parser/cjs/${context.version.language}_bcv_parser`)
-                        .bcv_parser;
-                } catch (e) {
-                    bcv_parser = require('bible-passage-reference-parser/cjs/en_bcv_parser')
-                        .bcv_parser;
-                }
-
-                const bcv: BibleReferenceParser = new bcv_parser();
-                bcv.set_options({
-                    punctuation_strategy:
-                        this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
-                    invalid_passage_strategy: 'include',
-                    invalid_sequence_strategy: 'include',
-                    passage_existence_strategy: 'bc',
-                    consecutive_combination_strategy: 'separate',
-                    non_latin_digits_strategy: 'replace',
-                    case_sensitive: 'books',
-                    grammar: {
-                        // there seems to be a bug when matching the next-verse pattern
-                        // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
-                        next: /^(?:\x1f\x1f\x1f)/i,
-                    },
-                });
-
-                if (this.options.bookMeta) {
-                    bcv.add_books({
-                        books: getBibleReferenceParserCustomBooks(this.options.bookMeta),
-                    });
-                }
-
-                context.bcv = bcv;
 
                 break;
             }

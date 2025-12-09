@@ -6,6 +6,8 @@ import { createPool } from 'mysql2';
 import * as path from 'path';
 import { run } from './run.js';
 
+const __dirname = new URL('.', import.meta.url).pathname;
+
 function connect(
     envPath: string | undefined,
     password: string | undefined

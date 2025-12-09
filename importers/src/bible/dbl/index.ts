@@ -16,10 +16,12 @@ import {
     IBibleVersion,
     NT_BOOKS,
     OT_BOOKS,
-    getChapterVerseSeparatorFromLanguage
+    getChapterVerseSeparatorFromLanguage,
 } from '@bible-engine/core';
 import { UsxImporter } from '../usx';
 import { ITagWithType, ParserStackItem, TagType } from './types';
+
+const __dirname = new URL('.', import.meta.url).pathname;
 
 interface IParserContext {
     version?: IBibleVersion;
@@ -105,7 +107,10 @@ function genPlaintextFromXHTMLNodes(nodes: IXHTMLNode<XHTMLNodeType>[]): string 
  * returns ':' for most languages. For RTL languages, a special unicode character is appended
  * that prevents the text direction to flip within the reference.
  */
-function getChapterVerseSeparatorFromLanguageWithTextDirChar(language: string, direction: 'LTR' | 'RTL' = 'LTR') {
+function getChapterVerseSeparatorFromLanguageWithTextDirChar(
+    language: string,
+    direction: 'LTR' | 'RTL' = 'LTR'
+) {
     const separator = getChapterVerseSeparatorFromLanguage(language);
     return `${separator || ':'}${direction === 'RTL' ? '\u200f' : ''}`;
 }
@@ -197,7 +202,8 @@ export class DblImporter extends BibleEngineImporter {
         const publication = Array.isArray(parsedMetadata.publications.publication)
             ? parsedMetadata.publications.publication[0]!
             : parsedMetadata.publications.publication;
-        const allBooks = publication.structure.content.length <= 27 ? NT_BOOKS : OT_BOOKS.concat(NT_BOOKS); 
+        const allBooks =
+            publication.structure.content.length <= 27 ? NT_BOOKS : OT_BOOKS.concat(NT_BOOKS);
         for (const osisId of allBooks) {
             const paratextId = BOOK_DATA[osisId]!.paratextId;
             const bookIndex = publication.structure.content.findIndex(

@@ -4,12 +4,7 @@ import { createReadStream } from 'fs';
 import { resolve } from 'path';
 import { createInterface } from 'readline';
 
-// const dirProjectRoot = resolve(__dirname + '/../../..');
-
-// const sqlBible = new BibleEngine({
-//     type: 'sqlite',
-//     database: `${dirProjectRoot}/output/bible.db`
-// });
+const __dirname = new URL('.', import.meta.url).pathname;
 
 const bookNum2Osis: Map<number, string> = new Map([
     [1, 'Gen'],

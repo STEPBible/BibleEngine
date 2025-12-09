@@ -1,4 +1,4 @@
-import * as csv from 'csv-parser';
+import csv from 'csv-parser';
 import { createReadStream } from 'fs';
 
 import {
@@ -8,6 +8,7 @@ import {
     IBibleContentPhrase,
     IBibleVersion,
 } from '@bible-engine/core';
+import { finished } from 'stream/promises';
 import {
     BibleEngineImporter,
     IImporterOptions,
@@ -180,6 +181,8 @@ export class CsvImporter extends BibleEngineImporter {
             .on('end', () => {
                 this.log(`finished import of ${this.options.versionMeta.uid}`);
             });
+
+        await finished(csvStream);
 
         const version = await this.bibleEngine.addVersion(this.options.versionMeta);
 

@@ -24,8 +24,7 @@
         "pm2": "4.5.5",
         "routing-controllers": "0.9.0",
         "tsconfig-paths": "3.9.0",
-        "typedi": "0.10.0",
-        "typeorm-typedi-extensions": "0.4.1"
+        "typedi": "0.10.0"
     },
     "devDependencies": {
         "@types/koa": "^2.0.48",

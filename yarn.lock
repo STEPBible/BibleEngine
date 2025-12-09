@@ -1988,12 +1988,10 @@ cssstyle@^1.0.0:
   dependencies:
     cssom "0.3.x"
 
-csv-parser@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/csv-parser/-/csv-parser-3.0.0.tgz#b88a6256d79e090a97a1b56451f9327b01d710e7"
-  integrity sha512-s6OYSXAK3IdKqYO33y09jhypG/bSDHPuyCme/IdEHfWpLf/jKcpitVFyOC6UemgGk8v7Q5u2XE0vvwmanxhGlQ==
-  dependencies:
-    minimist "^1.2.0"
+csv-parser@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/csv-parser/-/csv-parser-3.2.0.tgz#7e5515e3763e963dc8660dc9dcfc3f0eaf72b0a9"
+  integrity sha512-fgKbp+AJbn1h2dcAHKIdKNSSjfp43BZZykXsCjzALjKy80VXQNHPFJ6T9Afwdzoj24aMkq8GwDS7KGcDPpejrA==
 
 culvert@^0.1.2:
   version "0.1.2"
@@ -7165,11 +7163,6 @@ typedi@0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/typedi/-/typedi-0.10.0.tgz#e8f9a5ee100b84addbdfb57fe90d8d9ed2a21dea"
   integrity sha512-v3UJF8xm68BBj6AF4oQML3ikrfK2c9EmZUyLOfShpJuItAqVBHWP/KtpGinkSsIiP6EZyyb6Z3NXyW9dgS9X1w==
-
-typeorm-typedi-extensions@0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/typeorm-typedi-extensions/-/typeorm-typedi-extensions-0.4.1.tgz#e62e3c8f30021c9b8f258e068d38723dbd64de1d"
-  integrity sha512-05hWktQ4zuXzTTUO3ao56yOezlvUuZhH2NRS//m0SOGCAJoVlfPTMHcmDaMSQy/lMfAwPWoIyn+sfK7ONzTdXQ==
 
 typescript@~5.9:
   version "5.9.2"

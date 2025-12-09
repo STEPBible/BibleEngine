@@ -4,7 +4,6 @@ import * as winston from 'winston';
 
 import {
     BibleEngine,
-    BibleReferenceParser,
     DocumentElement,
     DocumentPhrase,
     generateVersionReferenceId,
@@ -24,6 +23,7 @@ import {
     LogLevel,
 } from '../../shared/Importer.interface';
 
+import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser';
 import {
     endsWithNoSpaceAfterChar,
     getBibleReferenceParserCustomBooks,
@@ -83,46 +83,47 @@ export class UsxImporter extends BibleEngineImporter {
     async getContextFromXml(book: IBibleBook, xml: string): Promise<IParserContext> {
         // Since the stream can't be canceled, we need to wrap events in a guard
         let encounteredError = false;
-        return new Promise<IParserContext>((resolve, reject) => {
-            const context: IParserContext = {
-                version: this.options.versionMeta,
-                book,
-                enableChapterLabels: this.options.enableChapterLabels,
-                contentContainerStack: [{ type: 'book', contents: [] }],
-                hierarchicalTagStack: [],
-                skipClosingTags: [],
-                sectionStack: [],
-                isCurrentVerseImplicit: false,
-            };
-            let bcv_parser;
-            try {
-                bcv_parser = require(`bible-passage-reference-parser/cjs/${context.version.language
-                    .substring(0, 2)
-                    .toLowerCase()}_bcv_parser`).bcv_parser;
-            } catch (e) {
-                bcv_parser = require('bible-passage-reference-parser/cjs/en_bcv_parser').bcv_parser;
-            }
-            const bcv: BibleReferenceParser = new bcv_parser();
-            bcv.set_options({
-                punctuation_strategy:
-                    this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
-                invalid_passage_strategy: 'include',
-                invalid_sequence_strategy: 'include',
-                passage_existence_strategy: 'bc',
-                consecutive_combination_strategy: 'separate',
-                non_latin_digits_strategy: 'replace',
-                case_sensitive: 'books',
-                grammar: {
-                    // there seems to be a bug when matching the next-verse pattern
-                    // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
-                    next: /^(?:\x1f\x1f\x1f)/i,
-                },
-            });
-            if (this.options.bookMeta) {
-                bcv.add_books({ books: getBibleReferenceParserCustomBooks(this.options.bookMeta) });
-            }
-            context.bcv = bcv;
 
+        const language = this.options.versionMeta.language.substring(0, 2).toLowerCase();
+        let langMod;
+        try {
+            langMod = await import(`bible-passage-reference-parser/esm/lang/${language}.js`);
+        } catch (e) {
+            langMod = await import('bible-passage-reference-parser/esm/lang/en.js');
+        }
+        const bcv = new bcv_parser(langMod);
+        bcv.set_options({
+            punctuation_strategy:
+                this.options.versionMeta?.chapterVerseSeparator === ',' ? 'eu' : 'us',
+            invalid_passage_strategy: 'include',
+            invalid_sequence_strategy: 'include',
+            passage_existence_strategy: 'bc',
+            consecutive_combination_strategy: 'separate',
+            non_latin_digits_strategy: 'replace',
+            case_sensitive: 'books',
+            grammar: {
+                // there seems to be a bug when matching the next-verse pattern
+                // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/33
+                next: /^(?:\x1f\x1f\x1f)/i,
+            },
+        });
+        if (this.options.bookMeta) {
+            bcv.add_books({ books: getBibleReferenceParserCustomBooks(this.options.bookMeta) });
+        }
+
+        const context: IParserContext = {
+            version: this.options.versionMeta,
+            book,
+            enableChapterLabels: this.options.enableChapterLabels,
+            contentContainerStack: [{ type: 'book', contents: [] }],
+            hierarchicalTagStack: [],
+            skipClosingTags: [],
+            sectionStack: [],
+            isCurrentVerseImplicit: false,
+            bcv,
+        };
+
+        return new Promise<IParserContext>((resolve, reject) => {
             const strict: boolean = true; // change to false for HTML parsing
             const options: {} = {}; // refer to "Arguments" section
             const xmlStream = new SAXParser(strict, options);
