@@ -280,9 +280,18 @@ export async function up(db: Kysely<any>): Promise<void> {
             ])
             .execute();
 
-        await sql`ALTER TABLE bible_search_cjk ADD FULLTEXT INDEX ftidx_cjk (verse) WITH PARSER ngram`.execute(
+        const ngram = await sql`SELECT * FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME = "ngram"`.execute(
             db
         );
+        if (ngram.rows.length > 0)
+            await sql`ALTER TABLE bible_search_cjk ADD FULLTEXT INDEX ftidx_cjk (verse) WITH PARSER ngram`.execute(
+                db
+            );
+        // if there is now cjk-compatible fulltext parser, we keep it at the default one, which is not ideal but better than nothing
+        else
+            await sql`ALTER TABLE bible_search_cjk ADD FULLTEXT INDEX ftidx_cjk (verse)`.execute(
+                db
+            );
     }
 }
 

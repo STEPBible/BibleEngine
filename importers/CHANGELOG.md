@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0-pre12]
+
+### Features
+
+- increased compression level for import files
+
+## [2.0.0-pre7]
+
+### Chores
+
+- migrated to esm-only context (removed dependency on require and __dirname)
+
 ## [2.0.0-pre6]
 
 ### Chores

@@ -1,4 +1,5 @@
-import { DB, beMigrationProvider } from '@bible-engine/db-schema';
+import { beMigrationProvider } from '@bible-engine/db-schema';
+import { DB } from '@bible-engine/db-schema/generated/db';
 import { Kysely, KyselyConfig, Migrator, sql } from 'kysely';
 
 // Typescript example in /dbSchema/migrations/0001-initial.ts

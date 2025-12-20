@@ -210,7 +210,9 @@ export class DblImporter extends BibleEngineImporter {
                 (metaStructureBook) => metaStructureBook.role === paratextId
             );
             if (bookIndex === -1) {
-                this.log(`missing book for paratextId ${paratextId}`);
+                // for nt-only bibles we have excluded ot books already above. however there are
+                // versions that have e.g. nt+psalms. in that case `allBooks` has all 66 books, and
+                // we just skip the non-existing ones here, no need to log since this is expected.
                 continue;
             }
             const metaStructureBook = publication.structure.content[bookIndex]!;

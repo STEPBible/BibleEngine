@@ -132,8 +132,8 @@ export class BeImportFileCreator {
                 return;
             }
 
-            // pack everything
-            const zipArchive = archiver('zip');
+            // pack everything (maximum possible compression)
+            const zipArchive = archiver('zip', { zlib: { level: 9 } });
             zipArchive.on('warning', function (err: any) {
                 if (err.code === 'ENOENT') {
                     console.error(err);

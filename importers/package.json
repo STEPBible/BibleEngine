@@ -1,6 +1,6 @@
 {
     "name": "@bible-engine/importers",
-    "version": "2.0.0-pre6",
+    "version": "2.0.0-pre12",
     "license": "MIT",
     "type": "module",
     "exports": {
@@ -12,7 +12,7 @@
         "prepublish": "yarn build"
     },
     "dependencies": {
-        "@bible-engine/core": "2.0.0-pre6",
+        "@bible-engine/core": "2.0.0-pre12",
         "archiver": "^3.0.0",
         "base64-js": "^1.5.1",
         "better-sqlite3": "^11.7.0",
