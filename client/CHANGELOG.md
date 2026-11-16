@@ -1,5 +1,11 @@
 # Changelog for BibleEngine Client
 
+## 2.0.0 (2026-11-16)
+
+- Promote the production-used Kysely/ESM refactor to a stable release.
+- Align internal package dependencies with the stable 2.0.0 release.
+- Complete native ESM entry points and restrict published files to build artifacts.
+
 ## [2.0.0]
 
 ### Bug Fixes

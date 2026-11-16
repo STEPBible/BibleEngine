@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { parseStringPromise } from 'xml2js';
 
-import { BibleEngineImporter, ImporterBookMetadataBook } from '../../shared/Importer.interface';
+import { BibleEngineImporter, ImporterBookMetadataBook } from '../../shared/Importer.interface.js';
 
 import {
     BOOK_DATA,
@@ -18,8 +18,8 @@ import {
     OT_BOOKS,
     getChapterVerseSeparatorFromLanguage,
 } from '@bible-engine/core';
-import { UsxImporter } from '../usx';
-import { ITagWithType, ParserStackItem, TagType } from './types';
+import { UsxImporter } from '../usx/index.js';
+import { ITagWithType, ParserStackItem, TagType } from './types.js';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 

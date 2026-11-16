@@ -1,7 +1,7 @@
 import * as winston from 'winston';
-import { ParserContext } from '../bible/osis/entities/ParserContext';
-import { getErrorMessageWithContext } from '../bible/osis/functions/logging.functions';
-import { LogLevel } from './Importer.interface';
+import { ParserContext } from '../bible/osis/entities/ParserContext.js';
+import { getErrorMessageWithContext } from '../bible/osis/functions/logging.functions.js';
+import { LogLevel } from './Importer.interface.js';
 
 class Logger {
     logger: winston.Logger;

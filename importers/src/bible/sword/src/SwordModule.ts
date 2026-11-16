@@ -1,10 +1,10 @@
-import { ImporterBookMetadata } from '../../../shared/Importer.interface';
-import BlobReader from './BlobReader';
-import ModuleConfig from './ModuleConfig';
-import ModuleIndex from './ModuleIndex';
-import { BookXML, ChapterPosition, ChapterXML, VerseXML } from './types';
-import verseKey from './VerseMetadata';
-import VerseScheme from './VerseScheme';
+import { ImporterBookMetadata } from '../../../shared/Importer.interface.js';
+import BlobReader from './BlobReader.js';
+import ModuleConfig from './ModuleConfig.js';
+import ModuleIndex from './ModuleIndex.js';
+import { BookXML, ChapterPosition, ChapterXML, VerseXML } from './types.js';
+import verseKey from './VerseMetadata.js';
+import VerseScheme from './VerseScheme.js';
 
 /**
  * Set of files which encapsulates a Bible version.

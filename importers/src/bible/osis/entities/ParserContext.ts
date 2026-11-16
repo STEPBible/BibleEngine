@@ -6,8 +6,8 @@ import {
     IBibleReference,
     BibleReferenceParser,
 } from '@bible-engine/core';
-import { OsisXmlNodeType } from '../../../shared/osisTypes';
-import { ParserStackItem, TagType, ITagWithType } from './../types';
+import { OsisXmlNodeType } from '../../../shared/osisTypes.js';
+import { ParserStackItem, TagType, ITagWithType } from './../types.js';
 
 export class ParserContext {
     version?: IBibleVersion;

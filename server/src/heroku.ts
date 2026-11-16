@@ -7,7 +7,7 @@
 // import { useContainer as useContainerForTypeORM } from 'typeorm';
 
 // import { BibleEngine } from '@bible-engine/core';
-// import { BibleController } from './Bible.controller';
+// import { BibleController } from './Bible.controller.js';
 
 // const apiVersion = 1;
 // const routePrefix = `/rest/v${apiVersion}`;

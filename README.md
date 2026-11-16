@@ -13,7 +13,7 @@ _BibleEngine_ can serve as a general purpose library for powering JavaScript bib
 Additional features:
 
 -   offline-first design with remote fallback
--   compatible with (almost) all relational databases (via [TypeORM](http://typeorm.io))
+-   database access through [Kysely](https://kysely.dev), with MySQL and SQLite schema support
 -   performant and space-efficient database design, focussed on bible study use cases
 -   [plugin system](https://github.com/STEPBible/BibleEngine/tree/master/importers) to import any kind of bible format
 -   TypeScript - Intellisense for the win!
@@ -25,28 +25,21 @@ Additional features:
 -   [@bible-engine/importers](https://github.com/STEPBible/BibleEngine/tree/master/importers): for creating a _BibleEngine_ database and import data from different data sources
 -   [@bible-engine/server](https://github.com/STEPBible/BibleEngine/tree/master/server): implementation example for a _BibleEngine_ server
 
+## Version 2
+
+Version 2 replaces TypeORM with Kysely and ships ESM packages targeting ES2020.
+Pass a Kysely database instance to `BibleEngine` instead of TypeORM connection options.
+Use matching versions of the workspace packages. Schema migrations and generated database
+interfaces now live in `@bible-engine/db-schema`.
+
 ## Contributing
 
-To set up a local database for testing, install docker-compose and run:
+Use Node.js 22 or newer and Yarn Classic (1.22.x). From the repository root:
 
-```
-docker-compose up postgres-db
-```
-
-Install all packages:
-
-```
-yarn install
+```sh
+yarn install --frozen-lockfile
+yarn buildAll
 ```
 
-To generate a new migration to capture schema changes:
-
-```
-yarn typeorm migration:generate -n SomeMigrationName
-```
-
-To test a new migration, run:
-
-```
-yarn typeorm migration:run
-```
+The build runs schema → core → importers → API client generation → server → client.
+See [db-schema](db-schema) for migration entry points.

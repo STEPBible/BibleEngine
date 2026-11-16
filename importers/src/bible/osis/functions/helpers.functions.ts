@@ -1,7 +1,7 @@
 import { IBibleReferenceRange } from '@bible-engine/core';
-import { OsisXmlNodeName, OsisXmlNodeType } from '../../../shared/osisTypes';
-import { ParserContext } from '../entities/ParserContext';
-import { OsisParseError } from '../errors/OsisParseError';
+import { OsisXmlNodeName, OsisXmlNodeType } from '../../../shared/osisTypes.js';
+import { ParserContext } from '../entities/ParserContext.js';
+import { OsisParseError } from '../errors/OsisParseError.js';
 
 export function getParsedBookChapterVerseRef(osisRef: string): IBibleReferenceRange {
     const firstVerse = osisRef.split('-')[0]!.split('.');

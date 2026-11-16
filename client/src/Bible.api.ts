@@ -1,7 +1,7 @@
 
     import { apiRequest, Clientify, ThenArg, 
                 FirstArgument, SecondArgument, ThirdArgument, FourthArgument, FifthArgument
-            } from './helpers';
+            } from './helpers.js';
     import { BibleController } from '@bible-engine/server';
 
     export class BibleApi implements Clientify<BibleController> {

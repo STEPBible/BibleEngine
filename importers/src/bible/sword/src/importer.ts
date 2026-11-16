@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
 
-import { BibleEngineImporter } from '../../../shared/Importer.interface';
-import SwordModule from './SwordModule';
-import ModuleIndex from './ModuleIndex';
-import { OsisImporter } from './../../osis/index';
-import { OsisXmlNodeName } from '../../../shared/osisTypes';
+import { BibleEngineImporter } from '../../../shared/Importer.interface.js';
+import SwordModule from './SwordModule.js';
+import ModuleIndex from './ModuleIndex.js';
+import { OsisImporter } from './../../osis/index.js';
+import { OsisXmlNodeName } from '../../../shared/osisTypes.js';
 
 export class SwordImporter extends BibleEngineImporter {
     async import() {

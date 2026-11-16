@@ -21,9 +21,9 @@ import {
     IImporterOptions,
     ImporterBookMetadataBook,
     LogLevel,
-} from '../../shared/Importer.interface';
+} from '../../shared/Importer.interface.js';
 
-import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser';
+import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser.js';
 import {
     endsWithNoSpaceAfterChar,
     getBibleReferenceParserCustomBooks,
@@ -31,7 +31,7 @@ import {
     getReferencesFromText,
     isOnlyCrossReferenceWordOrPunctuation,
     startsWithNoSpaceBeforeChar,
-} from '../../shared/helpers.functions';
+} from '../../shared/helpers.functions.js';
 import {
     closeAllGroups,
     closeDocument,
@@ -55,8 +55,8 @@ import {
     startNewParagraph,
     startSection,
     UsxParseError,
-} from './helpers';
-import { IParserContext, UsxXmlNode, UsxXmlNodeName, UsxXmlNodeStyle } from './types';
+} from './helpers.js';
+import { IParserContext, UsxXmlNode, UsxXmlNodeName, UsxXmlNodeStyle } from './types.js';
 
 export class UsxImporter extends BibleEngineImporter {
     private logger: winston.Logger;

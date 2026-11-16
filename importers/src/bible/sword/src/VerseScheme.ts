@@ -1,18 +1,18 @@
-import catholicJson from '../data/catholic.json';
-import catholic2Json from '../data/catholic2.json';
-import germanJson from '../data/german.json';
-import kjvJson from '../data/kjv.json';
-import kjvaJson from '../data/kjva.json';
-import leningradJson from '../data/leningrad.json';
-import lutherJson from '../data/luther.json';
-import lxxJson from '../data/lxx.json';
-import mtJson from '../data/mt.json';
-import nrsvJson from '../data/nrsv.json';
-import nrsvaJson from '../data/nrsva.json';
-import orthodoxJson from '../data/orthodox.json';
-import synodalJson from '../data/synodal.json';
-import synodalprotJson from '../data/synodalprot.json';
-import vulgJson from '../data/vulg.json';
+import catholicJson from '../data/catholic.json' with { type: 'json' };
+import catholic2Json from '../data/catholic2.json' with { type: 'json' };
+import germanJson from '../data/german.json' with { type: 'json' };
+import kjvJson from '../data/kjv.json' with { type: 'json' };
+import kjvaJson from '../data/kjva.json' with { type: 'json' };
+import leningradJson from '../data/leningrad.json' with { type: 'json' };
+import lutherJson from '../data/luther.json' with { type: 'json' };
+import lxxJson from '../data/lxx.json' with { type: 'json' };
+import mtJson from '../data/mt.json' with { type: 'json' };
+import nrsvJson from '../data/nrsv.json' with { type: 'json' };
+import nrsvaJson from '../data/nrsva.json' with { type: 'json' };
+import orthodoxJson from '../data/orthodox.json' with { type: 'json' };
+import synodalJson from '../data/synodal.json' with { type: 'json' };
+import synodalprotJson from '../data/synodalprot.json' with { type: 'json' };
+import vulgJson from '../data/vulg.json' with { type: 'json' };
 
 const versificationMgr: any = {};
 

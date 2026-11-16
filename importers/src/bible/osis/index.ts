@@ -1,8 +1,8 @@
-import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser';
+import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser.js';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { SAXParser } from 'sax-ts';
-import { getCurrentSection, startNewSection } from './functions/sections.functions';
+import { getCurrentSection, startNewSection } from './functions/sections.functions.js';
 
 import {
     DocumentGroup,
@@ -23,35 +23,35 @@ import {
     getReferencesFromText,
     isOnlyCrossReferenceWordOrPunctuation,
     startsWithNoSpaceBeforeChar,
-} from '../../shared/helpers.functions';
-import { BibleEngineImporter, IImporterOptions } from '../../shared/Importer.interface';
-import Logger from '../../shared/Logger';
+} from '../../shared/helpers.functions.js';
+import { BibleEngineImporter, IImporterOptions } from '../../shared/Importer.interface.js';
+import Logger from '../../shared/Logger.js';
 import {
     OsisXmlNode,
     OsisXmlNodeName,
     OsisXmlNodeSubType,
     OsisXmlNodeType,
-} from '../../shared/osisTypes';
-import { ParserContext } from './entities/ParserContext';
-import { OsisParseError } from './errors/OsisParseError';
+} from '../../shared/osisTypes.js';
+import { ParserContext } from './entities/ParserContext.js';
+import { OsisParseError } from './errors/OsisParseError.js';
 import {
     getCurrentContainer,
     getParsedBookChapterVerseRef,
     isBeginningOfSection,
     isInsideDocumentHeader,
     isInsideIgnoredContent,
-} from './functions/helpers.functions';
+} from './functions/helpers.functions.js';
 import {
     closeCurrentParagraph,
     createParagraph,
     isBeginningOfParagraph,
     sourceTextHasParagraphs,
     startNewParagraph,
-} from './functions/paragraphs.functions';
-import { parseStrongsNums } from './functions/strongs.functions';
-import { updateContextWithTitleText } from './functions/titles.functions';
-import { stackHasParagraph, validateGroup } from './functions/validators.functions';
-import { ITagWithType, TagType } from './types';
+} from './functions/paragraphs.functions.js';
+import { parseStrongsNums } from './functions/strongs.functions.js';
+import { updateContextWithTitleText } from './functions/titles.functions.js';
+import { stackHasParagraph, validateGroup } from './functions/validators.functions.js';
+import { ITagWithType, TagType } from './types.js';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 const STRICT_MODE_ENABLED = true;

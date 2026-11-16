@@ -1,6 +1,6 @@
 import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser.js';
 import * as lang from 'bible-passage-reference-parser/esm/lang/en.js';
-import VerseScheme from './VerseScheme';
+import VerseScheme from './VerseScheme.js';
 const bcv = new bcv_parser(lang);
 
 function parseVkey(inVKey: string, inV11n: string) {

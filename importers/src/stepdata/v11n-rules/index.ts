@@ -8,7 +8,7 @@ import {
 import { createReadStream } from 'fs';
 import { resolve } from 'path';
 import { createInterface } from 'readline';
-import { BibleEngineImporter } from '../../shared/Importer.interface';
+import { BibleEngineImporter } from '../../shared/Importer.interface.js';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 const DEBUG = false;

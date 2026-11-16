@@ -3,7 +3,7 @@
  * Documentation: https://wiki.crosswire.org/DevTools:conf_Files
  */
 
-import { SwordFilterOptions, SwordMetadataKey } from './types';
+import { SwordFilterOptions, SwordMetadataKey } from './types.js';
 
 export default class ModuleConfig {
     about: string;

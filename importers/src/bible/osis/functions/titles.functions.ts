@@ -1,8 +1,8 @@
-import { getCurrentSection } from './sections.functions';
-import { OsisXmlNodeName, OsisXmlNodeType } from '../../../shared/osisTypes';
-import { ParserContext } from '../entities/ParserContext';
-import { OsisParseError } from '../errors/OsisParseError';
-import { TagType } from '../types';
+import { getCurrentSection } from './sections.functions.js';
+import { OsisXmlNodeName, OsisXmlNodeType } from '../../../shared/osisTypes.js';
+import { ParserContext } from '../entities/ParserContext.js';
+import { OsisParseError } from '../errors/OsisParseError.js';
+import { TagType } from '../types.js';
 
 export function updateContextWithTitleText(context: ParserContext, tagType: TagType, text: string) {
     // Strongs numbers inside section titles are not supported

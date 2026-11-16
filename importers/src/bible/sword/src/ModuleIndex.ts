@@ -1,6 +1,6 @@
 import * as base64 from 'base64-js';
-import ModuleConfig from './ModuleConfig';
-import VerseScheme from './VerseScheme';
+import ModuleConfig from './ModuleConfig.js';
+import VerseScheme from './VerseScheme.js';
 
 let start: any = 0;
 let buf: any = null;

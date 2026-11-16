@@ -3,15 +3,15 @@ import * as lang from 'bible-passage-reference-parser/esm/lang/de.js';
 import { readFileSync } from 'fs';
 import { parseFragment } from 'parse5';
 import { resolve } from 'path';
-import { TreeDocumentFragment } from './models/parse5';
+import { TreeDocumentFragment } from './models/parse5.js';
 
 import { BibleReferenceParser, BookWithContentForInput, DocumentRoot } from '@bible-engine/core';
 
-import { getBibleReferenceParserCustomBooks } from '../../shared/helpers.functions';
-import { BibleEngineImporter } from '../../shared/Importer.interface';
-import { visitNode } from './helpers';
-import { bookList } from './meta/books';
-import copyrightLong from './meta/copyright';
+import { getBibleReferenceParserCustomBooks } from '../../shared/helpers.functions.js';
+import { BibleEngineImporter } from '../../shared/Importer.interface.js';
+import { visitNode } from './helpers.js';
+import { bookList } from './meta/books.js';
+import copyrightLong from './meta/copyright.js';
 
 const __dirname = new URL('.', import.meta.url).pathname;
 

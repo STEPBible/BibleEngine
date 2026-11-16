@@ -1,1 +1,1 @@
-export * from './Bible.controller';
+export * from './Bible.controller.js';

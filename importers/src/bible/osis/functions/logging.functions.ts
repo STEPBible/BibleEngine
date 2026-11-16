@@ -1,5 +1,5 @@
-import { ParserContext } from '../entities/ParserContext';
-import { ParserStackItem } from '../types';
+import { ParserContext } from '../entities/ParserContext.js';
+import { ParserStackItem } from '../types.js';
 
 export function printCompactContainerStack(stack: ParserStackItem[]) {
     return stack.map((container) => (container as any).groupType || container.type).join(' > ');

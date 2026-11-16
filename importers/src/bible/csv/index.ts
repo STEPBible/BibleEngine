@@ -13,7 +13,7 @@ import {
     BibleEngineImporter,
     IImporterOptions,
     ImporterBookMetadata,
-} from '../../shared/Importer.interface';
+} from '../../shared/Importer.interface.js';
 
 type Row = {
     osisId: string;

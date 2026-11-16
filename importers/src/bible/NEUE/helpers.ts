@@ -18,8 +18,8 @@ import {
     getReferencesFromText,
     isOnlyCrossReferenceWordOrPunctuation,
     startsWithNoSpaceBeforeChar,
-} from '../../shared/helpers.functions';
-import { DefaultNode, TreeElement } from './models/parse5';
+} from '../../shared/helpers.functions.js';
+import { DefaultNode, TreeElement } from './models/parse5.js';
 
 export const getAttribute = (node: TreeElement, name: string) => {
     const attr = node.attrs.find((_attr) => _attr.name === name);

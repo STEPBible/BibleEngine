@@ -1,10 +1,10 @@
-import { OsisXmlNodeName, OsisXmlNodeType } from './../../../shared/osisTypes';
+import { OsisXmlNodeName, OsisXmlNodeType } from './../../../shared/osisTypes.js';
 import { IBibleContentGroup } from '@bible-engine/core';
-import Logger from '../../../shared/Logger';
-import { ParserContext } from '../entities/ParserContext';
-import { OsisParseError } from '../errors/OsisParseError';
-import { getCurrentContainer } from '../functions/helpers.functions';
-import { stackHasParagraph } from './validators.functions';
+import Logger from '../../../shared/Logger.js';
+import { ParserContext } from '../entities/ParserContext.js';
+import { OsisParseError } from '../errors/OsisParseError.js';
+import { getCurrentContainer } from '../functions/helpers.functions.js';
+import { stackHasParagraph } from './validators.functions.js';
 
 export function isBeginningOfParagraph(context: ParserContext) {
     const currentContainer: any = getCurrentContainer(context);

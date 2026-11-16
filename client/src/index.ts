@@ -1,2 +1,2 @@
-export * from './Bible.api';
-export * from './BibleEngineClient';
+export * from './Bible.api.js';
+export * from './BibleEngineClient.js';

@@ -1,4 +1,4 @@
-import { ImporterBookMetadata } from '../shared/Importer.interface';
+import { ImporterBookMetadata } from '../shared/Importer.interface.js';
 
 export const enBookMetadata: ImporterBookMetadata = new Map([
     ['Gen', { abbreviation: 'Gen.', title: 'Genesis', number: 1 }],

@@ -1,6 +1,6 @@
 import { Inflate } from 'pako';
 
-import * as types from './types';
+import * as types from './types.js';
 
 /**
  * Converts blobs to XML.

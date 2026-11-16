@@ -4,7 +4,7 @@ import {
     IBibleContentGroup,
     IBibleContentSection,
 } from '@bible-engine/core';
-import { OsisXmlNode, OsisXmlNodeName, OsisXmlNodeType } from '../../shared/osisTypes';
+import { OsisXmlNode, OsisXmlNodeName, OsisXmlNodeType } from '../../shared/osisTypes.js';
 
 export type TagType = OsisXmlNodeName | OsisXmlNodeType;
 export interface ITagWithType extends OsisXmlNode {

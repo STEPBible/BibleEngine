@@ -7,7 +7,7 @@ import {
 } from '@bible-engine/core';
 import { DB } from '@bible-engine/db-schema/generated/db';
 import { Kysely } from 'kysely';
-import { BibleApi } from './Bible.api';
+import { BibleApi } from './Bible.api.js';
 
 export class BibleEngineClient {
     remoteApi?: BibleApi;

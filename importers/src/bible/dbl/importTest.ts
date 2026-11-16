@@ -1,6 +1,6 @@
 // import { resolve } from 'path';
 // import { DblImporter } from '.';
-// import { BeDatabaseCreator, V11nImporter } from '../..';
+// import { BeDatabaseCreator, V11nImporter } from '../../index.js';
 
 // const run = async () => {
 //     const creator = new BeDatabaseCreator({

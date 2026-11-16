@@ -17,7 +17,7 @@ import {
     SECTION_TAGS_NORMALIZED,
     TagType,
     UsxXmlNodeStyle,
-} from './types';
+} from './types.js';
 
 export class UsxParseError extends Error {
     constructor(message: string, context: IParserContext, dumpContext = false) {

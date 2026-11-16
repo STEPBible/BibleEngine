@@ -6,7 +6,7 @@ import * as lang from "bible-passage-reference-parser/esm/lang/de.js";
 import {
     getPhrasesFromParsedReferences,
     getReferencesFromText,
-} from '../../shared/helpers.functions';
+} from '../../shared/helpers.functions.js';
 
 const bcv: BibleReferenceParser = new bcv_parser(lang);
 bcv.set_options({

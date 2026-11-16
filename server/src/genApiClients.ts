@@ -1,11 +1,14 @@
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import Koa from 'koa';
 import { join } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
 import 'reflect-metadata';
 import { getMetadataArgsStorage, MetadataArgsStorage, useKoaServer } from 'routing-controllers';
 import { ControllerMetadataArgs } from 'routing-controllers/types/metadata/args/ControllerMetadataArgs';
 
-import { BibleController } from './Bible.controller';
+import { BibleController } from './Bible.controller.js';
 
 function genApiClient(
     apiName: string,
@@ -16,7 +19,7 @@ function genApiClient(
     ts += `
     import { apiRequest, Clientify, ThenArg, 
                 FirstArgument, SecondArgument, ThirdArgument, FourthArgument, FifthArgument
-            } from './helpers';
+            } from './helpers.js';
     import { ${controller.target.name} } from '@bible-engine/server';
 
     export class ${apiName}Api implements Clientify<${controller.target.name}> {

@@ -1,10 +1,10 @@
 import { IBibleContentSection } from '@bible-engine/core';
-import { OsisXmlNodeType } from '../../../shared/osisTypes';
-import { OsisParseError } from '../errors/OsisParseError';
-import { OsisSection } from '../types';
-import { ParserContext } from './../entities/ParserContext';
-import { getCurrentContainer } from './helpers.functions';
-import { startNewParagraph } from './paragraphs.functions';
+import { OsisXmlNodeType } from '../../../shared/osisTypes.js';
+import { OsisParseError } from '../errors/OsisParseError.js';
+import { OsisSection } from '../types.js';
+import { ParserContext } from './../entities/ParserContext.js';
+import { getCurrentContainer } from './helpers.functions.js';
+import { startNewParagraph } from './paragraphs.functions.js';
 
 export const startNewSection = (context: ParserContext, elementType: OsisSection, isChapterLabel?: boolean) => {
     // since we have some osis files where subSections are ended too early, we only

@@ -9,7 +9,7 @@ import {
     NT_BOOKS,
     OT_BOOKS,
 } from '@bible-engine/core';
-import { ImporterBookMetadata } from './Importer.interface';
+import { ImporterBookMetadata } from './Importer.interface.js';
 
 // we need to be careful with interpreting quotation marks, since german uses a 99-66 pattern, while
 // other languages use 66-99. However since the german starting marks are at the bottom, the two

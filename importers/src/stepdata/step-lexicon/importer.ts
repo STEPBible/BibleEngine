@@ -2,7 +2,7 @@ import { IDictionaryEntry } from '@bible-engine/core';
 import { readFileSync } from 'fs';
 import { transliterate } from 'hebrew-transliteration';
 import { resolve } from 'path';
-import { BibleEngineImporter } from '../../shared/Importer.interface';
+import { BibleEngineImporter } from '../../shared/Importer.interface.js';
 
 const dirname = new URL('.', import.meta.url).pathname;
 const dirProjectRoot = resolve(dirname + '/../..');

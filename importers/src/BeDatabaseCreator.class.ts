@@ -2,7 +2,7 @@ import { BibleEngine, BibleEngineOptions } from '@bible-engine/core';
 import { beMigrationProvider } from '@bible-engine/db-schema';
 import { DB } from '@bible-engine/db-schema/generated/db';
 import { Kysely, Migrator, sql } from 'kysely';
-import { BibleEngineImporter } from './shared/Importer.interface';
+import { BibleEngineImporter } from './shared/Importer.interface.js';
 interface Constructable<T> {
     new (...args: any): T;
 }
