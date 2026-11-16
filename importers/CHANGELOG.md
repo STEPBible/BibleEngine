@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 (2026-11-16)
+
+- Preserve numbered custom book aliases in automatic references (for example, `1Joh 1,1` → `1John.1.1`). Existing stored notes require reimport or targeted repair.
+
 ## 2.0.0 (2026-11-16)
 
 - Promote the production-used Kysely/ESM refactor to a stable release.

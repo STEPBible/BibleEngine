@@ -453,7 +453,12 @@ export function getAbbreviationWithoutDot(abbreviation: string) {
 }
 
 export function getBibleReferenceParserCustomBooks(bookMeta: ImporterBookMetadata) {
-    return Array.from(bookMeta.entries()).map(([osisId, book]) => {
+    // Custom patterns are tried in registration order. Match numbered books first,
+    // otherwise "Joh" consumes the suffix of "1Joh" before its own alias is tried.
+    const books = Array.from(bookMeta.entries()).sort(
+        ([a], [b]) => Number(/^\d/.test(b)) - Number(/^\d/.test(a))
+    );
+    return books.map(([osisId, book]) => {
         const abbreviation = getAbbreviationWithoutDot(book.abbreviation);
         // if the abbreviation is only one character, we don't include it in the
         // regex since this causes matches that confuse (in fact crash) the

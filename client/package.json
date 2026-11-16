@@ -1,6 +1,6 @@
 {
     "name": "@bible-engine/client",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "type": "module",
     "exports": {
         ".": "./lib/index.js"
@@ -11,12 +11,13 @@
         "prepublish": "yarn build"
     },
     "dependencies": {
-        "@bible-engine/core": "2.0.0",
+        "@bible-engine/core": "2.0.1",
         "whatwg-fetch": "^3.6.2",
         "kysely": "^0.28.8"
     },
     "types": "./lib/index.d.ts",
     "files": [
         "lib"
-    ]
+    ],
+    "license": "MIT"
 }

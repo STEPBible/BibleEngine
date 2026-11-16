@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 (2026-11-16)
+
+- Align workspace package versions and dependencies with the 2.0.1 importer fix.
+
 ## 2.0.0 (2026-11-16)
 
 - Promote the production-used Kysely/ESM refactor to a stable release.

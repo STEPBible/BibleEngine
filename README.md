@@ -39,6 +39,7 @@ Use Node.js 22 or newer and Yarn Classic (1.22.x). From the repository root:
 ```sh
 yarn install --frozen-lockfile
 yarn buildAll
+yarn test:references
 ```
 
 The build runs schema → core → importers → API client generation → server → client.

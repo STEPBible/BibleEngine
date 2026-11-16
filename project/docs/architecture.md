@@ -26,6 +26,7 @@ TypeScript or a development loader. Package `files` allowlists limit npm content
 The legacy Jest 24 / ts-jest 24 suite predates the ESM migration and currently fails
 at config loading (`module is not defined`). Do not present it as a green suite.
 New focused regressions can use Node's built-in test runner against compiled output;
-record their commands and build dependencies. Modernizing the legacy suite is a
+record their commands and build dependencies. `yarn test:references` builds the
+required packages and runs the automatic-reference regressions. Modernizing the legacy suite is a
 separate effort. The existing CircleCI Node 14 configuration is also historical,
 not evidence of compatibility with current dependencies.
