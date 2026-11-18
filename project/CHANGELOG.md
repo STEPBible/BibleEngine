@@ -1,5 +1,12 @@
 # Project changelog
 
+## Unreleased
+
+- Preserve version-numbered cross-reference endpoints before normalization, so
+  finalization, full output, and offline export retain complete ranges and labels.
+- Add synthetic SQLite integration coverage for phrase and section references,
+  same-chapter and cross-chapter ranges, chapter-only ranges, and single verses.
+
 ## 2.0.2 — 2026-11-18
 
 - Preserve resolved single-chapter verses and verse ranges when generating links;

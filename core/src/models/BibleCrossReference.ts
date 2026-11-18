@@ -39,6 +39,11 @@ export function parseCrossReferenceFromDatabase(
         range.normalizedVerseNum = normalizedRef.normalizedVerseNum;
     if (crossRef.versionChapterNum) range.versionChapterNum = crossRef.versionChapterNum;
     if (crossRef.versionVerseNum) range.versionVerseNum = crossRef.versionVerseNum;
+    // Version endpoints exist before finalization calculates the normalized endpoint.
+    // Preserve them independently so normalization receives the complete range.
+    if (crossRef.versionChapterEndNum)
+        range.versionChapterEndNum = crossRef.versionChapterEndNum;
+    if (crossRef.versionVerseEndNum) range.versionVerseEndNum = crossRef.versionVerseEndNum;
 
     if (crossRef.normalizedRefIdEnd) {
         const normalizedRefEnd = parseReferenceId(crossRef.normalizedRefIdEnd);
@@ -46,9 +51,6 @@ export function parseCrossReferenceFromDatabase(
             range.normalizedChapterEndNum = normalizedRefEnd.normalizedChapterNum;
         if (normalizedRefEnd.normalizedVerseNum)
             range.normalizedVerseEndNum = normalizedRefEnd.normalizedVerseNum;
-        if (crossRef.versionChapterEndNum)
-            range.versionChapterEndNum = crossRef.versionChapterEndNum;
-        if (crossRef.versionVerseEndNum) range.versionVerseEndNum = crossRef.versionVerseEndNum;
     }
     return {
         ...crossRef,

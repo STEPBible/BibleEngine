@@ -30,3 +30,16 @@ record their commands and build dependencies. `yarn test:references` builds the
 required packages and runs the automatic-reference regressions. Modernizing the legacy suite is a
 separate effort. The existing CircleCI Node 14 configuration is also historical,
 not evidence of compatibility with current dependencies.
+
+`yarn test:cross-references` builds the schema, core, and importers and tests database
+range round-trips, finalization, full output, and offline JSON export. It uses an
+isolated in-memory SQLite database with the shipped migrations and Node
+`node:sqlite` (Node 22.16+ or 24+); no external database is required.
+
+Cross-reference version endpoints must survive database reads even when
+`normalizedRefIdEnd` is null: finalization needs the complete version range to
+calculate normalized endpoints. For existing affected databases whose version
+endpoints remain stored, rerunning `finalizeVersion(versionId)` with the fixed core
+can restore normalized endpoints; regenerate offline exports afterward. An upgrade
+alone does not rewrite rows or existing exports. Run repairs only with explicit
+authorization for the target database.

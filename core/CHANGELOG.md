@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Preserve version-numbered cross-reference endpoints independently of normalized
+  endpoints, fixing range truncation during finalization and subsequent output.
+
 ## 2.0.2 (2026-11-18)
 
 - Align workspace versions and dependencies with the 2.0.2 reference parsing fixes.
