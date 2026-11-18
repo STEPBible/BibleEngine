@@ -1,10 +1,9 @@
 # Project changelog
 
-## Unreleased
+## 2.0.2 — 2026-11-18
 
 - Preserve resolved single-chapter verses and verse ranges when generating links;
   chapter-only references stay chapter-only. Keep ambiguous sequence parsing unchanged.
-
 - Resolve overlapping custom and built-in book aliases by actual matched length,
   retaining registration priority for equal spans and existing language boundaries.
 - Replace the accidental wildcard suffix with a literal optional period and an

@@ -1,6 +1,6 @@
 {
     "name": "@bible-engine/client",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "type": "module",
     "exports": {
         ".": "./lib/index.js"
@@ -11,7 +11,7 @@
         "prepublish": "yarn build"
     },
     "dependencies": {
-        "@bible-engine/core": "2.0.1",
+        "@bible-engine/core": "2.0.2",
         "whatwg-fetch": "^3.6.2",
         "kysely": "^0.28.8"
     },

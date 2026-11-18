@@ -1,5 +1,9 @@
 # Changelog for BibleEngine Client
 
+## 2.0.2 (2026-11-18)
+
+- Align workspace versions and dependencies with the 2.0.2 reference parsing fixes.
+
 ## 2.0.1 (2026-11-16)
 
 - Align workspace package versions and dependencies with the 2.0.1 importer fix.
