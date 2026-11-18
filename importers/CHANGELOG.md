@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.3 (2026-11-18)
+
+- Align workspace dependencies with the core cross-reference range preservation fix.
+
 ## 2.0.2 — 2026-11-18
 
 - Preserve resolved single-chapter verses and verse ranges when generating links;

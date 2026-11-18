@@ -1,6 +1,6 @@
 # Project changelog
 
-## Unreleased
+## 2.0.3 — 2026-11-18
 
 - Preserve version-numbered cross-reference endpoints before normalization, so
   finalization, full output, and offline export retain complete ranges and labels.

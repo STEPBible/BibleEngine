@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.0.3 (2026-11-18)
 
 - Preserve version-numbered cross-reference endpoints independently of normalized
   endpoints, fixing range truncation during finalization and subsequent output.
