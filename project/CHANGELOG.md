@@ -1,5 +1,18 @@
 # Project changelog
 
+## Unreleased
+
+- Preserve resolved single-chapter verses and verse ranges when generating links;
+  chapter-only references stay chapter-only. Keep ambiguous sequence parsing unchanged.
+
+- Resolve overlapping custom and built-in book aliases by actual matched length,
+  retaining registration priority for equal spans and existing language boundaries.
+- Replace the accidental wildcard suffix with a literal optional period and an
+  explicit letter/combining-mark compatibility fallback; chapter digits stay intact.
+- Expand reference regressions for OSIS/USX notes, custom prefix/suffix collisions,
+  compact references, metadata overrides, Unicode suffixes, and repeated parsing.
+- Document the corpus-comparison workflow and the isolated BCV matcher integration.
+
 ## 2.0.1 — 2026-11-16
 
 - Fixed numbered custom book alias precedence in automatic note references.

@@ -1,3 +1,4 @@
+import { preferLongerBookAliases } from '../../shared/preferLongerBookAliases.js';
 import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser.js';
 import * as lang from 'bible-passage-reference-parser/esm/lang/de.js';
 import { readFileSync } from 'fs';
@@ -28,6 +29,7 @@ export class NeueImporter extends BibleEngineImporter {
 
         if (this.options.bookMeta) {
             bcv.add_books({ books: getBibleReferenceParserCustomBooks(this.options.bookMeta) });
+            preferLongerBookAliases(bcv);
         }
 
         const versionUid = 'NEUE';

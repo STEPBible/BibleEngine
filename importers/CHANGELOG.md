@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Preserve resolved single-chapter verses and verse ranges when generating links;
+  chapter-only references stay chapter-only. Keep ambiguous sequence parsing unchanged.
+
+- Prefer longer overlapping book aliases, including built-in names and spaced
+  numbered books, instead of relying on numbered-first metadata order.
+- Preserve chapter digits after abbreviations and explicitly retain supported
+  one-letter/combining-mark suffix variants without a wildcard.
+
 ## 2.0.1 (2026-11-16)
 
 - Preserve numbered custom book aliases in automatic references (for example, `1Joh 1,1` → `1John.1.1`). Existing stored notes require reimport or targeted repair.

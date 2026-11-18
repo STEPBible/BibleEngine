@@ -1,3 +1,4 @@
+import { preferLongerBookAliases } from '../../shared/preferLongerBookAliases.js';
 import { readFileSync } from 'fs';
 import { SAXParser } from 'sax-ts';
 import * as winston from 'winston';
@@ -109,6 +110,7 @@ export class UsxImporter extends BibleEngineImporter {
         });
         if (this.options.bookMeta) {
             bcv.add_books({ books: getBibleReferenceParserCustomBooks(this.options.bookMeta) });
+            preferLongerBookAliases(bcv);
         }
 
         const context: IParserContext = {

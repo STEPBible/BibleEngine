@@ -1,3 +1,4 @@
+import { preferLongerBookAliases } from '../../shared/preferLongerBookAliases.js';
 import { bcv_parser } from 'bible-passage-reference-parser/esm/bcv_parser.js';
 import { readFileSync } from 'fs';
 import path from 'path';
@@ -111,6 +112,7 @@ export class OsisImporter extends BibleEngineImporter {
             bcv.add_books({
                 books: getBibleReferenceParserCustomBooks(this.options.bookMeta),
             });
+            preferLongerBookAliases(bcv);
         }
 
         // Since the stream can't be canceled, we need to wrap events in a guard

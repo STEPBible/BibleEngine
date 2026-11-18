@@ -170,14 +170,19 @@ export const getBibleReferenceFromParsedReference = (
         versionUid: versionUid,
         versionChapterNum: ref.start.c,
     };
-    if (
-        ref.type === 'v' ||
-        ref.type === 'cv' ||
-        ref.type === 'bcv' ||
-        ref.type === 'integer' ||
-        ref.type === 'next_v' ||
-        (ref.type === 'range' && ref.start.type !== 'c' && ref.start.type !== 'bc')
-    ) {
+    // BCV keeps the input syntax type: "Phlm 24" is `bc`, but resolves to
+    // Phlm.1.24. Conversely, chapter-only references also have start/end verse
+    // fields. Use the first resolved OSIS endpoint to decide whether to emit
+    // verses; retain syntax-based handling for invalid references without OSIS.
+    const hasVerse = ref.osis
+        ? /^[^.]+\.\d+\.\d+(?:[-,]|$)/.test(ref.osis)
+        : ref.type === 'v' ||
+          ref.type === 'cv' ||
+          ref.type === 'bcv' ||
+          ref.type === 'integer' ||
+          ref.type === 'next_v' ||
+          (ref.type === 'range' && ref.start.type !== 'c' && ref.start.type !== 'bc');
+    if (hasVerse) {
         bibleReference.versionVerseNum = ref.start.v;
         if (ref.start.v !== ref.end.v || ref.start.c !== ref.end.c) {
             bibleReference.versionVerseEndNum =
@@ -453,27 +458,31 @@ export function getAbbreviationWithoutDot(abbreviation: string) {
 }
 
 export function getBibleReferenceParserCustomBooks(bookMeta: ImporterBookMetadata) {
-    // Custom patterns are tried in registration order. Match numbered books first,
-    // otherwise "Joh" consumes the suffix of "1Joh" before its own alias is tried.
-    const books = Array.from(bookMeta.entries()).sort(
-        ([a], [b]) => Number(/^\d/.test(b)) - Number(/^\d/.test(a))
-    );
-    return books.map(([osisId, book]) => {
+    const exact: { osis: string[]; regexp: RegExp }[] = [];
+    const compatible: { osis: string[]; regexp: RegExp; insert_at: 'end' }[] = [];
+    for (const [osisId, book] of bookMeta) {
         const abbreviation = getAbbreviationWithoutDot(book.abbreviation);
-        // if the abbreviation is only one character, we don't include it in the
-        // regex since this causes matches that confuse (in fact crash) the
-        // bible-reference-parser library 
-        //
-        // RADAR: this might be related to the way we add our custom books
-        // regexps to the parser, which might be either a bug in the library or
-        // something we do wrong:
-        // https://github.com/openbibleinfo/Bible-Passage-Reference-Parser/issues/70
-        const regexp = abbreviation.length > 1
-            ? new RegExp(`(${escapeRegExp(abbreviation)}\.?|${escapeRegExp(book.title)})`)
-            : new RegExp(`(${escapeRegExp(book.title)})`);
-        return {
-            osis: [osisId],
-            regexp
-        };
-    });
+        // Single-character abbreviations are too ambiguous for BCV (see upstream
+        // issue #70). Titles remain supported even when the abbreviation is omitted.
+        const aliases = new Map([[book.title, false]]);
+        if (abbreviation.length > 1) aliases.set(abbreviation, true);
+        for (const [alias, optionalDot] of aliases) {
+            exact.push({
+                osis: [osisId],
+                regexp: new RegExp(`(${escapeRegExp(alias)}${optionalDot ? '\\.?' : ''})`),
+            });
+        }
+        if (abbreviation.length > 1) {
+            // Existing sources rely on spellings one letter/combining mark longer
+            // than their metadata abbreviation. Preserve that as a fallback after
+            // exact custom and built-in names. Unlike the old wildcard, it must
+            // never consume a chapter digit or arbitrary punctuation.
+            compatible.push({
+                osis: [osisId],
+                regexp: new RegExp(`(${escapeRegExp(abbreviation)}[\\p{L}\\p{M}])`, 'u'),
+                insert_at: 'end',
+            });
+        }
+    }
+    return [...exact, ...compatible];
 }

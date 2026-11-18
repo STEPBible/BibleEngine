@@ -1,5 +1,7 @@
 # Parser investigation
 
+Before changing automatic reference matching, read `project/docs/reference-parsing.md`.
+
 1. Trace source text → importer options/book metadata → reference parser → document
    phrases/ranges → database write. Check whether a reference is explicit in the
    source or automatically detected in free text.
